@@ -5,22 +5,29 @@
  */
 package org.previmer.ichthyop.ui;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Collection;
 import java.util.Vector;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.previmer.ichthyop.io.GridFile;
 import org.previmer.ichthyop.io.XGrid;
 
+
 /** Class that manages the GUI for the edition of grid parameters.
  *
  * @author barrier
  */
-public class GridEditorPanel extends javax.swing.JPanel implements ListSelectionListener {
+public class GridEditorPanel extends javax.swing.JPanel implements ListSelectionListener, PropertyChangeListener,
+ActionListener {
     
     /**
      * Creates new form GridEditorPanel
@@ -96,6 +103,12 @@ public class GridEditorPanel extends javax.swing.JPanel implements ListSelection
                 return canEdit [columnIndex];
             }
         });
+        
+        //gridListTable.setName("gridListTable"); // NOI18N
+        gridListTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        gridListTable.setShowVerticalLines(false);
+        gridListTable.getSelectionModel().addListSelectionListener(this);
+        
 
         gridAddButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico32/list-add.png"))); // NOI18N
         gridAddButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -438,7 +451,7 @@ public class GridEditorPanel extends javax.swing.JPanel implements ListSelection
     
     private GridFile gridFile;
     private XGrid grid;
-    private boolean hasGridChanged;
+    private boolean hasGridChanged = false;
     
     public void save() {
         this.gridSaveButton.doClick();
@@ -492,16 +505,56 @@ public class GridEditorPanel extends javax.swing.JPanel implements ListSelection
     }
     
     
+    /**
+     * If the grid parameters have been changed using the GUI, the grid element is
+     * updated based on the values of the GUI
+     */
     private void updateGrid(XGrid grid) {
-        
         grid.setEnabled(gridEnabledCheckBox.isSelected());
-        grid.setType((String)gridTypeComboBox.getSelectedItem());
-        grid.clearParameters();
-        
+        grid.setType((String) gridTypeComboBox.getSelectedItem());
+        grid.set3DEnabled(this.grid3DCheckBox.isSelected());
+        grid.setCentralLongitude((String) this.gridCentralLongitudeComboBox.getSelectedItem());
+        grid.setKey(gridIdTextField.getText());
+        grid.setGridMeshFile(gridFileNameTextField.getText());
+    }
+
+    /**
+     * Based on the element of the grid, the GUI is displayed accordingly.
+     * 
+     */
+    private void displayGrid(XGrid grid) {
+        this.gridEnabledCheckBox.setSelected(grid.isEnabled());
+        String type = grid.getType().getName();
+        this.gridTypeComboBox.setSelectedItem(type);
+        this.grid3DCheckBox.setSelected(grid.is3DEnabled());
+        this.gridCentralLongitudeComboBox.setSelectedItem(grid.getCentralLongitude());
+        this.gridIdTextField.setText(grid.getKey());
+        this.gridFileNameTextField.setText(grid.getsetGridMeshFile());
+        addChangeListeners(this, this);
     }
     
-    private void displayGrid(XGrid grid) {
+    public void propertyChange(PropertyChangeEvent evt) {
+        //System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
+        String prop = evt.getPropertyName();
+    }
+    
+    
+    private void addChangeListeners(PropertyChangeListener pl, ActionListener al) {
+        
+        // set-up property change listeners.
+        // each change to the below widgets will lead to a call to propertyChange.
+        this.grid3DCheckBox.addPropertyChangeListener(pl);
+        
+        // add action listeners. each widget below will
+        // lead to a call to actionPerformed
+        this.grid3DCheckBox.addActionListener(al);
 
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent arg0) {
+        hasGridChanged = true;
+        gridSaveButton.setEnabled(true);
     }
     
 }
