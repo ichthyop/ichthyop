@@ -11,8 +11,11 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Vector;
 
+import javax.swing.JFileChooser;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -103,12 +106,6 @@ ActionListener {
                 return canEdit [columnIndex];
             }
         });
-        
-        //gridListTable.setName("gridListTable"); // NOI18N
-        gridListTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        gridListTable.setShowVerticalLines(false);
-        gridListTable.getSelectionModel().addListSelectionListener(this);
-        
 
         gridAddButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico32/list-add.png"))); // NOI18N
         gridAddButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -215,6 +212,11 @@ ActionListener {
 
         gridFileSelectButton.setText("...");
         gridFileSelectButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        gridFileSelectButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                gridFileSelectButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -313,14 +315,14 @@ ActionListener {
                 "Param. name", "Param. value"
             }
         ) {
-            Class<?>[] types = new Class [] {
+            Class[] types = new Class [] {
                 java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
                 false, true
             };
 
-            public Class<?> getColumnClass(int columnIndex) {
+            public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
 
@@ -416,8 +418,26 @@ ActionListener {
     }//GEN-LAST:event_grid3DCheckBoxActionPerformed
 
     private void gridFileNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridFileNameTextFieldActionPerformed
-        // TODO add your handling code here:
+    
     }//GEN-LAST:event_gridFileNameTextFieldActionPerformed
+
+    private void gridFileSelectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridFileSelectButtonActionPerformed
+        
+        FileFilter ncFilter = new FileNameExtensionFilter("NetCDF Files", "nc", "nc4", "nc3");
+        
+        JFileChooser chooser = new JFileChooser();
+        chooser.addChoosableFileFilter(ncFilter);
+        chooser.setAcceptAllFileFilterUsed(false);
+        
+        // optionally set chooser options ...
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File f = chooser.getSelectedFile();
+            this.gridFileNameTextField.setText(f.getAbsolutePath());
+            // read  and/or display the file somehow. ....
+        } else {
+            // user changed their mind
+        }
+    }//GEN-LAST:event_gridFileSelectButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -536,6 +556,7 @@ ActionListener {
     public void propertyChange(PropertyChangeEvent evt) {
         //System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
         String prop = evt.getPropertyName();
+        System.out.println(prop);
     }
     
     
@@ -547,8 +568,13 @@ ActionListener {
         
         // add action listeners. each widget below will
         // lead to a call to actionPerformed
+        this.gridEnabledCheckBox.addActionListener(al);
+        this.gridTypeComboBox.addActionListener(al);
         this.grid3DCheckBox.addActionListener(al);
-
+        this.gridCentralLongitudeComboBox.addActionListener(al);
+        this.gridIdTextField.addActionListener(al);
+        this.gridFileNameTextField.addActionListener(al);
+        
     }
 
     @Override
