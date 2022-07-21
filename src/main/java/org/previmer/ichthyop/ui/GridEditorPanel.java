@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.previmer.GridType;
 import org.previmer.ichthyop.io.GridFile;
 import org.previmer.ichthyop.io.XGrid;
 import org.previmer.ichthyop.io.XParameter;
@@ -41,7 +42,6 @@ ActionListener {
      * Creates new form GridEditorPanel
      */
     public GridEditorPanel() {
-        gridSelectionPanel = new GridSelectionPanel();
         initComponents();
     }
 
@@ -206,7 +206,7 @@ ActionListener {
 
         jLabel3.setText("Central longitude");
 
-        gridCentralLongitudeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0 (Atlancic)", "180 (Pacific)" }));
+        gridCentralLongitudeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "180" }));
 
         jLabel4.setText("Grid ID");
 
@@ -427,7 +427,21 @@ ActionListener {
     
     private void gridAddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridAddButtonActionPerformed
         // TODO add your handling code here:
-        this.gridSelectionPanel.setVisible(true);
+        
+        // Create new window to select model type, and recover the
+        GridSelectionPanel gridSelectionPanel = new GridSelectionPanel(null, true);
+        gridSelectionPanel.setVisible(true);
+        String chosenGrid = gridSelectionPanel.getChosenGrid();
+        if(chosenGrid == null) {
+            return;    
+        }
+        
+        // add newly created grid element to the GridFile map object
+        gridFile.addGrid(chosenGrid + "-choose-key", chosenGrid);
+        this.updateGridList();
+        displayGrid(grid);
+        
+        
     }//GEN-LAST:event_gridAddButtonActionPerformed
 
     private void gridRemoveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridRemoveButtonActionPerformed
@@ -530,9 +544,7 @@ ActionListener {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
-    
-    private GridSelectionPanel gridSelectionPanel;
-    
+        
     private GridFile gridFile;
     private XGrid grid;
     private boolean hasGridChanged = false;
@@ -545,34 +557,41 @@ ActionListener {
         return gridFileNameLabel.getText();
     }
 
-    private Vector<Vector<String>> array2Vector(Collection<XGrid> zones) {
-        Vector<Vector<String>> vector = new Vector<>();
-        for (XGrid xGrid : zones) {
-            Vector<String> v = new Vector<>();
-            v.addElement(xGrid.getKey());
-            vector.addElement(v);
+    /**
+     * Loop over all the grids contained in the grids arguments and extracts
+     * 
+     * 
+     */
+    private String[][] collection2Array(Collection<XGrid> grids) {
+        int nRows = grids.size();
+        int nCols = 1;
+        String[][] vector = new String[nRows][nCols];
+        int cpt = 0;
+        for (XGrid xGrid : grids) {
+            vector[cpt][0] = xGrid.getKey();
+            cpt += 1;
         }
         return vector;
     }
-
+    
+    
+    public void updateGridList() { 
+        DefaultTableModel model = new DefaultTableModel();
+        String[] dummyHeader = new String[] {""};
+        model.setDataVector(collection2Array(gridFile.getGrids()), dummyHeader);
+        this.gridListTable.setModel(model);
+    }
+    
     public void loadGridFromFile(File file) throws Exception {
         gridFileNameLabel.setText(file.getAbsolutePath());
         gridFileNameLabel.setToolTipText(gridFileNameLabel.getText());
         gridFile = new GridFile(file);
-        DefaultTableModel model = new DefaultTableModel();
-        Vector<String> dummyHeader = new Vector<>();
-        dummyHeader.addElement("");
-        model.setDataVector(array2Vector(gridFile.getGrids()), dummyHeader);
-        this.gridListTable.setModel(model);
-        setPanelGridEnabled(false);
+        this.updateGridList();
         if (this.gridListTable.getRowCount() > 0) {
             this.gridListTable.getSelectionModel().setSelectionInterval(0, 0);
         }
     }
 
-    public void setPanelGridEnabled(final boolean enabled) {
-
-    }
 
     @Override
     public void valueChanged(ListSelectionEvent e) {
@@ -608,7 +627,6 @@ ActionListener {
         List<XParameter> parameters = grid.getParameters();
         cleanParamTable();
         int nRow = parameters.size();
-        int nCol = gridParamsTable.getModel().getColumnCount();
         for(int i = 0; i < nRow; i++) {
             XParameter param = parameters.get(i);
             param.getKey();
@@ -623,12 +641,14 @@ ActionListener {
      * updated based on the values of the GUI
      */
     private void updateGrid(XGrid grid) {
-        grid.setEnabled(gridEnabledCheckBox.isSelected());
-        grid.setType((String) gridTypeComboBox.getSelectedItem());
-        grid.set3DEnabled(this.grid3DCheckBox.isSelected());
-        grid.setCentralLongitude((String) this.gridCentralLongitudeComboBox.getSelectedItem());
-        grid.setKey(gridIdTextField.getText());
-        grid.setGridMeshFile(gridFileNameTextField.getText());
+        if (hasGridChanged) {
+            grid.setEnabled(gridEnabledCheckBox.isSelected());
+            grid.setType((String) gridTypeComboBox.getSelectedItem());
+            grid.set3DEnabled(this.grid3DCheckBox.isSelected());
+            grid.setCentralLongitude((String) this.gridCentralLongitudeComboBox.getSelectedItem());
+            grid.setKey(gridIdTextField.getText());
+            grid.setGridMeshFile(gridFileNameTextField.getText());
+        }
     }
 
     /**

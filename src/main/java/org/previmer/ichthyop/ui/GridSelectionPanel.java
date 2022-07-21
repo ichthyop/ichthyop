@@ -9,12 +9,13 @@ package org.previmer.ichthyop.ui;
  *
  * @author barrier
  */
-public class GridSelectionPanel extends javax.swing.JFrame {
+public class GridSelectionPanel extends javax.swing.JDialog {
 
     /**
      * Creates new form GridSelectionPanel
      */
-    public GridSelectionPanel() {
+    public GridSelectionPanel(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
         initComponents();
     }
 
@@ -28,24 +29,17 @@ public class GridSelectionPanel extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        nemoButton = new javax.swing.JButton();
         romsButton = new javax.swing.JButton();
         marsButton = new javax.swing.JButton();
         regularButton = new javax.swing.JButton();
+        nemoButton = new javax.swing.JButton();
 
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Choose a grid template");
         setResizable(false);
-        setSize(new java.awt.Dimension(100, 100));
+        setSize(new java.awt.Dimension(500, 200));
 
-        jPanel1.setLayout(new java.awt.GridLayout(2, 2, 5, 5));
-
-        nemoButton.setText("NEMO");
-        nemoButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nemoButtonActionPerformed(evt);
-            }
-        });
-        jPanel1.add(nemoButton);
+        jPanel1.setLayout(new java.awt.GridLayout(2, 2, 10, 10));
 
         romsButton.setText("ROMS");
         romsButton.addActionListener(new java.awt.event.ActionListener() {
@@ -71,21 +65,29 @@ public class GridSelectionPanel extends javax.swing.JFrame {
         });
         jPanel1.add(regularButton);
 
+        nemoButton.setText("NEMO");
+        nemoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nemoButtonActionPerformed(evt);
+            }
+        });
+        jPanel1.add(nemoButton);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 393, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -132,11 +134,9 @@ public class GridSelectionPanel extends javax.swing.JFrame {
         this.setVisible(false);
 
     }
-
     public String getChosenGrid() {
         return this.chosenGrid.toUpperCase();    
     }
-
     /**
      * @param args the command line arguments
      */
@@ -164,10 +164,17 @@ public class GridSelectionPanel extends javax.swing.JFrame {
         }
         //</editor-fold>
 
-        /* Create and display the form */
+        /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GridSelectionPanel().setVisible(true);
+                GridSelectionPanel dialog = new GridSelectionPanel(new javax.swing.JFrame(), true);
+                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+                dialog.setVisible(true);
             }
         });
     }
@@ -179,6 +186,5 @@ public class GridSelectionPanel extends javax.swing.JFrame {
     private javax.swing.JButton regularButton;
     private javax.swing.JButton romsButton;
     // End of variables declaration//GEN-END:variables
-    
     private String chosenGrid;
 }
