@@ -521,7 +521,7 @@ ActionListener {
         // TODO add your handling code here:
         int row = this.gridParamsTable.rowAtPoint(evt.getPoint());
         int col = gridParamsTable.columnAtPoint(evt.getPoint());
-        if (row >= 0 && col >= 0) {
+        if ((row < grid.getParameters().size()) && row >= 0 && col >= 0) {
             if (this.gridParamsTable.isCellEditable(row, col)) {
                 this.gridParamsTable.editCellAt(row, col);
             }
