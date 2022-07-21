@@ -33,7 +33,6 @@ public class GridSelectionPanel extends javax.swing.JFrame {
         marsButton = new javax.swing.JButton();
         regularButton = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Choose a grid template");
         setResizable(false);
         setSize(new java.awt.Dimension(100, 100));
@@ -49,6 +48,11 @@ public class GridSelectionPanel extends javax.swing.JFrame {
         jPanel1.add(nemoButton);
 
         romsButton.setText("ROMS");
+        romsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                romsButtonActionPerformed(evt);
+            }
+        });
         jPanel1.add(romsButton);
 
         marsButton.setText("MARS");
@@ -60,6 +64,11 @@ public class GridSelectionPanel extends javax.swing.JFrame {
         jPanel1.add(marsButton);
 
         regularButton.setText("REGULAR");
+        regularButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                regularButtonActionPerformed(evt);
+            }
+        });
         jPanel1.add(regularButton);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -84,11 +93,49 @@ public class GridSelectionPanel extends javax.swing.JFrame {
 
     private void nemoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nemoButtonActionPerformed
         // TODO add your handling code here:
+        this.genericButtonActionPerformed(evt);
     }//GEN-LAST:event_nemoButtonActionPerformed
 
     private void marsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_marsButtonActionPerformed
         // TODO add your handling code here:
+        this.genericButtonActionPerformed(evt);
     }//GEN-LAST:event_marsButtonActionPerformed
+
+    private void romsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_romsButtonActionPerformed
+        // TODO add your handling code here:
+        this.genericButtonActionPerformed(evt);
+    }//GEN-LAST:event_romsButtonActionPerformed
+
+    private void regularButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regularButtonActionPerformed
+        // TODO add your handling code here:
+        this.genericButtonActionPerformed(evt);
+    }//GEN-LAST:event_regularButtonActionPerformed
+    
+    private void genericButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        Object source = evt.getSource();
+        if (source == nemoButton) {
+            this.chosenGrid = "nemo";
+        }
+        else if (source == marsButton) {
+            this.chosenGrid = "mars";
+        }
+        else if (source == romsButton) {
+            this.chosenGrid = "roms";
+        }
+        else if (source == regularButton) {
+            this.chosenGrid = "regular";
+        }
+        else { 
+            this.chosenGrid = null;
+        }
+        
+        this.setVisible(false);
+
+    }
+
+    public String getChosenGrid() {
+        return this.chosenGrid.toUpperCase();    
+    }
 
     /**
      * @param args the command line arguments
@@ -132,4 +179,6 @@ public class GridSelectionPanel extends javax.swing.JFrame {
     private javax.swing.JButton regularButton;
     private javax.swing.JButton romsButton;
     // End of variables declaration//GEN-END:variables
+    
+    private String chosenGrid;
 }
