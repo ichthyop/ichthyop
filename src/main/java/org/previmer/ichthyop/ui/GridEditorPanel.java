@@ -41,6 +41,7 @@ ActionListener {
      * Creates new form GridEditorPanel
      */
     public GridEditorPanel() {
+        gridSelectionPanel = new GridSelectionPanel();
         initComponents();
     }
 
@@ -426,6 +427,7 @@ ActionListener {
     
     private void gridAddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridAddButtonActionPerformed
         // TODO add your handling code here:
+        this.gridSelectionPanel.setVisible(true);
     }//GEN-LAST:event_gridAddButtonActionPerformed
 
     private void gridRemoveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridRemoveButtonActionPerformed
@@ -528,6 +530,8 @@ ActionListener {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
+    
+    private GridSelectionPanel gridSelectionPanel;
     
     private GridFile gridFile;
     private XGrid grid;
