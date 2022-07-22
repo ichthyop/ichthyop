@@ -45,6 +45,9 @@ ActionListener {
     public GridEditorPanel() {
         initComponents();
         
+        // Adding a listener for when the table has been modified.
+        // The grid parameters are modified accordingly, and grid is defined
+        // as modified.
         gridParamsTable.getModel().addTableModelListener(new TableModelListener(){
             @Override
             public void tableChanged(TableModelEvent tableModelEvent) {
@@ -59,6 +62,8 @@ ActionListener {
                 //do stuff  with value          
             }
         });
+        
+        this.setIsEnabled(false);
         
     }
 
@@ -442,6 +447,8 @@ ActionListener {
         );
     }// </editor-fold>//GEN-END:initComponents
     
+    /** Method that is called when the Add button is selected. It opens 
+     * a JDialog box, which specifies which model template must be used. */
     private void gridAddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridAddButtonActionPerformed
         // TODO add your handling code here:
         
@@ -453,6 +460,7 @@ ActionListener {
             return;    
         }
         
+        // Choose from where we inser the new grid.
         int index = gridListTable.getSelectedRow();
         if (index < 0) {
             index = gridListTable.getRowCount();
@@ -462,14 +470,32 @@ ActionListener {
         String newKey = String.format("%s-choose-key-%d", chosenGrid, gridListTable.getRowCount());
         gridFile.addGrid(newKey, chosenGrid);
         
+        // Insert new row at the index location, and select this row.
         DefaultTableModel model = (DefaultTableModel) gridListTable.getModel();
         model.insertRow(index, new String[] {newKey});
         gridListTable.setRowSelectionInterval(index, index);
                 
     }//GEN-LAST:event_gridAddButtonActionPerformed
 
+    /** Action that is called when the remove button is selected. */
     private void gridRemoveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridRemoveButtonActionPerformed
         // TODO add your handling code here:
+                // Choose from where we inser the new grid.
+        int index = gridListTable.getSelectedRow();
+        int nRows = gridListTable.getRowCount();
+        
+        // If the index is out of the interval, nothing is done.
+        if (index < 0 || index > nRows - 1) {
+            return;
+        }
+        
+        DefaultTableModel model = (DefaultTableModel) gridListTable.getModel();
+        String key = (String) model.getValueAt(index, 0);
+        model.removeRow(index);
+        gridListTable.clearSelection();
+        gridFile.removeGrid(key);
+        
+        
     }//GEN-LAST:event_gridRemoveButtonActionPerformed
 
     private void gridUpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridUpButtonActionPerformed
@@ -611,7 +637,7 @@ ActionListener {
         }
     }
 
-
+    /** Function that is called when a new grid is selected. */
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
@@ -622,6 +648,9 @@ ActionListener {
                 String key = (String) this.gridListTable.getModel().getValueAt(gridListTable.getSelectedRow(), 0);
                 grid = gridFile.getGrid(key);
                 displayGrid(grid);
+                this.setIsEnabled(true);   
+            } else {
+                this.setIsEnabled(false);   
             }
         }
     }
@@ -671,6 +700,8 @@ ActionListener {
         }
     }
     
+    
+    /** Update the parameters for the given grid object. */
     private void updateParameters(XGrid grid) { 
         int nRow = grid.getParameters().size();
         for(int i = 0; i < nRow; i++) {
@@ -696,10 +727,23 @@ ActionListener {
         this.renderParamTable();
     }
     
+    /** Enable or disable all the grid parameters */
+    private void setIsEnabled(boolean visible) {
+        this.gridEnabledCheckBox.setEnabled(visible);
+        this.gridTypeComboBox.setEnabled(visible);
+        this.grid3DCheckBox.setEnabled(visible);
+        this.gridCentralLongitudeComboBox.setEnabled(visible);
+        this.gridIdTextField.setEnabled(visible);
+        this.gridFileNameTextField.setEnabled(visible);
+        if(!visible) { 
+            this.cleanParamTable();
+        }   
+    }
+    
     public void propertyChange(PropertyChangeEvent evt) {
-        //System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
-        String prop = evt.getPropertyName();
-        System.out.println(prop);
+        // System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
+        // String prop = evt.getPropertyName();
+        
     }
     
     
