@@ -121,13 +121,13 @@ public class XZone extends org.jdom2.Element {
      */
     public int getNParticles() { 
         if (null == getChild(NUMBER_PARTICLES)) {
-            return -999;
+            return 0;
         }
         try { 
             String strNParticles = this.getChildTextNormalize(NUMBER_PARTICLES);
             return Integer.valueOf(strNParticles);
         } catch (Exception e) {
-            return -999;
+            return 0;
         }
     }
     
