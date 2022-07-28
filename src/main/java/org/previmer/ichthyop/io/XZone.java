@@ -75,6 +75,7 @@ public class XZone extends org.jdom2.Element {
     private static final String BATHY_MASK = "bathy_mask";
     private static final String LINE_INSHORE = "line_inshore";
     private static final String LINE_OFFSHORE = "line_offshore";
+    private static final String NUMBER_PARTICLES = "number_particles";
 
     public XZone(Element xzone) {
         super(ZONE);
@@ -114,6 +115,30 @@ public class XZone extends org.jdom2.Element {
         setLowerDepth(50.f);
     }
 
+    /**
+     * Adding a getter for the number of particles. If no number has been found,
+     * returns a negative value.
+     */
+    public int getNParticles() { 
+        if (null == getChild(NUMBER_PARTICLES)) {
+            return -999;
+        }
+        try { 
+            String strNParticles = this.getChildTextNormalize(NUMBER_PARTICLES);
+            return Integer.valueOf(strNParticles);
+        } catch (Exception e) {
+            return -999;
+        }
+    }
+    
+    /** Set the number of particles. */
+    public void setNParticles(String key) { 
+        if (null == getChild(NUMBER_PARTICLES)) {
+            addContent(new Element(NUMBER_PARTICLES));
+        }
+        getChild(NUMBER_PARTICLES).setText(key);
+    }
+    
     public String getKey() {
         return getChildTextNormalize(KEY);
     }
