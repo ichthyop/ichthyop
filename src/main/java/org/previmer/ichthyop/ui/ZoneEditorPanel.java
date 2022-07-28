@@ -428,8 +428,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnColor = new javax.swing.JButton();
         pnlTypeZone = new javax.swing.JPanel();
         cbBoxType = new javax.swing.JComboBox();
-        jLabel1 = new javax.swing.JLabel();
-        jFormattedTextField1 = new javax.swing.JFormattedTextField();
+        labelNParticles = new javax.swing.JLabel();
+        textNParticles = new javax.swing.JFormattedTextField();
         pnlOption = new javax.swing.JPanel();
         lblLonlat = new javax.swing.JLabel();
         rdBtnDecimalDeg = new javax.swing.JRadioButton();
@@ -736,14 +736,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 .addGroup(pnlThicknessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblLowerDepth)
                     .addComponent(txtFieldLowerDepth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(49, Short.MAX_VALUE))
+                .addContainerGap(53, Short.MAX_VALUE))
         );
 
         pnlBathyMask.setBorder(javax.swing.BorderFactory.createTitledBorder("Bathymetric mask"));
         pnlBathyMask.setName("pnlBathyMask"); // NOI18N
 
         txtFieldInshore.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
-        txtFieldInshore.setText(bundle.getString("lblInshore.text")); // NOI18N
         txtFieldInshore.setName("txtFieldInshore"); // NOI18N
 
         ckBoxBathyMask.setText(bundle.getString("ckBoxBathyMask.text")); // NOI18N
@@ -834,13 +833,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         cbBoxType.setModel(new DefaultComboBoxModel(TypeZone.values()));
         pnlTypeZone.add(cbBoxType);
 
-        jLabel1.setText("Number of released particles:");
-        jLabel1.setName("jLabel1"); // NOI18N
+        labelNParticles.setText("Number of released particles:");
+        labelNParticles.setName("labelNParticles"); // NOI18N
 
-        jFormattedTextField1.setName("jFormattedTextField1"); // NOI18N
-        jFormattedTextField1.addActionListener(new java.awt.event.ActionListener() {
+        textNParticles.setName("textNParticles"); // NOI18N
+        textNParticles.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jFormattedTextField1ActionPerformed(evt);
+                textNParticlesActionPerformed(evt);
             }
         });
 
@@ -923,9 +922,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                                 .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addGroup(pnlZoneLayout.createSequentialGroup()
                                         .addGap(12, 12, 12)
-                                        .addComponent(jLabel1)
+                                        .addComponent(labelNParticles)
                                         .addGap(6, 6, 6)
-                                        .addComponent(jFormattedTextField1))
+                                        .addComponent(textNParticles))
                                     .addComponent(pnlTypeZone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -949,13 +948,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                             .addComponent(pnlTypeZone, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(labelNParticles)
+                            .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(11, 11, 11)
                         .addComponent(pnlThickness, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(pnlBathyMask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(1, 1, 1)
                 .addComponent(pnlOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -967,13 +966,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(pnlZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addComponent(pnlZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(106, Short.MAX_VALUE))
+            .addComponent(pnlZone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         jScrollPane3.setViewportView(jPanel4);
@@ -1019,7 +1016,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1010, Short.MAX_VALUE)
+                        .addComponent(jSplitPane1)
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnSave)
@@ -1029,7 +1026,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                         .addComponent(lblFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnHelp)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGap(47, 47, 47))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1261,9 +1258,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         dialogHowto.setVisible(true);
     }//GEN-LAST:event_btnHelpActionPerformed
 
-    private void jFormattedTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextField1ActionPerformed
+    private void textNParticlesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textNParticlesActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jFormattedTextField1ActionPerformed
+    }//GEN-LAST:event_textNParticlesActionPerformed
 
     private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
 
@@ -1366,8 +1363,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JCheckBox ckBoxBathyMask;
     private javax.swing.JCheckBox ckBoxEnabled;
     private javax.swing.JCheckBox ckBoxThickness;
-    private javax.swing.JFormattedTextField jFormattedTextField1;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -1377,6 +1372,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JToolBar jToolBar2;
+    private javax.swing.JLabel labelNParticles;
     private javax.swing.JLabel lblFile;
     private javax.swing.JLabel lblInshore;
     private javax.swing.JLabel lblLonlat;
@@ -1396,6 +1392,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JRadioButton rdBtnDegMinSec;
     private javax.swing.JTable tablePolygon;
     private javax.swing.JTable tableZone;
+    private javax.swing.JFormattedTextField textNParticles;
     private javax.swing.JToolBar toolBarZone;
     private javax.swing.JFormattedTextField txtFieldInshore;
     private javax.swing.JFormattedTextField txtFieldLowerDepth;

@@ -25,7 +25,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="jSplitPane1" pref="1010" max="32767" attributes="1"/>
+                      <Component id="jSplitPane1" max="32767" attributes="1"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
@@ -36,7 +36,7 @@
                       <Component id="lblFile" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="btnHelp" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="47" max="-2" attributes="0"/>
                   </Group>
               </Group>
           </Group>
@@ -252,16 +252,13 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="pnlZone" min="-2" max="-2" attributes="1"/>
-                          <EmptySpace pref="13" max="32767" attributes="0"/>
+                          <EmptySpace pref="29" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="pnlZone" min="-2" max="-2" attributes="1"/>
-                          <EmptySpace pref="106" max="32767" attributes="0"/>
-                      </Group>
+                      <Component id="pnlZone" alignment="0" max="32767" attributes="1"/>
                   </Group>
                 </DimensionLayout>
               </Layout>
@@ -292,9 +289,9 @@
                                               <Group type="103" groupAlignment="1" attributes="0">
                                                   <Group type="102" attributes="0">
                                                       <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
-                                                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="labelNParticles" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                                                      <Component id="jFormattedTextField1" max="32767" attributes="0"/>
+                                                      <Component id="textNParticles" max="32767" attributes="0"/>
                                                   </Group>
                                                   <Component id="pnlTypeZone" max="32767" attributes="0"/>
                                               </Group>
@@ -329,8 +326,8 @@
                                       </Group>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
-                                          <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jFormattedTextField1" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="labelNParticles" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="textNParticles" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
                                       <Component id="pnlThickness" max="32767" attributes="0"/>
@@ -338,7 +335,7 @@
                                       <Component id="pnlBathyMask" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
                               <Component id="pnlOption" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -542,7 +539,7 @@
                                       <Component id="lblLowerDepth" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="txtFieldLowerDepth" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="49" max="32767" attributes="0"/>
+                                  <EmptySpace pref="53" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -653,9 +650,6 @@
                           <Properties>
                             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
                               <Format format="###0.###" subtype="-1" type="0"/>
-                            </Property>
-                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="org/previmer/ichthyop/ui/resources/ZoneEditorPanel.properties" key="lblInshore.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                             </Property>
                             <Property name="name" type="java.lang.String" value="txtFieldInshore" noResource="true"/>
                           </Properties>
@@ -773,18 +767,18 @@
                         </Component>
                       </SubComponents>
                     </Container>
-                    <Component class="javax.swing.JLabel" name="jLabel1">
+                    <Component class="javax.swing.JLabel" name="labelNParticles">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Number of released particles:"/>
-                        <Property name="name" type="java.lang.String" value="jLabel1" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="labelNParticles" noResource="true"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JFormattedTextField" name="jFormattedTextField1">
+                    <Component class="javax.swing.JFormattedTextField" name="textNParticles">
                       <Properties>
-                        <Property name="name" type="java.lang.String" value="jFormattedTextField1" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="textNParticles" noResource="true"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jFormattedTextField1ActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textNParticlesActionPerformed"/>
                       </Events>
                     </Component>
                     <Container class="javax.swing.JPanel" name="pnlOption">
