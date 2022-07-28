@@ -428,7 +428,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnColor = new javax.swing.JButton();
         pnlTypeZone = new javax.swing.JPanel();
         cbBoxType = new javax.swing.JComboBox();
-        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
         pnlOption = new javax.swing.JPanel();
@@ -559,6 +558,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
         jSplitPane1.setLeftComponent(jScrollPane4);
 
+        jScrollPane3.setAutoscrolls(true);
         jScrollPane3.setName("jScrollPane3"); // NOI18N
 
         jPanel4.setName("jPanel4"); // NOI18N
@@ -736,15 +736,17 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 .addGroup(pnlThicknessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblLowerDepth)
                     .addComponent(txtFieldLowerDepth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(49, Short.MAX_VALUE))
         );
 
         pnlBathyMask.setBorder(javax.swing.BorderFactory.createTitledBorder("Bathymetric mask"));
         pnlBathyMask.setName("pnlBathyMask"); // NOI18N
 
         txtFieldInshore.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
+        txtFieldInshore.setText(bundle.getString("lblInshore.text")); // NOI18N
         txtFieldInshore.setName("txtFieldInshore"); // NOI18N
 
+        ckBoxBathyMask.setText(bundle.getString("ckBoxBathyMask.text")); // NOI18N
         ckBoxBathyMask.setName("ckBoxBathyMask"); // NOI18N
         ckBoxBathyMask.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -752,11 +754,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             }
         });
 
+        lblInshore.setText(bundle.getString("lblInshore.text")); // NOI18N
         lblInshore.setName("lblInshore"); // NOI18N
 
         txtFieldOffshore.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
         txtFieldOffshore.setName("txtFieldOffshore"); // NOI18N
 
+        lblOffshore.setText(bundle.getString("lblOffshore.text")); // NOI18N
         lblOffshore.setName("lblOffshore"); // NOI18N
 
         javax.swing.GroupLayout pnlBathyMaskLayout = new javax.swing.GroupLayout(pnlBathyMask);
@@ -830,8 +834,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         cbBoxType.setModel(new DefaultComboBoxModel(TypeZone.values()));
         pnlTypeZone.add(cbBoxType);
 
-        jPanel1.setName("jPanel1"); // NOI18N
-
         jLabel1.setText("Number of released particles:");
         jLabel1.setName("jLabel1"); // NOI18N
 
@@ -841,64 +843,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 jFormattedTextField1ActionPerformed(evt);
             }
         });
-
-        javax.swing.GroupLayout pnlZoneLayout = new javax.swing.GroupLayout(pnlZone);
-        pnlZone.setLayout(pnlZoneLayout);
-        pnlZoneLayout.setHorizontalGroup(
-            pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlZoneLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                        .addComponent(pnlPolygon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(pnlThickness, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(pnlBathyMask, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(pnlZoneLayout.createSequentialGroup()
-                                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                                        .addGap(6, 6, 6)
-                                        .addComponent(jLabel1)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jFormattedTextField1))
-                                    .addComponent(pnlTypeZone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlZoneLayout.createSequentialGroup()
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                                        .addGap(80, 80, 80)
-                                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
-                        .addGap(508, 508, 508))
-                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                        .addComponent(ckBoxEnabled)
-                        .addContainerGap())))
-        );
-        pnlZoneLayout.setVerticalGroup(
-            pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlZoneLayout.createSequentialGroup()
-                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                        .addComponent(ckBoxEnabled)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnlPolygon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(pnlTypeZone, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel1)
-                                .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(pnlThickness, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnlBathyMask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(6, 6, 6))
-        );
 
         pnlOption.setBorder(javax.swing.BorderFactory.createTitledBorder("Options"));
         pnlOption.setName("pnlOption"); // NOI18N
@@ -959,27 +903,77 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdBtnDecimalDeg)
                     .addComponent(rdBtnDegMinSec)
-                    .addComponent(rdBtnDegDecimalMin))
-                .addContainerGap(42, Short.MAX_VALUE))
+                    .addComponent(rdBtnDegDecimalMin)))
+        );
+
+        javax.swing.GroupLayout pnlZoneLayout = new javax.swing.GroupLayout(pnlZone);
+        pnlZone.setLayout(pnlZoneLayout);
+        pnlZoneLayout.setHorizontalGroup(
+            pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlZoneLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlZoneLayout.createSequentialGroup()
+                        .addComponent(pnlPolygon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(pnlThickness, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlBathyMask, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(pnlZoneLayout.createSequentialGroup()
+                                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(pnlZoneLayout.createSequentialGroup()
+                                        .addGap(12, 12, 12)
+                                        .addComponent(jLabel1)
+                                        .addGap(6, 6, 6)
+                                        .addComponent(jFormattedTextField1))
+                                    .addComponent(pnlTypeZone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(21, 21, 21))
+                    .addGroup(pnlZoneLayout.createSequentialGroup()
+                        .addComponent(ckBoxEnabled)
+                        .addContainerGap())
+                    .addComponent(pnlOption, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        pnlZoneLayout.setVerticalGroup(
+            pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlZoneLayout.createSequentialGroup()
+                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlZoneLayout.createSequentialGroup()
+                        .addComponent(ckBoxEnabled)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(pnlPolygon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(pnlZoneLayout.createSequentialGroup()
+                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(pnlTypeZone, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(11, 11, 11)
+                        .addComponent(pnlThickness, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(pnlBathyMask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+            .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlOption, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlZone, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 935, Short.MAX_VALUE))
-                .addContainerGap())
+                .addComponent(pnlZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(13, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addComponent(pnlZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(106, Short.MAX_VALUE))
         );
 
         jScrollPane3.setViewportView(jPanel4);
@@ -1008,6 +1002,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         lblFile.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
         lblFile.setName("lblFile"); // NOI18N
 
+        btnHelp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico22/help.png"))); // NOI18N
+        btnHelp.setText(bundle.getString("btnHelp.text")); // NOI18N
         btnHelp.setName("btnHelp"); // NOI18N
         btnHelp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1021,17 +1017,19 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 972, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1010, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSaveAs)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(135, 135, 135)
                         .addComponent(lblFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 724, Short.MAX_VALUE)
-                        .addComponent(btnHelp)))
-                .addContainerGap())
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnHelp)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1044,7 +1042,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                     .addComponent(btnSaveAs)
                     .addComponent(lblFile)
                     .addComponent(btnHelp))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1107,89 +1105,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         tableZone.setRowSelectionInterval(newIndex, newIndex);
         tableZone.getSelectionModel().addListSelectionListener(this);
 }//GEN-LAST:event_btnDownZoneActionPerformed
-
-    private void btnNewPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewPointActionPerformed
-        
-        DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
-        int index = tablePolygon.getSelectedRow() + 1;
-        if (index < 0) {
-            index = tablePolygon.getRowCount();
-        }
-        if (rdBtnDecimalDeg.isSelected()) {
-            model.insertRow(index, new Float[]{0.f, 0.f});
-        } else {
-            model.insertRow(index, new String[]{"0° 0\' 0.0\"", "0° 0\' 0.0\""});
-        }
-        tablePolygon.setRowSelectionInterval(index, index);
-        btnNewPoint.firePropertyChange("point", 0, 1);
-    }//GEN-LAST:event_btnNewPointActionPerformed
-
-    private void btnDeletePointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeletePointActionPerformed
-        
-        DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
-        int index = tablePolygon.getSelectedRow();
-        if (index < 0) {
-            return;
-        }
-        model.removeRow(index);
-        index = Math.max(Math.min(model.getRowCount() - 1, index), 0);
-        tablePolygon.setRowSelectionInterval(index, index);
-        btnDeletePoint.firePropertyChange("point", 0, 1);
-    }//GEN-LAST:event_btnDeletePointActionPerformed
-
-    private void btnUpPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpPointActionPerformed
-        
-        int selectedIndex = tablePolygon.getSelectedRow();
-        DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
-        int newIndex = Math.max(selectedIndex - 1, 0);
-        if (selectedIndex < 0 || selectedIndex == newIndex) {
-            return;
-        }
-        model.moveRow(selectedIndex, selectedIndex, newIndex);
-        tablePolygon.setRowSelectionInterval(newIndex, newIndex);
-        btnUpPoint.firePropertyChange("point", 0, 1);
-    }//GEN-LAST:event_btnUpPointActionPerformed
-
-    private void btnDownPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownPointActionPerformed
-        
-        int selectedIndex = tablePolygon.getSelectedRow();
-        DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
-        int newIndex = Math.min(selectedIndex + 1, model.getRowCount() - 1);
-        if (selectedIndex < 0 || selectedIndex == newIndex) {
-            return;
-        }
-        model.moveRow(selectedIndex, selectedIndex, newIndex);
-        tablePolygon.setRowSelectionInterval(newIndex, newIndex);
-        btnDownPoint.firePropertyChange("point", 0, 1);
-    }//GEN-LAST:event_btnDownPointActionPerformed
-
-    private void ckBoxEnabledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxEnabledActionPerformed
-        
-        setZoneEnabled(zone, ckBoxEnabled.isSelected());
-    }//GEN-LAST:event_ckBoxEnabledActionPerformed
-
-    private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
-        
-        Color currentColor = btnColor.getBackground();
-        Color newColor = JColorChooser.showDialog(btnColor, "", btnColor.getBackground());
-        if (null != newColor) {
-            repaintBtnColor(newColor);
-        } else {
-            repaintBtnColor(currentColor);
-        }
-    }//GEN-LAST:event_btnColorActionPerformed
-
-    private void ckBoxThicknessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxThicknessActionPerformed
-        
-        txtFieldUpperDepth.setEnabled(ckBoxThickness.isSelected());
-        txtFieldLowerDepth.setEnabled(ckBoxThickness.isSelected());
-    }//GEN-LAST:event_ckBoxThicknessActionPerformed
-
-    private void ckBoxBathyMaskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxBathyMaskActionPerformed
-        
-        txtFieldInshore.setEnabled(ckBoxBathyMask.isSelected());
-        txtFieldOffshore.setEnabled(ckBoxBathyMask.isSelected());
-    }//GEN-LAST:event_ckBoxBathyMaskActionPerformed
 
     private void rdBtnDecimalDegActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdBtnDecimalDegActionPerformed
         
@@ -1350,6 +1265,89 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         // TODO add your handling code here:
     }//GEN-LAST:event_jFormattedTextField1ActionPerformed
 
+    private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
+
+        Color currentColor = btnColor.getBackground();
+        Color newColor = JColorChooser.showDialog(btnColor, "", btnColor.getBackground());
+        if (null != newColor) {
+            repaintBtnColor(newColor);
+        } else {
+            repaintBtnColor(currentColor);
+        }
+    }//GEN-LAST:event_btnColorActionPerformed
+
+    private void ckBoxBathyMaskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxBathyMaskActionPerformed
+
+        txtFieldInshore.setEnabled(ckBoxBathyMask.isSelected());
+        txtFieldOffshore.setEnabled(ckBoxBathyMask.isSelected());
+    }//GEN-LAST:event_ckBoxBathyMaskActionPerformed
+
+    private void ckBoxThicknessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxThicknessActionPerformed
+
+        txtFieldUpperDepth.setEnabled(ckBoxThickness.isSelected());
+        txtFieldLowerDepth.setEnabled(ckBoxThickness.isSelected());
+    }//GEN-LAST:event_ckBoxThicknessActionPerformed
+
+    private void btnDownPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownPointActionPerformed
+
+        int selectedIndex = tablePolygon.getSelectedRow();
+        DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
+        int newIndex = Math.min(selectedIndex + 1, model.getRowCount() - 1);
+        if (selectedIndex < 0 || selectedIndex == newIndex) {
+            return;
+        }
+        model.moveRow(selectedIndex, selectedIndex, newIndex);
+        tablePolygon.setRowSelectionInterval(newIndex, newIndex);
+        btnDownPoint.firePropertyChange("point", 0, 1);
+    }//GEN-LAST:event_btnDownPointActionPerformed
+
+    private void btnUpPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpPointActionPerformed
+
+        int selectedIndex = tablePolygon.getSelectedRow();
+        DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
+        int newIndex = Math.max(selectedIndex - 1, 0);
+        if (selectedIndex < 0 || selectedIndex == newIndex) {
+            return;
+        }
+        model.moveRow(selectedIndex, selectedIndex, newIndex);
+        tablePolygon.setRowSelectionInterval(newIndex, newIndex);
+        btnUpPoint.firePropertyChange("point", 0, 1);
+    }//GEN-LAST:event_btnUpPointActionPerformed
+
+    private void btnDeletePointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeletePointActionPerformed
+
+        DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
+        int index = tablePolygon.getSelectedRow();
+        if (index < 0) {
+            return;
+        }
+        model.removeRow(index);
+        index = Math.max(Math.min(model.getRowCount() - 1, index), 0);
+        tablePolygon.setRowSelectionInterval(index, index);
+        btnDeletePoint.firePropertyChange("point", 0, 1);
+    }//GEN-LAST:event_btnDeletePointActionPerformed
+
+    private void btnNewPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewPointActionPerformed
+
+        DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
+        int index = tablePolygon.getSelectedRow() + 1;
+        if (index < 0) {
+            index = tablePolygon.getRowCount();
+        }
+        if (rdBtnDecimalDeg.isSelected()) {
+            model.insertRow(index, new Float[]{0.f, 0.f});
+        } else {
+            model.insertRow(index, new String[]{"0° 0\' 0.0\"", "0° 0\' 0.0\""});
+        }
+        tablePolygon.setRowSelectionInterval(index, index);
+        btnNewPoint.firePropertyChange("point", 0, 1);
+    }//GEN-LAST:event_btnNewPointActionPerformed
+
+    private void ckBoxEnabledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxEnabledActionPerformed
+
+        setZoneEnabled(zone, ckBoxEnabled.isSelected());
+    }//GEN-LAST:event_ckBoxEnabledActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnColor;
     private javax.swing.JButton btnDeletePoint;
@@ -1370,7 +1368,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JCheckBox ckBoxThickness;
     private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
