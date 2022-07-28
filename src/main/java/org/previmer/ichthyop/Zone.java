@@ -128,6 +128,11 @@ public class Zone extends SimulationManagerAccessor {
      */
     private double area = -1;
 
+    /** Number of particles that will be released.
+     * Only used if the user specifies the number of cells for each area.
+     */
+    private int nParticles;
+    
     /**
      * Creates a new zone.
      *
@@ -189,6 +194,14 @@ public class Zone extends SimulationManagerAccessor {
 
     public void setLowerDepth(float lowerDepth) {
         this.lowerDepth = lowerDepth;
+    }
+    
+    public void setNParticles(int nParticles) {
+        this.nParticles = nParticles;
+    }
+    
+    public int getNParticles() {
+        return this.nParticles;
     }
 
     public float getUpperDepth() {
