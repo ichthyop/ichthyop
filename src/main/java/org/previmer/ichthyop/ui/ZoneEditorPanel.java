@@ -50,6 +50,7 @@ import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
@@ -62,6 +63,8 @@ import java.util.Collection;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -74,11 +77,14 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.TypeZone;
@@ -829,7 +835,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         pnlTypeZone.setBorder(javax.swing.BorderFactory.createTitledBorder("Type of zone"));
         pnlTypeZone.setName("pnlTypeZone"); // NOI18N
 
-        cbBoxType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbBoxType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "release", "recruitment" }));
         cbBoxType.setName("cbBoxType"); // NOI18N
         cbBoxType.setModel(new DefaultComboBoxModel(TypeZone.values()));
         pnlTypeZone.add(cbBoxType);
@@ -837,16 +843,25 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         labelNParticles.setText("Number of released particles:");
         labelNParticles.setName("labelNParticles"); // NOI18N
 
-        textNParticles.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0"))));
+        textNParticles.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
         textNParticles.setName("textNParticles"); // NOI18N
-        textNParticles.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                textNParticlesActionPerformed(evt);
-            }
-        });
         textNParticles.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 textNParticlesPropertyChange(evt);
+            }
+        });
+        textNParticles.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "customAction");
+        textNParticles.getActionMap().put("customAction", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // Try to commit the edit
+                    textNParticles.commitEdit();
+                } catch (ParseException pe) {
+                    // Commiting didn't work, revert if necessary.
+                    if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {
+                        textNParticles.setValue(textNParticles.getValue());
+                    }
+                }
             }
         });
 
@@ -1027,9 +1042,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSaveAs)
-                        .addGap(135, 135, 135)
-                        .addComponent(lblFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(34, 34, 34)
+                        .addComponent(lblFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(btnHelp)
                         .addGap(47, 47, 47))))
         );
@@ -1263,16 +1278,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         dialogHowto.setVisible(true);
     }//GEN-LAST:event_btnHelpActionPerformed
 
-    private void textNParticlesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textNParticlesActionPerformed
-        // TODO add your handling code here:
-        try {
-            this.textNParticles.commitEdit();
-            this.zone.setNParticles(this.textNParticles.getText());
-        } catch (ParseException e) { 
-            
-        }
-    }//GEN-LAST:event_textNParticlesActionPerformed
-
     private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
 
         Color currentColor = btnColor.getBackground();
@@ -1356,9 +1361,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
     }//GEN-LAST:event_ckBoxEnabledActionPerformed
 
-    private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_textNParticlesPropertyChange
-        // TODO add your handling code here:
-    }//GEN-LAST:event_textNParticlesPropertyChange
+    private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_textNParticlesPropertyChange
+        if ("value".equals(evt.getPropertyName())) {
+            zone.setNParticles((String) textNParticles.getValue());
+        }
+    }// GEN-LAST:event_textNParticlesPropertyChange
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnColor;

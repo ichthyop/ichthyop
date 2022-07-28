@@ -32,9 +32,9 @@
                       <Component id="btnSave" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnSaveAs" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="135" max="-2" attributes="0"/>
-                      <Component id="lblFile" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
+                      <Component id="lblFile" max="32767" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="btnHelp" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="47" max="-2" attributes="0"/>
                   </Group>
@@ -748,11 +748,9 @@
                         <Component class="javax.swing.JComboBox" name="cbBoxType">
                           <Properties>
                             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                              <StringArray count="4">
-                                <StringItem index="0" value="Item 1"/>
-                                <StringItem index="1" value="Item 2"/>
-                                <StringItem index="2" value="Item 3"/>
-                                <StringItem index="3" value="Item 4"/>
+                              <StringArray count="2">
+                                <StringItem index="0" value="release"/>
+                                <StringItem index="1" value="recruitment"/>
                               </StringArray>
                             </Property>
                             <Property name="name" type="java.lang.String" value="cbBoxType" noResource="true"/>
@@ -772,14 +770,16 @@
                     <Component class="javax.swing.JFormattedTextField" name="textNParticles">
                       <Properties>
                         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
-                          <Format format="0" subtype="-1" type="0"/>
+                          <Format subtype="0" type="0"/>
                         </Property>
                         <Property name="name" type="java.lang.String" value="textNParticles" noResource="true"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textNParticlesActionPerformed"/>
                         <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="textNParticlesPropertyChange"/>
                       </Events>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_ListenersCodePost" type="java.lang.String" value="textNParticles.getInputMap().put(KeyStroke.getKeyStroke(&quot;ENTER&quot;), &quot;customAction&quot;);&#xa;textNParticles.getActionMap().put(&quot;customAction&quot;, new AbstractAction() {&#xa;    public void actionPerformed(ActionEvent e) {&#xa;        try {&#xa;            // Try to commit the edit&#xa;            textNParticles.commitEdit();&#xa;        } catch (ParseException pe) {&#xa;            // Commiting didn&apos;t work, revert if necessary.&#xa;            if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {&#xa;                textNParticles.setValue(textNParticles.getValue());&#xa;            }&#xa;        }&#xa;    }&#xa;});"/>
+                      </AuxValues>
                     </Component>
                     <Container class="javax.swing.JPanel" name="pnlOption">
                       <Properties>
