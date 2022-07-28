@@ -132,6 +132,11 @@ public class GridFile {
         write(new FileOutputStream(file));
     }
     
+    /** Remove a single zone from it's key */
+    public void removeGrid(String key) {
+        grids.remove(key);
+    }
+    
     /**
      * Remove all the "grid" child of the current "grids" tree.
      */

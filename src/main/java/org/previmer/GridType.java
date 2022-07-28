@@ -6,10 +6,10 @@ package org.previmer;
 public enum GridType {
     
     
-    NEMO("nemo"),
-    ROMS("roms"),
-    MARS("mars"),
-    REGULAR("regular");
+    NEMO("NEMO"),
+    ROMS("ROMS"),
+    MARS("MARS"),
+    REGULAR("REGULAR");
     
     private String name;
     
