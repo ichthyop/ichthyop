@@ -78,6 +78,28 @@ public class ZoneRelease extends AbstractRelease {
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
         getSimulationManager().getOutputManager().addPredefinedTracker(ReleaseZoneTracker.class);
     }
+    
+    /**
+     * Dispatch cells according to the user definition.
+     *
+     * @return the number of particles per release zone.
+     */
+    private int[] dispatchUserDefParticles() {
+
+        // assign number of particles per zone proportionnaly to zone extents
+        int[] nParticlePerZone = new int[nbReleaseZones];
+        for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
+            Zone zone = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
+            int nParticules = zone.getNParticles();
+            nParticlePerZone[i_zone] = nParticules;
+        }
+
+        for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
+            if (nParticlePerZone[i_zone] == 0) getLogger().log(Level.WARNING, "Release zone {0} has not been attributed any particle. It may be too small compared to other release zones or its definition may be flawed.", i_zone);
+        }
+
+        return nParticlePerZone;
+    }
 
     /**
      * Computes and returns the number of particles per release zone,
@@ -85,7 +107,7 @@ public class ZoneRelease extends AbstractRelease {
      *
      * @return the number of particles per release zone.
      */
-    private int[] dispatchParticles() {
+    private int[] dispatchParticlesArea() {
 
         double areaTot = 0;
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
@@ -120,8 +142,21 @@ public class ZoneRelease extends AbstractRelease {
 
     @Override
     public int release(ReleaseEvent event) throws Exception {
-
-        int[] nParticlePerZone = dispatchParticles();
+        
+        ZoneReleaseType type;
+        
+        if(isNull("release_type")) {
+            type = ZoneReleaseType.AREA;
+        } else {
+            type = ZoneReleaseType.valueOf(getParameter("release_type"));
+        }
+        
+        int[] nParticlePerZone;
+        if(type == ZoneReleaseType.AREA) { 
+            nParticlePerZone = dispatchParticlesArea();
+        } else {
+            nParticlePerZone = this.dispatchUserDefParticles();
+        }
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
 
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
@@ -164,4 +199,21 @@ public class ZoneRelease extends AbstractRelease {
     public int getNbParticles() {
         return nParticles;
     }
+    
+    private enum ZoneReleaseType {
+
+        AREA("area"), FIXED("fixed");
+
+        private String name;
+
+        ZoneReleaseType(String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return this.name.toLowerCase();
+        }
+
+    }
+
 }
