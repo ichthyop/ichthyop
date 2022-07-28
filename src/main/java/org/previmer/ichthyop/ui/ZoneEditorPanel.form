@@ -279,38 +279,31 @@
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" attributes="0">
-                                      <Component id="ckBoxEnabled" min="-2" max="-2" attributes="0"/>
+                                  <Component id="ckBoxEnabled" min="-2" max="-2" attributes="0"/>
+                                  <Component id="pnlOption" alignment="0" max="32767" attributes="1"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="pnlPolygon" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" alignment="1" attributes="0">
                                       <Group type="103" groupAlignment="1" attributes="0">
-                                          <Component id="pnlOption" alignment="0" max="32767" attributes="1"/>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Component id="pnlPolygon" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="pnlThickness" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="pnlBathyMask" max="32767" attributes="0"/>
+                                          <Group type="102" alignment="1" attributes="0">
                                               <Group type="103" groupAlignment="1" attributes="0">
-                                                  <Component id="pnlThickness" alignment="0" max="32767" attributes="0"/>
-                                                  <Component id="pnlBathyMask" max="32767" attributes="0"/>
-                                                  <Group type="102" alignment="1" attributes="0">
-                                                      <Group type="103" groupAlignment="1" attributes="0">
-                                                          <Group type="102" attributes="0">
-                                                              <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
-                                                              <Component id="labelNParticles" min="-2" max="-2" attributes="0"/>
-                                                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                                                              <Component id="textNParticles" max="32767" attributes="0"/>
-                                                          </Group>
-                                                          <Component id="pnlTypeZone" max="32767" attributes="0"/>
-                                                      </Group>
-                                                      <EmptySpace max="32767" attributes="0"/>
-                                                      <Component id="pnlColor" min="-2" max="-2" attributes="0"/>
+                                                  <Group type="102" attributes="0">
+                                                      <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
+                                                      <Component id="labelNParticles" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                                                      <Component id="textNParticles" max="32767" attributes="0"/>
                                                   </Group>
+                                                  <Component id="pnlTypeZone" max="32767" attributes="0"/>
                                               </Group>
+                                              <EmptySpace max="32767" attributes="0"/>
+                                              <Component id="pnlColor" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
-                                      <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                               </Group>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -543,7 +536,7 @@
                                       <Component id="lblLowerDepth" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="txtFieldLowerDepth" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="53" max="32767" attributes="0"/>
+                                  <EmptySpace pref="38" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
