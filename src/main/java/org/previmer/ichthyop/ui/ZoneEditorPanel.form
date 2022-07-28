@@ -771,10 +771,14 @@
                     </Component>
                     <Component class="javax.swing.JFormattedTextField" name="textNParticles">
                       <Properties>
+                        <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
+                          <Format format="0" subtype="-1" type="0"/>
+                        </Property>
                         <Property name="name" type="java.lang.String" value="textNParticles" noResource="true"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textNParticlesActionPerformed"/>
+                        <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="textNParticlesPropertyChange"/>
                       </Events>
                     </Component>
                     <Container class="javax.swing.JPanel" name="pnlOption">

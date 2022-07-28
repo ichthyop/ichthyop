@@ -57,6 +57,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -836,10 +837,16 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         labelNParticles.setText("Number of released particles:");
         labelNParticles.setName("labelNParticles"); // NOI18N
 
+        textNParticles.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0"))));
         textNParticles.setName("textNParticles"); // NOI18N
         textNParticles.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 textNParticlesActionPerformed(evt);
+            }
+        });
+        textNParticles.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                textNParticlesPropertyChange(evt);
             }
         });
 
@@ -1258,6 +1265,12 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
     private void textNParticlesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textNParticlesActionPerformed
         // TODO add your handling code here:
+        try {
+            this.textNParticles.commitEdit();
+            this.zone.setNParticles(this.textNParticles.getText());
+        } catch (ParseException e) { 
+            
+        }
     }//GEN-LAST:event_textNParticlesActionPerformed
 
     private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
@@ -1342,6 +1355,10 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
     }//GEN-LAST:event_ckBoxEnabledActionPerformed
+
+    private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_textNParticlesPropertyChange
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textNParticlesPropertyChange
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnColor;
