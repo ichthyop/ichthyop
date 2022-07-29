@@ -16,6 +16,6 @@ doc/_build
 doc/**/*ipynb*
 doc/generated
 doc/*sh
-doc/grid/_static/*svg
-doc/grid/_static/*pdf
+doc/**/_static/*svg
+doc/**/_static/*pdf
 

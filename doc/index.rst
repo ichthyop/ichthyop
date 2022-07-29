@@ -22,6 +22,7 @@ Ichthyop's documentation
    start
    console
    grid
+   release
    process
    faq
    genindex
