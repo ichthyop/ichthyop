@@ -19,5 +19,6 @@ Particle release
    :caption: Contents:
 
    release/stain.rst
+   release/zone.rst
    release/patchy.rst
    release/netcdf.rst

@@ -252,7 +252,7 @@ for xp, yp in zip(xxxp, yyyp):
     lonp, latp = stain_release_particles(50, xp, yp, 10000)
     plt.plot(lonp, latp, marker='.', linestyle='none', color='gray')
 
-plt.title('Path uniform release')
+plt.title('Patchy uniform release')
     
 savefig('release_patchy_uniform')
 
