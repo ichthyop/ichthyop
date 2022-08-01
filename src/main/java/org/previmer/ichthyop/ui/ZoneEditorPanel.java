@@ -1364,6 +1364,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_textNParticlesPropertyChange
         if ("value".equals(evt.getPropertyName())) {
             zone.setNParticles((String) textNParticles.getValue());
+            this.hasZoneChanged = true;
+            btnSave.setEnabled(true);
         }
     }// GEN-LAST:event_textNParticlesPropertyChange
 
