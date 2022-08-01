@@ -143,19 +143,19 @@ public class ZoneRelease extends AbstractRelease {
     @Override
     public int release(ReleaseEvent event) throws Exception {
         
-        ZoneReleaseType type;
+        boolean userDefinedNParticles = false;
         
-        if(isNull("release_type")) {
-            type = ZoneReleaseType.AREA;
+        if(isNull("user_defined_nparticles")) {
+            userDefinedNParticles = false;
         } else {
-            type = ZoneReleaseType.valueOf(getParameter("release_type"));
+            userDefinedNParticles = Boolean.valueOf(getParameter("user_defined_nparticles"));
         }
         
         int[] nParticlePerZone;
-        if(type == ZoneReleaseType.AREA) { 
-            nParticlePerZone = dispatchParticlesArea();
-        } else {
+        if(userDefinedNParticles) { 
             nParticlePerZone = this.dispatchUserDefParticles();
+        } else {
+            nParticlePerZone = dispatchParticlesArea();
         }
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
 
