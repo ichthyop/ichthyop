@@ -11,6 +11,7 @@ In this section, the Ichthyop console is described.
    :caption: Contents:
 
    console/configure.rst
+   console/zone.rst
    console/running.rst
    console/visu.rst
    console/anim.rst
