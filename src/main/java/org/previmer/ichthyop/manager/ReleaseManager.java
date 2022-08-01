@@ -109,6 +109,10 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     public String getParameter(String releaseKey, String key) {
         return getSimulationManager().getParameterManager().getParameter(BlockType.RELEASE, releaseKey, key);
     }
+    
+    public boolean isNull(String releaseKey, String key) {
+        return getSimulationManager().getParameterManager().isNull(BlockType.RELEASE, releaseKey, key);
+    }
 
     private XBlock findActiveReleaseProcess() throws Exception {
         List<XBlock> list = new ArrayList<>();

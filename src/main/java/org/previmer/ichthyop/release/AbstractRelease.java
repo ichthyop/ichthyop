@@ -68,4 +68,8 @@ public abstract class AbstractRelease extends SimulationManagerAccessor {
     String getParameter(String key) {
         return getSimulationManager().getReleaseManager().getParameter(releaseKey, key);
     }
+    
+    boolean isNull(String key) {
+        return getSimulationManager().getReleaseManager().isNull(releaseKey, key);
+    }
 }
