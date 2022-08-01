@@ -1,5 +1,16 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.13
+
+### New features
+
+- Possibility to define the number of particles released per area
+- Sphinx documentation is now included in the repository
+
+### Bug fix
+
+- If the `units` attribute is not found in the NetCDF file, then the `time_of_origin` parameter is used. **Must be in the NETCDF standards, i.e `seconds since YYYY-MM-DD HH:MM`**
+
 ## Changes in 3.3.12
 
 ### New features
