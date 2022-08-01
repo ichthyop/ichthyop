@@ -325,7 +325,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         }
         
         zone.setNParticles(textNParticles.getValue().toString());
-
+ 
     }
 
     public void setZoneEnabled(XZone zone, boolean enabled) {
@@ -384,6 +384,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     public void actionPerformed(ActionEvent e) {
         hasZoneChanged = true;
         btnSave.setEnabled(true);
+        textNParticles.setVisible(zone.getTypeZone() == TypeZone.RELEASE);
+        labelNParticles.setVisible(zone.getTypeZone() == TypeZone.RELEASE);
     }
 
     public ResourceMap getResourceMap() {
