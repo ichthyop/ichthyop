@@ -261,7 +261,7 @@ plt.figure(**figparams)
 plot_bkg()
 
 xmin, xmax = -2, 18
-ymin, ymax = 35, 44
+ymin, ymax = 35, 45
 
 xzone = [xmin, xmax, xmax, xmin, xmin]
 yzone = [ymin, ymin, ymax, ymax, ymin]
@@ -269,9 +269,9 @@ yzone = [ymin, ymin, ymax, ymax, ymin]
 xxxp, yyyp = zone_release_particles(1000, xzone, yzone)
 plt.plot(xxxp, yyyp, marker='.', linestyle='none', color='gray')
     
-plt.title('Netcdf release')
+plt.title('Surface release')
     
-savefig('release_netcdf')
+savefig('release_surface')
 # -
 
 

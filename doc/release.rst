@@ -22,4 +22,5 @@ Particle release
    release/zone.rst
    release/text.rst
    release/patchy.rst
+   release/bottom_surface
    release/netcdf.rst
