@@ -304,6 +304,10 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnSave.doClick();
     }
 
+    /**
+     * Updates the zone object. Done if one action has been made and if the focus
+     * has changed (either clicking on save or changing zone)
+     */
     private void updateZone(XZone zone) {
         zone.setEnabled(ckBoxEnabled.isSelected());
         zone.setColor(btnColor.getBackground());
@@ -318,6 +322,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             zone.addPoint(i, tablePolygon.getModel().getValueAt(i, 0).toString(), tablePolygon.getModel().getValueAt(i, 1).toString());
         }
+        
+        zone.setNParticles(textNParticles.getValue().toString());
+
     }
 
     public void setZoneEnabled(XZone zone, boolean enabled) {
@@ -856,6 +863,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 try {
                     // Try to commit the edit
                     textNParticles.commitEdit();
+                    hasZoneChanged = true;
+                    btnSave.setEnabled(true);
                 } catch (ParseException pe) {
                     // Commiting didn't work, revert if necessary.
                     if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {
@@ -1362,11 +1371,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_ckBoxEnabledActionPerformed
 
     private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_textNParticlesPropertyChange
-        if ("value".equals(evt.getPropertyName())) {
-            zone.setNParticles((String) textNParticles.getValue());
-            this.hasZoneChanged = true;
-            btnSave.setEnabled(true);
-        }
+
     }// GEN-LAST:event_textNParticlesPropertyChange
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
