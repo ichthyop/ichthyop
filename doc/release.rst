@@ -20,5 +20,6 @@ Particle release
 
    release/stain.rst
    release/zone.rst
+   release/text.rst
    release/patchy.rst
    release/netcdf.rst
