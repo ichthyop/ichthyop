@@ -259,6 +259,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             rdBtnDecimalDeg.doClick();
         }
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
+        this.textNParticles.setValue(zone.getNParticles());
         hasZoneChanged = false;
         addChangeListeners(this, this);
     }
