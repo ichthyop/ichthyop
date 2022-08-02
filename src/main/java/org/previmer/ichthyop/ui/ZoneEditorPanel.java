@@ -134,7 +134,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         tableZone.addPropertyChangeListener(pl);
         rdBtnDegMinSec.addPropertyChangeListener(pl);
         rdBtnDecimalDeg.addPropertyChangeListener(pl);
-        rdBtnDegDecimalMin.addPropertyChangeListener(pl);
+        rdBtnDegDecimalMin.addPropertyChangeListener(pl);     
+        textNParticles.addPropertyChangeListener(pl);   
         //
         cbBoxType.addActionListener(al);
         ckBoxThickness.addActionListener(al);
@@ -166,6 +167,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         rdBtnDegMinSec.removePropertyChangeListener(pl);
         rdBtnDecimalDeg.removePropertyChangeListener(pl);
         rdBtnDegDecimalMin.removePropertyChangeListener(pl);
+        textNParticles.removePropertyChangeListener(pl);  
         //
         cbBoxType.removeActionListener(al);
         ckBoxThickness.removeActionListener(al);
@@ -855,27 +857,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
         textNParticles.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
         textNParticles.setName("textNParticles"); // NOI18N
-        textNParticles.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                textNParticlesPropertyChange(evt);
-            }
-        });
-        textNParticles.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "customAction");
-        textNParticles.getActionMap().put("customAction", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    // Try to commit the edit
-                    textNParticles.commitEdit();
-                    hasZoneChanged = true;
-                    btnSave.setEnabled(true);
-                } catch (ParseException pe) {
-                    // Commiting didn't work, revert if necessary.
-                    if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {
-                        textNParticles.setValue(textNParticles.getValue());
-                    }
-                }
-            }
-        });
 
         pnlOption.setBorder(javax.swing.BorderFactory.createTitledBorder("Options"));
         pnlOption.setName("pnlOption"); // NOI18N
@@ -1373,9 +1354,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
     }//GEN-LAST:event_ckBoxEnabledActionPerformed
 
-    private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_textNParticlesPropertyChange
-
-    }// GEN-LAST:event_textNParticlesPropertyChange
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnColor;

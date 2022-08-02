@@ -774,12 +774,6 @@
                         </Property>
                         <Property name="name" type="java.lang.String" value="textNParticles" noResource="true"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="textNParticlesPropertyChange"/>
-                      </Events>
-                      <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_ListenersCodePost" type="java.lang.String" value="textNParticles.getInputMap().put(KeyStroke.getKeyStroke(&quot;ENTER&quot;), &quot;customAction&quot;);&#xa;textNParticles.getActionMap().put(&quot;customAction&quot;, new AbstractAction() {&#xa;    public void actionPerformed(ActionEvent e) {&#xa;        try {&#xa;            // Try to commit the edit&#xa;            textNParticles.commitEdit();&#xa;        } catch (ParseException pe) {&#xa;            // Commiting didn&apos;t work, revert if necessary.&#xa;            if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {&#xa;                textNParticles.setValue(textNParticles.getValue());&#xa;            }&#xa;        }&#xa;    }&#xa;});"/>
-                      </AuxValues>
                     </Component>
                     <Container class="javax.swing.JPanel" name="pnlOption">
                       <Properties>
