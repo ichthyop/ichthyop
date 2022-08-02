@@ -48,6 +48,14 @@ set equal to true, cf:numref:`zone_release`). It is done by filling the :guilabe
 and pressing :guilabel:`ENTER`
 
 Each zone is associated with a color, that will be used to its representation in the graphical interface during the
-preview and the display of the simulation results.
-
+preview and the display of the simulation results. 
 This color can be edited by using the |color| button.
+
+In the case of 3D simulations, you can specify the depth range to use in the zone. To activate this feature, 
+click on the :guilabel:`Activated` tick box of the :guilabel:`Thickness` panel.
+You can provide the lower and upper depth that must be considered in the given zone (negative values).
+
+In 3D simulations, you can also specify the bathymetric range that you want to include, for 
+instance if you want to release particles only 
+on the ocean shelf (i.e depth less than 200m). This can be done by activating the feature by clicking on the
+:samp:`Activated` tick box of the :guilabel:`Bathymetric mask` panel.
