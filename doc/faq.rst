@@ -1,6 +1,19 @@
 FAQ
 ------------------
 
+What to do when Ichthyop does not manage my ocean dataset
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Ichthyop developers cannot manage all the different ocean datasets that exist. First, there
+are too many of them which rely on different assumptions, such as grid layout, vertical coordinates, etc.
+
+Therefore, the Ichthyop developers have decided to first focus on the most used datasets, i.e. NEMO, MARS, ROMS
+and ocean datatasets that are stored on regular grid.
+
+If your model does not belon to the list, one possibility is to do a bit of pre-processing, in order
+to convert your input files to a regular, depth-based ocean grid. Different tools can help you with that,
+such as the `XESMF <https://xesmf.readthedocs.io/en/latest/>`_ Python package.
+
 What to do when Ichthyop suddenly fails to launch ?
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
