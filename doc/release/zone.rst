@@ -1,3 +1,5 @@
+.. _zone_release:
+
 Zone release
 ================
 
@@ -11,7 +13,7 @@ By default, the number of particles released in each zone (:math:`N_k`) is equal
 
 with :math:`N_{tot}` the total number of released particles, :math:`S_k` the surface of the :math:`k^{th}` release area and :math:`N` the number of release areas. 
 
-However, if the `release_type` parameter is set equal to `USER`, then the number of particles released in each zone is defined by the user.
+However, if the `user_defined_nparticles` parameter is set equal to `true`, then the number of particles released in each zone is defined by the user.
 
 An example of zone release is provided below.
 
