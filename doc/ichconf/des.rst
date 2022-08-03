@@ -3,7 +3,7 @@ Configuration files
 
 Ichthyop is configured using `XML <https://en.wikipedia.org/wiki/XML>`_ configuration files. It should always start as follows:
 
-.. code:: 
+.. code:: XML
     
     <icstructure>
     <long_name>Generic Ichthyop configuration file</long_name>
@@ -23,7 +23,7 @@ Ichthyop is configured by blocks, each block managing a specific aspect of the m
 
 New blocks can be added in the XML file as follows:
 
-.. code:: 
+.. code:: XML
 
     <block type="option">
             <key>app.transport</key>
@@ -40,14 +40,14 @@ Configuration parameters
 
 To each block is associated a list of parameters. This list of parameter is added in the XML as follows:
 
-.. code:: 
+.. code:: XML
 
     <parameters>
     </parameters>
     
 Inside the :samp:`parameters` tags, new parameters are defined as follows:
 
-.. code:: 
+.. code:: XML
     
     <parameter>
         <key>output_path</key>
@@ -65,12 +65,28 @@ to provide informations about the parameter.
 The :samp:`format` tag specifies the parameter format, which will be used by the console parameter editor. The accepted values are:
 
 - :samp:`path`: For files and folders
-- :samp:`date`: For dates (format is forced to :samp:`year YYYY month MM day HH:MM`
+- :samp:`date`: For dates (format must be :samp:`year YYYY month MM day at HH:MM`)
 - :samp:`duration`: For duration (format must be :samp:`#### day(s) ## hour(s) ## minute(s)`)
-- :samp:`integer`:
-- :samp:`class`:
-- :samp:`list`:
-- :samp:`bolean`:
-- :samp:`combo`:
-- :samp:`lonlat`:
-- :samp:`float`: For files and folders
+- :samp:`float`: For real values
+- :samp:`integer`: For integer values.
+- :samp:`class`: For class parameters. It allow the user to choose an existing Ichthyop class in the configuration file.
+- :samp:`list`: For a list of string parameters, separated by :samp:`,`
+- :samp:`boolean`: For boolean parameters. It allows the user to select `true` or `false` using a simple combo box.
+- :samp:`combo`: For parameters with a limited set of values, which can be selected in the console with a combo box.
+- :samp:`lonlat`: For geographical coordinates.
+
+In the case of :samp:`combo` parameters, the list of accepted parameters is specified by 
+providing as many :samp:`accepted` tags as necessary. For instance:
+
+.. code:: XML
+
+    <parameter>
+        <key>time_arrow</key>
+        <long_name>Direction of the simulation</long_name>
+        <value>forward</value>
+        <format>combo</format>
+        <accepted>backward</accepted>
+        <accepted>forward</accepted>
+        <default>forward</default>
+        <description>Run the simulation backward or forward in time.</description>
+    </parameter>
