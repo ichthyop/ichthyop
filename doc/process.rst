@@ -4,7 +4,7 @@
 Ichthyop processes
 ###############################
 
-In this section, the different Ichthyop processes are described
+In this section, the different Ichthyop processes are described.
 
 .. toctree::
    :maxdepth: 2
