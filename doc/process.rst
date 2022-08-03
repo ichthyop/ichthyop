@@ -4,7 +4,10 @@
 Ichthyop processes
 ###############################
 
-In this section, the different Ichthyop processes are described.
+In this section, the different Ichthyop processes are described. These processes are implemented in the classes within
+the :samp:`action` folder.
+
+Parameters associated with these processes must be included in :samp:`action` blocks.
 
 .. toctree::
    :maxdepth: 2

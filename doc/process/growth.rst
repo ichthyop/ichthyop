@@ -3,25 +3,12 @@ Growth
 
 There is 2 different implementations of the growth module.
 
-``SoleGrowthAction.java``
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-In this implementation, the length increment only depends on temperature and is given by:
-
-.. math:: 
-
-    \Delta L = C_1 \times T^{C_2} \times \Delta t
-
-with :math:`L` the length, :math:`T` the temperature and :math:`\Delta t` the time step in days, and :math:`C_1` and :math:`C_2` are parameters (``c1`` and ``c2`` respectively).
-
-The temperature field is provided by the ``temperature_field`` parameter.
-
-.. index:: c1, c2
-
-``LinearGrowthAction.java``
+Linear growth
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-In this implementation, the length increment is provided as follows:
+To use the linear growth method described in :cite:`LETT20081210`, choose the ``LinearGrowthAction.java`` class. 
+
+Length increment is provided as follows:
 
 .. math:: 
 
@@ -36,14 +23,18 @@ The name of the food and temperature variables are provided by the ``food_field`
 
     Add the description of the DEB module
 
+Sole growth
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+If the :samp:`SoleGrowthAction.java` class is selected, the growth model used in :cite:`TANNER201778` is 
+used. It relies on the growth equation from :cite:`fonds1979laboratory` and given by:
 
+.. math:: 
 
+    \Delta L = C_1 \times T^{C_2} \times \Delta t
 
+with :math:`L` the length, :math:`T` the temperature and :math:`\Delta t` the time step in days, and :math:`C_1` and :math:`C_2` are parameters (``c1`` and ``c2`` respectively).
 
+The temperature field is provided by the ``temperature_field`` parameter.
 
-
-
-
-
-
+.. index:: c1, c2
