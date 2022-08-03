@@ -94,3 +94,11 @@ providing as many :samp:`accepted` tags as necessary. For instance:
         <default>forward</default>
         <description>Run the simulation backward or forward in time.</description>
     </parameter>
+
+If a parameter should appear as hidden in the Ichthyop console, it can be specified by adding the 
+:samp:`hidden="true"` argument to the :samp:`parameter` tag, as shown below:
+
+.. code:: HTML
+
+    <parameter hidden="true">
+    </parameter>
