@@ -21,3 +21,4 @@ Parameters associated with these processes must be included in :samp:`action` bl
    process/ontogenetic_migration
    process/wind
    process/swim
+   process/wave
