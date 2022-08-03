@@ -14,6 +14,11 @@ Particle release
     with open(fpath) as f:
         with open(os.devnull, "w") as DEVNULL:
             subprocess.call(["python", fpath], stdout=DEVNULL, stderr=subprocess.STDOUT)
+            
+
+In the present section, the different release processes that are implemented within Ichthyop are described. 
+The parameters that are associated with the release processes must be included within :samp:`release` blocks
+(cf. :numref:`xml_config`).
 
 
 .. toctree::

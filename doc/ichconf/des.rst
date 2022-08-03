@@ -1,5 +1,7 @@
-Configuration files
-########################
+.. _xml_config:
+
+XML configuration files
+##############################
 
 Ichthyop is configured using `XML <https://en.wikipedia.org/wiki/XML>`_ configuration files. It should always start as follows:
 
