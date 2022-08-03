@@ -33,6 +33,8 @@ with open(pom_file, 'r') as fpom:
             version = regex.match(l).groups()[0]
             break
 
+# include to to references        
+todo_include_todos = True
 
 # -- General configuration ---------------------------------------------------
 
