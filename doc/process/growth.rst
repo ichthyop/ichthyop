@@ -1,7 +1,8 @@
 Growth
 ######################################
 
-There is 2 different implementations of the growth module.
+There is 2 different implementations of the growth module. They can be selected by setting the 
+``class_name`` parameter in the ``action.growth`` action configuration block.
 
 Linear growth
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
