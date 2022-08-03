@@ -35,6 +35,7 @@ with open(pom_file, 'r') as fpom:
 
 # include to to references        
 todo_include_todos = True
+todo_emit_warnings = True
 
 # -- General configuration ---------------------------------------------------
 
