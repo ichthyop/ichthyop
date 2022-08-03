@@ -5,4 +5,4 @@ Ichthyop configuration
    :maxdepth: 1
    :caption: Contents:
 
-   ichconf/des.rst
+   ichconf/xml.rst
