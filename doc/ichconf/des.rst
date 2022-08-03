@@ -27,13 +27,17 @@ New blocks can be added in the XML file as follows:
 
     <block type="option">
             <key>app.transport</key>
+            <enabled>true</enabled>
             <tree_path>Transport/General</tree_path>
             <description>Set the general transport options of the simulation.</description>
     </block>
     
-The :samp:`key` tag is used to identify the configuration block.  The :samp:`tree_path` tag is used in the Ichthyop console to 
+The :samp:`key` tag is used to identify the configuration block. The :samp:`tree_path` tag is used in the Ichthyop console to 
 create the parameter tree. The :samp:`description` field is used to display the block description in the 
 Ichthyop console.
+
+The :samp:`enabled` tag specifies whether the block should be considered by Ichthyop or not. By default, all blocks are enabled. 
+But for the :samp:`RELEASE` and :samp:`DATASET`, one and only one block must be activated.
 
 Configuration parameters
 ++++++++++++++++++++++++++++++
