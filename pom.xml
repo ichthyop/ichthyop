@@ -57,8 +57,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <!-- Project properties -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.release>8</maven.compiler.release>
         <mainClass>org.previmer.ichthyop.ui.IchthyopApp</mainClass>
     </properties>
     
@@ -125,6 +124,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </resources>
                
         <plugins>
+        
+        <plugin> 
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.0</version>
+            <configuration>
+                <release>${maven.compiler.release}</release>
+            </configuration>
+        </plugin>
            
             <!-- Copy dependencies in lib folder -->
             <plugin>
