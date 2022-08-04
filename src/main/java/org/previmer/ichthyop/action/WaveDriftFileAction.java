@@ -453,7 +453,6 @@ public class WaveDriftFileAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-        // TODO Auto-generated method stub
     }
 
     double skipSeconds(double time) {
