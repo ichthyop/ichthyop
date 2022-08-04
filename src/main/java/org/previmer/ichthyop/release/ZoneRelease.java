@@ -199,21 +199,5 @@ public class ZoneRelease extends AbstractRelease {
     public int getNbParticles() {
         return nParticles;
     }
-    
-    private enum ZoneReleaseType {
-
-        AREA("area"), FIXED("fixed");
-
-        private String name;
-
-        ZoneReleaseType(String name) {
-            this.name = name;
-        }
-
-        public String toString() {
-            return this.name.toLowerCase();
-        }
-
-    }
 
 }
