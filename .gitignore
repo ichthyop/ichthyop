@@ -19,3 +19,4 @@ doc/*sh
 doc/**/_static/*svg
 doc/**/_static/*pdf
 
+doc/_static/javadoc
