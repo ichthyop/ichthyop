@@ -9,9 +9,7 @@ ROMS grid
     cwd = os.getcwd()
 
     fpath = "grid/_static/roms.py"
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["python", fpath], stdout=DEVNULL, stderr=subprocess.STDOUT)
+    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 In this section, the main features of the ROMS grid and the implications in Ichthyop are summarized.
 

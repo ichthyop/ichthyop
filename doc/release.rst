@@ -11,9 +11,7 @@ Particle release
     cwd = os.getcwd()
 
     fpath = "release/_static/plot_release_types.py"
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["python", fpath], stdout=DEVNULL, stderr=subprocess.STDOUT)
+    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             
 
 In the present section, the different release processes that are implemented within Ichthyop are described. 
