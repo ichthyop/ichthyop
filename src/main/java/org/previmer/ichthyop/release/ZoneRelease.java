@@ -86,6 +86,7 @@ public class ZoneRelease extends AbstractRelease {
      */
     private int[] dispatchUserDefParticles() {
 
+        double totalPercentage = 0;
         int nParticleSum = 0; 
         // assign number of particles per zone proportionnaly to zone extents
         int[] nParticlePerZone = new int[nbReleaseZones];
@@ -94,8 +95,17 @@ public class ZoneRelease extends AbstractRelease {
             int nParticulesZone = (int) zone.getProportionParticles() * nParticles;
             nParticlePerZone[i_zone] = nParticulesZone;
             nParticleSum += nParticlePerZone[i_zone];
+            totalPercentage += zone.getProportionParticles();
         }
         
+        if (totalPercentage > 100) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Total proportion must be less equan than 100. ");
+            sb.append("Actual proportion is ");
+            sb.append(totalPercentage);
+            throw new IllegalArgumentException(sb.toString());
+        }
+
         // adjust number of particles per zones in case rounding did not match
         // exactly expected number of particles.
         int sign = (int) Math.signum(nParticles - nParticleSum);
