@@ -860,219 +860,219 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 textNParticlesPropertyChange(evt);
             }
         });
-        textNParticles.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "customAction");
-        textNParticles.getActionMap().put("customAction", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    // Try to commit the edit
-                    textNParticles.commitEdit();
-                    hasZoneChanged = true;
-                    btnSave.setEnabled(true);
-                } catch (ParseException pe) {
-                    // Commiting didn't work, revert if necessary.
-                    if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {
-                        textNParticles.setValue(textNParticles.getValue());
-                    }
-                }
-            }
-        });
+        //textNParticles.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "customAction");
+        //textNParticles.getActionMap().put("customAction", new AbstractAction() {
+            //    public void actionPerformed(ActionEvent e) {
+                //        try {
+                    //            // Try to commit the edit
+                    //            textNParticles.commitEdit();
+                    //            hasZoneChanged = true;
+                    //            btnSave.setEnabled(true);
+                    //        } catch (ParseException pe) {
+                    //            // Commiting didn't work, revert if necessary.
+                    //            if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {
+                        //                textNParticles.setValue(textNParticles.getValue());
+                        //            }
+                    //        }
+                //    }
+            //});
 
-        pnlOption.setBorder(javax.swing.BorderFactory.createTitledBorder("Options"));
-        pnlOption.setName("pnlOption"); // NOI18N
+    pnlOption.setBorder(javax.swing.BorderFactory.createTitledBorder("Options"));
+    pnlOption.setName("pnlOption"); // NOI18N
 
-        lblLonlat.setText("Sow lon / lat");
-        lblLonlat.setName("lblLonlat"); // NOI18N
+    lblLonlat.setText("Sow lon / lat");
+    lblLonlat.setName("lblLonlat"); // NOI18N
 
-        buttonGroup1.add(rdBtnDecimalDeg);
-        rdBtnDecimalDeg.setSelected(true);
-        rdBtnDecimalDeg.setText(bundle.getString("rdBtnDecimalDeg.text")); // NOI18N
-        rdBtnDecimalDeg.setName("rdBtnDecimalDeg"); // NOI18N
-        rdBtnDecimalDeg.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rdBtnDecimalDegActionPerformed(evt);
-            }
-        });
+    buttonGroup1.add(rdBtnDecimalDeg);
+    rdBtnDecimalDeg.setSelected(true);
+    rdBtnDecimalDeg.setText(bundle.getString("rdBtnDecimalDeg.text")); // NOI18N
+    rdBtnDecimalDeg.setName("rdBtnDecimalDeg"); // NOI18N
+    rdBtnDecimalDeg.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            rdBtnDecimalDegActionPerformed(evt);
+        }
+    });
 
-        buttonGroup1.add(rdBtnDegMinSec);
-        rdBtnDegMinSec.setText(bundle.getString("rdBtnDegMinSec.text")); // NOI18N
-        rdBtnDegMinSec.setName("rdBtnDegMinSec"); // NOI18N
-        rdBtnDegMinSec.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rdBtnDegMinSecActionPerformed(evt);
-            }
-        });
+    buttonGroup1.add(rdBtnDegMinSec);
+    rdBtnDegMinSec.setText(bundle.getString("rdBtnDegMinSec.text")); // NOI18N
+    rdBtnDegMinSec.setName("rdBtnDegMinSec"); // NOI18N
+    rdBtnDegMinSec.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            rdBtnDegMinSecActionPerformed(evt);
+        }
+    });
 
-        buttonGroup1.add(rdBtnDegDecimalMin);
-        rdBtnDegDecimalMin.setText(bundle.getString("rdBtnDegDecimalMin.text")); // NOI18N
-        rdBtnDegDecimalMin.setName("rdBtnDegDecimalMin"); // NOI18N
-        rdBtnDegDecimalMin.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rdBtnDegDecimalMinActionPerformed(evt);
-            }
-        });
+    buttonGroup1.add(rdBtnDegDecimalMin);
+    rdBtnDegDecimalMin.setText(bundle.getString("rdBtnDegDecimalMin.text")); // NOI18N
+    rdBtnDegDecimalMin.setName("rdBtnDegDecimalMin"); // NOI18N
+    rdBtnDegDecimalMin.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            rdBtnDegDecimalMinActionPerformed(evt);
+        }
+    });
 
-        javax.swing.GroupLayout pnlOptionLayout = new javax.swing.GroupLayout(pnlOption);
-        pnlOption.setLayout(pnlOptionLayout);
-        pnlOptionLayout.setHorizontalGroup(
-            pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlOptionLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlOptionLayout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(rdBtnDecimalDeg)
-                        .addGap(12, 12, 12)
-                        .addComponent(rdBtnDegDecimalMin)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(rdBtnDegMinSec))
-                    .addComponent(lblLonlat))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        pnlOptionLayout.setVerticalGroup(
-            pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlOptionLayout.createSequentialGroup()
-                .addComponent(lblLonlat)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+    javax.swing.GroupLayout pnlOptionLayout = new javax.swing.GroupLayout(pnlOption);
+    pnlOption.setLayout(pnlOptionLayout);
+    pnlOptionLayout.setHorizontalGroup(
+        pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(pnlOptionLayout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlOptionLayout.createSequentialGroup()
+                    .addGap(12, 12, 12)
                     .addComponent(rdBtnDecimalDeg)
-                    .addComponent(rdBtnDegMinSec)
-                    .addComponent(rdBtnDegDecimalMin)))
-        );
+                    .addGap(12, 12, 12)
+                    .addComponent(rdBtnDegDecimalMin)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(rdBtnDegMinSec))
+                .addComponent(lblLonlat))
+            .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+    );
+    pnlOptionLayout.setVerticalGroup(
+        pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(pnlOptionLayout.createSequentialGroup()
+            .addComponent(lblLonlat)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(rdBtnDecimalDeg)
+                .addComponent(rdBtnDegMinSec)
+                .addComponent(rdBtnDegDecimalMin)))
+    );
 
-        javax.swing.GroupLayout pnlZoneLayout = new javax.swing.GroupLayout(pnlZone);
-        pnlZone.setLayout(pnlZoneLayout);
-        pnlZoneLayout.setHorizontalGroup(
-            pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlZoneLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ckBoxEnabled)
-                    .addComponent(pnlOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                        .addComponent(pnlPolygon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(pnlThickness, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(pnlBathyMask, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(pnlZoneLayout.createSequentialGroup()
-                                .addComponent(pnlTypeZone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(pnlZoneLayout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addComponent(labelNParticles)
-                                .addGap(18, 18, 18)
-                                .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
-                .addContainerGap())
-        );
-        pnlZoneLayout.setVerticalGroup(
-            pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlZoneLayout.createSequentialGroup()
-                .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                        .addComponent(ckBoxEnabled)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnlPolygon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(pnlZoneLayout.createSequentialGroup()
-                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(pnlTypeZone, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+    javax.swing.GroupLayout pnlZoneLayout = new javax.swing.GroupLayout(pnlZone);
+    pnlZone.setLayout(pnlZoneLayout);
+    pnlZoneLayout.setHorizontalGroup(
+        pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(pnlZoneLayout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(ckBoxEnabled)
+                .addComponent(pnlOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(pnlZoneLayout.createSequentialGroup()
+                    .addComponent(pnlPolygon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(pnlThickness, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pnlBathyMask, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(pnlZoneLayout.createSequentialGroup()
+                            .addComponent(pnlTypeZone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(pnlZoneLayout.createSequentialGroup()
+                            .addGap(12, 12, 12)
                             .addComponent(labelNParticles)
-                            .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(11, 11, 11)
-                        .addComponent(pnlThickness, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnlBathyMask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(1, 1, 1)
-                .addComponent(pnlOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+                            .addGap(18, 18, 18)
+                            .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(0, 0, Short.MAX_VALUE)))))
+            .addContainerGap())
+    );
+    pnlZoneLayout.setVerticalGroup(
+        pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlZoneLayout.createSequentialGroup()
+            .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlZoneLayout.createSequentialGroup()
+                    .addComponent(ckBoxEnabled)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(pnlPolygon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(pnlZoneLayout.createSequentialGroup()
+                    .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(pnlTypeZone, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(labelNParticles)
+                        .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGap(11, 11, 11)
+                    .addComponent(pnlThickness, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(pnlBathyMask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+            .addGap(1, 1, 1)
+            .addComponent(pnlOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addContainerGap())
+    );
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pnlZone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
+    javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+    jPanel4.setLayout(jPanel4Layout);
+    jPanel4Layout.setHorizontalGroup(
+        jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(jPanel4Layout.createSequentialGroup()
+            .addContainerGap()
+            .addComponent(pnlZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+    );
+    jPanel4Layout.setVerticalGroup(
+        jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addComponent(pnlZone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+    );
 
-        jScrollPane3.setViewportView(jPanel4);
+    jScrollPane3.setViewportView(jPanel4);
 
-        jSplitPane1.setRightComponent(jScrollPane3);
+    jSplitPane1.setRightComponent(jScrollPane3);
 
-        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico22/save.png"))); // NOI18N
-        btnSave.setText(bundle.getString("btnSave.text")); // NOI18N
-        btnSave.setEnabled(false);
-        btnSave.setName("btnSave"); // NOI18N
-        btnSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSaveActionPerformed(evt);
-            }
-        });
+    btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico22/save.png"))); // NOI18N
+    btnSave.setText(bundle.getString("btnSave.text")); // NOI18N
+    btnSave.setEnabled(false);
+    btnSave.setName("btnSave"); // NOI18N
+    btnSave.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            btnSaveActionPerformed(evt);
+        }
+    });
 
-        btnSaveAs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico22/save-as.png"))); // NOI18N
-        btnSaveAs.setText(bundle.getString("btnSaveAs.text")); // NOI18N
-        btnSaveAs.setName("btnSaveAs"); // NOI18N
-        btnSaveAs.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSaveAsActionPerformed(evt);
-            }
-        });
+    btnSaveAs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico22/save-as.png"))); // NOI18N
+    btnSaveAs.setText(bundle.getString("btnSaveAs.text")); // NOI18N
+    btnSaveAs.setName("btnSaveAs"); // NOI18N
+    btnSaveAs.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            btnSaveAsActionPerformed(evt);
+        }
+    });
 
-        lblFile.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
-        lblFile.setName("lblFile"); // NOI18N
+    lblFile.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
+    lblFile.setName("lblFile"); // NOI18N
 
-        btnHelp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico22/help.png"))); // NOI18N
-        btnHelp.setText(bundle.getString("btnHelp.text")); // NOI18N
-        btnHelp.setName("btnHelp"); // NOI18N
-        btnHelp.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnHelpActionPerformed(evt);
-            }
-        });
+    btnHelp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico22/help.png"))); // NOI18N
+    btnHelp.setText(bundle.getString("btnHelp.text")); // NOI18N
+    btnHelp.setName("btnHelp"); // NOI18N
+    btnHelp.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            btnHelpActionPerformed(evt);
+        }
+    });
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jSplitPane1)
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnSave)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAs)
-                        .addGap(34, 34, 34)
-                        .addComponent(lblFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnHelp)
-                        .addGap(47, 47, 47))))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 535, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+    this.setLayout(layout);
+    layout.setHorizontalGroup(
+        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(layout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(jSplitPane1)
+                    .addContainerGap())
+                .addGroup(layout.createSequentialGroup()
                     .addComponent(btnSave)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                     .addComponent(btnSaveAs)
-                    .addComponent(lblFile)
-                    .addComponent(btnHelp))
-                .addContainerGap(22, Short.MAX_VALUE))
-        );
+                    .addGap(34, 34, 34)
+                    .addComponent(lblFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGap(18, 18, 18)
+                    .addComponent(btnHelp)
+                    .addGap(47, 47, 47))))
+    );
+    layout.setVerticalGroup(
+        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(layout.createSequentialGroup()
+            .addContainerGap()
+            .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 535, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(btnSave)
+                .addComponent(btnSaveAs)
+                .addComponent(lblFile)
+                .addComponent(btnHelp))
+            .addContainerGap(22, Short.MAX_VALUE))
+    );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNewZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewZoneActionPerformed
@@ -1374,7 +1374,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_ckBoxEnabledActionPerformed
 
     private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_textNParticlesPropertyChange
-
+        hasZoneChanged = true;
+        btnSave.setEnabled(true);
     }// GEN-LAST:event_textNParticlesPropertyChange
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
