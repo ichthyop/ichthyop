@@ -850,10 +850,10 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         cbBoxType.setModel(new DefaultComboBoxModel(TypeZone.values()));
         pnlTypeZone.add(cbBoxType);
 
-        labelNParticles.setText("Number of released particles:");
+        labelNParticles.setText("Proportion of released particles:");
         labelNParticles.setName("labelNParticles"); // NOI18N
 
-        textNParticles.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
+        textNParticles.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getPercentInstance())));
         textNParticles.setName("textNParticles"); // NOI18N
         textNParticles.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
