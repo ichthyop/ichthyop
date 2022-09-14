@@ -119,13 +119,13 @@ public class XZone extends org.jdom2.Element {
      * Adding a getter for the number of particles. If no number has been found,
      * returns a negative value.
      */
-    public int getProportionParticles() { 
+    public double getProportionParticles() { 
         if (null == getChild(PROPORTION_PARTICLES)) {
             return 0;
         }
         try { 
             String strNParticles = this.getChildTextNormalize(PROPORTION_PARTICLES);
-            return Integer.valueOf(strNParticles);
+            return Double.valueOf(strNParticles);
         } catch (Exception e) {
             return 0;
         }
