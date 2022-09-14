@@ -86,12 +86,23 @@ public class ZoneRelease extends AbstractRelease {
      */
     private int[] dispatchUserDefParticles() {
 
+        int nParticleSum = 0; 
         // assign number of particles per zone proportionnaly to zone extents
         int[] nParticlePerZone = new int[nbReleaseZones];
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
             Zone zone = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
-            int nParticules = zone.getNParticles();
-            nParticlePerZone[i_zone] = nParticules;
+            int nParticulesZone = (int) zone.getProportionParticles() * nParticles;
+            nParticlePerZone[i_zone] = nParticulesZone;
+            nParticleSum += nParticlePerZone[i_zone];
+        }
+        
+        // adjust number of particles per zones in case rounding did not match
+        // exactly expected number of particles.
+        int sign = (int) Math.signum(nParticles - nParticleSum);
+        if (sign != 0) {
+            for (int i = 0; i < Math.abs(nParticles - nParticleSum); i++) {
+                nParticlePerZone[i % nbReleaseZones] += sign;
+            }
         }
 
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
@@ -200,20 +211,4 @@ public class ZoneRelease extends AbstractRelease {
         return nParticles;
     }
     
-    private enum ZoneReleaseType {
-
-        AREA("area"), FIXED("fixed");
-
-        private String name;
-
-        ZoneReleaseType(String name) {
-            this.name = name;
-        }
-
-        public String toString() {
-            return this.name.toLowerCase();
-        }
-
-    }
-
 }

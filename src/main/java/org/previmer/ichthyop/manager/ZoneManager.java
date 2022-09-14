@@ -106,7 +106,7 @@ public class ZoneManager extends AbstractManager {
                 zone.setLowerDepth(xzone.getLowerDepth());
                 zone.setUpperDepth(xzone.getUpperDepth());
                 zone.setColor(xzone.getColor());
-                zone.setNParticles(xzone.getNParticles());
+                zone.setProportionParticles(xzone.getProportionParticles());
                 for (XPoint point : xzone.getPolygon()) {
                     zone.addPoint(point.createRhoPoint());
                 }

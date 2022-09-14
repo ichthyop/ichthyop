@@ -131,7 +131,7 @@ public class Zone extends SimulationManagerAccessor {
     /** Number of particles that will be released.
      * Only used if the user specifies the number of cells for each area.
      */
-    private int nParticles;
+    private int proportionParticles;
     
     /**
      * Creates a new zone.
@@ -196,12 +196,12 @@ public class Zone extends SimulationManagerAccessor {
         this.lowerDepth = lowerDepth;
     }
     
-    public void setNParticles(int nParticles) {
-        this.nParticles = nParticles;
+    public void setProportionParticles(int nParticles) {
+        this.proportionParticles = nParticles;
     }
     
-    public int getNParticles() {
-        return this.nParticles;
+    public int getProportionParticles() {
+        return this.proportionParticles;
     }
 
     public float getUpperDepth() {

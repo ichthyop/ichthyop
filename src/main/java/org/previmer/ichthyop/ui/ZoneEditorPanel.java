@@ -259,7 +259,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             rdBtnDecimalDeg.doClick();
         }
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
-        this.textNParticles.setValue(zone.getNParticles());
+        this.textNParticles.setValue(zone.getProportionParticles());
         hasZoneChanged = false;
         addChangeListeners(this, this);
     }
@@ -324,7 +324,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             zone.addPoint(i, tablePolygon.getModel().getValueAt(i, 0).toString(), tablePolygon.getModel().getValueAt(i, 1).toString());
         }
         
-        zone.setNParticles(textNParticles.getValue().toString());
+        zone.setProportionParticles(textNParticles.getValue().toString());
  
     }
 
