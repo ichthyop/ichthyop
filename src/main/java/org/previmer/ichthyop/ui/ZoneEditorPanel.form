@@ -763,14 +763,14 @@
                     </Container>
                     <Component class="javax.swing.JLabel" name="labelNParticles">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Number of released particles:"/>
+                        <Property name="text" type="java.lang.String" value="Proportion of released particles:"/>
                         <Property name="name" type="java.lang.String" value="labelNParticles" noResource="true"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JFormattedTextField" name="textNParticles">
                       <Properties>
                         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
-                          <Format subtype="0" type="0"/>
+                          <Format subtype="0" type="3"/>
                         </Property>
                         <Property name="name" type="java.lang.String" value="textNParticles" noResource="true"/>
                       </Properties>
@@ -778,7 +778,7 @@
                         <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="textNParticlesPropertyChange"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_ListenersCodePost" type="java.lang.String" value="textNParticles.getInputMap().put(KeyStroke.getKeyStroke(&quot;ENTER&quot;), &quot;customAction&quot;);&#xa;textNParticles.getActionMap().put(&quot;customAction&quot;, new AbstractAction() {&#xa;    public void actionPerformed(ActionEvent e) {&#xa;        try {&#xa;            // Try to commit the edit&#xa;            textNParticles.commitEdit();&#xa;        } catch (ParseException pe) {&#xa;            // Commiting didn&apos;t work, revert if necessary.&#xa;            if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {&#xa;                textNParticles.setValue(textNParticles.getValue());&#xa;            }&#xa;        }&#xa;    }&#xa;});"/>
+                        <AuxValue name="JavaCodeGenerator_ListenersCodePost" type="java.lang.String" value="//textNParticles.getInputMap().put(KeyStroke.getKeyStroke(&quot;ENTER&quot;), &quot;customAction&quot;);&#xa;//textNParticles.getActionMap().put(&quot;customAction&quot;, new AbstractAction() {&#xa;//    public void actionPerformed(ActionEvent e) {&#xa;//        try {&#xa;//            // Try to commit the edit&#xa;//            textNParticles.commitEdit();&#xa;//            hasZoneChanged = true;&#xa;//            btnSave.setEnabled(true);&#xa;//        } catch (ParseException pe) {&#xa;//            // Commiting didn&apos;t work, revert if necessary.&#xa;//            if (textNParticles.getFocusLostBehavior() == JFormattedTextField.COMMIT_OR_REVERT) {&#xa;//                textNParticles.setValue(textNParticles.getValue());&#xa;//            }&#xa;//        }&#xa;//    }&#xa;//});"/>
                       </AuxValues>
                     </Component>
                     <Container class="javax.swing.JPanel" name="pnlOption">
