@@ -60,6 +60,8 @@ public class AdvectionAction extends AbstractAction {
     private boolean vertical;
     // Threshold for CFL error message
     public static final float THRESHOLD_CFL = 1.0f;
+    
+    private double horizontal_mult_factor;
 
     @Override
     public void loadParameters() throws Exception {
@@ -74,6 +76,12 @@ public class AdvectionAction extends AbstractAction {
             isEuler = false;
             // print the info in the log
             getLogger().log(Level.INFO, "Failed to read the advection numerical scheme. Set by default to {0}", AdvectionScheme.RUNGE_KUTTA_4.getName());
+        }
+        
+        if (isNull("horizontal_mult_factor")) {
+            horizontal_mult_factor = 1.0;
+        } else {
+            horizontal_mult_factor = Float.valueOf(getParameter("horizontal_mult_factor"));
         }
 
         /* time direction */
@@ -131,11 +139,11 @@ public class AdvectionAction extends AbstractAction {
         double[] dU = new double[dim];
 
         if (horizontal) {   // barrier.n: activates only if horizontal is on
-            dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
+            dU[0] = horizontal_mult_factor * getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
             if (Math.abs(dU[0]) > THRESHOLD_CFL) {
                 getLogger().log(Level.WARNING, "CFL broken for U {0}", (float) dU[0]);
             }
-            dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time) * dt;
+            dU[1] = horizontal_mult_factor * getSimulationManager().getDataset().get_dVy(pGrid, time) * dt;
             if (Math.abs(dU[1]) > THRESHOLD_CFL) {
                 getLogger().log(Level.WARNING, "CFL broken for V {0}", (float) dU[1]);
             }
