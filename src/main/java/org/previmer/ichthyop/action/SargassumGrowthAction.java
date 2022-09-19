@@ -44,7 +44,7 @@
 
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.io.SargassumTracker;
+import org.previmer.ichthyop.io.SargassumDensityTracker;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.SargassumParticleLayer;
 
@@ -64,7 +64,7 @@ public class SargassumGrowthAction extends AbstractAction {
     public void loadParameters() throws Exception {
         
         // Add the sargassum value in the Ichthyop outputs
-        getSimulationManager().getOutputManager().addPredefinedTracker(SargassumTracker.class);
+        getSimulationManager().getOutputManager().addPredefinedTracker(SargassumDensityTracker.class);
         
         temperature_field = getParameter("temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
