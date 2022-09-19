@@ -4,7 +4,11 @@
 Ichthyop processes
 ###############################
 
-In this section, the different Ichthyop processes are described
+In this section, the different Ichthyop processes are described. These processes are implemented in the classes within
+the :samp:`action` folder.
+
+Parameters associated with these processes must be included in :samp:`action` blocks. They can be activated or deactivated by setting the
+``enabled`` tag (cf. :numref:`xml_config`).
 
 .. toctree::
    :maxdepth: 2
@@ -16,3 +20,5 @@ In this section, the different Ichthyop processes are described
    process/migration
    process/ontogenetic_migration
    process/wind
+   process/swim
+   process/wave

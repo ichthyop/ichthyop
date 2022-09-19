@@ -220,5 +220,4 @@ public class ZoneRelease extends AbstractRelease {
     public int getNbParticles() {
         return nParticles;
     }
-    
 }

@@ -539,7 +539,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         try {
             densNcOut.write(densNcOut.findVariable("time"), origin, timeArray);
         } catch (IOException | InvalidRangeException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }      
     }

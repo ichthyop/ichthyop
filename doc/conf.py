@@ -14,6 +14,8 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import os
+import re
 
 # -- Project information -----------------------------------------------------
 
@@ -21,9 +23,19 @@ project = 'Ichthyop'
 copyright = '2020, Nicolas Barrier'
 author = 'Nicolas Barrier'
 
-# The full version, including alpha/beta/rc tags
-version = '3.3.11'
+# Recover the Ichthyop version based 
+pom_file = os.path.join('..', 'pom.xml')
+with open(pom_file, 'r') as fpom:
+    lines = fpom.readlines()
+    regex = re.compile(' *\<version\>(.*)\</version\>')
+    for l in lines:
+        if regex.match(l):
+            version = regex.match(l).groups()[0]
+            break
 
+# include to to references        
+todo_include_todos = True
+todo_emit_warnings = True
 
 # -- General configuration ---------------------------------------------------
 

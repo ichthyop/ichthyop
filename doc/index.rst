@@ -20,6 +20,7 @@ Ichthyop's documentation
    :numbered:
 
    start
+   ichconf
    console
    grid
    release

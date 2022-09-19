@@ -2,5 +2,9 @@
     "java.autobuild.enabled": true,
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.format.settings.url": ".vscode/eclipse-formatter.xml",
-    "esbonio.sphinx.confDir": ""
+    "esbonio.sphinx.confDir": "doc",
+    "esbonio.server.excludedModules": [
+        "os"
+    ],
+    "esbonio.sphinx.buildDir": "doc/_build"
 }

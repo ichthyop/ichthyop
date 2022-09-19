@@ -134,7 +134,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         tableZone.addPropertyChangeListener(pl);
         rdBtnDegMinSec.addPropertyChangeListener(pl);
         rdBtnDecimalDeg.addPropertyChangeListener(pl);
-        rdBtnDegDecimalMin.addPropertyChangeListener(pl);
+        rdBtnDegDecimalMin.addPropertyChangeListener(pl);     
+        textNParticles.addPropertyChangeListener(pl);   
         //
         cbBoxType.addActionListener(al);
         ckBoxThickness.addActionListener(al);
@@ -166,6 +167,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         rdBtnDegMinSec.removePropertyChangeListener(pl);
         rdBtnDecimalDeg.removePropertyChangeListener(pl);
         rdBtnDegDecimalMin.removePropertyChangeListener(pl);
+        textNParticles.removePropertyChangeListener(pl);  
         //
         cbBoxType.removeActionListener(al);
         ckBoxThickness.removeActionListener(al);
@@ -877,67 +879,67 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 //    }
             //});
 
-    pnlOption.setBorder(javax.swing.BorderFactory.createTitledBorder("Options"));
-    pnlOption.setName("pnlOption"); // NOI18N
+        pnlOption.setBorder(javax.swing.BorderFactory.createTitledBorder("Options"));
+        pnlOption.setName("pnlOption"); // NOI18N
 
-    lblLonlat.setText("Sow lon / lat");
-    lblLonlat.setName("lblLonlat"); // NOI18N
+        lblLonlat.setText("Sow lon / lat");
+        lblLonlat.setName("lblLonlat"); // NOI18N
 
-    buttonGroup1.add(rdBtnDecimalDeg);
-    rdBtnDecimalDeg.setSelected(true);
-    rdBtnDecimalDeg.setText(bundle.getString("rdBtnDecimalDeg.text")); // NOI18N
-    rdBtnDecimalDeg.setName("rdBtnDecimalDeg"); // NOI18N
-    rdBtnDecimalDeg.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            rdBtnDecimalDegActionPerformed(evt);
-        }
-    });
+        buttonGroup1.add(rdBtnDecimalDeg);
+        rdBtnDecimalDeg.setSelected(true);
+        rdBtnDecimalDeg.setText(bundle.getString("rdBtnDecimalDeg.text")); // NOI18N
+        rdBtnDecimalDeg.setName("rdBtnDecimalDeg"); // NOI18N
+        rdBtnDecimalDeg.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rdBtnDecimalDegActionPerformed(evt);
+            }
+        });
 
-    buttonGroup1.add(rdBtnDegMinSec);
-    rdBtnDegMinSec.setText(bundle.getString("rdBtnDegMinSec.text")); // NOI18N
-    rdBtnDegMinSec.setName("rdBtnDegMinSec"); // NOI18N
-    rdBtnDegMinSec.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            rdBtnDegMinSecActionPerformed(evt);
-        }
-    });
+        buttonGroup1.add(rdBtnDegMinSec);
+        rdBtnDegMinSec.setText(bundle.getString("rdBtnDegMinSec.text")); // NOI18N
+        rdBtnDegMinSec.setName("rdBtnDegMinSec"); // NOI18N
+        rdBtnDegMinSec.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rdBtnDegMinSecActionPerformed(evt);
+            }
+        });
 
-    buttonGroup1.add(rdBtnDegDecimalMin);
-    rdBtnDegDecimalMin.setText(bundle.getString("rdBtnDegDecimalMin.text")); // NOI18N
-    rdBtnDegDecimalMin.setName("rdBtnDegDecimalMin"); // NOI18N
-    rdBtnDegDecimalMin.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            rdBtnDegDecimalMinActionPerformed(evt);
-        }
-    });
+        buttonGroup1.add(rdBtnDegDecimalMin);
+        rdBtnDegDecimalMin.setText(bundle.getString("rdBtnDegDecimalMin.text")); // NOI18N
+        rdBtnDegDecimalMin.setName("rdBtnDegDecimalMin"); // NOI18N
+        rdBtnDegDecimalMin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rdBtnDegDecimalMinActionPerformed(evt);
+            }
+        });
 
-    javax.swing.GroupLayout pnlOptionLayout = new javax.swing.GroupLayout(pnlOption);
-    pnlOption.setLayout(pnlOptionLayout);
-    pnlOptionLayout.setHorizontalGroup(
-        pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-        .addGroup(pnlOptionLayout.createSequentialGroup()
-            .addContainerGap()
-            .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(pnlOptionLayout.createSequentialGroup()
-                    .addGap(12, 12, 12)
+        javax.swing.GroupLayout pnlOptionLayout = new javax.swing.GroupLayout(pnlOption);
+        pnlOption.setLayout(pnlOptionLayout);
+        pnlOptionLayout.setHorizontalGroup(
+            pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlOptionLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlOptionLayout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(rdBtnDecimalDeg)
+                        .addGap(12, 12, 12)
+                        .addComponent(rdBtnDegDecimalMin)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(rdBtnDegMinSec))
+                    .addComponent(lblLonlat))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlOptionLayout.setVerticalGroup(
+            pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlOptionLayout.createSequentialGroup()
+                .addComponent(lblLonlat)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdBtnDecimalDeg)
-                    .addGap(12, 12, 12)
-                    .addComponent(rdBtnDegDecimalMin)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(rdBtnDegMinSec))
-                .addComponent(lblLonlat))
-            .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-    );
-    pnlOptionLayout.setVerticalGroup(
-        pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-        .addGroup(pnlOptionLayout.createSequentialGroup()
-            .addComponent(lblLonlat)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addGroup(pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(rdBtnDecimalDeg)
-                .addComponent(rdBtnDegMinSec)
-                .addComponent(rdBtnDegDecimalMin)))
-    );
+                    .addComponent(rdBtnDegMinSec)
+                    .addComponent(rdBtnDegDecimalMin)))
+        );
 
     javax.swing.GroupLayout pnlZoneLayout = new javax.swing.GroupLayout(pnlZone);
     pnlZone.setLayout(pnlZoneLayout);
