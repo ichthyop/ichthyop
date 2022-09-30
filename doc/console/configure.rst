@@ -48,3 +48,8 @@ Each block is fully described and commented in the block information area. As we
 .. warning:: 
 
     Do not forget to save the configuration file before going to the next step.
+    
+.. danger::
+    
+    **Parameters cannot be added from within the Ichthyop console. Only paramters that are already defined
+    on the XML file can be edited using the console**
