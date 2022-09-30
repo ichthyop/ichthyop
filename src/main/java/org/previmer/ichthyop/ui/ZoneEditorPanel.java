@@ -261,7 +261,18 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             rdBtnDecimalDeg.doClick();
         }
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
-        this.textNParticles.setValue(zone.getProportionParticles());
+        
+        if(zone.getTypeZone() == TypeZone.RELEASE) { 
+            this.textNParticles.setValue(zone.getProportionParticles());
+            this.textNParticles.setEnabled(true);
+            this.labelNParticles.setEnabled(true);
+        } else {
+            this.textNParticles.setValue(0);
+            this.textNParticles.setEnabled(false);
+            this.labelNParticles.setEnabled(false);
+        }
+            
+        
         hasZoneChanged = false;
         addChangeListeners(this, this);
     }
