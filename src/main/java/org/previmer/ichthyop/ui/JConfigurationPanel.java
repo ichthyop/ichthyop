@@ -168,7 +168,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnAddValue.getAction().setEnabled(false);
         btnRemoveValue.getAction().setEnabled(false);
         ckBoxHiddenParameter.setSelected(false);     
-        getTable().setModel(block, this);
+        getTable().setModel(block, this, ckBoxHiddenParameter.isSelected());
         if (block.getNbHiddenParameters() > 0) {
             ckBoxHiddenParameter.getAction().setEnabled(true);
         } else {
@@ -392,7 +392,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 int index = getTable().getParameterIndex(row);
                 xparam.removeValue(index);
             }
-            getTable().setModel(blockTree.getSelectedBlock(), JConfigurationPanel.this);
+            getTable().setModel(blockTree.getSelectedBlock(), JConfigurationPanel.this, ckBoxHiddenParameter.isSelected());
             return null;
         }
 
