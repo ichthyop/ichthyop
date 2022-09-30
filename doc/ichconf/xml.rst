@@ -115,7 +115,7 @@ In order to test different values for a given parameter, a ``serial`` tag can be
     <parameter type="serial">
     </parameter>
     
-Several values can be provided for ``serial`` parameters as follows:
+Different values are provided by replicating the ``value`` parameter as follows:
 
 .. code:: HTML
     
@@ -127,3 +127,12 @@ Several values can be provided for ``serial`` parameters as follows:
         <format>date</format>
         <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
       </parameter>
+      
+.. danger::
+    
+    **Using the GUI, additionnal values can be provided to serial parameters only when hidden parameters are
+    displayed**
+    
+When simulations are run with serial parameters, all possible combinations of parameters will be run. Output files 
+will contain a ``_sX`` suffix, with ``X`` the simulation number. The parameters used in the simulation are provided as 
+global NetCDF attributes.
