@@ -4,7 +4,7 @@ Prerequisites
 Java
 ############
 
-In order to run Ichthyop, Java **(>= 11)**  needs to be installed. Beforehand, let us clarify some of the acronyms regarding the Java
+In order to run Ichthyop, **Java (>= 11)**  needs to be installed. Beforehand, let us clarify some of the acronyms regarding the Java
 technologies.
 
 :samp:`JVM`: Java Virtual Machine. It is a set of software programs that interprets the Java byte code.
