@@ -10,6 +10,7 @@
 ### Bug fix
 
 - If the `units` attribute is not found in the NetCDF file, then the `time_of_origin` parameter is used. **Must be in the NETCDF standards, i.e `seconds since YYYY-MM-DD HH:MM`**
+- Adding serial parameters with the console did not work properly when hidden parameters were effectively hidden. The button is therefore activated only when hidden parameters are shown. 
 
 ## Changes in 3.3.12
 
