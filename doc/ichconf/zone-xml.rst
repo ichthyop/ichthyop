@@ -22,7 +22,7 @@ Each zone is defined on a ``zone`` tag, which contain the following tags:
 - ``bathy_mask`` specifies the bathymetric zone (for instance 0 to 200m, i.e. continental shelf) where the zone is defined.
 - ``thickness`` specifies the upper and lower depths where this zone is defined (**only valid for 3D runs**).
 - ``color`` specifies the display color of the zone (format is ``[r=102,g=51,b=255]``).
-- ``proportion_particles`` specifies the proportion (values in :math:`[0-1]`) of particles to be released in the area (**only used when ``type`` is ``release``)
+- ``proportion_particles`` specifies the proportion (values in :math:`[0-1]`) of particles to be released in the area. Only used when ``type`` is ``release`` and if the ``user_defined_nparticles`` parameter is set to True (cf. :numref:`zone_release`)
 
 
 An example of a zone definition is provided below.
