@@ -44,6 +44,7 @@
 
 package org.previmer.ichthyop.action;
 
+import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.SargassumDensityTracker;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.SargassumParticleLayer;
@@ -62,15 +63,21 @@ public class SargassumGrowthAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        
-        // Add the sargassum value in the Ichthyop outputs
+//        boolean addTracker = true;
+//        try {
+//            addTracker = Boolean.valueOf(getParameter("density_tracker"));
+//        } catch (Exception ex) {
+//            // do nothing and just add the tracker
+//        }
+//        if (addTracker) {
+//            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumDensityTracker.class);
+//        }
         getSimulationManager().getOutputManager().addPredefinedTracker(SargassumDensityTracker.class);
-        
-        temperature_field = getParameter("temperature_field");
-        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        food_field = getParameter("food_field");
-        getSimulationManager().getDataset().requireVariable(food_field, getClass());
-        
+//        temperature_field = getParameter("temperature_field");
+//        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+//        food_field = getParameter("food_field");
+//        getSimulationManager().getDataset().requireVariable(food_field, getClass());
+//
     }
 
     @Override
@@ -81,6 +88,8 @@ public class SargassumGrowthAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
        // TODO
+        // recuperqtion champ grille U/V double temp = getSimulationManager().getDataset().get(temperature_field, debLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        // recuperation grille vent: cf. WindDriftFileAction
     }
     
 }
