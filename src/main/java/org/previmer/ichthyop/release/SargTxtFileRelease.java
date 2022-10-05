@@ -130,9 +130,9 @@ public class SargTxtFileRelease extends AbstractRelease {
                 }
                 if (null != particle) {
                     //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
-                    double density = coord[2];
+                    double biomass = coord[2];
                     SargassumParticleLayer sargassumLayer = (SargassumParticleLayer) particle.getLayer(SargassumParticleLayer.class);
-                    sargassumLayer.setDensity(density);
+                    sargassumLayer.setBiomass(biomass);
                     getSimulationManager().getSimulation().getPopulation().add(particle);
                     index++;
                     cpt++;

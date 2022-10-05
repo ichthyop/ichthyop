@@ -2,7 +2,7 @@ package org.previmer.ichthyop.particle;
 
 public class SargassumParticleLayer extends ParticleLayer  {
     
-    private double density;
+    private double biomass;
 
     public SargassumParticleLayer(IParticle particle) {
         super(particle);
@@ -15,13 +15,13 @@ public class SargassumParticleLayer extends ParticleLayer  {
     }
     
     /** Sargassum value getter */
-    public double getDensity() {
-        return density;   
+    public double getBiomass() {
+        return biomass;
     }
     
     /** Sargassum Density setter */
-    public void setDensity(double density) {
-        this.density = density;   
+    public void setBiomass(double biomass) {
+        this.biomass = biomass;
     }
     
     
