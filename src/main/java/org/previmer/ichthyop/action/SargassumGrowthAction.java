@@ -45,6 +45,9 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.io.SargassumBiomassTracker;
+import org.previmer.ichthyop.io.SargassumCarbonTracker;
+import org.previmer.ichthyop.io.SargassumNitrogenTracker;
+import org.previmer.ichthyop.io.SargassumPhosphorTracker;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.SargassumParticleLayer;
 
@@ -57,20 +60,87 @@ public class SargassumGrowthAction extends AbstractAction {
     /** Name of the temperature variable to use in the module */
     private String temperature_field;
 
-    /** Name of the food variable to use in the module **/
-    private String food_field;
+    /** The three state variables, Carbon, Nitrogen and Phosphorus content.*/
+    private double C,N,P;
+
+    /** The Nitrogen and Phosphorus quotas corresponding to N/C and P/C.*/
+    private double quotaN,quotaP;
+
+    /** The Nitrogen and Phosphorus quotas maxima and minima.*/
+    private double minQuotaN,minQuotaP,maxQuotaN,maxQuotaP;
+
+    /** The temperature parameters.*/
+    private double minT, maxT, optT;
+
+    /** The uptake rates for C, n, P.*/
+    private double uptakeC, uptakeN, uptakeP;
+
+    /** Half saturation term for nitrogen and phosphorous absorption */
+    private double saturationN, saturationP;
+
+    /** Maximum uptake velocity for nitrogen and phosphorous absorption */
+    private double uptakeVelocityN, uptakeVelocityP;
 
     @Override
     public void loadParameters() throws Exception {
+
+        /** Adding trackers */
         boolean addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("biomass_tracker"));
+            addTracker = Boolean.parseBoolean(getParameter("biomass_tracker"));
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }
         if (addTracker) {
             getSimulationManager().getOutputManager().addPredefinedTracker(SargassumBiomassTracker.class);
         }
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("carbon_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumCarbonTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("nitrogen_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumNitrogenTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("phosphor_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumPhosphorTracker.class);
+        }
+
+        /** Loading parameters */
+
+        minQuotaN = Double.parseDouble(getParameter("minimum_quota_nitrogen"));
+        maxQuotaN = Double.parseDouble(getParameter("maximum_quota_nitrogen"));
+        minQuotaP = Double.parseDouble(getParameter("minimum_quota_phosphor"));
+        maxQuotaP = Double.parseDouble(getParameter("maximum_quota_phosphor"));
+        quotaN = (maxQuotaN - minQuotaN) /2;
+        quotaP = (maxQuotaP - minQuotaP) /2;
+
+        maxT = Double.parseDouble(getParameter("maximum_temperature"));
+        minT = Double.parseDouble(getParameter("minimum_temperature"));
+        optT = Double.parseDouble(getParameter("optimal_temperature"));
+
+        uptakeC = Double.parseDouble(getParameter("uptake_carbon"));
+        uptakeN = Double.parseDouble(getParameter("uptake_nitrogen"));
+        uptakeP = Double.parseDouble(getParameter("uptake_phosphor"));
+        saturationN = Double.parseDouble(getParameter("half_saturation_nitrogen"));
+        saturationP = Double.parseDouble(getParameter("half_saturation_phosphor"));
+
 //        getSimulationManager().getOutputManager().addPredefinedTracker(SargassumDensityTracker.class);
 //        temperature_field = getParameter("temperature_field");
 //        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
@@ -82,6 +152,8 @@ public class SargassumGrowthAction extends AbstractAction {
     @Override
     public void init(IParticle particle) {        
         SargassumParticleLayer sargassumLayer = (SargassumParticleLayer) particle.getLayer(SargassumParticleLayer.class);
+        sargassumLayer.setN(sargassumLayer.getC() * quotaN);
+        sargassumLayer.setP(sargassumLayer.getC() * quotaP);
     }
 
     @Override
@@ -90,5 +162,5 @@ public class SargassumGrowthAction extends AbstractAction {
         // recuperqtion champ grille U/V double temp = getSimulationManager().getDataset().get(temperature_field, debLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         // recuperation grille vent: cf. WindDriftFileAction
     }
-    
+
 }
