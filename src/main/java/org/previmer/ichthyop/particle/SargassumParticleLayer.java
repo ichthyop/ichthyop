@@ -71,6 +71,6 @@ public class SargassumParticleLayer extends ParticleLayer  {
         return P/C;
     }
 
-    public void UpdateBiomass() {this.biomass = C * CARBON_TO_DRY_WEIGHT_RATIO;}
+    public void updateBiomass() {this.biomass = C * CARBON_TO_DRY_WEIGHT_RATIO;}
     
 }
