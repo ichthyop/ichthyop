@@ -44,10 +44,7 @@
 
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.io.SargassumBiomassTracker;
-import org.previmer.ichthyop.io.SargassumCarbonTracker;
-import org.previmer.ichthyop.io.SargassumNitrogenTracker;
-import org.previmer.ichthyop.io.SargassumPhosphorTracker;
+import org.previmer.ichthyop.io.*;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.SargassumParticleLayer;
 
@@ -80,6 +77,13 @@ public class SargassumGrowthAction extends AbstractAction {
 
     /** Mortality parameters. */
     private double mortality, mortality_coefficient;
+
+    /** Irradiance loader */
+    private IrradianceLoader irradianceLoader;
+
+    /** Optimal irradiance */
+    private double IOpt;
+
 
     @Override
     public void loadParameters() throws Exception {
@@ -128,8 +132,8 @@ public class SargassumGrowthAction extends AbstractAction {
         maxQuotaN = Double.parseDouble(getParameter("maximum_quota_nitrogen"));
         minQuotaP = Double.parseDouble(getParameter("minimum_quota_phosphor"));
         maxQuotaP = Double.parseDouble(getParameter("maximum_quota_phosphor"));
-        quotaN = (maxQuotaN - minQuotaN) /2;
-        quotaP = (maxQuotaP - minQuotaP) /2;
+        quotaN = (maxQuotaN + minQuotaN) /2;
+        quotaP = (maxQuotaP + minQuotaP) /2;
 
         Tmax = Double.parseDouble(getParameter("maximum_temperature"));
         Tmin = Double.parseDouble(getParameter("minimum_temperature"));
@@ -153,6 +157,18 @@ public class SargassumGrowthAction extends AbstractAction {
         PO4_field = getParameter("PO4_field");
         getSimulationManager().getDataset().requireVariable(PO4_field, getClass());
 
+        /** Init IrradianceLoader */
+        String irradiance_field = getParameter("irradiance_field");
+        String lat_field = getParameter("lat_field");
+        String lon_field = getParameter("lon_field");
+        String irradiance_path = getParameter("irradiance_path");
+        String time_field = getParameter("time_field");
+        String file_filter = getParameter("file_filter");
+        IOpt = Double.parseDouble(getParameter("optimal_irradiance"));
+
+
+        irradianceLoader = new IrradianceLoader(irradiance_path, irradiance_field, lon_field, lat_field, time_field, getSimulationManager(), file_filter);
+
     }
 
     @Override
@@ -169,8 +185,7 @@ public class SargassumGrowthAction extends AbstractAction {
         /** Limitation due to temperature */
         double T = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double Tref = T <= Topt ? Tmin : Tmax;
-        double temp_limitation = Math.exp(0.5 * Math.pow((T - Topt)/(Tref - T),2));
-
+        double temp_limitation = Math.exp(-0.5 * Math.pow((T - Topt)/(Tref - T),2));
 
         /** Limitation due to nitrogen and phosphor content */
         quotaN = sargassumLayer.getQuotaN();
@@ -178,9 +193,13 @@ public class SargassumGrowthAction extends AbstractAction {
         quotaP = sargassumLayer.getQuotaP();
         double phosphor_limitation = (1 - minQuotaP/quotaP)/(1 - minQuotaP/maxQuotaP);
 
+        /** Limitation due to solar irradiance */
+        double I = irradianceLoader.getIrradiance(particle);
+        double solar_limitation = 1 / (1 + Math.exp(-0.1 * I/IOpt));
+
         /** C uptake and loss */
         double C = sargassumLayer.getC();
-        double uptakeC = C * maxUptakeC * temp_limitation * nitrogen_limitation * phosphor_limitation; // * radiation_limit;
+        double uptakeC = C * maxUptakeC * temp_limitation * nitrogen_limitation * phosphor_limitation * solar_limitation;
         double lossC = C * mortality / Math.exp(-mortality_coefficient * (T - 30));
 
         /** N and P uptakes and losses */
@@ -192,10 +211,10 @@ public class SargassumGrowthAction extends AbstractAction {
         double P_concentration = getSimulationManager().getDataset().get(PO4_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double uptakeP = uptakeVelocityP * C * P_concentration / (saturationP + P_concentration) * (maxQuotaP - quotaP) / (maxQuotaP - minQuotaP);
         double lossP = lossC * quotaP;
-
-        sargassumLayer.setC(C + uptakeC - lossC);
-        sargassumLayer.setN(sargassumLayer.getN() + uptakeN - lossN);
-        sargassumLayer.setP(sargassumLayer.getP() + uptakeP - lossP);
+        double dt = (double)getSimulationManager().getTimeManager().get_dt()/ (24 * 3600);
+        sargassumLayer.setC(C + (uptakeC - lossC) * dt);
+        sargassumLayer.setN(sargassumLayer.getN() + (uptakeN - lossN) * dt);
+        sargassumLayer.setP(sargassumLayer.getP() + (uptakeP - lossP) * dt);
         sargassumLayer.updateBiomass();
         // recuperation grille vent: cf. WindDriftFileAction
     }
