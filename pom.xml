@@ -263,7 +263,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
-            <version>5.4.1</version>
+            <version>5.5.2</version>
         </dependency>
         <dependency>
             <groupId>ml.options</groupId>
@@ -283,7 +283,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.1</version>
+            <version>5.7.0</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.timingframework</groupId>
@@ -304,13 +304,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.2</version>
+            <version>5.9.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.2</version>
+            <version>5.9.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
