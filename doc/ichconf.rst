@@ -6,3 +6,4 @@ Ichthyop configuration
    :caption: Contents:
 
    ichconf/xml.rst
+   ichconf/zone-xml.rst

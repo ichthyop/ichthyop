@@ -104,12 +104,16 @@ public class ParameterTable extends JMultiCellEditorsTable {
         return model.getUndoManager();
     }
 
-    public void setModel(XBlock block, TableModelListener l) {
+    public void setModel(XBlock block, TableModelListener l, boolean setVisible) {
         getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(block));
         setEditors(block);
-        setAllRowsVisible(false);
+        setAllRowsVisible(setVisible);
         getModel().addTableModelListener(l);
+    }
+    
+    public void setModel(XBlock block, TableModelListener l) {
+        setModel(block, l, false);
     }
 
     private void setEditors(XBlock block) {

@@ -167,8 +167,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRedo.getAction().setEnabled(false);
         btnAddValue.getAction().setEnabled(false);
         btnRemoveValue.getAction().setEnabled(false);
-        ckBoxHiddenParameter.setSelected(false);
-        getTable().setModel(block, this);
+        ckBoxHiddenParameter.setSelected(false);     
+        getTable().setModel(block, this, ckBoxHiddenParameter.isSelected());
         if (block.getNbHiddenParameters() > 0) {
             ckBoxHiddenParameter.getAction().setEnabled(true);
         } else {
@@ -316,8 +316,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 }
                 info.append("</i></html>");
                 lblParameter.setText(info.toString());
-                btnAddValue.getAction().setEnabled(xparam.isSerial());
-                btnRemoveValue.getAction().setEnabled(xparam.isSerial() && (xparam.getLength() > 1));
+                btnAddValue.getAction().setEnabled(this.ckBoxHiddenParameter.isSelected() && xparam.isSerial());
+                btnRemoveValue.getAction().setEnabled(this.ckBoxHiddenParameter.isSelected() && xparam.isSerial() && (xparam.getLength() > 1));
             } catch (Exception ex) {
                 pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParameterInfo.border.title")));
                 lblParameter.setText(getResourceMap().getString("noDescription.text"));
@@ -392,7 +392,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 int index = getTable().getParameterIndex(row);
                 xparam.removeValue(index);
             }
-            getTable().setModel(blockTree.getSelectedBlock(), JConfigurationPanel.this);
+            getTable().setModel(blockTree.getSelectedBlock(), JConfigurationPanel.this, ckBoxHiddenParameter.isSelected());
             return null;
         }
 

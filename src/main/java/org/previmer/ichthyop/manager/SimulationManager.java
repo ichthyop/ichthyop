@@ -72,6 +72,9 @@ import org.previmer.ichthyop.util.IchthyopLogFormatter;
  * @author pverley
  */
 public class SimulationManager {
+    
+    /** True if the preview must be reset or not */
+    private boolean resetPreview;
 
     final private static SimulationManager simulationManager = new SimulationManager();
     /**
@@ -121,6 +124,16 @@ public class SimulationManager {
      * Whether the simulation has been setup or not 
      */
     private boolean isSetup;
+    
+    /** Specifies whether the preview should be redrawn or not */
+    public void setResetPreview(boolean resetPreview) { 
+        this.resetPreview = resetPreview;   
+    }
+    
+    /** Get whether the preview should be redrawn or not */
+    public boolean getResetPreview() { 
+       return this.resetPreview;   
+    }
 
     /**
      *

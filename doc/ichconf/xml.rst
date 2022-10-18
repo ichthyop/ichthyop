@@ -1,9 +1,9 @@
 .. _xml_config:
 
-XML configuration files
-##############################
+Simulation configuration file
+####################################
 
-Ichthyop is configured using `XML <https://en.wikipedia.org/wiki/XML>`_ configuration files. It should always start as follows:
+Ichthyop simulations are configured using `XML <https://en.wikipedia.org/wiki/XML>`_ configuration files. It should always start as follows:
 
 .. code:: XML
     
@@ -104,3 +104,35 @@ If a parameter should appear as hidden in the Ichthyop console, it can be specif
 
     <parameter hidden="true">
     </parameter>
+    
+Serial parameters
++++++++++++++++++++++++++++++++++++++++++++++
+
+In order to test different values for a given parameter, a ``serial`` tag can be added as follows:
+
+.. code:: HTML
+    
+    <parameter type="serial">
+    </parameter>
+    
+Different values are provided by replicating the ``value`` parameter as follows:
+
+.. code:: HTML
+    
+      <parameter type="serial">
+        <key>initial_time</key>
+        <long_name>Beginning of simulation</long_name>
+        <value>year 2001 month 10 day 20 at 00:00</value>
+        <value>year 2001 month 10 day 21 at 00:00</value>
+        <format>date</format>
+        <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
+      </parameter>
+      
+.. danger::
+    
+    **Using the GUI, additionnal values can be provided to serial parameters only when hidden parameters are
+    displayed**
+    
+When simulations are run with serial parameters, all possible combinations of parameters will be run. Output files 
+will contain a ``_sX`` suffix, with ``X`` the simulation number. The parameters used in the simulation are provided as 
+global NetCDF attributes.

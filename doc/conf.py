@@ -56,7 +56,16 @@ extensions = [
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
+    'sphinxcontrib.plantuml',
+    'sphinxcontrib.mermaid',
 ]
+
+plantuml = 'plantuml'
+plantuml_output_format = 'svg_img'
+plantuml_latex_output_format = 'pdf'
+
+mermaid_pdfcrop = 'pdfcrop'
+#mermaid_output_format = 'png'
 
 with open('alias.rst', 'r') as pr:
         rst_prolog = pr.read()

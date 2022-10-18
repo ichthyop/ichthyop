@@ -588,7 +588,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected Object doInBackground() throws Exception {
-            if (!initDone) {
+            if (getSimulationManager().getResetPreview()) {
                 setMessage(resourceMap.getString("simulationRun.msg.init.start"));
                 getSimulationManager().setup();
                 setupSucceeded = true;
@@ -600,7 +600,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void onSuccess(Object obj) {
-            initDone = true;
+            getSimulationManager().setResetPreview(false);
             setMessage(resourceMap.getString("simulationRun.msg.init.ok"), false, LogLevel.COMPLETE);
             showSimulationPreview();
         }
@@ -614,7 +614,7 @@ public class IchthyopView extends FrameView
             setMessage(msg.toString(), false, Level.SEVERE);
             setupSucceeded = initSucceeded = false;
             btnPreview.setSelected(false);
-            initDone = false;
+            getSimulationManager().setResetPreview(true);
         }
     }
 
@@ -696,7 +696,7 @@ public class IchthyopView extends FrameView
         @Override
         protected void onSuccess(Object o) {
             btnSaveCfgFile.getAction().setEnabled(false);
-            initDone = false;
+            getSimulationManager().setResetPreview(true);
             setMessage(resourceMap.getString("saveConfigurationFile.msg.finished") + " " + getSimulationManager().getConfigurationFile().getName(), false, LogLevel.COMPLETE);
         }
 
@@ -889,7 +889,7 @@ public class IchthyopView extends FrameView
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
-        initDone = false;
+        getSimulationManager().setResetPreview(true);
         saveAsMenuItem.getAction().setEnabled(true);
         closeMenuItem.getAction().setEnabled(true);
         btnSimulationRun.getAction().setEnabled(true);
@@ -1037,7 +1037,7 @@ public class IchthyopView extends FrameView
     @Action
     public void previewSimulation() {
         if (btnPreview.isSelected()) {
-            if (!initDone) {
+            if (getSimulationManager().getResetPreview()) {
                 getApplication().getContext().getTaskService().execute(new SimulationPreviewTask(getApplication(), btnPreview.isSelected()));
             } else {
                 showSimulationPreview();
@@ -2851,7 +2851,6 @@ public class IchthyopView extends FrameView
     private Task<?, ?> simulActionTask;
     private Task<?, ?> createMapTask;
     private Task<?, ?> kmzTask;
-    private boolean initDone;
     private final ReplayPanel replayPanel = new ReplayPanel();
     private final float TEN_MINUTES = 10.f * 60.f;
     private final Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);
