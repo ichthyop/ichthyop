@@ -7,3 +7,4 @@ Ichthyop configuration
 
    ichconf/xml.rst
    ichconf/zone-xml.rst
+   ichconf/time.rst

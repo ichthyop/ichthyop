@@ -50,9 +50,9 @@ fig = plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
 plt.ylim(0, ymax)
-ax.set_xticks(np.arange(0, xmax + 1), major=True)
-ax.set_yticks(np.arange(0, ymax + 1), major=True)
-plt.grid(True, which='major', linewidth=1)
+ax.set_xticks(np.arange(0, xmax + 1), minor=True)
+ax.set_yticks(np.arange(0, ymax + 1), minor=True)
+plt.grid(True, which='minor', linewidth=1)
 lt = [plt.plot([x + 0.5] , [y + 0.5], marker='o', color='r') for x in range(xmax) for y in range(ymax)]
 lu = [plt.plot([x + 1] , [y + 0.5], marker='o', color='b') for x in range(xmax) for y in range(ymax)]
 lv = [plt.plot([x + 0.5] , [y + 1], marker='o', color='g') for x in range(xmax) for y in range(ymax)]
@@ -79,9 +79,9 @@ fig = plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
 plt.ylim(0, ymax)
-ax.set_xticks(np.arange(0, xmax + 1), major=True)
-ax.set_yticks(np.arange(0, ymax + 1), major=True)
-plt.grid(True, which='major', linewidth=1)
+ax.set_xticks(np.arange(0, xmax + 1), minor=True)
+ax.set_yticks(np.arange(0, ymax + 1), minor=True)
+plt.grid(True, which='minor', linewidth=1)
 
 color = 'firebrick'
 x0 = 0
@@ -621,5 +621,3 @@ plot_point(0.2, 5.3, 'blue')
 plt.savefig(os.path.join(outdir, 'vertical_landsea_mask_nemo.svg'), bbox_inches='tight')
 plt.savefig(os.path.join(outdir, 'vertical_landsea_mask_nemo.pdf'), bbox_inches='tight')
 # -
-
-
