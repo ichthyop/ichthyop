@@ -23,10 +23,10 @@ The parameters that are associated with the release processes must be included w
    :maxdepth: 1
    :caption: Contents:
 
-    release/stain.rst
-    release/zone.rst
-    release/text.rst
-    release/patchy.rst
-    release/bottom_surface
-    release/netcdf.rst
-    release/schedule.rst
+   release/stain.rst
+   release/zone.rst
+   release/text.rst
+   release/patchy.rst
+   release/bottom_surface
+   release/netcdf.rst
+   release/schedule.rst
