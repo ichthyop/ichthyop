@@ -7,7 +7,7 @@ Beginning of the simulation
 ++++++++++++++++++++++++++++++++++++
 
 In Ichthyop, the user provides the time at which the simulation should start. This ``initial_time`` parameter, which must be 
-defined in an ``option`` block, must be formatted as ``year YYYY month MM day DD at HH:MM``, with ``YYYY`` the year, ``MM`` the
+defined in the ``app.time`` option block, must be formatted as ``year YYYY month MM day DD at HH:MM``, with ``YYYY`` the year, ``MM`` the
 month, ``DD`` the day, ``HH`` the hour and ``MM`` the minutes where the simulation should start.
 
 Reading NetCDF times
@@ -20,13 +20,13 @@ and therefore be provided as follows:
 .. code:: bash
     
     UNITS since YYYY-MM-DD HH:MM:SS
-    
+
 with ``UNITS`` the units in which the time is stored (usually ``seconds``, ``days`` or ``hours``), ``YYYY`` the year, ``MM`` the month, ``DD`` the day, ``HH`` the hour, ``MM`` the minutes  and ``SS`` the seconds of the reference date.
 
 If a NetCDF ``time::units`` attribute is defined, Ichthyop will try to infer the NetCDF reference date and time units using this convention.
 
 If it fails (i.e. the ``time::units`` attribute does not follow the convention) or if no ``time::units`` attribute is found, 
-Ichthyop will read the ``time_origin`` parameter, which must be defined following the CF conventions.
+Ichthyop will read the ``time_origin`` parameter from the ``app.time`` option block, which must be defined following the CF conventions.
 
 .. danger::
     
