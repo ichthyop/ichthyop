@@ -25,6 +25,7 @@ Ichthyop's documentation
    grid
    release
    process
+   developer
    faq
    genindex
    biblio
