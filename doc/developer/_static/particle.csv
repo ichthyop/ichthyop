@@ -2,6 +2,16 @@ Variable ;  Description ; Type ; Units
 x;Particle x position within the grid; float, :math:`\in [0, N_{x} - 1]`;
 y;Particle y position within the grid; float, :math:`\in [0, N_{y} - 1]`;
 z;Particle z position within the grid; float, :math:`\in [0, N_{z} - 1]`;
+dx;Particle increment/decrement of x position; float;
+dy;Particle increment/decrement of y position; float;
+dz;Particle increment/decrement of z position; float;
 lat;Particle longitude; float;Degrees East
 lon;Particle latitude;float; Degrees North
 depth;Particle depth; float, < 0; m
+
+index;Particle index;int, :math:`\in [0, N_{part} - 1]` ;
+age;Particle age;int;seconds;
+deathCause;Mortality status;``ParticleMortality``;
+living;True if a particle is alive;bool;
+locked;True if a particle is locked;bool;
+layers;List of additional particle layers;``List<ParticleLayer>``;

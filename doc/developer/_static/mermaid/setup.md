@@ -1,4 +1,3 @@
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '13px'}}}%%
 graph TD;
 
     id0("Dataset Manager") 
@@ -9,7 +8,5 @@ graph TD;
     id5("Output Manager");
     
     classDef className fill:lightblue,stroke:black,stroke-width:3px,color:black
-    
-    class id0,id1,id2,id3,id4,id5 className;
-    
+        
     id0 --> id1 --> id2 --> id3 --> id4 --> id5
