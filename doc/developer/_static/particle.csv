@@ -1,0 +1,7 @@
+Variable ;  Description ; Type ; Units
+x;Particle x position within the grid; float, :math:`\in [0, N_{x} - 1]`;
+y;Particle y position within the grid; float, :math:`\in [0, N_{y} - 1]`;
+z;Particle z position within the grid; float, :math:`\in [0, N_{z} - 1]`;
+lat;Particle longitude; float;Degrees East
+lon;Particle latitude;float; Degrees North
+depth;Particle depth; float, < 0; m
