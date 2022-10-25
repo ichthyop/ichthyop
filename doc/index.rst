@@ -22,7 +22,6 @@ Ichthyop's documentation
    start
    ichconf
    console
-   grid
    release
    process
    developer
