@@ -9,4 +9,8 @@ graph TD;
     
     classDef className fill:lightblue,stroke:black,stroke-width:3px,color:black
         
-    id0 --> id1 --> id2 --> id3 --> id4 --> id5
+    id0 --> id1 
+    id1 --> id2 
+    id2 --> id3
+    id3 --> id4 
+    id4 --> id5
