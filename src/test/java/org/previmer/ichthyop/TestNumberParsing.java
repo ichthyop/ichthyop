@@ -45,6 +45,7 @@ package org.previmer.ichthyop;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
@@ -62,9 +63,9 @@ public class TestNumberParsing {
 
     }
 
-     /** Test when units are in seconds */
+    /** Test when units are in seconds */
     @Test
-    public void testParse2()  {
+    public void testParse2() {
 
         String number = "9.02400016784668";
         Double expected = 9.02400016784668;
@@ -72,5 +73,39 @@ public class TestNumberParsing {
         assertEquals(expected, actual);
 
     }
+
+    /** Test when units are in seconds */
+    @Test
+    public void testParse3() {
+
+        NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
+        String number = "9.02400016784668";
+        Double expected = 9.02400016784668;
+        Double actual = 0.0;
+        try {
+            actual = nbFormat.parse(number.trim()).doubleValue();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        assertEquals(expected, actual);
+
+    }
     
+    /** Test when units are in seconds */
+    @Test
+    public void testParse4() {
+
+        NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
+        String number = "9.02400016784668E-05";
+        Double expected = 9.02400016784668e-05;
+        Double actual = 0.0;
+        try {
+            actual = nbFormat.parse(number.trim()).doubleValue();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        assertEquals(expected, actual);
+
+    }
+
 }
