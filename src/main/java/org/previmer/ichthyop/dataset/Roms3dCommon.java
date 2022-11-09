@@ -95,6 +95,9 @@ abstract public class Roms3dCommon extends RomsCommon {
      * Vertical component of the velocity field at time t + dt
      */
     float[][][] w_tp1;
+    
+    float[][][] kz_tp0, kz_tp1;
+    
     /**
      * Depth at rho point
      */
@@ -129,6 +132,8 @@ abstract public class Roms3dCommon extends RomsCommon {
      * True if W should be read, false if should be computed.
      */
     private boolean readW;
+    
+    private String kv_field;
 
     /**
      * Name of the W variable is read.
@@ -340,7 +345,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         z_w_cst = z_w_tmp;
 
         z_w_tp0 = new double[nz + 1][ny][nx];
-        z_w_tp1 = new double[nz + 1][ny][nx];
+        z_w_tp1 = new double[nz + 1][ny][nx];  
     }
 
     @Override
@@ -366,6 +371,10 @@ abstract public class Roms3dCommon extends RomsCommon {
             }
         }
         zeta_tp1 = zeta_tp0;
+        
+        kv_field = getParameter("kv_field");
+        this.requireVariable(kv_field, getClass());
+        
     }
 
     @Override
@@ -652,6 +661,8 @@ abstract public class Roms3dCommon extends RomsCommon {
         } else {
             w_tp1 = computeW();
         }
+        
+        kz_tp1 = (float[][][]) requiredVariables.get(this.kv_field).getArray1().copyToNDJavaArray();
 
     }
 
