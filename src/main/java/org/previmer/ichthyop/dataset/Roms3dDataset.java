@@ -86,6 +86,7 @@ public class Roms3dDataset extends Roms3dCommon {
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
         zeta_tp0 = zeta_tp1;
+        kz_tp0 = kz_tp1; 
         if (z_w_tp1 != null) {
             z_w_tp0 = z_w_tp1;
         }
@@ -297,5 +298,25 @@ public class Roms3dDataset extends Roms3dCommon {
         System.exit(0);
 
     }  // end of method
+    
+    @Override
+    public double[][][] get_kz(double time) {
+        // IDataset dataset = getSimulationManager().getDataset();
+
+        double coef = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double[][][] output = new double[nz][ny][nx];
+
+        // Interpolation to get kz
+        for (int k = 0; k < nz; k++) {
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    output[k][j][i] = (1.d - coef) * kz_tp0[k][j][i] + coef * kz_tp1[k][j][i];
+                }
+            }
+        }
+        
+        return output;
+
+    }
 
 }
