@@ -187,6 +187,6 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     }
     
     public double[][][] get_kz(double time){
-        return new double[1][1][1]; 
+        return null;
     }
 }
