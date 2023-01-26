@@ -108,8 +108,8 @@ public class SargTxtFileRelease extends AbstractRelease {
                 coord = new double[strCoord.length];
                 for (int i = 0; i < strCoord.length; i++) {
                     try {
-                        coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
-                    } catch (ParseException ex) {
+                        coord[i] = Double.parseDouble(strCoord[i].trim());
+                    } catch (NumberFormatException ex) {
                         bfIn.close();
                         IOException ioex = new IOException("{Drifter release} Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
                         ioex.setStackTrace(ex.getStackTrace());
