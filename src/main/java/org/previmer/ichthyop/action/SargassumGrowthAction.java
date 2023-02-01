@@ -126,6 +126,54 @@ public class SargassumGrowthAction extends AbstractAction {
             getSimulationManager().getOutputManager().addPredefinedTracker(SargassumPhosphorTracker.class);
         }
 
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("environmental_phosphor_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalPhosphorTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("environmental_temperature_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalTemperatureTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("environmental_irradiance_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalIrradianceTracker.class);
+        }
+
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("environmental_NO3_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalNO3Tracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("environmental_NH4_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalNH4Tracker.class);
+        }
+
+
         /** Loading parameters */
 
         minQuotaN = Double.parseDouble(getParameter("minimum_quota_nitrogen"));
