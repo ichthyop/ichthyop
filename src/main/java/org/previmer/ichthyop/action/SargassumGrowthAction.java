@@ -156,22 +156,14 @@ public class SargassumGrowthAction extends AbstractAction {
 
         addTracker = true;
         try {
-            addTracker = Boolean.parseBoolean(getParameter("environmental_NO3_tracker"));
+            addTracker = Boolean.parseBoolean(getParameter("environmental_nitrogen_tracker"));
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }
         if (addTracker) {
-            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalNO3Tracker.class);
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalNitrogenTracker.class);
         }
-        addTracker = true;
-        try {
-            addTracker = Boolean.parseBoolean(getParameter("environmental_NH4_tracker"));
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
-        if (addTracker) {
-            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalNH4Tracker.class);
-        }
+
 
 
         /** Loading parameters */
@@ -234,6 +226,7 @@ public class SargassumGrowthAction extends AbstractAction {
         double T = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double Tref = T <= Topt ? Tmin : Tmax;
         double temp_limitation = Math.exp(-0.5 * Math.pow((T - Topt)/(Tref - T),2));
+        sargassumLayer.setT_env(T);
 
         /** Limitation due to nitrogen and phosphor content */
         quotaN = sargassumLayer.getQuotaN();
@@ -244,6 +237,7 @@ public class SargassumGrowthAction extends AbstractAction {
         /** Limitation due to solar irradiance */
         double I = irradianceLoader.getIrradiance(particle);
         double solar_limitation = 1 / (1 + Math.exp(-0.1 * I/IOpt));
+        sargassumLayer.setI_env(I);
 
         /** C uptake and loss */
         double C = sargassumLayer.getC();
@@ -253,10 +247,12 @@ public class SargassumGrowthAction extends AbstractAction {
         /** N and P uptakes and losses */
         double N_concentration = getSimulationManager().getDataset().get(NH4_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         N_concentration += getSimulationManager().getDataset().get(NO3_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setN_env(N_concentration);
         double uptakeN = uptakeVelocityN * C * N_concentration / (saturationN + N_concentration) * (maxQuotaN - quotaN) / (maxQuotaN - minQuotaN);
         double lossN = lossC * quotaN;
 
         double P_concentration = getSimulationManager().getDataset().get(PO4_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setP_env(P_concentration);
         double uptakeP = uptakeVelocityP * C * P_concentration / (saturationP + P_concentration) * (maxQuotaP - quotaP) / (maxQuotaP - minQuotaP);
         double lossP = lossC * quotaP;
         double dt = (double)getSimulationManager().getTimeManager().get_dt()/ (24 * 3600);

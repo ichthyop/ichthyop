@@ -3,12 +3,12 @@ package org.previmer.ichthyop.io;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.SargassumParticleLayer;
 
-public class SargassumEnvironmentalNH4Tracker extends FloatTracker {
+public class SargassumEnvironmentalNitrogenTracker extends FloatTracker {
 
     @Override
     float getValue(IParticle particle) {
         SargassumParticleLayer gParticle = (SargassumParticleLayer) particle.getLayer(SargassumParticleLayer.class);
-        return (float) gParticle.getNH4_env();
+        return (float) gParticle.getN_env();
     }
     
 }
