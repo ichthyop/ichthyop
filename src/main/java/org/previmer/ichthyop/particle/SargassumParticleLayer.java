@@ -88,7 +88,6 @@ public class SargassumParticleLayer extends ParticleLayer  {
     }
 
 
-
     /** Environmental temperature value getter */
     public double getT_env() {
         return T_env;

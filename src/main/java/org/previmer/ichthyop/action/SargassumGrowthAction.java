@@ -256,10 +256,10 @@ public class SargassumGrowthAction extends AbstractAction {
         double uptakeP = uptakeVelocityP * C * P_concentration / (saturationP + P_concentration) * (maxQuotaP - quotaP) / (maxQuotaP - minQuotaP);
         double lossP = lossC * quotaP;
         double dt = (double)getSimulationManager().getTimeManager().get_dt()/ (24 * 3600);
-        sargassumLayer.setC(C + (uptakeC - lossC) * dt);
-        sargassumLayer.setN(sargassumLayer.getN() + (uptakeN - lossN) * dt);
-        sargassumLayer.setP(sargassumLayer.getP() + (uptakeP - lossP) * dt);
-        sargassumLayer.updateBiomass();
+//        sargassumLayer.setC(C + (uptakeC - lossC) * dt);
+//        sargassumLayer.setN(sargassumLayer.getN() + (uptakeN - lossN) * dt);
+//        sargassumLayer.setP(sargassumLayer.getP() + (uptakeP - lossP) * dt);
+//        sargassumLayer.updateBiomass();
         // recuperation grille vent: cf. WindDriftFileAction
     }
 
