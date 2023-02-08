@@ -55,7 +55,7 @@ import org.previmer.ichthyop.particle.SargassumParticleLayer;
 public class SargassumGrowthAction extends AbstractAction {
 
     /** Name of the nc variables to use in the module. */
-    private String temperature_field, NO3_field, NH4_field, PO4_field;
+    private String temperature_field, NO3_field, NH4_field, PO4_field, I_field, S_field, V_field, U_field;
 
     /** The Nitrogen and Phosphorus quotas corresponding to N/C and P/C.*/
     private double quotaN,quotaP;
@@ -78,8 +78,8 @@ public class SargassumGrowthAction extends AbstractAction {
     /** Mortality parameters. */
     private double mortality, mortality_coefficient;
 
-    /** Irradiance loader */
-    private IrradianceLoader irradianceLoader;
+//    /** Irradiance loader */
+//    private IrradianceLoader irradianceLoader;
 
     /** Optimal irradiance */
     private double IOpt;
@@ -163,6 +163,24 @@ public class SargassumGrowthAction extends AbstractAction {
         if (addTracker) {
             getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalNitrogenTracker.class);
         }
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("environmental_salinity_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalSalinityTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.parseBoolean(getParameter("environmental_wind_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SargassumEnvironmentalWindTracker.class);
+        }
 
 
 
@@ -196,18 +214,26 @@ public class SargassumGrowthAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(NH4_field, getClass());
         PO4_field = getParameter("PO4_field");
         getSimulationManager().getDataset().requireVariable(PO4_field, getClass());
+        I_field = getParameter("irradiance_field");
+        getSimulationManager().getDataset().requireVariable(I_field, getClass());
+        S_field = getParameter("S_field");
+        getSimulationManager().getDataset().requireVariable(S_field, getClass());
+        U_field = getParameter("U_field");
+        getSimulationManager().getDataset().requireVariable(U_field, getClass());
+        V_field = getParameter("V_field");
+        getSimulationManager().getDataset().requireVariable(V_field, getClass());
 
         /** Init IrradianceLoader */
-        String irradiance_field = getParameter("irradiance_field");
-        String lat_field = getParameter("lat_field");
-        String lon_field = getParameter("lon_field");
-        String irradiance_path = getParameter("irradiance_path");
-        String time_field = getParameter("time_field");
-        String file_filter = getParameter("file_filter");
+//        String irradiance_field = getParameter("irradiance_field");
+//        String lat_field = getParameter("lat_field");
+//        String lon_field = getParameter("lon_field");
+//        String irradiance_path = getParameter("irradiance_path");
+//        String time_field = getParameter("time_field");
+//        String file_filter = getParameter("file_filter");
         IOpt = Double.parseDouble(getParameter("optimal_irradiance"));
 
 //
-        irradianceLoader = new IrradianceLoader(irradiance_path, irradiance_field, lon_field, lat_field, time_field, getSimulationManager(), file_filter);
+//        irradianceLoader = new IrradianceLoader(irradiance_path, irradiance_field, lon_field, lat_field, time_field, getSimulationManager(), file_filter);
 
     }
 
@@ -235,7 +261,8 @@ public class SargassumGrowthAction extends AbstractAction {
         double phosphor_limitation = (1 - minQuotaP/quotaP)/(1 - minQuotaP/maxQuotaP);
 
         /** Limitation due to solar irradiance */
-        double I = irradianceLoader.getIrradiance(particle);
+//        double I = irradianceLoader.getIrradiance(particle);
+        double I = getSimulationManager().getDataset().get(I_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double solar_limitation = 1 / (1 + Math.exp(-0.1 * I/IOpt));
         sargassumLayer.setI_env(I);
 
@@ -256,11 +283,17 @@ public class SargassumGrowthAction extends AbstractAction {
         double uptakeP = uptakeVelocityP * C * P_concentration / (saturationP + P_concentration) * (maxQuotaP - quotaP) / (maxQuotaP - minQuotaP);
         double lossP = lossC * quotaP;
         double dt = (double)getSimulationManager().getTimeManager().get_dt()/ (24 * 3600);
-//        sargassumLayer.setC(C + (uptakeC - lossC) * dt);
-//        sargassumLayer.setN(sargassumLayer.getN() + (uptakeN - lossN) * dt);
-//        sargassumLayer.setP(sargassumLayer.getP() + (uptakeP - lossP) * dt);
-//        sargassumLayer.updateBiomass();
-        // recuperation grille vent: cf. WindDriftFileAction
+        sargassumLayer.setC(C + (uptakeC - lossC) * dt);
+        sargassumLayer.setN(sargassumLayer.getN() + (uptakeN - lossN) * dt);
+        sargassumLayer.setP(sargassumLayer.getP() + (uptakeP - lossP) * dt);
+        sargassumLayer.updateBiomass();
+
+        double S = getSimulationManager().getDataset().get(S_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setS_env(S);
+        double V = getSimulationManager().getDataset().get(V_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double U = getSimulationManager().getDataset().get(U_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setW_env(Math.sqrt(U * U + V * V));
+//         recuperation grille vent: cf. WindDriftFileAction
     }
 
 }

@@ -4,7 +4,7 @@ public class SargassumParticleLayer extends ParticleLayer  {
     
     private double biomass;
     private double C, N, P;
-    private double N_env, P_env, T_env, I_env;
+    private double N_env, P_env, T_env, I_env, S_env, W_env;
     public static final double CARBON_TO_DRY_WEIGHT_RATIO = 0.27;
 
     public SargassumParticleLayer(IParticle particle) {
@@ -93,7 +93,7 @@ public class SargassumParticleLayer extends ParticleLayer  {
         return T_env;
     }
 
-    /** Environmental temperature Density setter */
+    /** Environmental temperature setter */
     public void setT_env(double T) {
         this.T_env = T;
     }
@@ -103,9 +103,29 @@ public class SargassumParticleLayer extends ParticleLayer  {
         return I_env;
     }
 
-    /** Environmental irradiance Density setter */
+    /** Environmental irradiance setter */
     public void setI_env(double I) {
         this.I_env = I;
+    }
+
+    /** Environmental wind value getter */
+    public double getW_env() {
+        return W_env;
+    }
+
+    /** Environmental wind setter */
+    public void setW_env(double W) {
+        this.W_env = W;
+    }
+
+    /** Environmental salinity getter */
+    public double getS_env() {
+        return S_env;
+    }
+
+    /** Environmental salinity setter */
+    public void setS_env(double S) {
+        this.S_env = S;
     }
 
     /** Nitrogen quota value getter */
