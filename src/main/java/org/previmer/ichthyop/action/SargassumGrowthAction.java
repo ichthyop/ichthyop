@@ -259,6 +259,7 @@ public class SargassumGrowthAction extends AbstractAction {
         double nitrogen_limitation = (1 - minQuotaN/quotaN)/(1 - minQuotaN/maxQuotaN);
         quotaP = sargassumLayer.getQuotaP();
         double phosphor_limitation = (1 - minQuotaP/quotaP)/(1 - minQuotaP/maxQuotaP);
+        double nutrient_limitation = Math.min(nitrogen_limitation, phosphor_limitation);
 
         /** Limitation due to solar irradiance */
 //        double I = irradianceLoader.getIrradiance(particle);
@@ -268,7 +269,7 @@ public class SargassumGrowthAction extends AbstractAction {
 
         /** C uptake and loss */
         double C = sargassumLayer.getC();
-        double uptakeC = C * maxUptakeC * temp_limitation * nitrogen_limitation * phosphor_limitation * solar_limitation;
+        double uptakeC = C * maxUptakeC * temp_limitation * nutrient_limitation * solar_limitation;
         double lossC = C * mortality / Math.exp(-mortality_coefficient * (T - 30));
 
         /** N and P uptakes and losses */
