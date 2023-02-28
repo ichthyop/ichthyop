@@ -232,7 +232,9 @@ public class MigrationAction extends AbstractAction {
             double depth;
             if (isodepth) {
                 // constant depth
-                depth = depthDay;
+                // adding a constraint in case of constant depth.
+                double bottom = getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0);
+                depth = (depthDay < bottom) ? particle.getDepth() : depthDay;
             } else {
                 // diel vertical migration
                 depth = getDepth(particle, getSimulationManager().getTimeManager().getTime());
