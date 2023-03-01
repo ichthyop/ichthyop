@@ -1,0 +1,19 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Barrier
+    given-names: Nicolas
+    orcid: https://orcid.org/0000-0002-1693-4719
+  - family-names: Verley
+    given-names: Philippe
+    orcid: https://orcid.org/0000-0002-5686-2764
+  - family-names: Andres 
+    given-names: Gwendoline
+  - family-names: Lett 
+    given-names: Christophe
+    orcid: https://orcid.org/0000-0001-5809-2452
+
+title: Ichthyop model 
+version: 3.3.12
+date-released: 2023-02-28
+doi: 10.5281/zenodo.4243813
