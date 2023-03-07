@@ -12,6 +12,7 @@
 - If the `units` attribute is not found in the NetCDF file, then the `time_of_origin` parameter is used. **Must be in the NETCDF standards, i.e `seconds since YYYY-MM-DD HH:MM`**
 - Adding serial parameters with the console did not work properly when hidden parameters were effectively hidden. The button is therefore activated only when hidden parameters are shown. 
 - Correction of a bug in the Preview. When zones were modified, preview was not updated accordingly. Now it is the case.
+- In `MigrationAction.java`, correction of the check on whether the particle destination depth is below the sea-bed. Comparison with bathymetry is now used instead of depth at `k=0`, which only workd on sigma models (ROMS and MARS)
 
 ## Changes in 3.3.12
 

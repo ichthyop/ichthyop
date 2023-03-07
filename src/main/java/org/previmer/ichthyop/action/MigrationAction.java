@@ -214,6 +214,18 @@ public class MigrationAction extends AbstractAction {
     public void init(IParticle particle) {
         // Nothing to do
     }
+    
+    private double getBathy(IParticle particle) {
+        
+        int i = (int) Math.floor(particle.getX());
+        int j = (int) Math.floor(particle.getY());
+        double bottom = -Math.abs(getSimulationManager().getDataset().getBathy(i, j));
+        if (Double.isNaN(bottom)) { 
+            bottom = 0;
+        }
+        return bottom; 
+        
+    }
 
     @Override
     public void execute(IParticle particle) {
@@ -232,7 +244,9 @@ public class MigrationAction extends AbstractAction {
             double depth;
             if (isodepth) {
                 // constant depth
-                depth = depthDay;
+                // adding a constraint in case of constant depth.
+                double bottom = this.getBathy(particle);
+                depth = (depthDay < bottom) ? particle.getDepth() : depthDay;
             } else {
                 // diel vertical migration
                 depth = getDepth(particle, getSimulationManager().getTimeManager().getTime());
@@ -263,7 +277,7 @@ public class MigrationAction extends AbstractAction {
         LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)
-        double bottom = getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0);
+        double bottom = this.getBathy(particle);
         double output;
 
         if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {
