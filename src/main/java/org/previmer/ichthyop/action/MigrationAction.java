@@ -219,7 +219,11 @@ public class MigrationAction extends AbstractAction {
         
         int i = (int) Math.floor(particle.getX());
         int j = (int) Math.floor(particle.getY());
-        return -Math.abs(getSimulationManager().getDataset().getBathy(i, j));
+        double bottom = -Math.abs(getSimulationManager().getDataset().getBathy(i, j));
+        if (Double.isNaN(bottom)) { 
+            bottom = 0;
+        }
+        return bottom; 
         
     }
 
