@@ -7,5 +7,6 @@
         "os"
     ],
     "esbonio.sphinx.buildDir": "doc/_build",
-    "java.debug.settings.vmArgs": " "
+    "java.debug.settings.vmArgs": " ",
+    "files.trimTrailingWhitespace": true,
 }
