@@ -1,5 +1,6 @@
 {
 "communities": [
-        {"identifier": "ichthyop"}
+        {"identifier": "ichthyop"}, 
+        {"identifier": "umr-marbec"}
     ]
 }

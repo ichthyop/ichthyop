@@ -1,6 +1,6 @@
 # ICHTHYOP Release notes
 
-## Changes in 3.3.13
+## Changes in 3.3.14
 
 ### New features
 
@@ -13,6 +13,13 @@
 - Adding serial parameters with the console did not work properly when hidden parameters were effectively hidden. The button is therefore activated only when hidden parameters are shown. 
 - Correction of a bug in the Preview. When zones were modified, preview was not updated accordingly. Now it is the case.
 - In `MigrationAction.java`, correction of the check on whether the particle destination depth is below the sea-bed. Comparison with bathymetry is now used instead of depth at `k=0`, which only workd on sigma models (ROMS and MARS)
+
+## Changes in 3.3.13
+
+### Bug fix
+
+- Correction in the reading of vertical scale variables in `Mercator_3D`. Management of the case where it is a 1D variable.
+- Forcing compilation and target to Java 11 in `pom.xml`
 
 ## Changes in 3.3.12
 
