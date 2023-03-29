@@ -1,5 +1,12 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.13
+
+### Bug fix
+
+- Correction in the reading of vertical scale variables in `Mercator_3D`. Management of the case where it is a 1D variable.
+- Forcing compilation and target to Java 11 in `pom.xml`
+
 ## Changes in 3.3.12
 
 ### New features

@@ -213,7 +213,7 @@ public class Mercator_3D extends AbstractDataset {
         for (int j = 0; j < ny; j++) {
             latitude[j] = arrLat.getFloat(indexLat.set(jpo + j));
         }
-
+       
         if (!isGridInfoInOneFile) {
             nc.close();
             nc = NetcdfDatasets.openDataset(file_mask, enhanced(), null);
@@ -228,12 +228,12 @@ public class Mercator_3D extends AbstractDataset {
                 }
             }
         }
-
+        
         if (!isGridInfoInOneFile) {
             nc.close();
             nc = NetcdfDatasets.openDataset(file_zgr, enhanced(), null);
         }
-
+        
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
         e3t = read_e3_field(nc, stre3t);
@@ -301,20 +301,36 @@ public class Mercator_3D extends AbstractDataset {
     }
 
     private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
-
+        
         Array array = nc.findVariable(varname).read().reduce().flip(0);
         Index index = array.getIndex();
         double[][][] field = new double[nz][ny][nx];
-        for (int k = 0; k < nz; k++) {
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    index.set(k + 1, j + jpo, i + ipo);
-                    field[k][j][i] = Double.isNaN(array.getDouble(index))
-                            ? 0.d
-                            : array.getDouble(index);
+        
+        int[] shape = array.getShape();
+
+        if (shape.length == 1) {
+
+            for (int k = 0; k < nz; k++) {
+                index.set(k + 1);
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
+                    }
+                }
+            }
+
+        } else {
+
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        index.set(k + 1, j + jpo, i + ipo);
+                        field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
+                    }
                 }
             }
         }
+        
         return field;
     }
 
