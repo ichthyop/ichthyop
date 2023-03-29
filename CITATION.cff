@@ -7,9 +7,9 @@ authors:
   - family-names: Verley
     given-names: Philippe
     orcid: https://orcid.org/0000-0002-5686-2764
-  - family-names: Andres 
+  - family-names: Andres
     given-names: Gwendoline
-  - family-names: Lett 
+  - family-names: Lett
     given-names: Christophe
     orcid: https://orcid.org/0000-0001-5809-2452
 preferred-citation:
@@ -37,7 +37,7 @@ preferred-citation:
   issue: 9
   volume: 23
   year: 2008
-title: Ichthyop model
+title: "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics"
 version: 3.3.13
 date-released: 2023-02-28
 doi: 10.5281/zenodo.4243813

@@ -1,6 +1,46 @@
 {
-"communities": [
-        {"identifier": "ichthyop"}, 
-        {"identifier": "umr-marbec"}
+    "publication_date": "2023-02-28",
+    "title": "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics",
+    "version": "3.3.13",
+    "upload_type": "software",
+    "license": "other-open",
+    "description": "",
+    "access_right": "open",
+    "creators": [
+        {
+            "name": "Barrier, Nicolas",
+            "orcid": "0000-0002-1693-4719"
+        },
+        {
+            "name": "Verley, Philippe",
+            "orcid": "0000-0002-5686-2764"
+        },
+        {
+            "name": "Andres, Gwendoline"
+        },
+        {
+            "name": "Lett, Christophe",
+            "orcid": "0000-0001-5809-2452"
+        }
+    ],
+    "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://github.com/ichthyop/ichthyop/tree/3.3.13",
+            "relation": "isSupplementTo"
+        },
+        {
+            "scheme": "doi",
+            "identifier": "10.5281/zenodo.4243813",
+            "relation": "isVersionOf"
+        }
+    ],
+    "communities": [
+        {
+            "identifier": "ichthyop"
+        },
+        {
+            "identifier": "umr-marbec"
+        }
     ]
 }
