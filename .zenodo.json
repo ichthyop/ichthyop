@@ -1,24 +1,6 @@
 {
-    "publication_date": "2023-02-28",
-    "version": "3.3.13",
-    "related_identifiers": [
-        {
-            "scheme": "url",
-            "identifier": "https://github.com/ichthyop/ichthyop/tree/3.3.13",
-            "relation": "isSupplementTo"
-        },
-        {
-            "scheme": "doi",
-            "identifier": "10.5281/zenodo.4243813",
-            "relation": "isVersionOf"
-        }
-    ],
     "title": "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics",
     "notes": "If you use this software, please cite it as below.",
-    "upload_type": "software",
-    "license": "other-open",
-    "description": "",
-    "access_right": "open",
     "creators": [
         {
             "name": "Barrier, Nicolas",
