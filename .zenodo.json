@@ -2,6 +2,7 @@
     "publication_date": "2023-02-28",
     "title": "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics",
     "version": "3.3.13",
+    "notes": "If you use this software, please cite it as below.",
     "upload_type": "software",
     "license": "other-open",
     "description": "",
