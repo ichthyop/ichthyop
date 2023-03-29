@@ -1,0 +1,43 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Barrier
+    given-names: Nicolas
+    orcid: https://orcid.org/0000-0002-1693-4719
+  - family-names: Verley
+    given-names: Philippe
+    orcid: https://orcid.org/0000-0002-5686-2764
+  - family-names: Andres 
+    given-names: Gwendoline
+  - family-names: Lett 
+    given-names: Christophe
+    orcid: https://orcid.org/0000-0001-5809-2452
+preferred-citation:
+  type: article
+  authors:
+  - given-names: Christophe
+    family-names: Lett
+  - given-names: Philippe
+    family-names: Verley
+  - given-names: Christian
+    family-names: Mullon
+  - given-names: Caroline
+    family-names: Parada
+  - given-names: Timothée
+    family-names: Brochier
+  - given-names: Pierrick
+    family-names: Penven
+  - given-names: Bruno
+    family-names: Blanke
+  doi: "10.1016/j.envsoft.2008.02.005"
+  journal: "Environmental Modelling & Software"
+  start: 1210 # First page number
+  end: 1214 # Last page number
+  title: "A Lagrangian tool for modelling ichthyoplankton dynamics"
+  issue: 9
+  volume: 23
+  year: 2008
+title: Ichthyop model 
+version: 3.3.12
+date-released: 2023-02-28
+doi: 10.5281/zenodo.4243813
