@@ -581,9 +581,9 @@ public class NemoGrid extends AbstractGrid {
     @Override
     public boolean isInWater(double[] pGrid) {
         if (pGrid.length > 2) {
-            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
+            return isInWater((int) Math.round(pGrid[0] - 0.5), (int) Math.round(pGrid[1] - 0.5), (int) Math.round(pGrid[2] - 0.5));
         } else {
-            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+            return isInWater((int) Math.round(pGrid[0] - 0.5), (int) Math.round(pGrid[1] - 0.5));
         }
     }
 
