@@ -19,7 +19,7 @@ public class SargassumParticleLayer extends ParticleLayer  {
 
     public void init(double biomass) {
         this.biomass = biomass;
-        this.C = biomass / CARBON_TO_DRY_WEIGHT_RATIO;
+        this.C = biomass * CARBON_TO_DRY_WEIGHT_RATIO;
     }
     
     /** Sargassum value getter */
@@ -138,6 +138,6 @@ public class SargassumParticleLayer extends ParticleLayer  {
         return P/C;
     }
 
-    public void updateBiomass() {this.biomass = C * CARBON_TO_DRY_WEIGHT_RATIO;}
+    public void updateBiomass() {this.biomass = C / CARBON_TO_DRY_WEIGHT_RATIO;}
     
 }
