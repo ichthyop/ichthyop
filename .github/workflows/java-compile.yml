@@ -37,7 +37,13 @@ jobs:
                 ${{ runner.os }}-build-
                 ${{ runner.os }}-
 
+      - name: Update apt
+        run: sudo apt install 
+
+      - name: Install C dependencies
+        run: sudo apt install -yq libnetcdf-dev
+
       - name: Compile Java code
         run:  | 
             mvn build-helper:remove-project-artifact
-            mvn -B package
+            mvn -B package -DskipTests=false
