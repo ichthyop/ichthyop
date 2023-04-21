@@ -14,6 +14,7 @@
 - Correction of a bug in the Preview. When zones were modified, preview was not updated accordingly. Now it is the case.
 - In `MigrationAction.java`, correction of the check on whether the particle destination depth is below the sea-bed. Comparison with bathymetry is now used instead of depth at `k=0`, which only workd on sigma models (ROMS and MARS)
 - In some cases, the bouncing algorithm fails and particle may advect over land (if wind drift is activated). Now, if the bouncing algorithm fails, particle is killed.
+- Correction of `Mercator2dDataset.java` to take into account data either in float or double. Use `Index` object instead of `copyToNDJavaArray`
 
 ## Changes in 3.3.13
 
