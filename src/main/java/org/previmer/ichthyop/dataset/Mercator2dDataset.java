@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -81,19 +82,19 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Zonal component of the velocity field at current time
      */
-    private double[][] u_tp0;
+    private Array u_tp0;
     /**
      * Zonal component of the velocity field at time t + dt
      */
-    private double[][] u_tp1;
+    private Array u_tp1;
     /**
      * Meridional component of the velocity field at current time
      */
-    private double[][] v_tp0;
+    private Array v_tp0;
     /**
      * Meridional component of the velocity field at time t + dt
      */
-    private double[][] v_tp1;
+    private Array v_tp1;
     /**
      * Geographical boundary of the domain
      */
@@ -133,7 +134,7 @@ public class Mercator2dDataset extends AbstractDataset {
     private double dyv;
     private List<String> listUFiles, listVFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncT;
-    
+
     private boolean use_constant_mask;
     private String mask_var;
     private String mask_file;
@@ -169,7 +170,7 @@ public class Mercator2dDataset extends AbstractDataset {
         for (int j = 0; j < ny; j++) {
             dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
         }
-        
+
         if(use_constant_mask) {
             NetcdfFile ncMask = DatasetUtil.openFile(this.mask_file, true);
             mask_array = (double[][]) ncMask.findVariable(mask_var).read().copyToNDJavaArray();
@@ -254,9 +255,12 @@ public class Mercator2dDataset extends AbstractDataset {
                         ci = 0;
                     }
 
+                    Index index_u = u_tp0.getIndex();
+                    index_u.set(j + jj, ci);
+
                     double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                     CO += co;
-                    x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
+                    x = (1.d - x_euler) * u_tp0.getDouble(index_u) + x_euler * u_tp1.getDouble(index_u);
                     if (!Double.isNaN(x)) {
                         du += x * co / dxu[j + jj];
                     }
@@ -292,7 +296,11 @@ public class Mercator2dDataset extends AbstractDataset {
                 }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
-                x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
+
+                Index index_v = v_tp0.getIndex();
+                index_v.set(j + jj, ci);
+
+                x = (1.d - x_euler) * v_tp0.getDouble(index_v) + x_euler * v_tp1.getDouble(index_v);
                 if (!Double.isNaN(x)) {
                     dv += x * co / dyv;
                 }
@@ -362,14 +370,14 @@ public class Mercator2dDataset extends AbstractDataset {
         if (!skipSorting()) {
             DatasetUtil.sort(listVFiles, strTime, timeArrow());
         }
-        
+
         if (this.findParameter("gridt_pattern")) {
             listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
             if (!skipSorting()) {
                 DatasetUtil.sort(listTFiles, strTime, timeArrow());
             }
         }
-        
+
         // Open first file
         open(0);
         readConstantField();
@@ -399,7 +407,7 @@ public class Mercator2dDataset extends AbstractDataset {
         } catch (NullPointerException ex ) {
             xTore = true;
         }
-          
+
         this.use_constant_mask = false;
         if (this.findParameter("use_constant_mask")) {
             this.use_constant_mask = Boolean.valueOf(getParameter("use_constant_mask"));
@@ -409,7 +417,7 @@ public class Mercator2dDataset extends AbstractDataset {
             this.mask_file = getParameter("mask_file");
             this.mask_var = getParameter("mask_var");
         }
-          
+
     }
 
     /**
@@ -492,9 +500,9 @@ public class Mercator2dDataset extends AbstractDataset {
 
         try {
             if (ncU.findVariable(strU).getShape().length > 3) {
-                u_tp1 = (double[][]) ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
+                u_tp1 = ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce();
             } else {
-                u_tp1 = (double[][]) ncU.findVariable(strU).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+                u_tp1 = ncU.findVariable(strU).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce();
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
@@ -504,9 +512,9 @@ public class Mercator2dDataset extends AbstractDataset {
 
         try {
             if (ncV.findVariable(strV).getShape().length > 3) {
-                v_tp1 = (double[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
+                v_tp1 = ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce();
             } else {
-                v_tp1 = (double[][]) ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+                v_tp1 = ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce();
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
@@ -521,7 +529,7 @@ public class Mercator2dDataset extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         if (this.findParameter("gridt_pattern")) {
             for (RequiredVariable variable : requiredVariables.values()) {
                 variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
@@ -542,7 +550,7 @@ public class Mercator2dDataset extends AbstractDataset {
                 ci = 0;
             }
         }
-        
+
         if (use_constant_mask) {
             try {
                 return (mask_array[j][ci] == 1);
@@ -550,10 +558,12 @@ public class Mercator2dDataset extends AbstractDataset {
                 return false;
             }
         }
-    
+
         //System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
         try {
-            return (!Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]));
+            Index index = u_tp1.getIndex();
+            index.set(j, ci);
+            return (!Double.isNaN(u_tp1.getDouble(index)) && !Double.isNaN(v_tp1.getDouble(index)));
         } catch (ArrayIndexOutOfBoundsException ex) {
             return false;
         }
@@ -788,7 +798,7 @@ public class Mercator2dDataset extends AbstractDataset {
             ncV.close();
         }
         ncV = DatasetUtil.openFile(listVFiles.get(index), true);
-        
+
         if (this.findParameter("gridt_pattern")) {
             if (ncT != null) {
                 ncT.close();
