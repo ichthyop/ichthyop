@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.15
+
+### Bug fix
+
+- Correction of `Mercator2dDataset.java` to take into account data either in float or double. Use `Index` object instead of `copyToNDJavaArray`
+
 ## Changes in 3.3.14
 
 ### New features
@@ -16,7 +22,6 @@
 - In `MigrationAction.java`, correction of the check on whether the particle destination depth is below the sea-bed. Comparison with bathymetry is now used instead of depth at `k=0`, which only workd on sigma models (ROMS and MARS)
 - In some cases, the bouncing algorithm fails and particle may advect over land (if wind drift is activated). Now, if the bouncing algorithm fails, particle is killed.
 - Change in the resource encoding. Move from `ISO-8859-1` to `UTF-8`
-- Correction of `Mercator2dDataset.java` to take into account data either in float or double. Use `Index` object instead of `copyToNDJavaArray`
 
 ## Changes in 3.3.13
 
