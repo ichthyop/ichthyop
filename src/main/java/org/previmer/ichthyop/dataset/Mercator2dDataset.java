@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -81,19 +82,19 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Zonal component of the velocity field at current time
      */
-    private double[][] u_tp0;
+    private Array u_tp0;
     /**
      * Zonal component of the velocity field at time t + dt
      */
-    private double[][] u_tp1;
+    private Array u_tp1;
     /**
      * Meridional component of the velocity field at current time
      */
-    private double[][] v_tp0;
+    private Array v_tp0;
     /**
      * Meridional component of the velocity field at time t + dt
      */
-    private double[][] v_tp1;
+    private Array v_tp1;
     /**
      * Geographical boundary of the domain
      */
@@ -254,9 +255,12 @@ public class Mercator2dDataset extends AbstractDataset {
                         ci = 0;
                     }
 
+                    Index index_u = u_tp0.getIndex();
+                    index_u.set(j + jj, ci);
+
                     double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                     CO += co;
-                    x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
+                    x = (1.d - x_euler) * u_tp0.getDouble(index_u) + x_euler * u_tp1.getDouble(index_u);
                     if (!Double.isNaN(x)) {
                         du += x * co / dxu[j + jj];
                     }
@@ -292,7 +296,11 @@ public class Mercator2dDataset extends AbstractDataset {
                 }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
-                x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
+
+                Index index_v = v_tp0.getIndex();
+                index_v.set(j + jj, ci);
+
+                x = (1.d - x_euler) * v_tp0.getDouble(index_v) + x_euler * v_tp1.getDouble(index_v);
                 if (!Double.isNaN(x)) {
                     dv += x * co / dyv;
                 }
@@ -492,9 +500,9 @@ public class Mercator2dDataset extends AbstractDataset {
 
         try {
             if (ncU.findVariable(strU).getShape().length > 3) {
-                u_tp1 = (double[][]) ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
+                u_tp1 = ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce();
             } else {
-                u_tp1 = (double[][]) ncU.findVariable(strU).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+                u_tp1 = ncU.findVariable(strU).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce();
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
@@ -504,9 +512,9 @@ public class Mercator2dDataset extends AbstractDataset {
 
         try {
             if (ncV.findVariable(strV).getShape().length > 3) {
-                v_tp1 = (double[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
+                v_tp1 = ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce();
             } else {
-                v_tp1 = (double[][]) ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+                v_tp1 = ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce();
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
@@ -553,7 +561,9 @@ public class Mercator2dDataset extends AbstractDataset {
 
         //System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
         try {
-            return (!Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]));
+            Index index = u_tp1.getIndex();
+            index.set(j, ci);
+            return (!Double.isNaN(u_tp1.getDouble(index)) && !Double.isNaN(v_tp1.getDouble(index)));
         } catch (ArrayIndexOutOfBoundsException ex) {
             return false;
         }
