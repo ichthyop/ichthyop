@@ -134,15 +134,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     <reportOutputDirectory>doc/_static/javadoc</reportOutputDirectory>
                     <failOnError>false</failOnError>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>javadoc</goal>
-                        </goals>
-                        <id>execution1</id>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
