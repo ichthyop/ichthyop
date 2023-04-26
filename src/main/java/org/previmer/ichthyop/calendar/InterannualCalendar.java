@@ -8,7 +8,7 @@
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
@@ -108,7 +108,7 @@ public class InterannualCalendar extends Calendar {
     /**
      * Constructs a Gregorian Calendar with origin of time set by parameters. Hours,
      * minutes, seconds are automatically set to 00:00:00.000
-     * 
+     *
      * @param year   an int, the year origin
      * @param month  an int, the month origin
      * @param day    an int, the day origin

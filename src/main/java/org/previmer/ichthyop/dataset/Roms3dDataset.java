@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package org.previmer.ichthyop.dataset;
 
@@ -70,7 +70,7 @@ public class Roms3dDataset extends Roms3dCommon {
     private List<String> ncfiles;
     private int ncindex;
     boolean saveWEnabled = false;
-    
+
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
@@ -128,7 +128,7 @@ public class Roms3dDataset extends Roms3dCommon {
 
     @Override
     void setOnFirstTime() throws Exception {
-        
+
         if (this.saveWEnabled) {
             this.saveWFiles();
         }
@@ -141,22 +141,22 @@ public class Roms3dDataset extends Roms3dCommon {
         time_tp1 = t0;
     }
 
-    
+
     public void saveWFiles() throws IOException, InvalidRangeException {
-            
+
         // Init netcdf variables for reading
         int[] origin = new int[]{0, 0, jpo, ipo};
         int[] countU = new int[]{1, nz, ny, (nx - 1)};
         int[] countV = new int[]{1, nz, ny - 1, nx};
         int[] countZeta = new int[]{1, ny, nx};
         int[] originZeta = new int[]{0, jpo, ipo};
-        
+
         // Init outputs and output dimension
         float[][][] w;
         int[] originOut = new int[]{1, 0, 0, 0};
 
         for (String f : this.ncfiles) {
-            
+
             System.out.println("++++++++++ Processing file " + f);
 
             // Reconstruction of output filename
@@ -164,7 +164,7 @@ public class Roms3dDataset extends Roms3dCommon {
             String direc = fin.getParent();
             String baseName = fin.getName().replace(".nc", "_reconW.nc");
             File fout = new File(direc, baseName);
-            
+
             // Creation of file output + definition of dims/vars
             NetcdfFormatWriter.Builder builderNcOut = NetcdfFormatWriter.createNewNetcdf3(fout.getAbsolutePath());
             Dimension timeDim = builderNcOut.addUnlimitedDimension("time");
@@ -175,7 +175,7 @@ public class Roms3dDataset extends Roms3dCommon {
             Dimension[] dimArrZeta = {timeDim, yDim, xDim};
             List<Dimension> listDimArr = new ArrayList<>(Arrays.asList(dimArr));
             List<Dimension> listDimArrZeta = new ArrayList<>(Arrays.asList(dimArrZeta));
-                       
+
             builderNcOut.addVariable("U", DataType.FLOAT, listDimArr);
             builderNcOut.addVariable("V", DataType.FLOAT, listDimArr);
             builderNcOut.addVariable("W", DataType.FLOAT, listDimArr);
@@ -186,28 +186,28 @@ public class Roms3dDataset extends Roms3dCommon {
             // Opening of NetCDF file and reading of U/V/Zeta
             NetcdfFile nc;
             nc = NetcdfDatasets.openDataset(f);
-            
+
             // Correct the time counter to read all variables
             int ntime = nc.findDimension("time").getLength();
-            
+
             // Update the counter of U/V/Zeta
             countU[0] = ntime;
             countV[0] = ntime;
             countZeta[0] = ntime;
-            
+
             // Read all
             Array arrU = ncIn.findVariable(strU).read(origin, countU).reduce();
             Array arrV = ncIn.findVariable(strV).read(origin, countV).reduce();
             Array arrZeta = ncIn.findVariable(strZeta).read(originZeta, countZeta).reduce();
             Index index;
-                
+
             nc.close();
-            
+
             // Loop over all the time variables
             for (int t = 0; t < ntime; t++) {
-                
+
                 System.out.println("time index " + t);
-                
+
                 // Read Zeta
                 index = arrZeta.getIndex();
                 zeta_tp1 = new float[ny][nx];
@@ -216,7 +216,7 @@ public class Roms3dDataset extends Roms3dCommon {
                         zeta_tp1[j][i] = arrZeta.getFloat(index.set(t, j, i));
                     }
                 }
-                
+
                 // Read U
                 u_tp1 = new float[nz][ny][nx - 1];
                 index = arrU.getIndex();
@@ -241,7 +241,7 @@ public class Roms3dDataset extends Roms3dCommon {
 
                 // Computes Z(t, z, y, x)
                 z_w_tp1 = this.getSigLevels(); //[nz + 1][ny][nx];
-                
+
                 // Compute W
                 w = this.computeW();  // [nz + 1][ny][nx];
 
@@ -254,7 +254,7 @@ public class Roms3dDataset extends Roms3dCommon {
                         }
                     }
                 }
-                
+
                 ArrayFloat.D4 arrayZ = new ArrayFloat.D4(1, nz + 1, ny, nx);
                 for (int k = 0; k < nz; k++) {
                     for (int j = 0; j < ny; j++) {
@@ -272,7 +272,7 @@ public class Roms3dDataset extends Roms3dCommon {
                         }
                     }
                 }
-                
+
                 ArrayFloat.D4 arrayV = new ArrayFloat.D4(1, nz + 1, ny, nx);
                 for (int k = 0; k < nz; k++) {
                     for (int j = 0; j < ny - 1; j++) {
@@ -281,17 +281,17 @@ public class Roms3dDataset extends Roms3dCommon {
                         }
                     }
                 }
-                
+
                 originOut[0] = t;
                 ncOut.write(ncOut.findVariable("U"), originOut, arrayU);
                 ncOut.write(ncOut.findVariable("V"), originOut, arrayV);
                 ncOut.write(ncOut.findVariable("Depth"), originOut, arrayZ);
                 ncOut.write(ncOut.findVariable("W"), originOut, arrayW);
-                
+
             }  // end of time loop
 
             ncOut.close();
-            
+
         }  // end of ncfiles loop
 
         System.exit(0);

@@ -8,7 +8,7 @@
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
@@ -214,17 +214,17 @@ public class MigrationAction extends AbstractAction {
     public void init(IParticle particle) {
         // Nothing to do
     }
-    
+
     private double getBathy(IParticle particle) {
-        
+
         int i = (int) Math.floor(particle.getX());
         int j = (int) Math.floor(particle.getY());
         double bottom = -Math.abs(getSimulationManager().getDataset().getBathy(i, j));
-        if (Double.isNaN(bottom)) { 
+        if (Double.isNaN(bottom)) {
             bottom = 0;
         }
-        return bottom; 
-        
+        return bottom;
+
     }
 
     @Override
@@ -273,7 +273,7 @@ public class MigrationAction extends AbstractAction {
         double realHour = (time / (60 * 60)) % 24;
         int hour = (int) Math.floor(realHour);
         double minute = (int) ((realHour - hour) * 60) ;
-        
+
         LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)

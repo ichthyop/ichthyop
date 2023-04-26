@@ -8,7 +8,7 @@
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
@@ -391,9 +391,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         if (evt.getSource().equals(tableZone) && prop.equals("tableCellEditor")) {
             zoneFile.updateKey(zone.getKey(), (String) tableZone.getModel().getValueAt(tableZone.getSelectedRow(), 0));
         }
-        
+
         SimulationManager.getInstance().setResetPreview(true);
-        
+
     }
 
     public void actionPerformed(ActionEvent e) {

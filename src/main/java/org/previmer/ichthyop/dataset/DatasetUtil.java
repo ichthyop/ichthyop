@@ -8,7 +8,7 @@
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
@@ -131,9 +131,9 @@ public class DatasetUtil {
         if (!new File(file).isFile()) {
             throw new FileNotFoundException(file);
         }
-        
+
         return getDate(file, strTime, 0);
-        
+
     }
 
     /**
@@ -151,11 +151,11 @@ public class DatasetUtil {
         NetcdfFile nc = NetcdfDatasets.openDataset(file);
         Array timeArr = nc.findVariable(strTime).read();
         nc.close();
-        
+
         int lastIndex = timeArr.getShape()[0] - 1;
-        
+
         return getDate(file, strTime, lastIndex);
-        
+
     }
 
     public static double timeAtRank(NetcdfFile nc, String strTime, int rank) throws IOException {
@@ -279,7 +279,7 @@ public class DatasetUtil {
         lrank = lrank - (timeArrow + 1) / 2;
         return lrank;
     }
-    
+
     /**
      * Guess whether time is expressed in seconds in the NetCDF file and if not
      * return a conversion value to adjust it to seconds. So far it detects
@@ -438,9 +438,9 @@ public class DatasetUtil {
         double d = Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
         return d;
     }
-    
+
     public static double getDate(String file, String strTime, int index) throws IOException {
-        
+
         // Open the NetCDF file
         // Recover the time variable and units
         NetcdfFile nc = NetcdfDatasets.openDataset(file);
@@ -450,7 +450,7 @@ public class DatasetUtil {
         // Recover the time values for the corresponding index
         Array timeArr = nc.findVariable(strTime).read();
         long time = (long) timeArr.getDouble(timeArr.getIndex().set(index));
-        
+
         String units;
         // Converts string into lower case.
         if (attrUnits != null) {
@@ -460,29 +460,29 @@ public class DatasetUtil {
         }
 
         nc.close();
-        
+
         return getDate(time, units);
-        
+
     }
-    
+
     public static double getDate(long time, String units) {
-        if(TimeManager.getInstance().isNoLeapEnabled()) { 
+        if(TimeManager.getInstance().isNoLeapEnabled()) {
             return getDateNoLeap(time, units);
         } else {
             return getDateLeap(time, units);
-        }  
+        }
     }
-    
+
     public static double getDateLeap(long time, String units) {
-        
+
         LocalDateTime finalDate, dateUnit;
-        try { 
+        try {
             dateUnit = getDateUnit(time, units);
         } catch(Exception e) {
             units = TimeManager.getInstance().getTimeOfOrigin();
             dateUnit = getDateUnit(time, units);
         }
-              
+
         if (units.contains("second")) {
             finalDate = dateUnit.plusSeconds(time);
         } else if (units.contains("hour")) {
@@ -494,15 +494,15 @@ public class DatasetUtil {
         }
 
         double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
-        
+
         return output;
 
     }
-    
+
     public static double getDateNoLeap(long time, String units) {
 
         LocalDateTime dateUnit;
-        try { 
+        try {
             dateUnit = getDateUnit(time, units);
         } catch(Exception e) {
             units = TimeManager.getInstance().getTimeOfOrigin();
@@ -537,41 +537,41 @@ public class DatasetUtil {
         // Offset the duration to take into account different reference times.
         double offset = 0;
         offset = (dr - 1) * Constant.ONE_DAY + hr * Constant.ONE_HOUR + minr * Constant.ONE_MINUTE;
-        
+
         // Computing the offset due to other reference months.
         double moffset = 0;
         if (mr > 1) {
             moffset = TimeManager.monthEdges[mr - 2] * Constant.ONE_DAY;
         }
         offset += moffset;
-        
+
         // update duration by adding the time offset due to different reference times
         duration += offset;
-        
+
         return duration;
-        
+
     }
 
     public static LocalDateTime getDateUnit(long time, String units) {
-        
+
         // Date formatter to extract NetCDF time
         DateTimeFormatter dateFormatter;
-        
+
         // Extract the NetCDF reference date by removing the
         // prefix (day(s), month(s) or day(s)) and the seconds values
         int beginIndex = units.indexOf("since") + 5;
-        
+
         // Count the occurrence of : char. If 1, format is HH:MM then we add :00 to the units
         // to convert to HH:mm:ss
         int count = StringUtils.countMatches(units, ":");
         if(count == 1) {
-            units = units + ":00";   
+            units = units + ":00";
         }
-        
+
         int endIndex = units.lastIndexOf(":");
-        
+
         LocalDateTime dateUnit;
-        if(endIndex != -1) { 
+        if(endIndex != -1) {
             String subUnits = units.substring(beginIndex, endIndex).trim();
             subUnits = subUnits.replace("t", " ");
             dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -584,10 +584,10 @@ public class DatasetUtil {
             LocalDate dateDay = LocalDate.parse(subUnits, dateFormatter);
             dateUnit = dateDay.atStartOfDay();
         }
-        
+
         return dateUnit;
-        
+
     }
-    
-        
+
+
 }
