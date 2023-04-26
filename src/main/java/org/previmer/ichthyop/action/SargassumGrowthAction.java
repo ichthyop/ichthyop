@@ -289,7 +289,7 @@ public class SargassumGrowthAction extends AbstractAction {
         /** C uptake and loss */
         double C = sargassumLayer.getC();
         double uptakeC = C * maxUptakeC * temp_limitation * nutrient_limitation * solar_limitation * salinity_limitation;
-        double lossC = C * mortality * C / (C + half_mortality) * (1 + alphaWind * 3);
+        double lossC = C * C * mortality * C / (C + half_mortality) * (1 + alphaWind * 3);
 
         /** N and P uptakes and losses */
         double N_concentration = getSimulationManager().getDataset().get(NH4_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
