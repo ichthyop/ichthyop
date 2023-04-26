@@ -9,7 +9,7 @@ http://www.ird.fr
 
 Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
 Contributors (alphabetically sorted):
-Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
 Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
 Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
 Stephane POUS, Nathan PUTMAN.
@@ -21,7 +21,7 @@ mortality and recruitment. The tool uses as input time series of velocity,
 temperature and salinity fields archived from oceanic models such as NEMO,
 ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
 generates output files that can be post-processed easily using graphic and
-statistical software. 
+statistical software.
 
 To cite Ichthyop, please refer to Lett et al. 2008
 A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
@@ -30,7 +30,7 @@ doi:10.1016/j.envsoft.2008.02.005
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation (version 3 of the License). For a full 
+the Free Software Foundation (version 3 of the License). For a full
 description, see the LICENSE file.
 
 This program is distributed in the hope that it will be useful,
@@ -49,19 +49,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.previmer</groupId>
     <artifactId>ichthyop</artifactId>
-    <version>3.3.13</version>
+    <version>3.3.14</version>
     <packaging>jar</packaging>
     <name>Ichthyop</name>
     <description></description>
-    
+
     <!-- Project properties -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.release>11</maven.compiler.release>
         <mainClass>org.previmer.ichthyop.ui.IchthyopApp</mainClass>
     </properties>
-    
+
     <!-- Libraries declarations -->
 
     <!-- Address to the libraries repositories -->
@@ -71,14 +70,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <id>default</id>
             <url>http://repo.maven.apache.org/maven2/</url>
         </repository>
-        
+
         <!-- Local repository -->
         <repository>
             <id>project.local</id>
             <name>project</name>
             <url>file:${project.basedir}/local/</url>
         </repository>
-        
+
         <!-- NetCDF releases repository -->
         <repository>
             <snapshots>
@@ -88,7 +87,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <name>libs-release</name>
             <url>https://artifacts.unidata.ucar.edu/repository/unidata-releases/</url>
         </repository>
-        
+
         <!-- NetCDF snapshots repository -->
         <repository>
             <id>amap-maven-snapshots</id>
@@ -96,17 +95,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <url>https://artifacts.unidata.ucar.edu/repository/unidata-snapshots/</url>
         </repository>
     </repositories>
-    
+
     <build>
-        
+
         <filters>
             <filter>
                 src/main/filters/IchthyopApp.filters
-            </filter>                     
+            </filter>
         </filters>
 
         <resources>
-            
+
             <resource>
                 <directory>src/main/resources/</directory>
                 <excludes>
@@ -114,22 +113,43 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 </excludes>
                 <filtering>true</filtering>
             </resource>
-            
+
             <resource>
                 <directory>src/main/resources/</directory>
                 <excludes>
                     <exclude>*.properties</exclude>
                 </excludes>
             </resource>
-            
+
         </resources>
-               
+
         <plugins>
-           
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <outputDirectory>doc/_static/javadoc</outputDirectory>
+                    <reportOutputDirectory>doc/_static/javadoc</reportOutputDirectory>
+                    <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
+
             <!-- Copy dependencies in lib folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -148,12 +168,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Link the jar with the dependencies in libs folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -165,12 +185,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </archive>
                 </configuration>
             </plugin>
-                        
+
             <!-- Create a jar with dependencies inside -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -193,28 +213,49 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Execute the jar file on "Run Project" -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>default-cli</id>
                         <goals>
-                            <goal>exec</goal>                            
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
                             <executable>${java.home}/bin/java</executable>
                             <commandlineArgs>-classpath "${project.build.directory}/lib" -jar "${project.build.directory}/${project.build.finalName}.jar"</commandlineArgs>
                         </configuration>
                     </execution>
-                </executions>  
+                </executions>
             </plugin>
-            
-            
-        </plugins>      
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.2.5</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+        </plugins>
     </build>
     <dependencies>
         <dependency>
@@ -235,7 +276,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
-            <version>5.4.1</version>
+            <version>5.5.2</version>
         </dependency>
         <dependency>
             <groupId>ml.options</groupId>
@@ -255,7 +296,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.1</version>
+            <version>5.7.1</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.timingframework</groupId>
@@ -276,13 +317,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

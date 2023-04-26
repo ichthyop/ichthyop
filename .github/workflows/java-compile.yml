@@ -16,16 +16,17 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          java-version: 15
+          java-version: 17
+          distribution: oracle
       
       - name: Cache Maven dependencies
         id: maven-dep
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
             cache-name: maven-dep-modules
         with:
@@ -36,7 +37,13 @@ jobs:
                 ${{ runner.os }}-build-
                 ${{ runner.os }}-
 
+      - name: Update apt
+        run: sudo apt install 
+
+      - name: Install C dependencies
+        run: sudo apt install -yq libnetcdf-dev
+
       - name: Compile Java code
         run:  | 
             mvn build-helper:remove-project-artifact
-            mvn -B package
+            mvn -B package -DskipTests=false

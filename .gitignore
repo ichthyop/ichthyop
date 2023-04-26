@@ -10,3 +10,13 @@ output
 .classpath
 .project
 .settings
+**/*.swp
+
+doc/_build
+doc/**/*ipynb*
+doc/generated
+doc/*sh
+doc/**/_static/*svg
+doc/**/_static/*pdf
+
+doc/_static/javadoc

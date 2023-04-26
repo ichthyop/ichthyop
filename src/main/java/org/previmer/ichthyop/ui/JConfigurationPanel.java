@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.ui;
@@ -168,7 +168,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnAddValue.getAction().setEnabled(false);
         btnRemoveValue.getAction().setEnabled(false);
         ckBoxHiddenParameter.setSelected(false);
-        getTable().setModel(block, this);
+        getTable().setModel(block, this, ckBoxHiddenParameter.isSelected());
         if (block.getNbHiddenParameters() > 0) {
             ckBoxHiddenParameter.getAction().setEnabled(true);
         } else {
@@ -316,8 +316,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 }
                 info.append("</i></html>");
                 lblParameter.setText(info.toString());
-                btnAddValue.getAction().setEnabled(xparam.isSerial());
-                btnRemoveValue.getAction().setEnabled(xparam.isSerial() && (xparam.getLength() > 1));
+                btnAddValue.getAction().setEnabled(this.ckBoxHiddenParameter.isSelected() && xparam.isSerial());
+                btnRemoveValue.getAction().setEnabled(this.ckBoxHiddenParameter.isSelected() && xparam.isSerial() && (xparam.getLength() > 1));
             } catch (Exception ex) {
                 pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParameterInfo.border.title")));
                 lblParameter.setText(getResourceMap().getString("noDescription.text"));
@@ -392,7 +392,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 int index = getTable().getParameterIndex(row);
                 xparam.removeValue(index);
             }
-            getTable().setModel(blockTree.getSelectedBlock(), JConfigurationPanel.this);
+            getTable().setModel(blockTree.getSelectedBlock(), JConfigurationPanel.this, ckBoxHiddenParameter.isSelected());
             return null;
         }
 
@@ -889,7 +889,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     }// </editor-fold>//GEN-END:initComponents
 
     private void textFieldTitleKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldTitleKeyTyped
-        
+
         firePropertyChange("configurationFile", null, null);
     }//GEN-LAST:event_textFieldTitleKeyTyped
 

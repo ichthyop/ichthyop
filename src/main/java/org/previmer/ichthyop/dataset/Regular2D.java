@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -134,7 +134,7 @@ public class Regular2D extends AbstractDataset {
     private double dyv;
     private List<String> listUFiles, listVFiles;
     private NetcdfFile ncU, ncV;
-    
+
     private boolean use_constant_mask;
     private String mask_var;
     private String mask_file;
@@ -157,12 +157,12 @@ public class Regular2D extends AbstractDataset {
      * Reads time non-dependant fields in NetCDF dataset
      */
     private void readConstantField() throws Exception {
-        
+
         Array variable;
         Index index;
-        
+
         getLogger().log(Level.INFO, "Read longitude and latitude from {0}", ncU.getLocation());
-        
+
         // Reads longitude, either from 1d or 2d array
         variable = ncU.findVariable(strLon).read().reduce();
         index = variable.getIndex();
@@ -181,9 +181,9 @@ public class Regular2D extends AbstractDataset {
                 longitude[i] = variable.getDouble(index);
             }
         }
-        
+
         variable = ncU.findVariable(strLat).read().reduce();
-        index = variable.getIndex();     
+        index = variable.getIndex();
         ny = variable.getShape()[0];
         latitude = new double[ny];
         if (variable.getRank() == 1) {
@@ -197,14 +197,14 @@ public class Regular2D extends AbstractDataset {
                 latitude[i] = variable.getDouble(index);
             }
         }
-        
+
         // scale factors
         dyv = 111138.d * (latitude[1] - latitude[0]);
         dxu = new double[ny];
         for (int j = 0; j < ny; j++) {
             dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
         }
-        
+
         if(use_constant_mask) {
             NetcdfFile ncMask = DatasetUtil.openFile(this.mask_file, true);
             mask_array = (double[][]) ncMask.findVariable(mask_var).read().copyToNDJavaArray();
@@ -426,7 +426,7 @@ public class Regular2D extends AbstractDataset {
         } catch (NullPointerException ex ) {
             xTore = true;
         }
-          
+
         this.use_constant_mask = false;
         if (this.findParameter("use_constant_mask")) {
             this.use_constant_mask = Boolean.valueOf(getParameter("use_constant_mask"));
@@ -436,7 +436,7 @@ public class Regular2D extends AbstractDataset {
             this.mask_file = getParameter("mask_file");
             this.mask_var = getParameter("mask_var");
         }
-          
+
     }
 
     /**
@@ -501,7 +501,7 @@ public class Regular2D extends AbstractDataset {
         open(indexFile = DatasetUtil.index(listUFiles, t0, time_arrow, strTime));
         setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncU, strTime, time_arrow));
         time_tp1 = t0;
-        
+
         for(RequiredVariable var : this.requiredVariables.values()) {
             var.setUnlimited(true);
         }
@@ -520,16 +520,16 @@ public class Regular2D extends AbstractDataset {
 
         int[] origin = new int[]{rank, 0, 0, 0};
         double time_tp0 = time_tp1;
-        
+
         Array variable;
         Index index;
-        
+
         u_tp1 = new double[ny][nx];
         v_tp1 = new double[ny][nx];
-        
+
         try {
             if (ncU.findVariable(strU).getShape().length > 3) {
-                variable = ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce();              
+                variable = ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce();
             } else {
                 variable = ncU.findVariable(strU).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce();
             }
@@ -538,7 +538,7 @@ public class Regular2D extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         index = variable.getIndex();
         for (int i = 0; i < variable.getShape()[0]; i++) {
             for (int j = 0; j < variable.getShape()[1]; j++) {
@@ -558,7 +558,7 @@ public class Regular2D extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         index = variable.getIndex();
         for (int i = 0; i < variable.getShape()[0]; i++) {
             for (int j = 0; j < variable.getShape()[1]; j++) {
@@ -574,7 +574,7 @@ public class Regular2D extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         for (RequiredVariable reqVar : requiredVariables.values()) {
             reqVar.nextStep(readVariable(ncU, reqVar.getName(), rank), time_tp1, dt_HyMo);
         }
@@ -593,7 +593,7 @@ public class Regular2D extends AbstractDataset {
                 ci = 0;
             }
         }
-        
+
         if (use_constant_mask) {
             try {
                 return (mask_array[j][ci] == 1);
@@ -601,7 +601,7 @@ public class Regular2D extends AbstractDataset {
                 return false;
             }
         }
-    
+
         //System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
         try {
             return (!Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]));
@@ -821,7 +821,7 @@ public class Regular2D extends AbstractDataset {
         }
 
         return (new double[]{xgrid, ygrid});
-        
+
     }
 
     /**

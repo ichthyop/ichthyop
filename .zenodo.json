@@ -1,6 +1,29 @@
 {
-"communities": [
-        {"identifier": "ichthyop"}, 
-        {"identifier": "umr-marbec"}
+    "title": "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics",
+    "notes": "If you use this software, please cite it as below.",
+    "creators": [
+        {
+            "name": "Barrier, Nicolas",
+            "orcid": "0000-0002-1693-4719"
+        },
+        {
+            "name": "Verley, Philippe",
+            "orcid": "0000-0002-5686-2764"
+        },
+        {
+            "name": "Andres, Gwendoline"
+        },
+        {
+            "name": "Lett, Christophe",
+            "orcid": "0000-0001-5809-2452"
+        }
+    ],
+    "communities": [
+        {
+            "identifier": "ichthyop"
+        },
+        {
+            "identifier": "umr-marbec"
+        }
     ]
 }

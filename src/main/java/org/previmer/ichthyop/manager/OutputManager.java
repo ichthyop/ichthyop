@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.manager;
@@ -117,25 +117,25 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private boolean clearCustomTrackerList = false;
     private boolean isDensityEnabled = false;
     private boolean isTrajectoryEnabled = true;
-    
+
     // barrier.n: adding control over the version format
     NetcdfFileFormat ncVersion;
-    
+
     DensityTracker densTracker;
-    
+
     /**
      * Object for creating/writing netCDF files.
      */
     private static NetcdfFormatWriter ncOut;
     private static NetcdfFormatWriter.Builder bNcOut;
-    
+
     /** Object for creating/writting netCDF density files */
     private static NetcdfFormatWriter densNcOut;
     private static NetcdfFormatWriter.Builder bDensNcOut;
-    
+
     private String trajectoryFileName;
     private String densityFileName;
-    
+
     private Nc4Chunking chunker;
 
     /**
@@ -160,7 +160,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public String getParameter(String key) {
         return getSimulationManager().getParameterManager().getParameter(block_key, key);
     }
-    
+
     public boolean isNull(String key) {
         return getSimulationManager().getParameterManager().isNull(block_key, key);
     }
@@ -207,7 +207,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
     }
-    
+
     /**
      * Closes the Distribution NetCDF file.
      */
@@ -248,13 +248,13 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
         ncOut.write(ncOut.findVariable("region_edge"), edge);
     }
-    
+
     private void addDrifters() {
         Variable.Builder<?> variable = bNcOut.addVariable("drifter", DataType.INT, "drifter");
         variable.addAttribute(new Attribute("long_name", "drifter index"));
         variable.addAttribute(new Attribute("unit", ""));
     }
-    
+
     /**
      * Add drifter coordinates in the Netcdf. Used mainly for visualisation purposes
      */
@@ -270,7 +270,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private void addZones() {
-        
+
         int iZone = 0;
         zoneAreas = new ArrayList<>();
         for (TypeZone type : TypeZone.values()) {
@@ -312,22 +312,22 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             ncOut.write(ncOut.findVariable("coord_zone" + iZone), arrZoneArea);
             iZone++;
         }
-        
+
         iZone = 0 ;
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
                     int nPoints = zone.getLon().size();
                     ArrayFloat.D2 arrZoneArea = new ArrayFloat.D2(nPoints, 2);
-                    for(int k = 0; k < nPoints; k++) { 
+                    for(int k = 0; k < nPoints; k++) {
                         arrZoneArea.set(k, 0,  ((float) zone.getLat().get(k)));
                         arrZoneArea.set(k, 1, (float) (zone.getLon().get(k)));
-                    }      
+                    }
                     ncOut.write(ncOut.findVariable("coord_geo_zone" + iZone), arrZoneArea);
                     iZone++;
                 }
             }
-        }    
+        }
     }
 
     private void addGlobalAttributes() {
@@ -375,7 +375,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
             }
         }
-        
+
         // for tiny zones include at least one point, the barycenter of the zone
         // not satisfactory solution, this fix should be improved
         if (list.isEmpty()) {
@@ -516,12 +516,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             if (this.isDensityEnabled) {
                 writeDensToNetCDF(i_record);
             }
-            
+
             i_record++;
-            
+
         }
     }
-    
+
     private void writeDensToNetCDF(int i_record) {
         getLogger().log(Level.INFO, "Saving variables...");
         int[] origin = new int[] {i_record, 0, 0};
@@ -531,7 +531,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             getLogger().log(Level.SEVERE, "Error saving density value");
             e.printStackTrace();
         }
-        
+
         // Write time.
         origin = new int[] {i_record, 0, 0};
         Array timeArray = new ArrayDouble.D1(1);
@@ -539,9 +539,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         try {
             densNcOut.write(densNcOut.findVariable("time"), origin, timeArray);
         } catch (IOException | InvalidRangeException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-        }      
+        }
     }
 
     private void writeToNetCDF(int i_record) {
@@ -575,21 +574,21 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     @Override
     public void lastStepOccurred(LastStepEvent e) {
-        
+
         if (this.isTrajectoryEnabled) {
             if (!e.isInterrupted()) {
                 writeToNetCDF(i_record);
             }
             this.closeTraj();
         }
-        
+
         if (this.isDensityEnabled) {
             if (!e.isInterrupted()) {
                 writeDensToNetCDF(i_record);
             }
             this.closeDist();
         }
-        
+
         if (null != predefinedTrackers) {
             predefinedTrackers.clear();
         }
@@ -597,22 +596,22 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             customTrackers.clear();
         }
     }
-    
+
     /** Setup trajectory outputs */
     private void setupTrajectoryOutput() throws Exception {
-        
+
         if(bNcOut != null) {
             // if ncOut is not null, i.e. if file is defined,
             // and if not in defined mode, nothing is done here
             return;
         }
-        
+
         this.trajectoryFileName = makeFileLocation();
         bNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, this.trajectoryFileName, this.chunker);
-    
+
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
-        
+
         /* add application trackers lon lat depth time */
         addPredefinedTrackers();
 
@@ -634,31 +633,31 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                         variable.addAttribute(attribute);
                     }
                 }
-                
+
             } catch (Exception ex) {
                 errTrackers.add(tracker);
                 getLogger().log(Level.WARNING, "Error adding tracker " + tracker.getName() + " in NetCDF output file. The variable will not be recorded.", ex);
             }
         }
-        
+
         trackers.removeAll(errTrackers);
 
-        // add gloabal attributes 
+        // add gloabal attributes
         addGlobalAttributes();
 
-        // add definition of the simulated area 
+        // add definition of the simulated area
         addRegion();
-        
+
         // add drifter variables
         addDrifters();
-        
+
         clearPredefinedTrackerList = true;
         clearCustomTrackerList = true;
     }
-        
+
     /** Setup density outputs */
-    private void setupDensityOutput() throws IOException { 
-        
+    private void setupDensityOutput() throws IOException {
+
         // If the file is defined and not in define mode, nothing is done.
         if ((bDensNcOut != null)) {
             return;
@@ -671,10 +670,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         Dimension dimTime;
         Dimension dimLongitude;
         Dimension dimLatitude;
-        this.densityFileName = makeFileLocation().replace(".nc", "_density.nc"); 
-              
+        this.densityFileName = makeFileLocation().replace(".nc", "_density.nc");
+
         bDensNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, this.densityFileName, this.chunker);
-        
+
         dimTime = bDensNcOut.addUnlimitedDimension("time");
         dimLongitude = bDensNcOut.addDimension("longitude", densTracker.getNLon());
         dimLatitude = bDensNcOut.addDimension("latitude", densTracker.getNLat());
@@ -684,7 +683,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         bDensNcOut.addVariable("longitude", ucar.ma2.DataType.FLOAT, "longitude");
         bDensNcOut.addVariable("latitude", ucar.ma2.DataType.FLOAT, "latitude");
         bDensNcOut.addVariable("density", ucar.ma2.DataType.INT, dimsDens);
-        
+
         // Create time variable and add attributes
         Variable.Builder<?> timeVar = bDensNcOut.addVariable("time", ucar.ma2.DataType.DOUBLE, "time");
         List<Attribute> listAttributes = new ArrayList<>();
@@ -697,9 +696,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         for (Attribute attribute : listAttributes) {
             timeVar.addAttribute(attribute);
         }
-                      
+
     }
-    
+
 
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
@@ -733,19 +732,19 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     break;
             }
         }
-        
+
         // adding options for NetCDF compression
-        if(ncVersion == NetcdfFileFormat.NETCDF4) { 
-            
+        if(ncVersion == NetcdfFileFormat.NETCDF4) {
+
             int deflateLevel = 0;
             boolean shuffle = false;
-            
+
             // if netcdf4 output, check if deflate level is set.
             key = "netcdf_output_compression";
             if (!this.isNull(key)) {
                 deflateLevel = Integer.valueOf(getParameter(key));
             }
-            
+
             // if deflate > 0, compression is on.
             if(deflateLevel > 0) {
                 key = "netcdf_output_shuffle";
@@ -753,7 +752,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 if(!this.isNull(key)) {
                     shuffle = Boolean.valueOf(getParameter(key));
                 }
-                
+
                 Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
                 key = "netcdf_output_compression_stragegy";
                 if (!this.isNull(key)) {
@@ -775,46 +774,46 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 this.chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
             }
         }
-        
+
         /* Get record frequency */
         record_frequency = Integer.valueOf(getParameter("record_frequency"));
         dt_record = record_frequency * Math.abs(getSimulationManager().getTimeManager().get_dt());
 
         key = "output.trajectory.enabled";
-        if(!this.isNull(key)) { 
+        if(!this.isNull(key)) {
             this.isTrajectoryEnabled = Boolean.valueOf(getParameter(key));
         }
 
         key = "output.density.enabled";
-        if(!this.isNull(key)) { 
+        if(!this.isNull(key)) {
             this.isDensityEnabled = Boolean.valueOf(getParameter(key));
         }
-        
-        if(this.isDensityEnabled) { 
+
+        if(this.isDensityEnabled) {
             this.setupDensityOutput();
         }
-        
+
         if(this.isTrajectoryEnabled) {
-            this.setupTrajectoryOutput();   
+            this.setupTrajectoryOutput();
         }
-        
+
         getLogger().info("Output manager setup [OK]");
     }
-    
-    
+
+
     /** Initialize trajectory outputs. */
     private void initializeTrajectoryOutputs() throws Exception {
-        
+
         if (ncOut != null) {
             // If the file is not in defined mode, assumes that everything has been already
             // created
             return;
         }
-        
+
         // add the zones It cannnot be done in the setup because the definition of the
         // zones requires that dataset has been initialized first.
         addZones();
-        
+
         /* create the NetCDF file */
         try {
             ncOut = bNcOut.build();
@@ -835,11 +834,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             sb.append("Map creation might not work correctly later on.");
             getLogger().log(Level.WARNING, sb.toString());
         }
-        
+
         try {
             writeDrifters();
         } catch(Exception ex) {
-            
+
         }
 
         /* write the zones */
@@ -856,47 +855,47 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* initialization completed */
         getLogger().log(Level.INFO, "Created output file {0}", ncOut.getOutputFile().getLocation());
-        
+
     }
 
     /** Initialize trajectory outputs. */
     private void initializeDensityOutputs() throws Exception {
-        
+
         // write the lon/lat coordinates
         if (densNcOut != null) {
             // If the file is not in defined mode, assumes that everything has been already
             // created
             return;
         }
-        
+
         densNcOut = bDensNcOut.build();
-        
+
         densNcOut.write(densNcOut.findVariable("longitude"), densTracker.getLonCells());
         densNcOut.write(densNcOut.findVariable("latitude"), densTracker.getLatCells());
-        
+
     }
-    
+
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
         getLogger().info("Output manager initialization [OK]");
-        
+
         /* reset counter */
         i_record = 0;
-        
-        if(this.isTrajectoryEnabled) { 
-            this.initializeTrajectoryOutputs();  
+
+        if(this.isTrajectoryEnabled) {
+            this.initializeTrajectoryOutputs();
         }
-        
-        if(this.isDensityEnabled) { 
-            this.initializeDensityOutputs();  
+
+        if(this.isDensityEnabled) {
+            this.initializeDensityOutputs();
         }
-        
+
         /* add listeners */
         getSimulationManager().getTimeManager().addNextStepListener(this);
         getSimulationManager().getTimeManager().addLastStepListener(this);
         getLogger().info("Output manager initialization [OK]");
-        
+
     }
 
     public class NCDimFactory {
