@@ -13,6 +13,13 @@ ICHTHYOP
 
 Ichthtyop is an individual based model that simulates Lagrangian transport of particles.
 
+# Requirements
+
+- NetCDF-C Library
+- Java > 11
+
+See [here](https://documentation.ichthyop.org/start/download_java.html) for details
+
 # Download
 
 - Go to https://github.com/ichthyop/ichthyop/releases/latest
@@ -25,7 +32,7 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 - Open a Terminal session.
 - Navigate to the `.jar` location using `cd`
 - Type `java -jar ichthyop-X.Y.Z-jar-with-dependencies.jar &`
-- To run withoug console, type `java -jar ichthyop-X.Y.Z-jar-with-dependencies.jar configuration_file.xml`, replacing `configuration_file.xml` by your own Ichthyop configuration file.
+- To run without console, type `java -jar ichthyop-X.Y.Z-jar-with-dependencies.jar configuration_file.xml`, replacing `configuration_file.xml` by your own Ichthyop configuration file.
 
 ## Windows
 
