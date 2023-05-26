@@ -12,12 +12,14 @@ public class ReefOrientationAction extends AbstractAction {
     private double dtturb;
 
     private Random randomGenerator;
+    double dt;
 
     @Override
     public void loadParameters() throws Exception {
 
         maximumDistance = Double.valueOf(getParameter("maximum.distance"));
         randomGenerator = new Random();
+        dt = getSimulationManager().getTimeManager().get_dt();
     }
 
     @Override
@@ -41,7 +43,16 @@ public class ReefOrientationAction extends AbstractAction {
             uorient = norm1 * htvelscl;
             vorient = norm2 * htvelscl;
 
+        } else {
+
+            uorient = 0;
+            vorient = 0;
+
         }
+
+        double dx = uorient * dt;
+        double dy = vorient * dt;
+        particle.increment(new double[]{dx, dy});
 
     }
 
