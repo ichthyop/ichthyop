@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.16
+
+### Bug fix
+
+- Correction of `BuoyancyAction.java`: correction of the ovoid calculation (minor axis was used twice) (cf. #71).
+
 ## Changes in 3.3.15
 
 ### Bug fix
