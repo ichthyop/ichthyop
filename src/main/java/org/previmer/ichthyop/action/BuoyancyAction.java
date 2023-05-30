@@ -259,14 +259,14 @@ public class BuoyancyAction extends AbstractAction {
          deltaDensity = (waterDensity - eggDensity);
          quotient = (2 * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS);
          logn = Math.log(quotient);
-         buoyancyEgg = (g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f
+         buoyancyEgg = (g * MEAN_MINOR_AXIS * MEAN_MAJOR_AXIS / (24.0f
          MOLECULAR_VISCOSITY * waterDensity) * (logn + 0.5f) * deltaDensity); //cms-1
          buoyancyMeters = (buoyancyEgg / 100.0f); //m.s-1
          return (buoyancyMeters * dt_sec); //meter
          */
         waterDensity = waterDensity(sal, tp);
 
-        double wpart =  g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * LOGN * (waterDensity - particleDensity) / 100.0f;
+        double wpart =  g * MEAN_MAJOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * LOGN * (waterDensity - particleDensity) / 100.0f;
         return wpart * dt;
 
     }
