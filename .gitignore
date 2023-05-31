@@ -1,6 +1,6 @@
 dist
 target
-nbactions.xml 
+nbactions.xml
 nbproject
 manifest.mf
 **html
@@ -10,3 +10,4 @@ output
 .classpath
 .project
 .settings
+.vscode/launch.json
