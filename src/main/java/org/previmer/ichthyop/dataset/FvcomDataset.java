@@ -378,7 +378,11 @@ public class FvcomDataset extends AbstractDataset {
     @Override
     public boolean isCloseToCost(double[] pGrid) {
         int triangle = this.findTriangle(pGrid);
-        return (this.nNeighbours[triangle] < 3);
+        if (triangle < 0) {
+            return true;
+        } else {
+            return (this.nNeighbours[triangle] < 3);
+        }
     }
 
     /** We consider that points are always out of edge. */
@@ -494,6 +498,10 @@ public class FvcomDataset extends AbstractDataset {
 
         double pGrid[] = new double[] { xRho, yRho };
         int iTriangle = this.findTriangle(pGrid);
+        if (iTriangle < 0) {
+            return Double.NaN;
+        }
+
         double xB = this.getXBarycenter(iTriangle);
         double yB = this.getYBarycenter(iTriangle);
         double dX = xRho - xB;
