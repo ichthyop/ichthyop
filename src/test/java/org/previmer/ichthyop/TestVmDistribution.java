@@ -48,7 +48,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.previmer.ichthyop.action.orientation.ReefOrientationAction;
 
-
+/** Test of the Von Mises distributions. Expected values are extracted from Python, using:
+ * import numpy as np
+ * from scipy.stats import vonmises
+ * kappa = 3.99
+ * mean, var, skew, kurt = vonmises.stats(kappa, moments='mvsk')
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
 public class TestVmDistribution {
