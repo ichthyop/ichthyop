@@ -63,6 +63,8 @@ public class Particle extends GridPoint implements IParticle {
     private boolean living = true;
     private boolean locked = false;
     private final List<ParticleLayer> layers = new ArrayList<>();
+    private double oldLon;
+    private double oldLat;
 
     @Override
     public ParticleLayer getLayer(Class<?> layerClass) {
@@ -195,5 +197,15 @@ public class Particle extends GridPoint implements IParticle {
         str.append(getDeathCause().toString());
         str.append('\n');
         return str.toString();
+    }
+
+    @Override
+    public double getOldLat() {
+        return this.oldLat;
+    }
+
+    @Override
+    public double getOldLon() {
+        return this.oldLon;
     }
 }
