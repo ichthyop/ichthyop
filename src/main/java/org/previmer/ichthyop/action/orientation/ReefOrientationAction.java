@@ -17,7 +17,7 @@ public class ReefOrientationAction extends AbstractAction {
 
   private double secs_in_day = 86400;
 
-  private Random randomGenerator;
+  private Random randomGenerator = new Random();
   double dt;
 
   @Override
@@ -27,7 +27,6 @@ public class ReefOrientationAction extends AbstractAction {
     swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
     swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
 
-    randomGenerator = new Random();
     p = new double[20];
     theta = new double[21];
 
@@ -70,7 +69,7 @@ public class ReefOrientationAction extends AbstractAction {
       double thetaCurrent = Haversine(particle.getOldLon(), particle.getOldLat(), particle.getLon(), particle.getLat());
       double mu = -d * (thetaCurrent - thetaPref);
 
-      double ti = random_von_Mises(Kappa_reef, false);
+      double ti = randomVonMisesJava(0, Kappa_reef);
       double theta = ti - thetaCurrent - mu;
 
       double age = particle.getAge() / (secs_in_day);
@@ -92,6 +91,29 @@ public class ReefOrientationAction extends AbstractAction {
 
   }
 
+  /** Another algorithm for the computation of VM Distributions.
+   * Source: https://github.com/robbymckilliam/Distributions/blob/master/src/org/mckilliam/distributions/circular/VonMises.java */
+  public double randomVonMisesJava(double mu, double kappa) {
+
+    double tau = 1 + Math.sqrt(1 + 4 * kappa * kappa);
+    double rau = (tau - Math.sqrt(2 * tau)) / (2 * kappa);
+    double r = (1 + rau * rau) / (2 * rau);
+
+    while (true) {
+
+      double z = Math.cos(Math.PI * randomGenerator.nextDouble());
+      double f = (1 + r * z) / (r + z);
+      double c = kappa * (r - f);
+
+      double U2 = randomGenerator.nextDouble();
+      if (c * (2 - c) - U2 > 0 || Math.log(c / U2) + 1 - c > 0)
+        return mu + Math.signum(randomGenerator.nextDouble() - 0.5) * Math.acos(f); // / 2 / Math.PI;
+
+    }
+
+  }
+
+
   /*
    * Algorithm VMD from: Dagpunar, J.S. (1990) `Sampling from the von Mises
    * distribution via a comparison of random numbers', J. of Appl. Statist., 17,
@@ -102,7 +124,7 @@ public class ReefOrientationAction extends AbstractAction {
    * function sets up starting values and may be very much slower.
    */
 
-  private double random_von_Mises(double k, boolean first) {
+  private double randomVonMisesFortran(double k, boolean first) {
 
     int j, n;
     double pi = Math.PI;
