@@ -233,7 +233,7 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      */
     @Override
-    public double get_dUx(double[] pGrid, double time) {
+    public double get_dUx(double[] pGrid, double time, boolean normalize) {
 
         double du = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -262,7 +262,11 @@ public class Mercator2dDataset extends AbstractDataset {
                     CO += co;
                     x = (1.d - x_euler) * u_tp0.getDouble(index_u) + x_euler * u_tp1.getDouble(index_u);
                     if (!Double.isNaN(x)) {
-                        du += x * co / dxu[j + jj];
+                        if (normalize) {
+                            du += x * co / dxu[j + jj];
+                        } else {
+                            du += x * co;
+                        }
                     }
                 }
             }
@@ -274,7 +278,7 @@ public class Mercator2dDataset extends AbstractDataset {
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
+    public double get_dVy(double[] pGrid, double time, boolean normalize) {
 
         double dv = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -302,7 +306,11 @@ public class Mercator2dDataset extends AbstractDataset {
 
                 x = (1.d - x_euler) * v_tp0.getDouble(index_v) + x_euler * v_tp1.getDouble(index_v);
                 if (!Double.isNaN(x)) {
-                    dv += x * co / dyv;
+                    if (normalize) {
+                        dv += x * co / dyv;
+                    } else {
+                        dv += x * co;
+                    }
                 }
             }
         }

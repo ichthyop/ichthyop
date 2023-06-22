@@ -353,7 +353,7 @@ public class OscarDataset extends AbstractDataset {
     }
 
     @Override
-    public double get_dUx(double[] pGrid, double time) {
+    public double get_dUx(double[] pGrid, double time, boolean normalize) {
 
         double du = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -376,7 +376,11 @@ public class OscarDataset extends AbstractDataset {
                 CO += co;
                 double x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
                 if (!Double.isNaN(x)) {
-                    du += x * co / dlon[ci];
+                    if(normalize) {
+                        du += x * co / dlon[ci];
+                    } else {
+                        du += x * co;
+                    }
                 }
             }
         }
@@ -388,7 +392,7 @@ public class OscarDataset extends AbstractDataset {
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
+    public double get_dVy(double[] pGrid, double time, boolean normalize) {
 
         double dv = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -411,7 +415,11 @@ public class OscarDataset extends AbstractDataset {
                 CO += co;
                 double x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
                 if (!Double.isNaN(x)) {
-                    dv += x * co / dlat[j + jj];
+                    if (normalize) {
+                        dv += x * co / dlat[j + jj];
+                    } else {
+                        dv += x * co;
+                    }
                 }
             }
         }

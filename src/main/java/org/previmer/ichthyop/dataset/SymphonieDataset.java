@@ -849,7 +849,12 @@ public class SymphonieDataset extends AbstractDataset {
     }
 
     @Override
-    public double get_dUx(double[] pGrid, double time) {
+    public double get_dUx(double[] pGrid, double time, boolean normalize) {
+
+        if(!normalize) {
+            throw new UnsupportedOperationException("Raw speed computation not implemented yet in Symphonie");
+        }
+
         double du = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -887,7 +892,12 @@ public class SymphonieDataset extends AbstractDataset {
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
+    public double get_dVy(double[] pGrid, double time, boolean normalize) {
+
+        if(!normalize) {
+            throw new UnsupportedOperationException("Raw speed computation not implemented yet in Symphonie");
+        }
+
         double dv = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
