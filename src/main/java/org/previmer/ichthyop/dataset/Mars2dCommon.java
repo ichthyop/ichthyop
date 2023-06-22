@@ -79,7 +79,7 @@ public abstract class Mars2dCommon extends MarsCommon {
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
+    public double get_dVy(double[] pGrid, double time, boolean normalize) {
         double dv = 0.d;
         double ix, jy;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -101,7 +101,11 @@ public abstract class Mars2dCommon extends MarsCommon {
                 CO += co;
                 if (!Float.isNaN(v_tp0[j + jj - 1][i + ii])) {
                     x = (1.d - x_euler) * v_tp0[j + jj - 1][i + ii] + x_euler * v_tp1[j + jj - 1][i + ii];
+                    if(normalize) {
                     dv += 2.d * x * co / (dyv[Math.max(j + jj - 1, 0)][i + ii] + dyv[j + jj][i + ii]);
+                    } else {
+                        dv += x * co;
+                    }
                 }
             }
         }
@@ -113,7 +117,7 @@ public abstract class Mars2dCommon extends MarsCommon {
     }
 
     @Override
-    public double get_dUx(double[] pGrid, double time) {
+    public double get_dUx(double[] pGrid, double time, boolean normalize) {
 
         double du = 0.d;
         double ix, jy;
@@ -136,7 +140,11 @@ public abstract class Mars2dCommon extends MarsCommon {
                 CO += co;
                 if (!Float.isNaN(u_tp0[j + jj][i + ii - 1])) {
                     x = (1.d - x_euler) * u_tp0[j + jj][i + ii - 1] + x_euler * u_tp1[j + jj][i + ii - 1];
-                    du += 2.d * x * co / (dxu[j + jj][Math.max(i + ii - 1, 0)] + dxu[j + jj][i + ii]);
+                    if (normalize) {
+                        du += 2.d * x * co / (dxu[j + jj][Math.max(i + ii - 1, 0)] + dxu[j + jj][i + ii]);
+                    } else {
+                        du += x * co;
+                    }
                 }
             }
         }
