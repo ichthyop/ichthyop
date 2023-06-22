@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.util.VonMisesRandom;
 
 public class ReefOrientationAction extends AbstractAction {
 
@@ -64,7 +65,9 @@ public class ReefOrientationAction extends AbstractAction {
       double thetaCurrent = haverSine(particle.getOldLon(), particle.getOldLat(), particle.getLon(), particle.getLat());
       double mu = -d * (thetaCurrent - thetaPref);
 
-      double ti = randomVonMisesJava(0, Kappa_reef);
+      VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef);
+
+      double ti = vonMises.nextDouble();
       double theta = ti - thetaCurrent - mu;
 
       double age = particle.getAge() / (secs_in_day);
@@ -83,28 +86,6 @@ public class ReefOrientationAction extends AbstractAction {
     double dx = uorient * dt;
     double dy = vorient * dt;
     particle.increment(new double[] { dx, dy });
-
-  }
-
-  /** Another algorithm for the computation of VM Distributions.
-   * Source: https://github.com/robbymckilliam/Distributions/blob/master/src/org/mckilliam/distributions/circular/VonMises.java */
-  public double randomVonMisesJava(double mu, double kappa) {
-
-    double tau = 1 + Math.sqrt(1 + 4 * kappa * kappa);
-    double rau = (tau - Math.sqrt(2 * tau)) / (2 * kappa);
-    double r = (1 + rau * rau) / (2 * rau);
-
-    while (true) {
-
-      double z = Math.cos(Math.PI * randomGenerator.nextDouble());
-      double f = (1 + r * z) / (r + z);
-      double c = kappa * (r - f);
-
-      double U2 = randomGenerator.nextDouble();
-      if (c * (2 - c) - U2 > 0 || Math.log(c / U2) + 1 - c > 0)
-        return mu + Math.signum(randomGenerator.nextDouble() - 0.5) * Math.acos(f); // / 2 / Math.PI;
-
-    }
 
   }
 

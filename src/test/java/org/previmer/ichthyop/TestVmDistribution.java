@@ -44,9 +44,12 @@ package org.previmer.ichthyop;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import javax.xml.bind.helpers.ValidationEventImpl;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.previmer.ichthyop.action.orientation.ReefOrientationAction;
+import org.previmer.ichthyop.util.VonMisesRandom;
 
 /** Test of the Von Mises distributions. Expected values are extracted from Python, using:
  * import numpy as np
@@ -63,11 +66,11 @@ public class TestVmDistribution {
 
     private double[] getValues(double mu, double kappa) {
 
-        ReefOrientationAction action = new ReefOrientationAction();
+        VonMisesRandom vm = new VonMisesRandom(0, kappa);
         int N = 100000000;
         double[] values = new double[N];
         for(int k = 0; k < N; k++) {
-            values[k] = action.randomVonMisesJava(0, kappa);
+            values[k] = vm.nextDouble();
         }
 
         return values;
