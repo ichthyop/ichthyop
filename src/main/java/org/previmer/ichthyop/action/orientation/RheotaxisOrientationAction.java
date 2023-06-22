@@ -48,9 +48,13 @@ public class RheotaxisOrientationAction extends AbstractAction {
         swimmingSpeed = swimmingSpeed / 100;
         double norm_swim = Math.abs(swimmingSpeed);
 
-        double[] pGrid = new double[] {particle.getX(), particle.getY()};
+        double[] pGrid;
+        if(getSimulationManager().getDataset().is3D()) {
+            pGrid = new double[] {particle.getX(), particle.getY(), particle.getZ()};
+        } else {
+            pGrid = new double[] { particle.getX(), particle.getY() };
+        }
 
-        // TODO: convert this in m/s instead of s-1
         double uf = getSimulationManager().getDataset().get_dUx(pGrid, getSimulationManager().getTimeManager().getTime(), false);
         double vf = getSimulationManager().getDataset().get_dVy(pGrid, getSimulationManager().getTimeManager().getTime(), false);
         double uv = Math.sqrt(uf * uf + vf * vf);
