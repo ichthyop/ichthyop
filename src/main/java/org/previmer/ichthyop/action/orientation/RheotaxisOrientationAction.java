@@ -8,11 +8,9 @@ import org.previmer.ichthyop.util.VonMisesRandom;
 
 public class RheotaxisOrientationAction extends AbstractAction {
 
-    private double maximumDistance;
-    private double horDiffOrient;
-    private double dtturb;
     private double swimmingSpeedHatch;
     private double swimmingSpeedSettle;
+    private double vonMisesKappa;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
     private VonMisesRandom vonMises;
@@ -25,6 +23,7 @@ public class RheotaxisOrientationAction extends AbstractAction {
     public void loadParameters() throws Exception {
         swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
         swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
+        vonMisesKappa = Math.toRadians(Double.valueOf(getParameter("swimming.von.mises.kappa")));
     }
 
     @Override
@@ -91,7 +90,8 @@ public class RheotaxisOrientationAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-        vonMises = new VonMisesRandom(0, 5);
+        vonMises = new VonMisesRandom(0, vonMisesKappa);
+        dt = getSimulationManager().getTimeManager().get_dt();
     }
 
 }
