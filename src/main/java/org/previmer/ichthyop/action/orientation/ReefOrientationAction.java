@@ -13,6 +13,7 @@ public class ReefOrientationAction extends AbstractAction {
   private double dtturb;
   private double swimmingSpeedHatch;
   private double swimmingSpeedSettle;
+  public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
   private double secs_in_day = 86400;
 
@@ -29,8 +30,20 @@ public class ReefOrientationAction extends AbstractAction {
     dt = getSimulationManager().getTimeManager().get_dt();
   }
 
+
   @Override
   public void execute(IParticle particle) {
+
+        double[] mvt = getDlonDlat(particle);
+        double newLon = particle.getLon() + mvt[0];
+        double newLat = particle.getLat() + mvt[1];
+        double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
+        double[] posIncr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
+        particle.increment(posIncr);
+
+  }
+
+  public double[] getDlonDlat(IParticle particle) {
 
     double uorient, vorient;
     int N = 5;
@@ -56,6 +69,7 @@ public class ReefOrientationAction extends AbstractAction {
 
       uorient = 0;
       vorient = 0;
+
       double d = 1 - (closestReefDistance / maximumDistance);
       double thetaPref = -haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
           latBarycenter[closestReefIndex]);
@@ -85,7 +99,14 @@ public class ReefOrientationAction extends AbstractAction {
 
     double dx = uorient * dt;
     double dy = vorient * dt;
-    particle.increment(new double[] { dx, dy });
+
+    double[] latlon = getSimulationManager().getDataset().xy2latlon(particle.getX(), particle.getY());
+    double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
+    double dLon = dx / one_deg_lon_meter;
+    double dLat = dy / ONE_DEG_LATITUDE_IN_METER;
+
+    return new double[] { dLon, dLat };
+
 
   }
 
