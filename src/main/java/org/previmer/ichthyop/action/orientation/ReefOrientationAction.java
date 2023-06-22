@@ -61,12 +61,12 @@ public class ReefOrientationAction extends AbstractAction {
       uorient = 0;
       vorient = 0;
       double d = 1 - (closestReefDistance / maximumDistance);
-      double thetaPref = -Haversine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
+      double thetaPref = -haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
           latBarycenter[closestReefIndex]);
 
       double Kappa_reef = kappaBarycenter[closestReefIndex];
 
-      double thetaCurrent = Haversine(particle.getOldLon(), particle.getOldLat(), particle.getLon(), particle.getLat());
+      double thetaCurrent = haverSine(particle.getOldLon(), particle.getOldLat(), particle.getLon(), particle.getLat());
       double mu = -d * (thetaCurrent - thetaPref);
 
       double ti = randomVonMisesJava(0, Kappa_reef);
@@ -114,7 +114,7 @@ public class ReefOrientationAction extends AbstractAction {
   }
 
   /** Haversine formula to compute angles from lat and lon */
-  private double Haversine(double lon1, double lat1, double lon2, double lat2) {
+  private double haverSine(double lon1, double lat1, double lon2, double lat2) {
 
     double rlon1 = Math.toRadians(lon1);
     double rlat1 = Math.toRadians(lat1);
@@ -164,25 +164,4 @@ public class ReefOrientationAction extends AbstractAction {
 
   }
 
-  /** Gaussian integration of exp(k.cosx) from a to b. */
-  private double integral(double a, double b, double dk) {
-
-    double xmid, range, x1, x2;
-    double[] x = new double[] { 0.238619186083197, 0.661209386466265, 0.932469514203152 };
-    double[] w = new double[] { 0.467913934572691, 0.360761573048139, 0.171324492379170 };
-
-    xmid = (a + b) / 2.;
-    range = (b - a) / 2.;
-
-    double result = 0.;
-    for (int i = 1; i <= 3; i++) {
-      x1 = xmid + x[i - 1] * range;
-      x2 = xmid - x[i - 1] * range;
-      result = result + w[i - 1] * (Math.exp(dk * Math.cos(x1)) + Math.exp(dk * Math.cos(x2)));
-    }
-
-    result = result * range;
-    return result;
-
-  }
 }
