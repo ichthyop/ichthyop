@@ -10,8 +10,6 @@ public class ReefOrientationAction extends AbstractAction {
   private double maximumDistance;
   private double horDiffOrient;
   private double dtturb;
-  private int nk;
-  private double[] p, theta;
   private double swimmingSpeedHatch;
   private double swimmingSpeedSettle;
 
@@ -26,9 +24,6 @@ public class ReefOrientationAction extends AbstractAction {
     maximumDistance = Double.valueOf(getParameter("maximum.distance"));
     swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
     swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
-
-    p = new double[20];
-    theta = new double[21];
 
     dt = getSimulationManager().getTimeManager().get_dt();
   }
@@ -128,8 +123,6 @@ public class ReefOrientationAction extends AbstractAction {
 
   @Override
   public void init(IParticle particle) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'init'");
   }
 
   public int findSmallestDistance(double[] distance) {
