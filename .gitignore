@@ -1,6 +1,6 @@
 dist
 target
-nbactions.xml 
+nbactions.xml
 nbproject
 manifest.mf
 **html
@@ -10,9 +10,14 @@ output
 .classpath
 .project
 .settings
-**/*.py
-**/*ipynb
-**/.classpath
-**/.project
-**/.settings
 
+**/*.swp
+
+doc/_build
+doc/**/*ipynb*
+doc/generated
+doc/*sh
+doc/**/_static/*svg
+doc/**/_static/*pdf
+
+doc/_static/javadoc

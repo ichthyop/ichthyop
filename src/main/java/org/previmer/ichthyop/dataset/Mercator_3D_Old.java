@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -392,7 +392,7 @@ public class Mercator_3D_Old extends AbstractDataset {
     /*
      * private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws
      * InvalidRangeException, IOException {
-     * 
+     *
      * Array array = nc.findVariable(varname).read().reduce(); double[][] field =
      * new double[ny][nx]; Index index = array.getIndex(); for (int j = 0; j < ny;
      * j++) { for (int i = 0; i < nx; i++) { index.set(j + jpo, i + ipo);
@@ -401,7 +401,7 @@ public class Mercator_3D_Old extends AbstractDataset {
     /**
      * Advects the particle with the model velocity vector, using a Forward Euler
      * scheme. Let's see how it works with the example of the Zonal component.
-     * 
+     *
      * <pre>
      * ROMS and MARS uses an Arakawa C grid.
      * Here is the scheme (2D) of cells (i, j) and (i + 1, j):
@@ -580,7 +580,7 @@ public class Mercator_3D_Old extends AbstractDataset {
 
     /**
      * Computes the vertical velocity vector.
-     * 
+     *
      * <pre>
      * Drill:
      *
@@ -1211,11 +1211,11 @@ public class Mercator_3D_Old extends AbstractDataset {
      * Computes the depth of the specified sigma level at the x-y particle location.
      *
      * @param xRho a double, x-coordinate of the grid point
-     * 
+     *
      * @param yRho a double, y-coordinate of the grid point
-     * 
+     *
      * @param k an int, the index of the sigma level
-     * 
+     *
      * @return a double, the depth [meter] at (x, y, k)
      */
     public double getDepth(int k) {
@@ -1249,10 +1249,10 @@ public class Mercator_3D_Old extends AbstractDataset {
      * Determines whether the specified {@code RohPoint} is in water.
      *
      * @param ptRho the RhoPoint
-     * 
+     *
      * @return <code>true</code> if the {@code RohPoint} is in water,
      * <code>false</code> otherwise.
-     * 
+     *
      * @see #isInWater(int i, int j)
      */
     @Override
@@ -1290,11 +1290,11 @@ public class Mercator_3D_Old extends AbstractDataset {
      * Transforms the depth at specified x-y particle location into z coordinate
      *
      * @param xRho a double, the x-coordinate
-     * 
+     *
      * @param yRho a double, the y-coordinate
-     * 
+     *
      * @param depth a double, the depth of the particle
-     * 
+     *
      * @return a double, the z-coordinate corresponding to the depth
      *
      * pverley pour chourdin: méthode à tester.
@@ -1346,11 +1346,11 @@ public class Mercator_3D_Old extends AbstractDataset {
      * mais il faudra faire une validation plus sérieuse.
      *
      * @param x double
-     * 
+     *
      * @param y double
-     * 
+     *
      * @param z double
-     * 
+     *
      * @return double
      */
     @Override
@@ -1537,9 +1537,9 @@ public class Mercator_3D_Old extends AbstractDataset {
      * Determines whether or not the x-y particle location is on edge of the domain.
      *
      * @param x a double, the x-coordinate
-     * 
+     *
      * @param y a double, the y-coordinate
-     * 
+     *
      * @return <code>true</code> if the particle is on edge of the domain
      * <code>false</code> otherwise.
      */

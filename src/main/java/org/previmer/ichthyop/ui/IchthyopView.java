@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.ui;
@@ -102,7 +102,7 @@ public class IchthyopView extends FrameView
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
-        
+
         initComponents();
         setStatusBar(statusBar);
 
@@ -576,7 +576,7 @@ public class IchthyopView extends FrameView
     }
 
     private class SimulationPreviewTask extends SFTask<Object, Object> {
-        
+
         private boolean setupSucceeded;
         private boolean initSucceeded;
 
@@ -588,7 +588,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected Object doInBackground() throws Exception {
-            if (!initDone) {
+            if (getSimulationManager().getResetPreview()) {
                 setMessage(resourceMap.getString("simulationRun.msg.init.start"));
                 getSimulationManager().setup();
                 setupSucceeded = true;
@@ -600,7 +600,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void onSuccess(Object obj) {
-            initDone = true;
+            getSimulationManager().setResetPreview(false);
             setMessage(resourceMap.getString("simulationRun.msg.init.ok"), false, LogLevel.COMPLETE);
             showSimulationPreview();
         }
@@ -614,7 +614,7 @@ public class IchthyopView extends FrameView
             setMessage(msg.toString(), false, Level.SEVERE);
             setupSucceeded = initSucceeded = false;
             btnPreview.setSelected(false);
-            initDone = false;
+            getSimulationManager().setResetPreview(true);
         }
     }
 
@@ -696,7 +696,7 @@ public class IchthyopView extends FrameView
         @Override
         protected void onSuccess(Object o) {
             btnSaveCfgFile.getAction().setEnabled(false);
-            initDone = false;
+            getSimulationManager().setResetPreview(true);
             setMessage(resourceMap.getString("saveConfigurationFile.msg.finished") + " " + getSimulationManager().getConfigurationFile().getName(), false, LogLevel.COMPLETE);
         }
 
@@ -889,7 +889,7 @@ public class IchthyopView extends FrameView
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
-        initDone = false;
+        getSimulationManager().setResetPreview(true);
         saveAsMenuItem.getAction().setEnabled(true);
         closeMenuItem.getAction().setEnabled(true);
         btnSimulationRun.getAction().setEnabled(true);
@@ -1037,7 +1037,7 @@ public class IchthyopView extends FrameView
     @Action
     public void previewSimulation() {
         if (btnPreview.isSelected()) {
-            if (!initDone) {
+            if (getSimulationManager().getResetPreview()) {
                 getApplication().getContext().getTaskService().execute(new SimulationPreviewTask(getApplication(), btnPreview.isSelected()));
             } else {
                 showSimulationPreview();
@@ -1128,7 +1128,7 @@ public class IchthyopView extends FrameView
                         msg.append(getSimulationManager().getTimeManager().timeToString());
                         msg.append(")");
                     }
-                    // Display current step 
+                    // Display current step
                     setMessage(msg.toString());
                     /* step simulation */
                     getSimulationManager().getSimulation().step();
@@ -2567,20 +2567,20 @@ public class IchthyopView extends FrameView
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblFramePerSecondMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblFramePerSecondMouseClicked
-        
+
         if (evt.getClickCount() > 1) {
             animationSpeed.setValue(1.5f);
         }
 }//GEN-LAST:event_lblFramePerSecondMouseClicked
 
     private void animationSpeedStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_animationSpeedStateChanged
-        
+
         JSpinner source = (JSpinner) evt.getSource();
         nbfps = (Float) source.getValue();
 }//GEN-LAST:event_animationSpeedStateChanged
 
     private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -2591,17 +2591,17 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_sliderTimeStateChanged
 
     private void hyperLinkLogoMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_hyperLinkLogoMouseEntered
-        
+
         pnlLogo.setAlpha(0.9f);
     }//GEN-LAST:event_hyperLinkLogoMouseEntered
 
     private void hyperLinkLogoMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_hyperLinkLogoMouseExited
-        
+
         pnlLogo.setAlpha(0.4f);
     }//GEN-LAST:event_hyperLinkLogoMouseExited
 
     private void taskPaneConfigurationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneConfigurationPropertyChange
-        
+
         if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
@@ -2623,7 +2623,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_taskPaneConfigurationPropertyChange
 
     private void taskPaneSimulationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneSimulationPropertyChange
-        
+
         if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneConfiguration.setCollapsed(true);
@@ -2641,7 +2641,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_taskPaneSimulationPropertyChange
 
     private void taskPaneMappingPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneMappingPropertyChange
-        
+
         if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
@@ -2658,7 +2658,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_taskPaneMappingPropertyChange
 
     private void taskPaneAnimationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneAnimationPropertyChange
-        
+
         if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
@@ -2674,7 +2674,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_taskPaneAnimationPropertyChange
 
     private void btnColorMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMinActionPerformed
-        
+
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -2685,7 +2685,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_btnColorMinActionPerformed
 
     private void btnColorMaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMaxActionPerformed
-        
+
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -2696,7 +2696,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_btnColorMaxActionPerformed
 
     private void btnParticleColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnParticleColorActionPerformed
-        
+
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -2710,7 +2710,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_btnParticleColorActionPerformed
 
     private void btnColorMedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMedActionPerformed
-        
+
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -2721,7 +2721,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_btnColorMedActionPerformed
 
     private void spinnerParticleSizeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinnerParticleSizeStateChanged
-        
+
         JSpinner source = (JSpinner) evt.getSource();
         final int pixel = (Integer) source.getValue();
         SwingUtilities.invokeLater(new Runnable() {
@@ -2734,7 +2734,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_spinnerParticleSizeStateChanged
 
     private void ckBoxDrawGridActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxDrawGridActionPerformed
-        
+
         getSimulationUI().setGridVisible(ckBoxDrawGrid.isSelected());
     }//GEN-LAST:event_ckBoxDrawGridActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -2851,7 +2851,6 @@ public class IchthyopView extends FrameView
     private Task<?, ?> simulActionTask;
     private Task<?, ?> createMapTask;
     private Task<?, ?> kmzTask;
-    private boolean initDone;
     private final ReplayPanel replayPanel = new ReplayPanel();
     private final float TEN_MINUTES = 10.f * 60.f;
     private final Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);

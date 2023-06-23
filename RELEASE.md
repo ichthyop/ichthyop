@@ -1,5 +1,41 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.16
+
+### Bug fix
+
+- Correction of `BuoyancyAction.java`: correction of the ovoid calculation (minor axis was used twice) (cf. #71).
+
+## Changes in 3.3.15
+
+### Bug fix
+
+- Correction of `Mercator2dDataset.java` to take into account data either in float or double. Use `Index` object instead of `copyToNDJavaArray`
+
+## Changes in 3.3.14
+
+### New features
+
+- Possibility to define the number of particles released per area
+- Sphinx documentation is now included in the repository
+- Update of the different plugins and dependencies
+
+### Bug fix
+
+- If the `units` attribute is not found in the NetCDF file, then the `time_of_origin` parameter is used. **Must be in the NETCDF standards, i.e `seconds since YYYY-MM-DD HH:MM`**
+- Adding serial parameters with the console did not work properly when hidden parameters were effectively hidden. The button is therefore activated only when hidden parameters are shown.
+- Correction of a bug in the Preview. When zones were modified, preview was not updated accordingly. Now it is the case.
+- In `MigrationAction.java`, correction of the check on whether the particle destination depth is below the sea-bed. Comparison with bathymetry is now used instead of depth at `k=0`, which only workd on sigma models (ROMS and MARS)
+- In some cases, the bouncing algorithm fails and particle may advect over land (if wind drift is activated). Now, if the bouncing algorithm fails, particle is killed.
+- Change in the resource encoding. Move from `ISO-8859-1` to `UTF-8`
+
+## Changes in 3.3.13
+
+### Bug fix
+
+- Correction in the reading of vertical scale variables in `Mercator_3D`. Management of the case where it is a 1D variable.
+- Forcing compilation and target to Java 11 in `pom.xml`
+
 ## Changes in 3.3.12
 
 ### New features
@@ -13,7 +49,7 @@
 
 ### Bug fix
 
-- Consideration of the case where HH:mm:ss is not provided in units (issues #22) 
+- Consideration of the case where HH:mm:ss is not provided in units (issues #22)
 - Consideration of the case where time is provided as HH:mm instead of HH:mm:ss (issue #32)
 - If NetCDF time cannot be properly read in NetCDF (wrong units), use the string provided in the `time_origin` parameter.
 - Adding the case when time units is in `minutes since ...`
@@ -36,7 +72,7 @@
 
 ### New features
 
-- Resources have been moved in a new folder (`src/main/resources`). This allows the VSCOde debugger to work more  nicely (debugging in `java` files and not in `class` files). 
+- Resources have been moved in a new folder (`src/main/resources`). This allows the VSCOde debugger to work more  nicely (debugging in `java` files and not in `class` files).
 
 ### Bug fix
 
@@ -146,12 +182,12 @@
 * Replaced ClimatoCalendar by Day360Calendar which takes into account an Origin of time (same parameter used for the Gregorian Calendar).
 * NemoDataset, added new function to reconstruct three-dimensional e3t field from e3t_0, e3t_ps and mbathy
 
- 
+
 ### Requirement
 
 Java >= 1.8
 
-### Run Ichthyop 
+### Run Ichthyop
 
 Double click on the JAR file or run it from commmand line 'java -jar ichthyop-3.3.jar'
 
@@ -183,7 +219,7 @@ Bactracking - Multi release event did not work in backward mode.
 ### New features:
 Dataset - Ichthyop can read Symphonie (http://sirocco.omp.obs-mip.fr/outils/Symphonie/Accueil/SymphoAccueil.htm) NetCDF output files.
 Lethal temperature - Added a hot lethal temperature. Lethal temperatures (both cold and hot) can be provided as a function of particle age, in a CSV file.
-Buoyancy - Egg density can be provided as a function of age, in a CSV file. 
+Buoyancy - Egg density can be provided as a function of age, in a CSV file.
 
 ## From 3.0b to 3.1
 ### Bug fixes:
@@ -199,7 +235,7 @@ OPA NEMO - computation of the vertical velocity was not correct. Now requires fi
 Configuration menu - Save as button did not work.
 Gregorian calendar - The time converter generated a 24h offset on leap years only.
 ROMS Dataset - Wrong calculation of the NEW type of vertical coordinate.
-Coastal advection - 
+Coastal advection -
 
 
 ### New features:

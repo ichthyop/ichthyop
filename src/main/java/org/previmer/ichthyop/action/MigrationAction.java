@@ -8,7 +8,7 @@
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
@@ -215,6 +215,18 @@ public class MigrationAction extends AbstractAction {
         // Nothing to do
     }
 
+    private double getBathy(IParticle particle) {
+
+        int i = (int) Math.floor(particle.getX());
+        int j = (int) Math.floor(particle.getY());
+        double bottom = -Math.abs(getSimulationManager().getDataset().getBathy(i, j));
+        if (Double.isNaN(bottom)) {
+            bottom = 0;
+        }
+        return bottom;
+
+    }
+
     @Override
     public void execute(IParticle particle) {
 
@@ -232,7 +244,9 @@ public class MigrationAction extends AbstractAction {
             double depth;
             if (isodepth) {
                 // constant depth
-                depth = depthDay;
+                // adding a constraint in case of constant depth.
+                double bottom = this.getBathy(particle);
+                depth = (depthDay < bottom) ? particle.getDepth() : depthDay;
             } else {
                 // diel vertical migration
                 depth = getDepth(particle, getSimulationManager().getTimeManager().getTime());
@@ -259,11 +273,11 @@ public class MigrationAction extends AbstractAction {
         double realHour = (time / (60 * 60)) % 24;
         int hour = (int) Math.floor(realHour);
         double minute = (int) ((realHour - hour) * 60) ;
-        
+
         LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)
-        double bottom = getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0);
+        double bottom = this.getBathy(particle);
         double output;
 
         if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {
