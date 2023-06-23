@@ -80,17 +80,17 @@ public class TestNemoGrid extends SimulationManagerAccessor {
 
     @Test
     public void testNx() {
-        assertEquals(26, nemoGrid.get_nx());
+        assertEquals(182, nemoGrid.get_nx());
     }
 
     @Test
     public void testNy() {
-        assertEquals(16, nemoGrid.get_ny());
+        assertEquals(149, nemoGrid.get_ny());
     }
 
     @Test
     public void testNz() {
-        assertEquals(45, nemoGrid.get_nz());
+        assertEquals(30, nemoGrid.get_nz());
     }
 
     @Test
