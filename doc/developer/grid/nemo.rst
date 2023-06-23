@@ -8,7 +8,7 @@ NEMO grid
     import subprocess
     
     cwd = os.getcwd()
-    fpath = "grid/_static/nemo.py"
+    fpath = "developer/grid/_static/nemo.py"
     subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 In this section, the main features of the NEMO grid and the implications in Ichthyop are summarized.

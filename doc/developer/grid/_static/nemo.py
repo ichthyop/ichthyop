@@ -20,7 +20,7 @@ working_directory
 if working_directory.endswith('_static'):
     outdir = './'
 else:
-    outdir = os.path.join('grid', '_static')
+    outdir = os.path.join('developer', 'grid', '_static')
 print("++++++++++++++++++++++++++++++++++++++++++ ", outdir)
 
 # # NEMO grid
