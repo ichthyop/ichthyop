@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.grid;
@@ -57,20 +57,20 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
-/** Class to manage Nemo grid. 
- * 
+/** Class to manage Nemo grid.
+ *
  * The Grid layout in Roms is as follows:
- * 
+ *
  * +----------+------------+
- * |          |            |     
- * |          |            |      
- * |          |            |       
- * |----------+--V(i,j)----|        
- * |          |            |  
- * |      U(i-1,j) T(i,j) U(i,j) 
- * |          |            |       
- * +----------+--V(i,j-1)--+       
- * 
+ * |          |            |
+ * |          |            |
+ * |          |            |
+ * |----------+--V(i,j)----|
+ * |          |            |
+ * |      U(i-1,j) T(i,j) U(i,j)
+ * |          |            |
+ * +----------+--V(i,j-1)--+
+ *
  * @author Nicolas Barrier
  */
 public class NemoGrid extends AbstractGrid {
@@ -79,12 +79,12 @@ public class NemoGrid extends AbstractGrid {
      * Mask: water = 1, land = 0
      */
     private int[][][] maskRho;
-    
+
     /**
      * Depth at rho point
      */
     private double[][][] gdepT;
-    
+
     /**
      * Depth at w point. The free surface elevation is disregarded. For index k,
      * gdepW[k] is the depth of the W point below the center of the cell.
@@ -95,7 +95,7 @@ public class NemoGrid extends AbstractGrid {
      * Name of the Dimension in NetCDF file
      */
     private String strXDim, strYDim, strZDim;
-    
+
     /**
      * Name of the Variable in NetCDF file
      */
@@ -110,35 +110,35 @@ public class NemoGrid extends AbstractGrid {
     private String file_hgr, file_zgr, file_mask;
     private boolean isGridInfoInOneFile;
     private boolean is3Denabled;
-    
+
     public interface Cyclicity {
         double getX(double x);
     }
-    
+
     private Cyclicity cyclicity;
-    
+
     public NemoGrid() {
-        super();   
+        super();
     }
 
     @Override
     public boolean is3D() {
         return is3Denabled;
     }
-    
+
     /**
      * Reads time non-dependant fields in NetCDF dataset
      */
      public void readConstantField() throws Exception {
-        
+
         NetcdfFile nc;
-        
+
         // Reads longitude and latitudes
         // This time, only the shrinked domain has been extracted
         this.readLonLat();
 
         nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
-        
+
         // Note that here, only the NZ is equal to (NZ - 1)
         maskRho = new int[get_nz()][get_ny()][get_nx()];
         Array arrMask = nc.findVariable(strMask).read().reduce().flip(0);
@@ -155,19 +155,19 @@ public class NemoGrid extends AbstractGrid {
             nc.close();
             nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
         }
-        
+
         get_gdep_fields(nc);
 
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
         e3t = read_e3_field(nc, stre3t);
-        
+
         if (stre3u.equals(stre3t)) {
             e3u = e3t;
         } else {
             e3u = read_e3_field(nc, stre3u);
         }
-        
+
         if (stre3v.equals(stre3t)) {
             e3v = e3t;
         } else {
@@ -178,14 +178,14 @@ public class NemoGrid extends AbstractGrid {
             nc.close();
             nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
         }
-        
+
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
         e1t = read_e1_e2_field(nc, stre1t);
         e2t = read_e1_e2_field(nc, stre2t);
         e1v = read_e1_e2_field(nc, stre1v);
         e2u = read_e1_e2_field(nc, stre2u);
-        
+
         nc.close();
     }
 
@@ -227,7 +227,7 @@ public class NemoGrid extends AbstractGrid {
                 }
             }
         }
-        
+
         return field;
     }
 
@@ -257,7 +257,7 @@ public class NemoGrid extends AbstractGrid {
 
             getLogger().log(Level.INFO, "Depth array are 1D arrays (z dimension)");
 
-            // Extraction of depth at T points  
+            // Extraction of depth at T points
             // and extract of W points below the T points
             for (int k = 0; k < get_nz(); k++) {
                 indexT.set(k + 1);
@@ -269,7 +269,7 @@ public class NemoGrid extends AbstractGrid {
                     }
                 }
             }
-            
+
             // get the W point which corresponds to the surface.
             int k = get_nz();
             indexW.set(k);
@@ -278,7 +278,7 @@ public class NemoGrid extends AbstractGrid {
                     gdepW[k][j][i] = arrayW.getDouble(indexW);
                 }
             }
-            
+
         } else {
 
             getLogger().log(Level.INFO, "Depth array are 3D arrays (z, y, z dimensions)");
@@ -293,7 +293,7 @@ public class NemoGrid extends AbstractGrid {
                     }
                 }
             }
-            
+
             int k = get_nz();
             for (int j = 0; j < get_ny(); j++) {
                 for (int i = 0; i < get_nx(); i++) {
@@ -301,7 +301,7 @@ public class NemoGrid extends AbstractGrid {
                     gdepW[k][j][i] = arrayW.getDouble(indexW);
                 }
             }
-            
+
         }
     }
 
@@ -319,7 +319,7 @@ public class NemoGrid extends AbstractGrid {
         return field;
     }
 
-    
+
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      *
@@ -426,19 +426,19 @@ public class NemoGrid extends AbstractGrid {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
-        
+
         if (findParameter("is_3d_enabled")) {
             this.is3Denabled = Boolean.valueOf(getParameter("is_3d_enabled"));
         } else {
             this.is3Denabled = true;
         }
-        
+
         if (findParameter("is_global")) {
             this.cyclicity = (double x) -> x;
         } else {
             this.cyclicity = (double x) -> this.getCyclicValue(x);
         }
-        
+
         //if (!findParameter("enhanced_mode")) {
         //    getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
         //}
@@ -465,7 +465,7 @@ public class NemoGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         // Recover Y dimension
         try {
             this.set_ny(nc.findDimension(strYDim).getLength());
@@ -474,19 +474,19 @@ public class NemoGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
-        // Recover Z dimension. 
+
+        // Recover Z dimension.
         // remove one element in Z, in order to remove the last T point which is only land
         // and have (N - 1) T points and (N) W points
         try {
-            this.set_nz(nc.findDimension(strZDim).getLength() - 1); 
+            this.set_nz(nc.findDimension(strZDim).getLength() - 1);
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset Z dimension. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
-        // Init the ipo and the jpo values to 0. 
+
+        // Init the ipo and the jpo values to 0.
         // Because they are used in readLonLat.
         this.set_ipo(0);
         this.set_jpo(0);
@@ -523,7 +523,7 @@ public class NemoGrid extends AbstractGrid {
 
         set_ipo((int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0])));
         ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
-        
+
         set_jpo((int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1])));
         jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
 
@@ -545,7 +545,7 @@ public class NemoGrid extends AbstractGrid {
 
     }
 
-   
+
 
     /**
      * Determines whether or not the specified grid cell(i, j) is in water.
@@ -581,9 +581,9 @@ public class NemoGrid extends AbstractGrid {
     @Override
     public boolean isInWater(double[] pGrid) {
         if (pGrid.length > 2) {
-            return isInWater((int) Math.round(pGrid[0] - 0.5), (int) Math.round(pGrid[1] - 0.5), (int) Math.round(pGrid[2] - 0.5));
+            return isInWater((int) Math.floor(pGrid[0]), (int) Math.floor(pGrid[1]), (int) Math.floor(pGrid[2]));
         } else {
-            return isInWater((int) Math.round(pGrid[0] - 0.5), (int) Math.round(pGrid[1] - 0.5));
+            return isInWater((int) Math.floor(pGrid[0]), (int) Math.floor(pGrid[1]));
         }
     }
 
@@ -696,9 +696,9 @@ public class NemoGrid extends AbstractGrid {
             // depth needs to be decreased
             depth = gdepT[k][j][i] - 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k][j][i]));
         }
-        
+
         return -depth;
-        
+
     }
 
     /*
@@ -1031,21 +1031,21 @@ public class NemoGrid extends AbstractGrid {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        
+
         boolean output = false;
-        
+
         // southern edge
         output = output && (pGrid[1] <= 0.5);
-        
+
         // western edge
         output = output && (pGrid[0] <= 0.5);
-        
+
         // northern edge
         output = output && (pGrid[1] >= get_ny() -1);
-          
+
         // eastern edge
         output = output && (pGrid[0] >= get_nx() - 1);
-        
+
         return output;
     }
 
@@ -1097,8 +1097,8 @@ public class NemoGrid extends AbstractGrid {
         }
         return Double.NaN;
     }
-    
-    
+
+
     /*
     @Override
     public double xTore(double x) {
@@ -1110,10 +1110,10 @@ public class NemoGrid extends AbstractGrid {
         return y;
     }
     */
-    
-    /** Method to interpolate a U variable. 
+
+    /** Method to interpolate a U variable.
      * On NEMO, U points are on the eastern face of the cell.
-     * 
+     *
     */
     public double interpolate2dU(double[] pGrid, double[][][] variable, int kIndex) {
 
@@ -1122,10 +1122,10 @@ public class NemoGrid extends AbstractGrid {
 
         int i = (int) Math.round(ix);
         int j = (int) Math.floor(jy);
-    
+
         double output = 0;
         double weight = 0;
-        
+
         for (int jj = 0; jj < 2; jj++) {
             double coy = 1 - Math.abs(jy - (j + jj));
             for (int ii = 0; ii < 2; ii++) {
@@ -1143,22 +1143,22 @@ public class NemoGrid extends AbstractGrid {
         return output;
 
     }
-    
+
     /** Interpolates in 3D current velocities */
     public double interpolate3dU(double[] pGrid, double[][][] variable) {
 
         double kz = pGrid[2];
         int k = (int) Math.floor(kz);
-        
+
         double output = 0;
         double weight = 0;
-        
+
         for (int kk = 0; kk < 2; kk++) {
             double coz = 1 - Math.abs(kz - (k + kk));
             output += this.interpolate2dU(pGrid, variable, k + kk) * coz;
             weight += coz;
         }
-        
+
         if (weight != 0) {
             output /= weight;
         }
@@ -1166,12 +1166,12 @@ public class NemoGrid extends AbstractGrid {
         return output;
 
     }
-    
-    
-    /** Method to interpolate a V variable. 
-     * 
+
+
+    /** Method to interpolate a V variable.
+     *
      * V points are locate in the northern faces
-     * 
+     *
     */
     public double interpolate2dV(double[] pGrid, double[][][] variable, int kIndex) {
 
@@ -1204,11 +1204,11 @@ public class NemoGrid extends AbstractGrid {
         return output;
 
     }
-    
-     /** Method to interpolate a V variable. 
-     * 
+
+     /** Method to interpolate a V variable.
+     *
      * V points are locate in the northern faces
-     * 
+     *
     */
     public double interpolate3dV(double[] pGrid, double[][][] variable) {
 
@@ -1224,7 +1224,7 @@ public class NemoGrid extends AbstractGrid {
             output += this.interpolate2dV(pGrid, variable, k + kk) * coz;
             weight += coz;
         }
-  
+
         if (weight != 0) {
             output /= weight;
         }
@@ -1232,23 +1232,23 @@ public class NemoGrid extends AbstractGrid {
         return output;
 
     }
-    
-         
-    /** Method to interpolate a T variable. 
+
+
+    /** Method to interpolate a T variable.
      * On NEMO, T points are in the centerof the cell.
-     * 
+     *
     */
     public double interpolate2dT(double[] pGrid, double[][][] variable, int kIndex) {
-        
+
         double ix = pGrid[0];
         double jy = pGrid[1];
-       
+
         int i = (int) Math.floor(ix);
         int j = (int) Math.floor(jy);
-    
+
         double output = 0;
         double weight = 0;
-       
+
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 double coy = 1 - Math.abs(jy - (j + jj));
@@ -1260,25 +1260,25 @@ public class NemoGrid extends AbstractGrid {
                 }
             }
         }
-        
-        if(weight != 0) { 
+
+        if(weight != 0) {
             output /= weight;
         }
-        
+
         return output;
-        
+
     }
-    
-    /** Method to interpolate a T variable. 
+
+    /** Method to interpolate a T variable.
      * On NEMO, T points are in the centerof the cell.
-     * 
+     *
     */
     public double interpolate3dT(double[] pGrid, double[][][] variable) {
-        
+
         double kz = pGrid[2];
 
         int k = (int) Math.floor(kz);
-        
+
         double output = 0;
         double weight = 0;
 
@@ -1287,21 +1287,21 @@ public class NemoGrid extends AbstractGrid {
             output += this.interpolate2dT(pGrid, variable, k + kk) * coz;
             weight += coz;
         }
-      
-        
-        if(weight != 0) { 
+
+
+        if(weight != 0) {
             output /= weight;
         }
-        
+
         return output;
-        
+
     }
-    
+
     /**
      * Method to interpolate a W variable. On NEMO, W points are in the northern
      * faces of the cell. However, Ichthyop flips data on the vertical, so the W
      * point is below!
-     * 
+     *
      */
     public double interpolate3dW(double[] pGrid, double[][][] variable) {
 
@@ -1335,23 +1335,23 @@ public class NemoGrid extends AbstractGrid {
             double delta = x - (this.get_nx() - 1 - 0.5);
             x = 0.5 + delta;
         } else if (x <= 0.5) {
-            double delta = 0.5 - x; 
+            double delta = 0.5 - x;
             x = this.get_nx() - 1 - 0.5 - delta;
         } else {}
-        
-        return x;   
+
+        return x;
     }
-    
-    public double[][][] getDepthT() { 
-        return this.gdepT;   
+
+    public double[][][] getDepthT() {
+        return this.gdepT;
     }
-    
-    public double[][][] getDepthW() { 
-        return this.gdepW;   
+
+    public double[][][] getDepthW() {
+        return this.gdepW;
     }
-    
+
     public double[][][] getE3T() {
-        return this.e3t;   
+        return this.e3t;
     }
 
 }
