@@ -123,7 +123,7 @@ public class RequiredExternalVariable {
         double[] latlon = dataset.xy2latlon(pGrid_hydro[0], pGrid_hydro[1]);
         double[] pGrid = latlon2xy(latlon[0], latlon[1]);
 
-        int n = dataset.isCloseToCost(pGrid_hydro) ? 1 : 2;
+        int n = dataset.isCloseToCoast(pGrid_hydro) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double dx = pGrid[0] - (double) i;
@@ -149,7 +149,7 @@ public class RequiredExternalVariable {
 
         double[] latlon = dataset.xy2latlon(pGrid_hydro[0], pGrid_hydro[1]);
         double[] pGrid = latlon2xy(latlon[0], latlon[1]);
-        int n = dataset.isCloseToCost(pGrid_hydro) ? 1 : 2;
+        int n = dataset.isCloseToCoast(pGrid_hydro) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double dx = pGrid[0] - (double) i;

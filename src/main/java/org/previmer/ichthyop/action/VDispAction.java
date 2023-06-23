@@ -144,7 +144,7 @@ public class VDispAction extends AbstractAction {
         double co, CO = 0.d, Kv = 0.d, diffKv = 0.d, Hz = 0.d;
         double x, y, z, dx, dy;
         int i, j, k;
-        int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
+        int n = dataset.isCloseToCoast(pGrid) ? 1 : 2;
         double[] kvSpline;
         double depth;
 

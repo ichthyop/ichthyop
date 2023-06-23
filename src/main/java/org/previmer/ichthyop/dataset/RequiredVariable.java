@@ -136,7 +136,7 @@ public class RequiredVariable {
 
         int[] origin;
         int[] shape;
-        int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
+        int n = dataset.isCloseToCoast(pGrid) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double dx = pGrid[0] - (double) i;

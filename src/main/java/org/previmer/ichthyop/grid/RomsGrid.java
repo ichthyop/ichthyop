@@ -59,8 +59,8 @@ import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  * Class to manage Roms grid.
- * 
- * 
+ *
+ *
  */
 public class RomsGrid extends AbstractGrid {
 
@@ -105,12 +105,12 @@ public class RomsGrid extends AbstractGrid {
      *
      */
     private double[][] pm, pn;
-    
+
     private double[] sigma, sigmaW;
     private double[] Cs_r, Cs_w;
 
     private VerticalMode verticalMode;
-    
+
     private String meshFile;
 
     private enum VerticalMode {
@@ -173,7 +173,7 @@ public class RomsGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         set_ipo(0);
         set_jpo(0);
     }
@@ -226,7 +226,7 @@ public class RomsGrid extends AbstractGrid {
     }
 
     @Override
-    public boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCoast(double[] pGrid) {
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
@@ -694,7 +694,7 @@ public class RomsGrid extends AbstractGrid {
 
         this.depth = new double[get_nz()][get_ny()][get_nx()];
         this.depthW = new double[get_nz() + 1][get_ny()][get_nx()];
-        
+
         switch (verticalMode) {
             case UCLA:
                 for (int i = 0; i < get_nx(); i++) {
@@ -735,21 +735,21 @@ public class RomsGrid extends AbstractGrid {
                 break;
         }
     }
-    
-    public double[] getSigma() { 
-        return this.sigma;   
+
+    public double[] getSigma() {
+        return this.sigma;
     }
 
-    public double[] getSigmaW() { 
-        return this.sigmaW;   
-    }
-    
-    public double[] getCs() { 
-        return this.Cs_r;   
+    public double[] getSigmaW() {
+        return this.sigmaW;
     }
 
-    public double[] getCsW() { 
-        return this.Cs_w;   
+    public double[] getCs() {
+        return this.Cs_r;
     }
-    
+
+    public double[] getCsW() {
+        return this.Cs_w;
+    }
+
 }

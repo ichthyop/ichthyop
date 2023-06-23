@@ -307,7 +307,7 @@ public class NemoDataset_2D extends AbstractDataset {
 
         double du = 0.d;
         double ix, jy;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
 
@@ -342,7 +342,7 @@ public class NemoDataset_2D extends AbstractDataset {
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
 
@@ -732,7 +732,7 @@ public class NemoDataset_2D extends AbstractDataset {
      * <code>false</code> otherwise.
      */
     @Override
-    public boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCoast(double[] pGrid) {
 
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));

@@ -356,7 +356,7 @@ public class OscarDataset extends AbstractDataset {
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
@@ -391,7 +391,7 @@ public class OscarDataset extends AbstractDataset {
     public double get_dVy(double[] pGrid, double time) {
 
         double dv = 0.d;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
@@ -459,7 +459,7 @@ public class OscarDataset extends AbstractDataset {
     }
 
     @Override
-    public boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCoast(double[] pGrid) {
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));

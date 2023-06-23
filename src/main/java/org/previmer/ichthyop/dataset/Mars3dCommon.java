@@ -398,7 +398,7 @@ abstract class Mars3dCommon extends MarsCommon {
 
         double dw = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
@@ -433,7 +433,7 @@ abstract class Mars3dCommon extends MarsCommon {
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
@@ -472,7 +472,7 @@ abstract class Mars3dCommon extends MarsCommon {
 
         double du = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));

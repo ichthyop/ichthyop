@@ -56,7 +56,7 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
      * nz = number of vertical levels in mesh file (T points)
      */
     private int nx, ny, nz;
-    
+
     protected double[][] lonRho, latRho;
 
     /**
@@ -65,12 +65,12 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
     private int ipo, jpo;
 
     private double lonMin, latMin, lonMax, latMax;
-            
+
     /**
      * Maximum depth [meter] of the domain
      */
     private double depthMax;
-    
+
     public abstract void init() throws Exception;
     public abstract void setUp() throws Exception;
     public abstract boolean is3D();
@@ -80,18 +80,18 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
     public abstract boolean isInWater(int i, int j);
     public abstract void loadParameters();
     public abstract boolean isInWater(double[] pGrid);
-    public abstract boolean isCloseToCost(double[] pGrid);
+    public abstract boolean isCloseToCoast(double[] pGrid);
     public abstract double depth2z(double x, double y, double depth);
     public abstract double z2depth(double x, double y, double z);
     public abstract double[] xy2latlon(double xRho, double yRho);
     public abstract double[] latlon2xy(double lat, double lon);
     public abstract boolean isOnEdge(double[] pGrid);
-    
+
     public AbstractGrid() {
         this.gridKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
     }
-    
-    
+
+
     boolean enhanced() {
         try {
             return Boolean.valueOf(getParameter("enhanced_mode"));
@@ -99,51 +99,51 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
             return true;
         }
     }
-    
-    public void setDepthMax(double value) { 
+
+    public void setDepthMax(double value) {
         this.depthMax = value;
     }
-    
-    public double getDepthMax() { 
+
+    public double getDepthMax() {
         return this.depthMax;
     }
-    
-    public void setLonMin(double value) { 
+
+    public void setLonMin(double value) {
         this.lonMin = value;
     }
-    
-    public double getLonMin() { 
+
+    public double getLonMin() {
         return this.lonMin;
     }
 
-    public void setLonMax(double value) { 
+    public void setLonMax(double value) {
         this.lonMax = value;
     }
-    
-    public double getLonMax() { 
+
+    public double getLonMax() {
         return this.lonMax;
     }
-    
-    public void setLatMin(double value) { 
+
+    public void setLatMin(double value) {
         this.latMin = value;
     }
-    
-    public double getLatMin() { 
+
+    public double getLatMin() {
         return this.latMin;
     }
 
-    public void setLatMax(double value) { 
+    public void setLatMax(double value) {
         this.latMax = value;
     }
-    
-    public double getLatMax() { 
+
+    public double getLatMax() {
         return this.latMax;
     }
 
     public String getParameter(String key) {
         return getSimulationManager().getGridManager().getParameter(gridKey, key);
     }
-    
+
     public boolean findParameter(String key) {
         // Check whether the parameter can be retrieved
         try {
@@ -155,7 +155,7 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
         // The parameter does exist
         return true;
     }
-    
+
     public int get_nx() {
         return this.nx;
     }
@@ -195,7 +195,7 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
     public void set_jpo(int value) {
         this.jpo = value;
     }
-    
+
         /**
      * Determines the geographical boundaries of the domain in longitude,
      * latitude and depth.
@@ -246,7 +246,7 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
             this.setLatMax(double_tmp);
         }
     }
-    
+
         /**
      * Gets the latitude at (i, j) grid point.
      *
@@ -268,5 +268,5 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
-    
+
 }

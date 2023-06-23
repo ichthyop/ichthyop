@@ -76,7 +76,7 @@ public interface IDataset extends NextStepListener {
 
     public boolean isInWater(int i, int j);
 
-    boolean isCloseToCost(double[] pGrid);
+    boolean isCloseToCoast(double[] pGrid);
 
     public boolean isOnEdge(double[] pGrid);
 

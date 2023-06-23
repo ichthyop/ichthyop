@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.grid;
@@ -66,17 +66,17 @@ public class RegularGrid extends AbstractGrid {
      * Longitude at rho point.
      */
     private float[][] lonRho;
-    
+
     /**
      * Latitude at rho point.
      */
      private float[][] latRho;
-     
+
     /**
      * Mask: water = 1, cost = 0
      */
     private int[][][] maskRho;//, masku, maskv;
-    
+
     /**
      * Depth at rho point
      */
@@ -86,29 +86,29 @@ public class RegularGrid extends AbstractGrid {
      * Name of the Dimension in NetCDF file
      */
     private String strXDim, strYDim, strZDim;
-    
+
     /**
      * Name of the Variable in NetCDF file
      */
     private String strLon, strLat, strMask;
-    
+
     /**
      *
      */
     private String str_gdepT, str_gdepW;
     private String file_hgr, file_zgr, file_mask;
     private boolean isGridInfoInOneFile;
-    
+
     public RegularGrid() {
-        super(); 
-        
+        super();
+
     }
 
     @Override
     public boolean is3D() {
         return true;
     }
-    
+
     /**
      * Reads time non-dependant fields in NetCDF dataset
      */
@@ -153,7 +153,7 @@ public class RegularGrid extends AbstractGrid {
             nc.close();
             nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
         }
-        
+
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
         get_gdep_fields(nc);
@@ -228,9 +228,9 @@ public class RegularGrid extends AbstractGrid {
                             gdepW[k][j][i] = array.getDouble(index);
                             gdepW[k][j][i] += array.getDouble(indexbis);
                             gdepW[k][j][i] *= 0.5;
-                        }   // end of i 
-                    }  // end of j 
-                }   // end of k 
+                        }   // end of i
+                    }  // end of j
+                }   // end of k
 
                 // surface condition on W
                 for (int j = 0; j < get_ny(); j++) {
@@ -284,9 +284,9 @@ public class RegularGrid extends AbstractGrid {
                             index.set(k + 1, j, i);
                             gdepW[k][j][i] += array.getDouble(index);
                             gdepW[k][j][i] *= 0.5;
-                        }   // end of i 
-                    }  // end of j 
-                }   // end of k 
+                        }   // end of i
+                    }  // end of j
+                }   // end of k
 
                 // surface condition on W
                 for (int j = 0; j < get_ny(); j++) {
@@ -297,7 +297,7 @@ public class RegularGrid extends AbstractGrid {
             }
         }
     }
-    
+
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      *
@@ -455,7 +455,7 @@ public class RegularGrid extends AbstractGrid {
         //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
         set_ipo((int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0])));
         ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
-        
+
         set_jpo((int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1])));
         jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
 
@@ -464,7 +464,7 @@ public class RegularGrid extends AbstractGrid {
         //System.out.println("get_ipo() " + get_ipo() + " get_nx() " + get_nx() + " get_jpo() " + get_jpo() + " get_ny() " + get_ny());
     }
 
-  
+
     /*
      * Initializes the {@code Dataset}. Opens the file holding the first time of
      * the simulation. Checks out the existence of the fields required by the
@@ -477,7 +477,7 @@ public class RegularGrid extends AbstractGrid {
     public void init() throws Exception {
 
     }
-   
+
 
     /**
      * Determines whether or not the specified grid cell(i, j) is in water.
@@ -529,7 +529,7 @@ public class RegularGrid extends AbstractGrid {
      * <code>false</code> otherwise.
      */
     @Override
-    public boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCoast(double[] pGrid) {
 
         int i, j, k, ii, jj;
         i = (int) (Math.round(pGrid[0]));
@@ -937,7 +937,7 @@ public class RegularGrid extends AbstractGrid {
      */
     @Override
     public double getBathy(int i, int j) {
-        
+
         return 0;
 
         /*
@@ -954,8 +954,8 @@ public class RegularGrid extends AbstractGrid {
         return Double.NaN;
         */
     }
-    
-    
+
+
     /*
     @Override
     public double xTore(double x) {
@@ -967,38 +967,38 @@ public class RegularGrid extends AbstractGrid {
         return y;
     }
     */
-    
-    /** Method to interpolate a U variable. 
+
+    /** Method to interpolate a U variable.
      * On regular grid, U points are located at the cell center (as T)
-     * 
+     *
     */
     public double interpolate2dU(double[] pGrid, double[][][] variable, int kIndex) {
-        return this.interpolate2dT(pGrid, variable, kIndex);    
+        return this.interpolate2dT(pGrid, variable, kIndex);
     }
-    
-    /** Method to interpolate a V variable. 
+
+    /** Method to interpolate a V variable.
      * On regular grid, U points are located at the cell center (as  T)
-     * 
+     *
     */
     public double interpolate2dV(double[] pGrid, double[][][] variable, int kIndex) {
         return this.interpolate2dT(pGrid, variable, kIndex);
     }
-    
-         
-    /** Method to interpolate a T variable. 
+
+
+    /** Method to interpolate a T variable.
      * On regular grid, T points are in the center of the cell.
-     * 
+     *
     */
     public double interpolate2dT(double[] pGrid, double[][][] variable, int kIndex) {
-        
+
         double ix = pGrid[0];
         double jy = pGrid[1];
-        
+
         int i = (int) (ix);
         int j = (int) (jy);
         double output = 0;
         double weight = 0;
-       
+
         for (int jj = 0; jj < 1; jj++) {
             for (int ii = 0; ii < 1; ii++) {
                 double cox = Math.abs(ix - i - 1 - ii);
@@ -1008,13 +1008,13 @@ public class RegularGrid extends AbstractGrid {
                 weight += co;
             }
         }
-        
-        if(weight != 0) { 
+
+        if(weight != 0) {
             output /= weight;
         }
-        
+
         return output;
-        
+
     }
 
 }

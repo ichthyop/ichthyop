@@ -475,7 +475,7 @@ public abstract class MarsCommon extends AbstractDataset {
      *         <code>false</code> otherwise.
      */
     @Override
-    public boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCoast(double[] pGrid) {
 
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));

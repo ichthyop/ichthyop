@@ -300,6 +300,54 @@ public class TestNemoGrid extends SimulationManagerAccessor {
 
     }
 
+    @Test
+    public void testcloseToCoastParticles() {
+
+        double[] pGrid3d;
+
+        pGrid3d = new double[] { 27.864138, 62.739776, 25.795268 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 22.712241, 59.857330, 16.075374 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 35.654567, 62.996834, 7.198985 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 24.807870, 62.198495, 17.639074 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 21.110180, 57.813281, 23.003689 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 22.577400, 61.527881, 26.000478 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 35.157431, 57.451565, 19.005240 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 34.907540, 60.814606, 14.023901 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 33.125578, 59.312105, 26.683748 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 24.298059, 59.409615, 27.945148 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 34.711726, 57.292412, 17.965610 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 25.636351, 61.477968, 13.086388 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 24.701213, 62.906694, 11.851347 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 24.715353, 60.587516, 17.186502 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 30.286792, 60.447768, 25.825310 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 25.938844, 62.944070, 27.510525 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 34.216972, 61.172355, 16.689331 };
+        assertEquals(true, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 35.582747, 57.807356, 15.718211 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 22.429547, 60.108933, 8.088254 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+        pGrid3d = new double[] { 22.475056, 58.259612, 20.216463 };
+        assertEquals(false, nemoGrid.isCloseToCoast(pGrid3d));
+
+    }
+
     // @Test
     // public void testDepthT() {
 

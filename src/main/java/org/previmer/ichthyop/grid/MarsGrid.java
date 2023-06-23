@@ -14,8 +14,8 @@ import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  * Class to manage Mars grid.
- * 
- * 
+ *
+ *
  * @author Nicolas Barrier
  */
 public class MarsGrid extends AbstractGrid {
@@ -64,7 +64,7 @@ public class MarsGrid extends AbstractGrid {
     private String strDxV, strDyU;
     private String strLevW, strLev;
     private VerticalMode verticalMode;
-    
+
     private String meshFile;
 
     private enum VerticalMode {
@@ -150,7 +150,7 @@ public class MarsGrid extends AbstractGrid {
 
     /**
      * Reads the dimensions of the NetCDF dataset
-     * 
+     *
      * @throws an IOException if an error occurs while reading the dimensions.
      */
     void getDimNC() throws IOException {
@@ -229,7 +229,7 @@ public class MarsGrid extends AbstractGrid {
     }
 
     @Override
-    public boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCoast(double[] pGrid) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -267,7 +267,7 @@ public class MarsGrid extends AbstractGrid {
     /**
      * Method to interpolate a U variable. On NEMO, U points are on the eastern face
      * of the cell.
-     * 
+     *
      */
     public double interpolate2dU(double[] pGrid, double[][][] variable, int kIndex) {
 
@@ -300,7 +300,7 @@ public class MarsGrid extends AbstractGrid {
     /**
      * Method to interpolate a U variable. On NEMO, U points are on the eastern face
      * of the cell.
-     * 
+     *
      */
     public double interpolate3dU(double[] pGrid, double[][][] variable) {
 
@@ -326,9 +326,9 @@ public class MarsGrid extends AbstractGrid {
 
     /**
      * Method to interpolate a V variable.
-     * 
+     *
      * V points are locate in the northern faces
-     * 
+     *
      */
     public double interpolate2dV(double[] pGrid, double[][][] variable, int kIndex) {
 
@@ -361,9 +361,9 @@ public class MarsGrid extends AbstractGrid {
 
     /**
      * Method to interpolate a V variable.
-     * 
+     *
      * V points are locate in the northern faces
-     * 
+     *
      */
     public double interpolate3dV(double[] pGrid, double[][][] variable) {
 
@@ -391,7 +391,7 @@ public class MarsGrid extends AbstractGrid {
     /**
      * Method to interpolate a T variable. On NEMO, T points are in the centerof the
      * cell.
-     * 
+     *
      */
     public double interpolate2dT(double[] pGrid, double[][][] variable, int kIndex) {
 
@@ -425,7 +425,7 @@ public class MarsGrid extends AbstractGrid {
     /**
      * Method to interpolate a T variable. On NEMO, T points are in the centerof the
      * cell.
-     * 
+     *
      */
     public double interpolate3dT(double[] pGrid, double[][][] variable) {
 
@@ -480,7 +480,7 @@ public class MarsGrid extends AbstractGrid {
      * Resizes the domain and determines the range of the grid indexes taht will be
      * used in the simulation. The new domain is limited by the Northwest and the
      * Southeast corners.
-     * 
+     *
      * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
      *               corner
      * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast

@@ -531,7 +531,7 @@ public class NoveltisDataset extends AbstractDataset {
      * <code>false</code> otherwise.
      */
     @Override
-    public boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCoast(double[] pGrid) {
 
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
@@ -902,7 +902,7 @@ public class NoveltisDataset extends AbstractDataset {
 
         double dw = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
@@ -939,7 +939,7 @@ public class NoveltisDataset extends AbstractDataset {
 
                 double dv = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
@@ -978,7 +978,7 @@ public class NoveltisDataset extends AbstractDataset {
 
         double du = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int n = isCloseToCoast(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
