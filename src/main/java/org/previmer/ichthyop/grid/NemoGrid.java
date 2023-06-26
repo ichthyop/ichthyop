@@ -1167,6 +1167,73 @@ public class NemoGrid extends AbstractGrid {
 
     }
 
+    /** Return the i_index, j_index, weight_x and weight_y for the horizontal interpolation *
+     * output[0] = i_index (4 values)
+     * output[1] = j_index  (4 values)
+     * output[2] = weight_x (4 values)
+     * output[3] = weight_y (4 values)
+     *
+     */
+    public double[][] get2dInterpolationCoefficients(double[] pGrid, String gridPoint) {
+
+        double ix = pGrid[0];
+        double jy = pGrid[1];
+        double output[][] = new double[4][4];
+        int cpt = 0;
+        if (gridPoint.compareTo("T") == 0) {
+            int i = (int) Math.floor(ix - 0.5);
+            int j = (int) Math.floor(jy - 0.5);
+            for (int ii = 0; ii < 2; ii++) {
+                double cox = 1 - Math.abs(ix - (i + ii + 0.5));
+                for (int jj = 0; jj < 2; jj++) {
+                    double coy = 1 - Math.abs(jy - (j + jj + 0.5));
+                    output[0][cpt] = i + ii;
+                    output[1][cpt] = j + jj;
+                    output[2][cpt] = cox;
+                    output[3][cpt] = coy;
+                    cpt += 1;
+                }
+            }
+        }
+
+         if (gridPoint.compareTo("U") == 0) {
+            int i = (int) Math.floor(ix -1);
+            int j = (int) Math.floor(jy - 0.5);
+            for (int ii = 0; ii < 2; ii++) {
+                double cox = Math.abs(1 - Math.abs(ix -(i + ii + 1)));
+                for (int jj = 0; jj < 2; jj++) {
+                    double coy = Math.abs(1 - Math.abs(jy - (j + jj + 0.5)));
+                    output[0][cpt] = i + ii;
+                    output[1][cpt] = j + jj;
+                    output[2][cpt] = cox;
+                    output[3][cpt] = coy;
+                    cpt += 1;
+                }
+            }
+        }
+
+        if (gridPoint.compareTo("V") == 0) {
+            int i = (int) Math.floor(ix - 0.5);
+            int j = (int) Math.floor(jy - 1);
+            for (int ii = 0; ii < 2; ii++) {
+                double cox = Math.abs(1 - Math.abs(ix - (i + ii + 0.5)));
+                for (int jj = 0; jj < 2; jj++) {
+                    double coy = Math.abs(1 - Math.abs(jy - (j + jj + 1)));
+                    output[0][cpt] = i + ii;
+                    output[1][cpt] = j + jj;
+                    output[2][cpt] = cox;
+                    output[3][cpt] = coy;
+                    cpt += 1;
+                }
+            }
+        }
+
+
+
+
+        return output;
+
+    }
 
     /** Method to interpolate a V variable.
      *
@@ -1204,6 +1271,7 @@ public class NemoGrid extends AbstractGrid {
         return output;
 
     }
+
 
      /** Method to interpolate a V variable.
      *

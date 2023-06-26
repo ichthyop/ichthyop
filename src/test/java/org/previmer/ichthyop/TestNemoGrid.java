@@ -95,14 +95,14 @@ public class TestNemoGrid extends SimulationManagerAccessor {
 
     // @Test
     // public void testCyclic() {
-    //     // nx = 26
-    //     double precision = 1e-4;
-    //     assertEquals(1, nemoGrid.getCyclicValue(25), precision);
-    //     assertEquals(24, nemoGrid.getCyclicValue(0), precision);
-    //     assertEquals(1, nemoGrid.getCyclicValue(1), precision);
-    //     assertEquals(24, nemoGrid.getCyclicValue(24), precision);
-    //     assertEquals(0.6, nemoGrid.getCyclicValue(24.6), precision);
-    //     assertEquals(23.9, nemoGrid.getCyclicValue(-0.1), precision);
+    // // nx = 26
+    // double precision = 1e-4;
+    // assertEquals(1, nemoGrid.getCyclicValue(25), precision);
+    // assertEquals(24, nemoGrid.getCyclicValue(0), precision);
+    // assertEquals(1, nemoGrid.getCyclicValue(1), precision);
+    // assertEquals(24, nemoGrid.getCyclicValue(24), precision);
+    // assertEquals(0.6, nemoGrid.getCyclicValue(24.6), precision);
+    // assertEquals(23.9, nemoGrid.getCyclicValue(-0.1), precision);
 
     // }
 
@@ -170,7 +170,6 @@ public class TestNemoGrid extends SimulationManagerAccessor {
         assertEquals(true, nemoGrid.isInWater(22, 63, 13));
 
     }
-
 
     @Test
     public void testMaskParticles() {
@@ -348,39 +347,724 @@ public class TestNemoGrid extends SimulationManagerAccessor {
 
     }
 
+    @Test
+    public void testHorizontalInterpolationT() {
+        double[][] expected = new double[4][];
+        double[][] actual;
+        double[] pGrid2d;
+
+        expected[0] = new double[] { 32.000000, 32.000000, 33.000000, 33.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.930190, 0.930190, 0.069810, 0.069810 };
+        expected[3] = new double[] { 0.159645, 0.840355, 0.159645, 0.840355 };
+        pGrid2d = new double[] { 32.569810, 59.340355 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 20.000000, 20.000000, 21.000000, 21.000000 };
+        expected[1] = new double[] { 55.000000, 56.000000, 55.000000, 56.000000 };
+        expected[2] = new double[] { 0.188721, 0.188721, 0.811279, 0.811279 };
+        expected[3] = new double[] { 0.362640, 0.637360, 0.362640, 0.637360 };
+        pGrid2d = new double[] { 21.311279, 56.137360 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 30.000000, 30.000000, 31.000000, 31.000000 };
+        expected[1] = new double[] { 57.000000, 58.000000, 57.000000, 58.000000 };
+        expected[2] = new double[] { 0.995276, 0.995276, 0.004724, 0.004724 };
+        expected[3] = new double[] { 0.513274, 0.486726, 0.513274, 0.486726 };
+        pGrid2d = new double[] { 30.504724, 57.986726 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.267942, 0.267942, 0.732058, 0.732058 };
+        expected[3] = new double[] { 0.106931, 0.893069, 0.106931, 0.893069 };
+        pGrid2d = new double[] { 32.232058, 60.393069 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 27.000000, 27.000000, 28.000000, 28.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.022395, 0.022395, 0.977605, 0.977605 };
+        expected[3] = new double[] { 0.965335, 0.034665, 0.965335, 0.034665 };
+        pGrid2d = new double[] { 28.477605, 58.534665 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 23.000000, 23.000000, 24.000000, 24.000000 };
+        expected[1] = new double[] { 57.000000, 58.000000, 57.000000, 58.000000 };
+        expected[2] = new double[] { 0.128050, 0.128050, 0.871950, 0.871950 };
+        expected[3] = new double[] { 0.027888, 0.972112, 0.027888, 0.972112 };
+        pGrid2d = new double[] { 24.371950, 58.472112 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 23.000000, 23.000000, 24.000000, 24.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.529057, 0.529057, 0.470943, 0.470943 };
+        expected[3] = new double[] { 0.557864, 0.442136, 0.557864, 0.442136 };
+        pGrid2d = new double[] { 23.970943, 59.942136 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.092039, 0.092039, 0.907961, 0.907961 };
+        expected[3] = new double[] { 0.394894, 0.605106, 0.394894, 0.605106 };
+        pGrid2d = new double[] { 32.407961, 59.105106 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 23.000000, 23.000000, 24.000000, 24.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.963337, 0.963337, 0.036663, 0.036663 };
+        expected[3] = new double[] { 0.296823, 0.703177, 0.296823, 0.703177 };
+        pGrid2d = new double[] { 23.536663, 60.203177 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 21.000000, 21.000000, 22.000000, 22.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.174903, 0.174903, 0.825097, 0.825097 };
+        expected[3] = new double[] { 0.691688, 0.308312, 0.691688, 0.308312 };
+        pGrid2d = new double[] { 22.325097, 59.808312 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 30.000000, 30.000000, 31.000000, 31.000000 };
+        expected[1] = new double[] { 60.000000, 61.000000, 60.000000, 61.000000 };
+        expected[2] = new double[] { 0.219603, 0.219603, 0.780397, 0.780397 };
+        expected[3] = new double[] { 0.058214, 0.941786, 0.058214, 0.941786 };
+        pGrid2d = new double[] { 31.280397, 61.441786 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 34.000000, 34.000000, 35.000000, 35.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.199100, 0.199100, 0.800900, 0.800900 };
+        expected[3] = new double[] { 0.326823, 0.673177, 0.326823, 0.673177 };
+        pGrid2d = new double[] { 35.300900, 59.173177 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 20.000000, 20.000000, 21.000000, 21.000000 };
+        expected[1] = new double[] { 61.000000, 62.000000, 61.000000, 62.000000 };
+        expected[2] = new double[] { 0.440776, 0.440776, 0.559224, 0.559224 };
+        expected[3] = new double[] { 0.230809, 0.769191, 0.230809, 0.769191 };
+        pGrid2d = new double[] { 21.059224, 62.269191 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 28.000000, 28.000000, 29.000000, 29.000000 };
+        expected[1] = new double[] { 57.000000, 58.000000, 57.000000, 58.000000 };
+        expected[2] = new double[] { 0.817116, 0.817116, 0.182884, 0.182884 };
+        expected[3] = new double[] { 0.946111, 0.053889, 0.946111, 0.053889 };
+        pGrid2d = new double[] { 28.682884, 57.553889 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 32.000000, 32.000000, 33.000000, 33.000000 };
+        expected[1] = new double[] { 55.000000, 56.000000, 55.000000, 56.000000 };
+        expected[2] = new double[] { 0.310686, 0.310686, 0.689314, 0.689314 };
+        expected[3] = new double[] { 0.776325, 0.223675, 0.776325, 0.223675 };
+        pGrid2d = new double[] { 33.189314, 55.723675 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 29.000000, 29.000000, 30.000000, 30.000000 };
+        expected[1] = new double[] { 56.000000, 57.000000, 56.000000, 57.000000 };
+        expected[2] = new double[] { 0.312109, 0.312109, 0.687891, 0.687891 };
+        expected[3] = new double[] { 0.094400, 0.905600, 0.094400, 0.905600 };
+        pGrid2d = new double[] { 30.187891, 57.405600 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 55.000000, 56.000000, 55.000000, 56.000000 };
+        expected[2] = new double[] { 0.673670, 0.673670, 0.326330, 0.326330 };
+        expected[3] = new double[] { 0.588125, 0.411875, 0.588125, 0.411875 };
+        pGrid2d = new double[] { 31.826330, 55.911875 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 24.000000, 24.000000, 25.000000, 25.000000 };
+        expected[1] = new double[] { 61.000000, 62.000000, 61.000000, 62.000000 };
+        expected[2] = new double[] { 0.121859, 0.121859, 0.878141, 0.878141 };
+        expected[3] = new double[] { 0.870549, 0.129451, 0.870549, 0.129451 };
+        pGrid2d = new double[] { 25.378141, 61.629451 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 34.000000, 34.000000, 35.000000, 35.000000 };
+        expected[1] = new double[] { 54.000000, 55.000000, 54.000000, 55.000000 };
+        expected[2] = new double[] { 0.733388, 0.733388, 0.266612, 0.266612 };
+        expected[3] = new double[] { 0.124829, 0.875171, 0.124829, 0.875171 };
+        pGrid2d = new double[] { 34.766612, 55.375171 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.781363, 0.781363, 0.218637, 0.218637 };
+        expected[3] = new double[] { 0.489703, 0.510297, 0.489703, 0.510297 };
+        pGrid2d = new double[] { 31.718637, 60.010297 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "T");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+    }
+
+    @Test
+    public void testHorizontalInterpolationU() {
+        double[][] expected = new double[4][];
+        double[][] actual;
+        double[] pGrid2d;
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.430190, 0.430190, 0.569810, 0.569810 };
+        expected[3] = new double[] { 0.159645, 0.840355, 0.159645, 0.840355 };
+        pGrid2d = new double[] { 32.569810, 59.340355 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 20.000000, 20.000000, 21.000000, 21.000000 };
+        expected[1] = new double[] { 55.000000, 56.000000, 55.000000, 56.000000 };
+        expected[2] = new double[] { 0.688721, 0.688721, 0.311279, 0.311279 };
+        expected[3] = new double[] { 0.362640, 0.637360, 0.362640, 0.637360 };
+        pGrid2d = new double[] { 21.311279, 56.137360 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 29.000000, 29.000000, 30.000000, 30.000000 };
+        expected[1] = new double[] { 57.000000, 58.000000, 57.000000, 58.000000 };
+        expected[2] = new double[] { 0.495276, 0.495276, 0.504724, 0.504724 };
+        expected[3] = new double[] { 0.513274, 0.486726, 0.513274, 0.486726 };
+        pGrid2d = new double[] { 30.504724, 57.986726 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.767942, 0.767942, 0.232058, 0.232058 };
+        expected[3] = new double[] { 0.106931, 0.893069, 0.106931, 0.893069 };
+        pGrid2d = new double[] { 32.232058, 60.393069 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 27.000000, 27.000000, 28.000000, 28.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.522395, 0.522395, 0.477605, 0.477605 };
+        expected[3] = new double[] { 0.965335, 0.034665, 0.965335, 0.034665 };
+        pGrid2d = new double[] { 28.477605, 58.534665 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 23.000000, 23.000000, 24.000000, 24.000000 };
+        expected[1] = new double[] { 57.000000, 58.000000, 57.000000, 58.000000 };
+        expected[2] = new double[] { 0.628050, 0.628050, 0.371950, 0.371950 };
+        expected[3] = new double[] { 0.027888, 0.972112, 0.027888, 0.972112 };
+        pGrid2d = new double[] { 24.371950, 58.472112 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 22.000000, 22.000000, 23.000000, 23.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.029057, 0.029057, 0.970943, 0.970943 };
+        expected[3] = new double[] { 0.557864, 0.442136, 0.557864, 0.442136 };
+        pGrid2d = new double[] { 23.970943, 59.942136 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.592039, 0.592039, 0.407961, 0.407961 };
+        expected[3] = new double[] { 0.394894, 0.605106, 0.394894, 0.605106 };
+        pGrid2d = new double[] { 32.407961, 59.105106 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 22.000000, 22.000000, 23.000000, 23.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.463337, 0.463337, 0.536663, 0.536663 };
+        expected[3] = new double[] { 0.296823, 0.703177, 0.296823, 0.703177 };
+        pGrid2d = new double[] { 23.536663, 60.203177 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 21.000000, 21.000000, 22.000000, 22.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.674903, 0.674903, 0.325097, 0.325097 };
+        expected[3] = new double[] { 0.691688, 0.308312, 0.691688, 0.308312 };
+        pGrid2d = new double[] { 22.325097, 59.808312 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 30.000000, 30.000000, 31.000000, 31.000000 };
+        expected[1] = new double[] { 60.000000, 61.000000, 60.000000, 61.000000 };
+        expected[2] = new double[] { 0.719603, 0.719603, 0.280397, 0.280397 };
+        expected[3] = new double[] { 0.058214, 0.941786, 0.058214, 0.941786 };
+        pGrid2d = new double[] { 31.280397, 61.441786 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 34.000000, 34.000000, 35.000000, 35.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.699100, 0.699100, 0.300900, 0.300900 };
+        expected[3] = new double[] { 0.326823, 0.673177, 0.326823, 0.673177 };
+        pGrid2d = new double[] { 35.300900, 59.173177 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 20.000000, 20.000000, 21.000000, 21.000000 };
+        expected[1] = new double[] { 61.000000, 62.000000, 61.000000, 62.000000 };
+        expected[2] = new double[] { 0.940776, 0.940776, 0.059224, 0.059224 };
+        expected[3] = new double[] { 0.230809, 0.769191, 0.230809, 0.769191 };
+        pGrid2d = new double[] { 21.059224, 62.269191 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 27.000000, 27.000000, 28.000000, 28.000000 };
+        expected[1] = new double[] { 57.000000, 58.000000, 57.000000, 58.000000 };
+        expected[2] = new double[] { 0.317116, 0.317116, 0.682884, 0.682884 };
+        expected[3] = new double[] { 0.946111, 0.053889, 0.946111, 0.053889 };
+        pGrid2d = new double[] { 28.682884, 57.553889 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 32.000000, 32.000000, 33.000000, 33.000000 };
+        expected[1] = new double[] { 55.000000, 56.000000, 55.000000, 56.000000 };
+        expected[2] = new double[] { 0.810686, 0.810686, 0.189314, 0.189314 };
+        expected[3] = new double[] { 0.776325, 0.223675, 0.776325, 0.223675 };
+        pGrid2d = new double[] { 33.189314, 55.723675 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 29.000000, 29.000000, 30.000000, 30.000000 };
+        expected[1] = new double[] { 56.000000, 57.000000, 56.000000, 57.000000 };
+        expected[2] = new double[] { 0.812109, 0.812109, 0.187891, 0.187891 };
+        expected[3] = new double[] { 0.094400, 0.905600, 0.094400, 0.905600 };
+        pGrid2d = new double[] { 30.187891, 57.405600 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 30.000000, 30.000000, 31.000000, 31.000000 };
+        expected[1] = new double[] { 55.000000, 56.000000, 55.000000, 56.000000 };
+        expected[2] = new double[] { 0.173670, 0.173670, 0.826330, 0.826330 };
+        expected[3] = new double[] { 0.588125, 0.411875, 0.588125, 0.411875 };
+        pGrid2d = new double[] { 31.826330, 55.911875 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 24.000000, 24.000000, 25.000000, 25.000000 };
+        expected[1] = new double[] { 61.000000, 62.000000, 61.000000, 62.000000 };
+        expected[2] = new double[] { 0.621859, 0.621859, 0.378141, 0.378141 };
+        expected[3] = new double[] { 0.870549, 0.129451, 0.870549, 0.129451 };
+        pGrid2d = new double[] { 25.378141, 61.629451 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 33.000000, 33.000000, 34.000000, 34.000000 };
+        expected[1] = new double[] { 54.000000, 55.000000, 54.000000, 55.000000 };
+        expected[2] = new double[] { 0.233388, 0.233388, 0.766612, 0.766612 };
+        expected[3] = new double[] { 0.124829, 0.875171, 0.124829, 0.875171 };
+        pGrid2d = new double[] { 34.766612, 55.375171 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 30.000000, 30.000000, 31.000000, 31.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.281363, 0.281363, 0.718637, 0.718637 };
+        expected[3] = new double[] { 0.489703, 0.510297, 0.489703, 0.510297 };
+        pGrid2d = new double[] { 31.718637, 60.010297 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "U");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+    }
+
+    @Test
+    public void testHorizontalInterpolationV() {
+
+        double[][] expected = new double[4][];
+        double[][] actual;
+        double[] pGrid2d;
+
+        expected[0] = new double[] { 32.000000, 32.000000, 33.000000, 33.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.930190, 0.930190, 0.069810, 0.069810 };
+        expected[3] = new double[] { 0.659645, 0.340355, 0.659645, 0.340355 };
+        pGrid2d = new double[] { 32.569810, 59.340355 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 20.000000, 20.000000, 21.000000, 21.000000 };
+        expected[1] = new double[] { 55.000000, 56.000000, 55.000000, 56.000000 };
+        expected[2] = new double[] { 0.188721, 0.188721, 0.811279, 0.811279 };
+        expected[3] = new double[] { 0.862640, 0.137360, 0.862640, 0.137360 };
+        pGrid2d = new double[] { 21.311279, 56.137360 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 30.000000, 30.000000, 31.000000, 31.000000 };
+        expected[1] = new double[] { 56.000000, 57.000000, 56.000000, 57.000000 };
+        expected[2] = new double[] { 0.995276, 0.995276, 0.004724, 0.004724 };
+        expected[3] = new double[] { 0.013274, 0.986726, 0.013274, 0.986726 };
+        pGrid2d = new double[] { 30.504724, 57.986726 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.267942, 0.267942, 0.732058, 0.732058 };
+        expected[3] = new double[] { 0.606931, 0.393069, 0.606931, 0.393069 };
+        pGrid2d = new double[] { 32.232058, 60.393069 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 27.000000, 27.000000, 28.000000, 28.000000 };
+        expected[1] = new double[] { 57.000000, 58.000000, 57.000000, 58.000000 };
+        expected[2] = new double[] { 0.022395, 0.022395, 0.977605, 0.977605 };
+        expected[3] = new double[] { 0.465335, 0.534665, 0.465335, 0.534665 };
+        pGrid2d = new double[] { 28.477605, 58.534665 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 23.000000, 23.000000, 24.000000, 24.000000 };
+        expected[1] = new double[] { 57.000000, 58.000000, 57.000000, 58.000000 };
+        expected[2] = new double[] { 0.128050, 0.128050, 0.871950, 0.871950 };
+        expected[3] = new double[] { 0.527888, 0.472112, 0.527888, 0.472112 };
+        pGrid2d = new double[] { 24.371950, 58.472112 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 23.000000, 23.000000, 24.000000, 24.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.529057, 0.529057, 0.470943, 0.470943 };
+        expected[3] = new double[] { 0.057864, 0.942136, 0.057864, 0.942136 };
+        pGrid2d = new double[] { 23.970943, 59.942136 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.092039, 0.092039, 0.907961, 0.907961 };
+        expected[3] = new double[] { 0.894894, 0.105106, 0.894894, 0.105106 };
+        pGrid2d = new double[] { 32.407961, 59.105106 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 23.000000, 23.000000, 24.000000, 24.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.963337, 0.963337, 0.036663, 0.036663 };
+        expected[3] = new double[] { 0.796823, 0.203177, 0.796823, 0.203177 };
+        pGrid2d = new double[] { 23.536663, 60.203177 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 21.000000, 21.000000, 22.000000, 22.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.174903, 0.174903, 0.825097, 0.825097 };
+        expected[3] = new double[] { 0.191688, 0.808312, 0.191688, 0.808312 };
+        pGrid2d = new double[] { 22.325097, 59.808312 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 30.000000, 30.000000, 31.000000, 31.000000 };
+        expected[1] = new double[] { 60.000000, 61.000000, 60.000000, 61.000000 };
+        expected[2] = new double[] { 0.219603, 0.219603, 0.780397, 0.780397 };
+        expected[3] = new double[] { 0.558214, 0.441786, 0.558214, 0.441786 };
+        pGrid2d = new double[] { 31.280397, 61.441786 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 34.000000, 34.000000, 35.000000, 35.000000 };
+        expected[1] = new double[] { 58.000000, 59.000000, 58.000000, 59.000000 };
+        expected[2] = new double[] { 0.199100, 0.199100, 0.800900, 0.800900 };
+        expected[3] = new double[] { 0.826823, 0.173177, 0.826823, 0.173177 };
+        pGrid2d = new double[] { 35.300900, 59.173177 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 20.000000, 20.000000, 21.000000, 21.000000 };
+        expected[1] = new double[] { 61.000000, 62.000000, 61.000000, 62.000000 };
+        expected[2] = new double[] { 0.440776, 0.440776, 0.559224, 0.559224 };
+        expected[3] = new double[] { 0.730809, 0.269191, 0.730809, 0.269191 };
+        pGrid2d = new double[] { 21.059224, 62.269191 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 28.000000, 28.000000, 29.000000, 29.000000 };
+        expected[1] = new double[] { 56.000000, 57.000000, 56.000000, 57.000000 };
+        expected[2] = new double[] { 0.817116, 0.817116, 0.182884, 0.182884 };
+        expected[3] = new double[] { 0.446111, 0.553889, 0.446111, 0.553889 };
+        pGrid2d = new double[] { 28.682884, 57.553889 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 32.000000, 32.000000, 33.000000, 33.000000 };
+        expected[1] = new double[] { 54.000000, 55.000000, 54.000000, 55.000000 };
+        expected[2] = new double[] { 0.310686, 0.310686, 0.689314, 0.689314 };
+        expected[3] = new double[] { 0.276325, 0.723675, 0.276325, 0.723675 };
+        pGrid2d = new double[] { 33.189314, 55.723675 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 29.000000, 29.000000, 30.000000, 30.000000 };
+        expected[1] = new double[] { 56.000000, 57.000000, 56.000000, 57.000000 };
+        expected[2] = new double[] { 0.312109, 0.312109, 0.687891, 0.687891 };
+        expected[3] = new double[] { 0.594400, 0.405600, 0.594400, 0.405600 };
+        pGrid2d = new double[] { 30.187891, 57.405600 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 54.000000, 55.000000, 54.000000, 55.000000 };
+        expected[2] = new double[] { 0.673670, 0.673670, 0.326330, 0.326330 };
+        expected[3] = new double[] { 0.088125, 0.911875, 0.088125, 0.911875 };
+        pGrid2d = new double[] { 31.826330, 55.911875 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 24.000000, 24.000000, 25.000000, 25.000000 };
+        expected[1] = new double[] { 60.000000, 61.000000, 60.000000, 61.000000 };
+        expected[2] = new double[] { 0.121859, 0.121859, 0.878141, 0.878141 };
+        expected[3] = new double[] { 0.370549, 0.629451, 0.370549, 0.629451 };
+        pGrid2d = new double[] { 25.378141, 61.629451 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 34.000000, 34.000000, 35.000000, 35.000000 };
+        expected[1] = new double[] { 54.000000, 55.000000, 54.000000, 55.000000 };
+        expected[2] = new double[] { 0.733388, 0.733388, 0.266612, 0.266612 };
+        expected[3] = new double[] { 0.624829, 0.375171, 0.624829, 0.375171 };
+        pGrid2d = new double[] { 34.766612, 55.375171 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+        expected[0] = new double[] { 31.000000, 31.000000, 32.000000, 32.000000 };
+        expected[1] = new double[] { 59.000000, 60.000000, 59.000000, 60.000000 };
+        expected[2] = new double[] { 0.781363, 0.781363, 0.218637, 0.218637 };
+        expected[3] = new double[] { 0.989703, 0.010297, 0.989703, 0.010297 };
+        pGrid2d = new double[] { 31.718637, 60.010297 };
+        actual = nemoGrid.get2dInterpolationCoefficients(pGrid2d, "V");
+        assertArrayEquals(expected[0], actual[0]);
+        assertArrayEquals(expected[1], actual[1]);
+        assertArrayEquals(expected[2], actual[2], 1e-10);
+        assertArrayEquals(expected[3], actual[3], 1e-10);
+
+    }
+
     // @Test
     // public void testDepthT() {
 
-    //     double[] actual = new double[nemoGrid.get_nz()];
-    //     double[][][] nemoDepthT = nemoGrid.getDepthT();
-    //     for (int k = 0; k < nemoGrid.get_nz(); k++) {
-    //         actual[k] = nemoDepthT[k][5][5];
-    //     }
-    //     assertArrayEquals(depthT, actual, 0.001);
+    // double[] actual = new double[nemoGrid.get_nz()];
+    // double[][][] nemoDepthT = nemoGrid.getDepthT();
+    // for (int k = 0; k < nemoGrid.get_nz(); k++) {
+    // actual[k] = nemoDepthT[k][5][5];
+    // }
+    // assertArrayEquals(depthT, actual, 0.001);
 
     // }
 
     // @Test
     // public void testE3T() {
 
-    //     double[] actual = new double[nemoGrid.get_nz()];
-    //     double[][][] nemoE3T = nemoGrid.getE3T();
-    //     for (int k = 0; k < nemoGrid.get_nz(); k++) {
-    //         actual[k] = nemoE3T[k][5][5];
-    //     }
-    //     assertArrayEquals(e3t, actual, 0.001);
+    // double[] actual = new double[nemoGrid.get_nz()];
+    // double[][][] nemoE3T = nemoGrid.getE3T();
+    // for (int k = 0; k < nemoGrid.get_nz(); k++) {
+    // actual[k] = nemoE3T[k][5][5];
+    // }
+    // assertArrayEquals(e3t, actual, 0.001);
 
     // }
 
     // @Test
     // public void testDepthW() {
 
-    //     double[] actual = new double[nemoGrid.get_nz() + 1];
-    //     double[][][] nemoDepthW = nemoGrid.getDepthW();
-    //     for (int k = 0; k < nemoGrid.get_nz() + 1; k++) {
-    //         actual[k] = nemoDepthW[k][5][5];
-    //     }
-    //     assertArrayEquals(depthW, actual, 0.001);
+    // double[] actual = new double[nemoGrid.get_nz() + 1];
+    // double[][][] nemoDepthW = nemoGrid.getDepthW();
+    // for (int k = 0; k < nemoGrid.get_nz() + 1; k++) {
+    // actual[k] = nemoDepthW[k][5][5];
+    // }
+    // assertArrayEquals(depthW, actual, 0.001);
 
     // }
 
