@@ -98,7 +98,7 @@ public class ZoneRelease extends AbstractRelease {
             totalPercentage += zone.getProportionParticles();
         }
 
-        if (totalPercentage != 1) {
+        if (Math.abs(totalPercentage - 1) > Math.pow(10, -8)) {
             StringBuilder sb = new StringBuilder();
             sb.append("Total proportion must be less equan than 100. ");
             sb.append("Actual proportion is ");
