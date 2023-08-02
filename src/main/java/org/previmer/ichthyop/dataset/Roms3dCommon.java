@@ -400,11 +400,15 @@ abstract public class Roms3dCommon extends RomsCommon {
         final double dx = x - (double) i;
         final double dy = y - (double) j;
         final double dz = kz - (double) k;
+        
+        // patch for Luisa
+        int nk = (z == 0) ? 1 : 2;
+        
         double co;
         double z_r;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
+                for (int kk = 0; kk < nk; kk++) {
                     co = Math.abs((1.d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
