@@ -474,6 +474,13 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         try {
             String[] tokens = userTrackers.split("\"");
             List<String> variables = new ArrayList<>();
+
+            // barrier.n: correct patch for when custom trackers not set
+            // but user trackers are.
+            if(this.customTrackers == null) {
+                customTrackers = new ArrayList<>();
+            }
+
             for (String token : tokens) {
                 if (!token.trim().isEmpty()) {
                     String varname = token.trim();
