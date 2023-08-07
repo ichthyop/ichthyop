@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
@@ -37,13 +38,13 @@
                                     </ImageView>
                                  </graphic>
                                  <content>
-                                    <VBox prefHeight="200.0" prefWidth="100.0">
+                                    <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
                                        <children>
                                           <ButtonBar prefHeight="40.0" prefWidth="200.0">
                                             <buttons>
                                               <Button mnemonicParsing="false" text="New">
                                                    <graphic>
-                                                      <ImageView fitHeight="150.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                                      <ImageView pickOnBounds="true" preserveRatio="true">
                                                          <image>
                                                             <Image url="@resources/images/ico32/menu-new.png" />
                                                          </image>
@@ -52,16 +53,16 @@
                                                 </Button>
                                                 <Button mnemonicParsing="false" text="Open">
                                                    <graphic>
-                                                      <ImageView fitHeight="150.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                                      <ImageView pickOnBounds="true" preserveRatio="true">
                                                          <image>
                                                             <Image url="@resources/images/ico32/menu-open.png" />
                                                          </image>
                                                       </ImageView>
                                                    </graphic>
                                                 </Button>
-                                                <Button mnemonicParsing="false" text="Close">
+                                                <Button disable="true" mnemonicParsing="false" text="Close">
                                                    <graphic>
-                                                      <ImageView fitHeight="150.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                                      <ImageView pickOnBounds="true" preserveRatio="true">
                                                          <image>
                                                             <Image url="@resources/images/ico32/menu-close.png" />
                                                          </image>
@@ -72,18 +73,18 @@
                                           </ButtonBar>
                                           <ButtonBar prefHeight="40.0" prefWidth="200.0">
                                             <buttons>
-                                              <Button mnemonicParsing="false" text="Save">
+                                              <Button disable="true" mnemonicParsing="false" text="Save">
                                                    <graphic>
-                                                      <ImageView fitHeight="150.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                                      <ImageView pickOnBounds="true" preserveRatio="true">
                                                          <image>
                                                             <Image url="@resources/images/ico32/save.png" />
                                                          </image>
                                                       </ImageView>
                                                    </graphic>
                                                 </Button>
-                                                <Button mnemonicParsing="false" text="Save As">
+                                                <Button disable="true" mnemonicParsing="false" text="Save As">
                                                    <graphic>
-                                                      <ImageView fitHeight="150.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                                      <ImageView pickOnBounds="true" preserveRatio="true">
                                                          <image>
                                                             <Image url="@resources/images/ico32/save-as.png" />
                                                          </image>
@@ -152,6 +153,8 @@
                           <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                           </columnConstraints>
                           <rowConstraints>
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -165,7 +168,7 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <ButtonBar buttonMinWidth="20.0" prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="8">
+                              <ButtonBar buttonMinWidth="20.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="8">
                                 <buttons>
                                   <Button minWidth="69.0" mnemonicParsing="false" prefHeight="40.0">
                                        <graphic>
@@ -204,8 +207,11 @@
                                        </graphic>
                                     </Button>
                                 </buttons>
+                                 <padding>
+                                    <Insets right="10.0" />
+                                 </padding>
                               </ButtonBar>
-                              <ScrollPane prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowSpan="8" />
+                              <ScrollPane prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowSpan="8" />
                            </children>
                         </GridPane>
                      </children>
@@ -221,7 +227,7 @@
             <items>
                   <MenuItem mnemonicParsing="false" text="New">
                      <graphic>
-                        <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@resources/images/ico32/menu-new.png" />
                            </image>
@@ -229,13 +235,13 @@
                      </graphic></MenuItem>
                   <MenuItem mnemonicParsing="false" text="Open">
                      <graphic>
-                        <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@resources/images/ico32/menu-open.png" />
                            </image>
                         </ImageView>
                      </graphic></MenuItem>
-              <MenuItem mnemonicParsing="false" text="Close">
+              <MenuItem disable="true" mnemonicParsing="false" text="Close">
                      <graphic>
                         <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -244,42 +250,154 @@
                         </ImageView>
                      </graphic></MenuItem>
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem disable="true" mnemonicParsing="false" text="Save" />
-                  <MenuItem mnemonicParsing="false" text="Save As" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Save">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/save.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <MenuItem disable="true" mnemonicParsing="false" text="Save As">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/save-as.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Close" />
+                  <MenuItem mnemonicParsing="false" text="Exit">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/menu-exit.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Simulation">
             <items>
-              <MenuItem mnemonicParsing="false" text="Run simulation" />
-                  <MenuItem mnemonicParsing="false" text="Preview" />
+              <MenuItem disable="true" mnemonicParsing="false" text="Run simulation">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/run-play.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <MenuItem disable="true" mnemonicParsing="false" text="Preview">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/visual-control.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
             </items>
           </Menu>
             <Menu mnemonicParsing="false" text="Mapping">
               <items>
-                <MenuItem disable="true" mnemonicParsing="false" text="Make maps" />
-                  <MenuItem disable="true" mnemonicParsing="false" text="Export to KMZ" />
-                  <MenuItem disable="true" mnemonicParsing="false" text="Cancel" />
+                <MenuItem disable="true" mnemonicParsing="false" text="Make maps">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/earth.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <MenuItem disable="true" mnemonicParsing="false" text="Export to KMZ">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/googleearth.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <MenuItem disable="true" mnemonicParsing="false" text="Cancel">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/cancel.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Open Netcdf" />
+                  <MenuItem mnemonicParsing="false" text="Open Netcdf">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/open-nc.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
               </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Animation">
               <items>
-                <MenuItem disable="true" mnemonicParsing="false" text="Start animation (forward)" />
-                  <MenuItem disable="true" mnemonicParsing="false" text="Start animation (backward)" />
-                  <MenuItem disable="true" mnemonicParsing="false" text="Stop animation" />
+                <MenuItem disable="true" mnemonicParsing="false" text="Start animation (forward)">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/icon-play-fw.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <MenuItem disable="true" mnemonicParsing="false" text="Start animation (backward)">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/icon-play-bw.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <MenuItem disable="true" mnemonicParsing="false" text="Stop animation">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/icon-stop.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Open maps" />
+                  <MenuItem mnemonicParsing="false" text="Open maps">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/open-animation.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Save As" />
-                  <MenuItem mnemonicParsing="false" text="Delete" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Save As">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/save-animation.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <MenuItem disable="true" mnemonicParsing="false" text="Delete">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/delete-animation.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
               </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
               <items>
-                <MenuItem mnemonicParsing="false" text="About" />
+                <MenuItem mnemonicParsing="false" text="About">
+                     <graphic>
+                        <ImageView pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/menu-about.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
               </items>
             </Menu>
         </menus>
