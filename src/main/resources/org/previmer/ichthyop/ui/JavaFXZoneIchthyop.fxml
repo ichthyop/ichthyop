@@ -32,6 +32,7 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ColorPicker?>
@@ -54,7 +55,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="400.0" prefWidth="740.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -97,7 +98,7 @@
     </MenuBar>
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <children>
-            <GridPane hgap="5.0" vgap="5.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+            <GridPane hgap="10.0" vgap="5.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -123,7 +124,7 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnSpan="2" GridPane.rowSpan="10">
+                  <VBox prefWidth="100.0" GridPane.columnSpan="2" GridPane.rowSpan="10">
                      <children>
                         <Label text="Zones">
                            <font>
@@ -135,11 +136,6 @@
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowSpan="10">
                      <children>
-                        <Label text="Zone name" VBox.vgrow="NEVER">
-                           <font>
-                              <Font name="System Bold" size="13.0" />
-                           </font>
-                        </Label>
                         <CheckBox mnemonicParsing="false" text="Enabled" VBox.vgrow="NEVER" />
                         <TableView prefHeight="242.0" prefWidth="200.0">
                           <columns>
@@ -172,9 +168,12 @@
                         <ColorPicker />
                      </children>
                   </VBox>
-                  <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="4" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" GridPane.rowSpan="2">
+                  <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" GridPane.columnIndex="4" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" GridPane.rowSpan="2">
                      <children>
-                        <Label text="Thickness" />
+                        <Label text="Thickness">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font></Label>
                         <CheckBox mnemonicParsing="false" text="Activated" />
                         <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                            <children>
@@ -192,7 +191,10 @@
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" GridPane.columnIndex="4" GridPane.columnSpan="2147483647" GridPane.rowIndex="8" GridPane.rowSpan="2">
                      <children>
-                        <Label text="Bathymetric mask" />
+                        <Label text="Bathymetric mask">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font></Label>
                         <CheckBox mnemonicParsing="false" text="Enabled" />
                         <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                            <children>
@@ -210,7 +212,10 @@
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="11">
                      <children>
-                        <Label text="Display of lon/lat" />
+                        <Label text="Display of lon/lat">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font></Label>
                         <HBox prefHeight="41.0" prefWidth="610.0" spacing="20.0">
                            <children>
                               <RadioButton mnemonicParsing="false" text="Decimal degrees">
@@ -233,6 +238,9 @@
                         </Label>
                         <TextField />
                      </children>
+                     <GridPane.margin>
+                        <Insets bottom="5.0" />
+                     </GridPane.margin>
                   </VBox>
                </children>
             </GridPane>
