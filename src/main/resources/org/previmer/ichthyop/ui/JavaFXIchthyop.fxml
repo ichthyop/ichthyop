@@ -214,18 +214,25 @@
       <TabPane layoutY="28.0" prefHeight="719.0" prefWidth="1007.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0">
         <tabs>
           <Tab text="Step 1: Configuration">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@resources/images/ico32/apply.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <content>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
                      <children>
-                        <HBox alignment="CENTER" prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <VBox alignment="CENTER" spacing="10.0">
+                        <BorderPane prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <left>
+                              <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <ButtonBar nodeOrientation="LEFT_TO_RIGHT">
+                                    <ButtonBar buttonMinWidth="120.0" nodeOrientation="LEFT_TO_RIGHT">
                                       <buttons>
                                         <Button mnemonicParsing="false" text="New">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/menu-new.png" />
                                                    </image>
@@ -234,29 +241,20 @@
                                           </Button>
                                           <Button mnemonicParsing="false" text="Open">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/menu-open.png" />
                                                    </image>
                                                 </ImageView>
                                              </graphic>
                                           </Button>
-                                          <Button disable="true" mnemonicParsing="false" text="Close">
-                                             <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
-                                                   <image>
-                                                      <Image url="@resources/images/ico32/menu-close.png" />
-                                                   </image>
-                                                </ImageView>
-                                             </graphic>
-                                          </Button>
                                       </buttons>
                                     </ButtonBar>
-                                    <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                    <ButtonBar buttonMinWidth="120.0">
                                       <buttons>
                                         <Button disable="true" mnemonicParsing="false" text="Save">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/save.png" />
                                                    </image>
@@ -265,7 +263,7 @@
                                           </Button>
                                           <Button disable="true" mnemonicParsing="false" text="Save As">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/save-as.png" />
                                                    </image>
@@ -274,9 +272,27 @@
                                           </Button>
                                       </buttons>
                                     </ButtonBar>
+                                    <ButtonBar buttonMinWidth="120.0" prefHeight="40.0" prefWidth="200.0">
+                                      <buttons>
+                                          <Button disable="true" mnemonicParsing="false" text="Close">
+                                             <graphic>
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/menu-close.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
                                  </children>
+                                 <BorderPane.margin>
+                                    <Insets right="10.0" />
+                                 </BorderPane.margin>
                               </VBox>
-                              <SplitPane dividerPositions="0.5" prefHeight="745.0" prefWidth="682.0">
+                           </left>
+                           <center>
+                              <SplitPane dividerPositions="0.5" prefHeight="745.0" prefWidth="682.0" BorderPane.alignment="CENTER">
                                 <items>
                                   <AnchorPane>
                                        <children>
@@ -358,18 +374,14 @@
                                     </AnchorPane>
                                 </items>
                               </SplitPane>
-                           </children>
-                        </HBox>
+                           </center>
+                           <bottom>
+                              <Label text="Configuration file: " BorderPane.alignment="CENTER" />
+                           </bottom>
+                        </BorderPane>
                      </children>
                   </AnchorPane>
-            </content>
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@resources/images/ico32/apply.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
+               </content>
           </Tab>
           <Tab text="Step 2: Simulation">
             <content>
@@ -384,7 +396,7 @@
                               </ImageView>
                            </center>
                            <bottom>
-                              <Label text="Label" BorderPane.alignment="TOP_CENTER" />
+                              <Label text="Configuration file: " BorderPane.alignment="TOP_CENTER" />
                            </bottom>
                            <left>
                               <VBox alignment="CENTER" BorderPane.alignment="CENTER">
@@ -541,19 +553,6 @@
                                     </ButtonBar>
                                     <ButtonBar prefWidth="100.0">
                                       <buttons>
-                                        <Button mnemonicParsing="false" text="Cancel">
-                                             <graphic>
-                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                   <image>
-                                                      <Image url="@resources/images/ico32/cancel.png" />
-                                                   </image>
-                                                </ImageView>
-                                             </graphic>
-                                          </Button>
-                                      </buttons>
-                                    </ButtonBar>
-                                    <ButtonBar prefWidth="100.0">
-                                      <buttons>
                                         <Button mnemonicParsing="false" text="Open NetCDF">
                                              <graphic>
                                                 <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
@@ -568,6 +567,19 @@
                                                 <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/close-folder.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <ButtonBar buttonMinWidth="140.0" prefWidth="120.0">
+                                      <buttons>
+                                        <Button mnemonicParsing="false" text="Cancel">
+                                             <graphic>
+                                                <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/cancel.png" />
                                                    </image>
                                                 </ImageView>
                                              </graphic>
@@ -618,7 +630,7 @@
                               </ImageView>
                            </center>
                            <left>
-                              <VBox alignment="CENTER_LEFT" prefHeight="182.0" prefWidth="315.0" spacing="5.0" BorderPane.alignment="CENTER">
+                              <VBox alignment="CENTER_LEFT" prefHeight="182.0" prefWidth="315.0" spacing="10.0" BorderPane.alignment="CENTER">
                                  <children>
                                     <ButtonBar buttonMinWidth="30.0">
                                       <buttons>
@@ -689,11 +701,11 @@
                                     </ButtonBar>
                                     <Label text="Time" />
                                     <ScrollBar />
-                                    <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                    <ButtonBar buttonMinWidth="80.0" prefHeight="40.0" prefWidth="200.0">
                                       <buttons>
                                           <Button mnemonicParsing="false" text="Open Maps">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/open-animation.png" />
                                                    </image>
@@ -702,7 +714,7 @@
                                           </Button>
                                         <Button mnemonicParsing="false" text="Delete">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/delete-animation.png" />
                                                    </image>
@@ -711,7 +723,7 @@
                                           </Button>
                                           <Button mnemonicParsing="false" text="Save As">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/save-animation.png" />
                                                    </image>
@@ -721,7 +733,7 @@
                                       </buttons>
                                     </ButtonBar>
                                     <Label text="Simulation Maps" />
-                                    <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                                    <HBox alignment="CENTER_LEFT" spacing="5.0">
                                        <children>
                                           <Button mnemonicParsing="false" text="Animated GIF">
                                              <graphic>
@@ -735,7 +747,7 @@
                                           <CheckBox mnemonicParsing="false" text="Reverse time" />
                                        </children>
                                     </HBox>
-                                    <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                                    <HBox alignment="CENTER_LEFT" spacing="5.0">
                                        <children>
                                           <Spinner editable="true" />
                                           <Label text="Frame per seconds" />
