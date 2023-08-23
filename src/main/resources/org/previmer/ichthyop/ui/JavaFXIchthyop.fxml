@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
@@ -18,8 +17,9 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -29,514 +29,6 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="747.0" prefWidth="1007.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <SplitPane dividerPositions="0.28861330326944756" prefHeight="702.0" prefWidth="889.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <items>
-            <SplitPane dividerPositions="0.8" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
-              <items>
-                <AnchorPane>
-                     <children>
-                        <Accordion layoutX="14.0" layoutY="27.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="27.0">
-                          <panes>
-                            <TitledPane animated="false" text="Step 1: Configuration">
-                                 <graphic>
-                                    <ImageView pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@resources/images/ico32/apply.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <content>
-                                    <VBox alignment="CENTER" spacing="10.0">
-                                       <children>
-                                          <ButtonBar nodeOrientation="LEFT_TO_RIGHT">
-                                            <buttons>
-                                              <Button mnemonicParsing="false" text="New">
-                                                   <graphic>
-                                                      <ImageView pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@resources/images/ico32/menu-new.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                                <Button mnemonicParsing="false" text="Open">
-                                                   <graphic>
-                                                      <ImageView pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@resources/images/ico32/menu-open.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                                <Button disable="true" mnemonicParsing="false" text="Close">
-                                                   <graphic>
-                                                      <ImageView pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@resources/images/ico32/menu-close.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                            </buttons>
-                                          </ButtonBar>
-                                          <ButtonBar prefHeight="40.0" prefWidth="200.0">
-                                            <buttons>
-                                              <Button disable="true" mnemonicParsing="false" text="Save">
-                                                   <graphic>
-                                                      <ImageView pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@resources/images/ico32/save.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                                <Button disable="true" mnemonicParsing="false" text="Save As">
-                                                   <graphic>
-                                                      <ImageView pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@resources/images/ico32/save-as.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                            </buttons>
-                                          </ButtonBar>
-                                       </children>
-                                    </VBox>
-                                 </content>
-                            </TitledPane>
-                            <TitledPane animated="false" text="Step 2: Simulation">
-                                 <graphic>
-                                    <ImageView pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@resources/images/ico32/run-build.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <content>
-                                    <VBox alignment="CENTER">
-                                       <children>
-                                          <ButtonBar buttonMinWidth="50.0" prefHeight="40.0" prefWidth="200.0">
-                                            <buttons>
-                                              <Button mnemonicParsing="false" text="Preview">
-                                                   <graphic>
-                                                      <ImageView pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@resources/images/ico32/visual-control.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                                <Button mnemonicParsing="false" text="Run simulation">
-                                                   <graphic>
-                                                      <ImageView pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@resources/images/ico32/run-play.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                            </buttons>
-                                          </ButtonBar>
-                                          <CheckBox mnemonicParsing="false" text="Draw dataset grid" />
-                                       </children>
-                                    </VBox>
-                                 </content>
-                            </TitledPane>
-                            <TitledPane animated="false" text="Step 3: Mapping">
-                                 <graphic>
-                                    <ImageView pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@resources/images/ico32/mapping.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <content>
-                                    <ScrollPane prefHeight="200.0" prefWidth="200.0">
-                                      <content>
-                                        <AnchorPane>
-                                             <children>
-                                                <VBox spacing="5.0">
-                                                   <children>
-                                                      <Label text="Particle color">
-                                                         <font>
-                                                            <Font name="System Bold" size="13.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <HBox alignment="CENTER_LEFT" spacing="5.0">
-                                                         <children>
-                                                            <Label text="Default Color" />
-                                                            <ColorPicker prefWidth="60.0" />
-                                                            <Label text="Size (pixel)" />
-                                                            <Spinner editable="true" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="60.0" />
-                                                         </children>
-                                                      </HBox>
-                                                      <Label text="Colorbar">
-                                                         <font>
-                                                            <Font name="System Bold" size="13.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <HBox alignment="CENTER_LEFT" spacing="5.0">
-                                                         <children>
-                                                            <Label text="Variable" />
-                                                            <ChoiceBox prefWidth="100.0" />
-                                                         </children>
-                                                      </HBox>
-                                                      <HBox alignment="CENTER_LEFT" spacing="5.0">
-                                                         <children>
-                                                            <Label prefWidth="100.0" text="Minimum" />
-                                                            <TextField prefWidth="80.0" HBox.hgrow="NEVER" />
-                                                            <ColorPicker prefWidth="50.0" />
-                                                         </children>
-                                                      </HBox>
-                                                      <HBox alignment="CENTER_LEFT" spacing="5.0">
-                                                         <children>
-                                                            <Label prefWidth="100.0" text="Median" />
-                                                            <TextField prefWidth="80.0" HBox.hgrow="NEVER" />
-                                                            <ColorPicker prefWidth="50.0" />
-                                                         </children>
-                                                      </HBox>
-                                                      <HBox alignment="CENTER_LEFT" spacing="5.0">
-                                                         <children>
-                                                            <Label prefWidth="100.0" text="Maximum" />
-                                                            <TextField prefWidth="80.0" HBox.hgrow="NEVER" />
-                                                            <ColorPicker prefWidth="50.0" />
-                                                         </children>
-                                                      </HBox>
-                                                      <ButtonBar buttonMinWidth="20.0" prefWidth="100.0">
-                                                        <buttons>
-                                                            <Button mnemonicParsing="false" text="Apply settings">
-                                                               <graphic>
-                                                                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/ok.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false" text="Auto range">
-                                                               <graphic>
-                                                                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/range.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                        </buttons>
-                                                      </ButtonBar>
-                                                      <Separator />
-                                                      <ButtonBar prefWidth="100.0">
-                                                        <buttons>
-                                                          <Button mnemonicParsing="false" text="Make Maps">
-                                                               <graphic>
-                                                                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/mapping.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false" text="Export to KMZ">
-                                                               <graphic>
-                                                                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/googleearth.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                        </buttons>
-                                                      </ButtonBar>
-                                                      <ButtonBar prefWidth="100.0">
-                                                        <buttons>
-                                                          <Button mnemonicParsing="false" text="Cancel">
-                                                               <graphic>
-                                                                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/cancel.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                        </buttons>
-                                                      </ButtonBar>
-                                                      <ButtonBar prefWidth="100.0">
-                                                        <buttons>
-                                                          <Button mnemonicParsing="false" text="Open NetCDF">
-                                                               <graphic>
-                                                                  <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/open-nc.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false" text="Close NetCDF">
-                                                               <graphic>
-                                                                  <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/close-folder.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                        </buttons>
-                                                      </ButtonBar>
-                                                      <Label text="Ichthyop output file" />
-                                                      <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                                         <children>
-                                                            <Label text="Web Map Service" />
-                                                            <ChoiceBox />
-                                                         </children>
-                                                      </HBox>
-                                                   </children>
-                                                </VBox>
-                                             </children>
-                                          </AnchorPane>
-                                      </content>
-                                    </ScrollPane>
-                                 </content>
-                            </TitledPane>
-                              <TitledPane animated="false" text="Step 4: Animation">
-                                 <graphic>
-                                    <ImageView pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@resources/images/ico32/tool-animator.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <content>
-                                    <ScrollPane prefHeight="200.0" prefWidth="200.0">
-                                      <content>
-                                        <AnchorPane>
-                                             <children>
-                                                <VBox prefHeight="182.0" prefWidth="315.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                   <children>
-                                                      <ButtonBar buttonMinWidth="30.0">
-                                                        <buttons>
-                                                          <Button mnemonicParsing="false">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/go-first.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/go-previous.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/icon-play-bw.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/icon-stop.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/icon-play-fw.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/go-next.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/go-last.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                        </buttons>
-                                                      </ButtonBar>
-                                                      <Label text="Time" />
-                                                      <ScrollBar />
-                                                      <ButtonBar prefHeight="40.0" prefWidth="200.0">
-                                                        <buttons>
-                                                            <Button mnemonicParsing="false" text="Open Maps">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/open-animation.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                          <Button mnemonicParsing="false" text="Delete">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/delete-animation.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <Button mnemonicParsing="false" text="Save As">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/save-animation.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                        </buttons>
-                                                      </ButtonBar>
-                                                      <Label text="Simulation Maps" />
-                                                      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
-                                                         <children>
-                                                            <Button mnemonicParsing="false" text="Animated GIF">
-                                                               <graphic>
-                                                                  <ImageView pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@resources/images/ico32/film.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                            </Button>
-                                                            <CheckBox mnemonicParsing="false" text="Reverse time" />
-                                                         </children>
-                                                      </HBox>
-                                                      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
-                                                         <children>
-                                                            <Spinner editable="true" />
-                                                            <Label text="Frame per seconds" />
-                                                         </children>
-                                                      </HBox>
-                                                   </children>
-                                                </VBox>
-                                             </children>
-                                          </AnchorPane>
-                                      </content>
-                                    </ScrollPane>
-                                 </content>
-                              </TitledPane>
-                          </panes>
-                        </Accordion>
-                     </children>
-                  </AnchorPane>
-                <AnchorPane>
-                     <children>
-                        <ScrollPane layoutX="27.0" layoutY="45.0" prefHeight="347.0" prefWidth="253.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children>
-                  </AnchorPane>
-              </items>
-            </SplitPane>
-            <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0">
-              <items>
-                <AnchorPane>
-                     <children>
-                        <VBox layoutX="51.0" layoutY="26.0" prefHeight="719.0" prefWidth="338.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="26.0">
-                           <children>
-                              <ListView />
-                              <ButtonBar buttonMinWidth="20.0">
-                                <buttons>
-                                  <Button minWidth="69.0" mnemonicParsing="false" prefHeight="40.0">
-                                       <graphic>
-                                          <ImageView pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@resources/images/ico32/tree-collapse.png" />
-                                             </image>
-                                          </ImageView>
-                                       </graphic>
-                                    </Button>
-                                    <Button mnemonicParsing="false">
-                                       <graphic>
-                                          <ImageView pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@resources/images/ico32/tree-expand.png" />
-                                             </image>
-                                          </ImageView>
-                                       </graphic>
-                                    </Button>
-                                    <Button mnemonicParsing="false">
-                                       <graphic>
-                                          <ImageView pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@resources/images/ico32/up.png" />
-                                             </image>
-                                          </ImageView>
-                                       </graphic>
-                                    </Button>
-                                    <Button mnemonicParsing="false">
-                                       <graphic>
-                                          <ImageView pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@resources/images/ico32/down.png" />
-                                             </image>
-                                          </ImageView>
-                                       </graphic>
-                                    </Button>
-                                </buttons>
-                                 <padding>
-                                    <Insets right="10.0" />
-                                 </padding>
-                              </ButtonBar>
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                     <children>
-                        <VBox prefHeight="719.0" prefWidth="338.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="26.0">
-                           <children>
-                              <Label text="Block Description: ">
-                                 <font>
-                                    <Font name="System Bold" size="13.0" />
-                                 </font>
-                              </Label>
-                              <Label text="Label" />
-                              <Separator prefWidth="200.0" />
-                              <Label text="Parameters">
-                                 <font>
-                                    <Font name="System Bold" size="13.0" />
-                                 </font>
-                              </Label>
-                              <CheckBox mnemonicParsing="false" text="Show hidden parameters" />
-                              <ScrollPane>
-                                 <content>
-                                    <ListView prefHeight="200.0" prefWidth="200.0" />
-                                 </content>
-                              </ScrollPane>
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </items>
-            </SplitPane>
-         </items>
-      </SplitPane>
       <MenuBar layoutY="1.0" prefHeight="27.0" prefWidth="635.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <menus>
           <Menu mnemonicParsing="false" text="Configuration">
@@ -718,5 +210,518 @@
             </Menu>
         </menus>
       </MenuBar>
+      <TabPane layoutY="28.0" prefHeight="719.0" prefWidth="1007.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0">
+        <tabs>
+          <Tab text="Step 1: Configuration">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <HBox prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <VBox alignment="CENTER" spacing="10.0">
+                                 <children>
+                                    <ButtonBar nodeOrientation="LEFT_TO_RIGHT">
+                                      <buttons>
+                                        <Button mnemonicParsing="false" text="New">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/menu-new.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false" text="Open">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/menu-open.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button disable="true" mnemonicParsing="false" text="Close">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/menu-close.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                      <buttons>
+                                        <Button disable="true" mnemonicParsing="false" text="Save">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/save.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button disable="true" mnemonicParsing="false" text="Save As">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/save-as.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                 </children>
+                              </VBox>
+                              <SplitPane dividerPositions="0.5" prefHeight="745.0" prefWidth="682.0">
+                                <items>
+                                  <AnchorPane>
+                                       <children>
+                                          <VBox layoutX="51.0" layoutY="26.0" prefHeight="719.0" prefWidth="338.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="26.0">
+                                             <children>
+                                                <ListView />
+                                                <ButtonBar buttonMinWidth="20.0">
+                                                  <buttons>
+                                                    <Button minWidth="69.0" mnemonicParsing="false" prefHeight="40.0">
+                                                         <graphic>
+                                                            <ImageView pickOnBounds="true" preserveRatio="true">
+                                                               <image>
+                                                                  <Image url="@resources/images/ico32/tree-collapse.png" />
+                                                               </image>
+                                                            </ImageView>
+                                                         </graphic>
+                                                      </Button>
+                                                      <Button mnemonicParsing="false">
+                                                         <graphic>
+                                                            <ImageView pickOnBounds="true" preserveRatio="true">
+                                                               <image>
+                                                                  <Image url="@resources/images/ico32/tree-expand.png" />
+                                                               </image>
+                                                            </ImageView>
+                                                         </graphic>
+                                                      </Button>
+                                                      <Button mnemonicParsing="false">
+                                                         <graphic>
+                                                            <ImageView pickOnBounds="true" preserveRatio="true">
+                                                               <image>
+                                                                  <Image url="@resources/images/ico32/up.png" />
+                                                               </image>
+                                                            </ImageView>
+                                                         </graphic>
+                                                      </Button>
+                                                      <Button mnemonicParsing="false">
+                                                         <graphic>
+                                                            <ImageView pickOnBounds="true" preserveRatio="true">
+                                                               <image>
+                                                                  <Image url="@resources/images/ico32/down.png" />
+                                                               </image>
+                                                            </ImageView>
+                                                         </graphic>
+                                                      </Button>
+                                                  </buttons>
+                                                   <padding>
+                                                      <Insets right="10.0" />
+                                                   </padding>
+                                                </ButtonBar>
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                    </AnchorPane>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                       <children>
+                                          <VBox prefHeight="719.0" prefWidth="338.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="26.0">
+                                             <children>
+                                                <Label text="Block Description: ">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label text="Label" />
+                                                <Separator prefWidth="200.0" />
+                                                <Label text="Parameters">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                </Label>
+                                                <CheckBox mnemonicParsing="false" text="Show hidden parameters" />
+                                                <ScrollPane>
+                                                   <content>
+                                                      <ListView prefHeight="200.0" prefWidth="200.0" />
+                                                   </content>
+                                                </ScrollPane>
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                    </AnchorPane>
+                                </items>
+                              </SplitPane>
+                           </children>
+                        </HBox>
+                     </children>
+                  </AnchorPane>
+            </content>
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@resources/images/ico32/apply.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+          </Tab>
+          <Tab text="Step 2: Simulation">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <HBox prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <VBox alignment="CENTER">
+                                 <children>
+                                    <ButtonBar buttonMinWidth="50.0" prefHeight="40.0" prefWidth="200.0">
+                                      <buttons>
+                                        <Button mnemonicParsing="false" text="Preview">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/visual-control.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false" text="Run simulation">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/run-play.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <CheckBox mnemonicParsing="false" text="Draw dataset grid" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </AnchorPane>
+            </content>
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@resources/images/ico32/run-build.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+          </Tab>
+            <Tab text="Step 3: Mapping">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <VBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <Label text="Particle color">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <Label text="Default Color" />
+                                          <ColorPicker prefWidth="60.0" />
+                                          <Label text="Size (pixel)" />
+                                          <Spinner editable="true" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="60.0" />
+                                       </children>
+                                    </HBox>
+                                    <Label text="Colorbar">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <Label text="Variable" />
+                                          <ChoiceBox prefWidth="100.0" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <Label prefWidth="100.0" text="Minimum" />
+                                          <TextField prefWidth="80.0" HBox.hgrow="NEVER" />
+                                          <ColorPicker prefWidth="50.0" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <Label prefWidth="100.0" text="Median" />
+                                          <TextField prefWidth="80.0" HBox.hgrow="NEVER" />
+                                          <ColorPicker prefWidth="50.0" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <Label prefWidth="100.0" text="Maximum" />
+                                          <TextField prefWidth="80.0" HBox.hgrow="NEVER" />
+                                          <ColorPicker prefWidth="50.0" />
+                                       </children>
+                                    </HBox>
+                                    <ButtonBar buttonMinWidth="20.0" prefWidth="100.0">
+                                      <buttons>
+                                          <Button mnemonicParsing="false" text="Apply settings">
+                                             <graphic>
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/ok.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false" text="Auto range">
+                                             <graphic>
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/range.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <Separator />
+                                    <ButtonBar prefWidth="100.0">
+                                      <buttons>
+                                        <Button mnemonicParsing="false" text="Make Maps">
+                                             <graphic>
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/mapping.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false" text="Export to KMZ">
+                                             <graphic>
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/googleearth.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <ButtonBar prefWidth="100.0">
+                                      <buttons>
+                                        <Button mnemonicParsing="false" text="Cancel">
+                                             <graphic>
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/cancel.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <ButtonBar prefWidth="100.0">
+                                      <buttons>
+                                        <Button mnemonicParsing="false" text="Open NetCDF">
+                                             <graphic>
+                                                <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/open-nc.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false" text="Close NetCDF">
+                                             <graphic>
+                                                <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/close-folder.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <Label text="Ichthyop output file" />
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                       <children>
+                                          <Label text="Web Map Service" />
+                                          <ChoiceBox />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                           <padding>
+                              <Insets left="10.0" />
+                           </padding>
+                        </HBox>
+                     </children>
+                  </AnchorPane>
+              </content>
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@resources/images/ico32/mapping.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Tab>
+            <Tab text="Step 4: Animation">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <VBox alignment="CENTER_LEFT" prefHeight="182.0" prefWidth="315.0" spacing="5.0">
+                                 <children>
+                                    <ButtonBar buttonMinWidth="30.0">
+                                      <buttons>
+                                        <Button mnemonicParsing="false">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/go-first.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/go-previous.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/icon-play-bw.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/icon-stop.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/icon-play-fw.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/go-next.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/go-last.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <Label text="Time" />
+                                    <ScrollBar />
+                                    <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                      <buttons>
+                                          <Button mnemonicParsing="false" text="Open Maps">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/open-animation.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                        <Button mnemonicParsing="false" text="Delete">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/delete-animation.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Button mnemonicParsing="false" text="Save As">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/save-animation.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                      </buttons>
+                                    </ButtonBar>
+                                    <Label text="Simulation Maps" />
+                                    <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" text="Animated GIF">
+                                             <graphic>
+                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@resources/images/ico32/film.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <CheckBox mnemonicParsing="false" text="Reverse time" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                                       <children>
+                                          <Spinner editable="true" />
+                                          <Label text="Frame per seconds" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                           <padding>
+                              <Insets left="10.0" />
+                           </padding>
+                        </HBox>
+                     </children>
+                  </AnchorPane>
+              </content>
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@resources/images/ico32/tool-animator.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Tab>
+        </tabs>
+      </TabPane>
    </children>
 </AnchorPane>
