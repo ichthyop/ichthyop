@@ -23,6 +23,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -216,7 +217,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <HBox prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <HBox alignment="CENTER" prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <VBox alignment="CENTER" spacing="10.0">
                                  <children>
@@ -279,7 +280,7 @@
                                 <items>
                                   <AnchorPane>
                                        <children>
-                                          <VBox layoutX="51.0" layoutY="26.0" prefHeight="719.0" prefWidth="338.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="26.0">
+                                          <VBox alignment="CENTER" layoutX="51.0" layoutY="26.0" prefHeight="686.0" prefWidth="337.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
                                                 <ListView />
                                                 <ButtonBar buttonMinWidth="20.0">
@@ -331,7 +332,7 @@
                                     </AnchorPane>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                        <children>
-                                          <VBox prefHeight="719.0" prefWidth="338.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="26.0">
+                                          <VBox alignment="CENTER_LEFT" prefHeight="686.0" prefWidth="337.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
                                                 <Label text="Block Description: ">
                                                    <font>
@@ -374,15 +375,25 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <HBox prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <VBox alignment="CENTER">
+                        <BorderPane prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <center>
+                              <ImageView pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+                                 <image>
+                                    <Image url="@resources/images/ico256/run-simulation.png" />
+                                 </image>
+                              </ImageView>
+                           </center>
+                           <bottom>
+                              <Label text="Label" BorderPane.alignment="TOP_CENTER" />
+                           </bottom>
+                           <left>
+                              <VBox alignment="CENTER" BorderPane.alignment="CENTER">
                                  <children>
-                                    <ButtonBar buttonMinWidth="50.0" prefHeight="40.0" prefWidth="200.0">
+                                    <ButtonBar buttonMinWidth="120.0" prefHeight="40.0" prefWidth="200.0">
                                       <buttons>
                                         <Button mnemonicParsing="false" text="Preview">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/visual-control.png" />
                                                    </image>
@@ -391,7 +402,7 @@
                                           </Button>
                                           <Button mnemonicParsing="false" text="Run simulation">
                                              <graphic>
-                                                <ImageView pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
                                                       <Image url="@resources/images/ico32/run-play.png" />
                                                    </image>
@@ -403,8 +414,8 @@
                                     <CheckBox mnemonicParsing="false" text="Draw dataset grid" />
                                  </children>
                               </VBox>
-                           </children>
-                        </HBox>
+                           </left>
+                        </BorderPane>
                      </children>
                   </AnchorPane>
             </content>
@@ -420,9 +431,23 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <HBox alignment="CENTER_LEFT" prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <VBox alignment="CENTER_LEFT" spacing="5.0">
+                        <BorderPane prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <center>
+                              <HBox alignment="CENTER" prefHeight="688.0" prefWidth="1007.0">
+                                 <padding>
+                                    <Insets left="10.0" />
+                                 </padding>
+                                 <children>
+                                    <ImageView pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@resources/images/ico256/mapping.png" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </HBox>
+                           </center>
+                           <left>
+                              <VBox alignment="CENTER_LEFT" spacing="5.0" BorderPane.alignment="CENTER">
                                  <children>
                                     <Label text="Particle color">
                                        <font>
@@ -557,12 +582,15 @@
                                        </children>
                                     </HBox>
                                  </children>
+                                 <BorderPane.margin>
+                                    <Insets left="10.0" />
+                                 </BorderPane.margin>
                               </VBox>
-                           </children>
-                           <padding>
-                              <Insets left="10.0" />
-                           </padding>
-                        </HBox>
+                           </left>
+                           <bottom>
+                              <Label text="Output file" BorderPane.alignment="CENTER" />
+                           </bottom>
+                        </BorderPane>
                      </children>
                   </AnchorPane>
               </content>
@@ -578,9 +606,19 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <HBox alignment="CENTER_LEFT" prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <VBox alignment="CENTER_LEFT" prefHeight="182.0" prefWidth="315.0" spacing="5.0">
+                        <BorderPane prefHeight="688.0" prefWidth="1007.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <bottom>
+                              <Label text="Output file" BorderPane.alignment="CENTER" />
+                           </bottom>
+                           <center>
+                              <ImageView pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+                                 <image>
+                                    <Image url="@resources/images/ico256/folder-video.png" />
+                                 </image>
+                              </ImageView>
+                           </center>
+                           <left>
+                              <VBox alignment="CENTER_LEFT" prefHeight="182.0" prefWidth="315.0" spacing="5.0" BorderPane.alignment="CENTER">
                                  <children>
                                     <ButtonBar buttonMinWidth="30.0">
                                       <buttons>
@@ -704,12 +742,12 @@
                                        </children>
                                     </HBox>
                                  </children>
+                                 <padding>
+                                    <Insets left="10.0" right="10.0" />
+                                 </padding>
                               </VBox>
-                           </children>
-                           <padding>
-                              <Insets left="10.0" />
-                           </padding>
-                        </HBox>
+                           </left>
+                        </BorderPane>
                      </children>
                   </AnchorPane>
               </content>
