@@ -314,7 +314,7 @@ public class FvcomDataset extends AbstractDataset {
         double output_0_kzp1 = 0;
         double output_1_kzp1 = 0;
 
-        if (z >= 0.5 || z <= nLayer + 0.5) {
+        if (z >= 0.5 && z <= nLayer - 1 + 0.5) {
             // if the depth of the particle is between two T layers, we recover the value
             // at the T layer which is below
             index0.set(kz + 1, iTriangle);
