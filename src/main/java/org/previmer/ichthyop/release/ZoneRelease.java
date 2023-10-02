@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,30 +20,31 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.release;
 
+import java.util.Random;
 import java.util.logging.Level;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.particle.IParticle;
@@ -60,12 +61,20 @@ public class ZoneRelease extends AbstractRelease {
 
     private int nbReleaseZones, nParticles;
     private boolean is3D;
+    private Random randomGenerator;
 
     @Override
     public void loadParameters() throws Exception {
 
         /* Get number of particles to release */
         nParticles = Integer.valueOf(getParameter("number_particles"));
+
+        if(isNull("random_seed")) {
+            randomGenerator = new Random();
+        } else {
+            long seed = Long.valueOf(getParameter("random_seed"));
+            randomGenerator = new Random(seed);
+        }
 
         /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
@@ -110,7 +119,7 @@ public class ZoneRelease extends AbstractRelease {
                 nParticlePerZone[i % nbReleaseZones] += sign;
             }
         }
-        
+
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
             if (nParticlePerZone[i_zone] == 0) getLogger().log(Level.WARNING, "Release zone {0} has not been attributed any particle. It may be too small compared to other release zones or its definition may be flawed.", i_zone);
         }
@@ -144,11 +153,11 @@ public class ZoneRelease extends AbstractRelease {
                     if (counter++ > DROP_MAX) {
                         throw new NullPointerException("Unable to release particle in release zone " + zone.getIndex() + ". Check out the zone definitions.");
                     }
-                    double x = xmin + Math.random() * (xmax - xmin);
-                    double y = ymin + Math.random() * (ymax - ymin);
+                    double x = xmin + randomGenerator.nextDouble() * (xmax - xmin);
+                    double y = ymin + randomGenerator.nextDouble() * (ymax - ymin);
                     double depth = Double.NaN;
                     if (is3D) {
-                        depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
+                        depth = -1.d * (upDepth + randomGenerator.nextDouble() * (lowDepth - upDepth));
                     }
                     particle = ParticleFactory.createZoneParticle(index, x, y, depth);
                 }
