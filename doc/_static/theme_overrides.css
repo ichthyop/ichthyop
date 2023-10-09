@@ -5493,17 +5493,17 @@ input[type=radio][disabled] {
 }
 
 a {
-    color: #2980b9;
+    color: #bd561aaf;
     text-decoration: none;
     cursor: pointer
 }
 
 a:hover {
-    color: #3091d1
+    color: #bd561aaf
 }
 
 a:visited {
-    color: #9b59b6
+    color: #ff8d4b
 }
 
 html {
