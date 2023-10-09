@@ -52,10 +52,10 @@ First, the user can enable or disable a zone by clicking on the {guilabel}`Enabl
 The zones are defined by providing the points coordinates. Points can be added, removed and reordered by using the
 {{ list-add }}, {{ list-remove }}, {{ up }} and {{ down }} buttons, respectively. The user can also change the format of the points coordinates by clicking on the radio buttons in the {guilabel}`Options` bottom panel.
 
-Ichthyop defines two types of zones: one for release (see {numref}`zone_release`) problèmeand one for recruitment purposes.
+Ichthyop defines two types of zones: one for release (see {numref}`zone-release`) problèmeand one for recruitment purposes.
 This type is chosen by using the {guilabel}`Type of zone` combo box. For release zones, the user can specify the number of
 particles that will be released in the zone (only if the `user_defined_nparticles` parameter is
-set equal to true, cf:numref:`zone_release`). It is done by filling the {guilabel}`Number of released particles` textbox
+set equal to true, cf {numref}`zone-release`). It is done by filling the {guilabel}`Number of released particles` textbox
 and pressing {guilabel}`ENTER`
 
 Each zone is associated with a color, that will be used to its representation in the graphical interface during the

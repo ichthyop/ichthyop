@@ -2,7 +2,7 @@
 
 # Adding output variable
 
-When including new processes to Ichthyop (cf. {numref}`new_action`), the storage of additional variable may be required.
+When including new processes to Ichthyop (cf. {numref}`new-action`), the storage of additional variable may be required.
 For instance, in the growth processes  (see {numref}`growth-proc`), in which particle length is a state variable, it is necessary to
 save length in the output NetCDF file. This is done by creating a new Java class associated with
 a property file.
@@ -10,7 +10,7 @@ a property file.
 # Creating java class
 
 Creating the Java class depends on what type of variable you want to save, as shown
-in {numref}`fig_output_diag`.
+in {numref}`fig-output-diag`.
 
 (fig-output-diag)=
 
@@ -57,7 +57,7 @@ added by calling the `addAttribute(Attribute attribute)` method.
 
 :::{note}
 Compulsory attributes and variable names
-are defined using properties files, see {numref}`tracker_prop`
+are defined using properties files, see {numref}`tracker-prop`
 :::
 
 `createArray` initializes the `Array` object that will be used to store the output variable.

@@ -16,6 +16,7 @@
 
 import os
 import re
+from glob import glob
 
 # -- Project information -----------------------------------------------------
 
@@ -81,6 +82,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 exclude_patterns += ['**/*.ipynb']
+exclude_patterns += glob(os.path.join('developer','_static',' mermaid/'))
 
 source_suffix = {'.md': 'markdown'}
 

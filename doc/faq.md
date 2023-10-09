@@ -54,7 +54,7 @@ With your_configuration_file.xml the name of the XML configuration files that yo
 
 ## What are the different coastline behaviours in Ichthyop?
 
-First you may want to read {ref}`spatial_int`
+First you may want to read {numref}`spatial-int`
 
 Coastline behaviour manages what must be done in the event that the move of a particle takes it inland (which might happen because the simulation time step is not small enough or because there is some additional movement, such as diffusion or swimming, etc.)
 
