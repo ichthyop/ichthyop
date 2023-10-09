@@ -52,12 +52,10 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.githubpages',
     'sphinxcontrib.bibtex',
-    #'sphinxcontrib.video',
     'sphinxcontrib.programoutput',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
-    # 'sphinxcontrib.plantuml',
     'sphinxcontrib.mermaid',
     'myst_parser'
 ]
@@ -82,8 +80,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 exclude_patterns += ['**/*.ipynb']
-exclude_patterns += glob(os.path.join('developer','_static',' mermaid', '*md'))
-
+exclude_patterns += glob(os.path.join('developer','_static', 'mermaid', '*md'))
 source_suffix = {'.md': 'markdown'}
 
 myst_enable_extensions = [
