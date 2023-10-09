@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -239,7 +239,7 @@ public class Mercator_3D extends AbstractDataset {
         e3t = read_e3_field(nc, stre3t);
         e3u = compute_e3u(e3t);
         e3v = compute_e3v(e3t);
-        
+
         if (!isGridInfoInOneFile) {
             nc.close();
             nc = NetcdfDatasets.openDataset(file_hgr, enhanced(), null);
@@ -253,11 +253,11 @@ public class Mercator_3D extends AbstractDataset {
         e2u = e2t;
 
         nc.close();
-        
+
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
         get_gdep_fields(nc);
-        
+
     }
 
     private double[][][] compute_e3u(double[][][] e3t) {
@@ -325,7 +325,7 @@ public class Mercator_3D extends AbstractDataset {
 
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                
+
                 gdepW[nz][j][i] = 0.d;   // init.
 
                 for (int k = nz; k-- > 0;) {
@@ -336,7 +336,7 @@ public class Mercator_3D extends AbstractDataset {
                 }
             }
         }
-   
+
         /*
         array = nc.findVariable(str_gdepT).read().reduce().flip(0);
         index = array.getIndex();
@@ -345,7 +345,7 @@ public class Mercator_3D extends AbstractDataset {
             index.set(k + 1);
             gdepT[k] = array.getDouble(index);
         }
-     
+
         gdepW = new double[nz + 1];
         if (null != nc.findVariable(str_gdepW)) {
             getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
@@ -458,7 +458,7 @@ public class Mercator_3D extends AbstractDataset {
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = (int) kz;
-           
+
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
         double dz = kz - (double) k;
@@ -537,7 +537,7 @@ public class Mercator_3D extends AbstractDataset {
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        
+
         double dv = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
@@ -548,7 +548,7 @@ public class Mercator_3D extends AbstractDataset {
         double CO = 0.d;
         double x;
         double co;
-        
+
         double kz;
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
@@ -710,7 +710,7 @@ public class Mercator_3D extends AbstractDataset {
             }
         }
         //---------------------------------------------------
-        // Boundary Conditions       
+        // Boundary Conditions
         for (int k = nz + 1; k-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 w_double[k][j][0] = w_double[k][j][1];
@@ -723,7 +723,7 @@ public class Mercator_3D extends AbstractDataset {
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
         }
-        
+
         //---------------------------------------------------
         // w * dxu * dyv
         //float[][][] w = new float[nz + 1][ny][nx];
@@ -958,7 +958,7 @@ public class Mercator_3D extends AbstractDataset {
      */
     private void getDimGeogArea() {
 
-        /* NEMO way. 
+        /* NEMO way.
         //--------------------------------------
         // Calculate the Physical Space extrema
         lonMin = Double.MAX_VALUE;
@@ -1009,7 +1009,7 @@ public class Mercator_3D extends AbstractDataset {
         lonMax = -lonMin;
         latMin = Double.MAX_VALUE;
         latMax = -latMin;
-        
+
                 depthMax = 0.d;
 
         int i = nx;
@@ -1044,7 +1044,7 @@ public class Mercator_3D extends AbstractDataset {
             latMin = latMax;
             latMax = double_tmp;
         }
-        
+
         for (j = 0; j < ny; j++) {
             for (i = 0; i < nx; i++) {
                 double depth = getBathy(i, j);
@@ -1209,15 +1209,15 @@ public class Mercator_3D extends AbstractDataset {
             depth = 0.d;
         }
         depth = Math.abs(depth);
-        
+
         int i = (int) Math.floor(x);
         int j = (int) Math.floor(y);
-            
+
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double zRho = 0.d;
-        
-        
+
+
         /* case particle is going straight up to surface, due to strong
          * buoyancy for instance.
          */
@@ -1266,7 +1266,7 @@ public class Mercator_3D extends AbstractDataset {
         double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
         int k = (int) Math.round(kz);
         dz = z - k;
-        
+
         int i = (int) Math.floor(x);
         int j = (int) Math.floor(y);
 
@@ -1299,7 +1299,7 @@ public class Mercator_3D extends AbstractDataset {
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
-        /* NEMO way 
+        /* NEMO way
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
         final double ix = Math.max(0.00001f,
@@ -1321,7 +1321,7 @@ public class Mercator_3D extends AbstractDataset {
                 longitude += co * lonRho[j + jj][i + ii];
             }
         }
-        return (new double[]{latitude, longitude}); 
+        return (new double[]{latitude, longitude});
          */
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
@@ -1644,7 +1644,7 @@ public class Mercator_3D extends AbstractDataset {
     @Override
     public boolean isOnEdge(double[] pGrid) {
 
-        /* NEMO way 
+        /* NEMO way
         return ((pGrid[0] > (nx - 3.0f))
                 || (pGrid[0] < 2.0f)
                 || (pGrid[1] > (ny - 3.0f))

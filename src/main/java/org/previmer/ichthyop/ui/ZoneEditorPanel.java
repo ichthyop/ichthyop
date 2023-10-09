@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.ui;
@@ -1045,7 +1045,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNewZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewZoneActionPerformed
-        
+
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
         int index = tableZone.getSelectedRow();
         if (index < 0) {
@@ -1058,7 +1058,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 }//GEN-LAST:event_btnNewZoneActionPerformed
 
     private void btnDeleteZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteZoneActionPerformed
-        
+
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
         int index = tableZone.getSelectedRow();
         if (index < 0) {
@@ -1075,7 +1075,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 }//GEN-LAST:event_btnDeleteZoneActionPerformed
 
     private void btnUpZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpZoneActionPerformed
-        
+
         tableZone.getSelectionModel().removeListSelectionListener(this);
         int selectedIndex = tableZone.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
@@ -1090,7 +1090,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 }//GEN-LAST:event_btnUpZoneActionPerformed
 
     private void btnDownZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownZoneActionPerformed
-        
+
         tableZone.getSelectionModel().removeListSelectionListener(this);
         int selectedIndex = tableZone.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
@@ -1105,7 +1105,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 }//GEN-LAST:event_btnDownZoneActionPerformed
 
     private void btnNewPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewPointActionPerformed
-        
+
         DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
         int index = tablePolygon.getSelectedRow() + 1;
         if (index < 0) {
@@ -1121,7 +1121,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnNewPointActionPerformed
 
     private void btnDeletePointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeletePointActionPerformed
-        
+
         DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
         int index = tablePolygon.getSelectedRow();
         if (index < 0) {
@@ -1134,7 +1134,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnDeletePointActionPerformed
 
     private void btnUpPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpPointActionPerformed
-        
+
         int selectedIndex = tablePolygon.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
         int newIndex = Math.max(selectedIndex - 1, 0);
@@ -1147,7 +1147,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnUpPointActionPerformed
 
     private void btnDownPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownPointActionPerformed
-        
+
         int selectedIndex = tablePolygon.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
         int newIndex = Math.min(selectedIndex + 1, model.getRowCount() - 1);
@@ -1160,12 +1160,12 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnDownPointActionPerformed
 
     private void ckBoxEnabledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxEnabledActionPerformed
-        
+
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
     }//GEN-LAST:event_ckBoxEnabledActionPerformed
 
     private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
-        
+
         Color currentColor = btnColor.getBackground();
         Color newColor = JColorChooser.showDialog(btnColor, "", btnColor.getBackground());
         if (null != newColor) {
@@ -1176,19 +1176,19 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnColorActionPerformed
 
     private void ckBoxThicknessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxThicknessActionPerformed
-        
+
         txtFieldUpperDepth.setEnabled(ckBoxThickness.isSelected());
         txtFieldLowerDepth.setEnabled(ckBoxThickness.isSelected());
     }//GEN-LAST:event_ckBoxThicknessActionPerformed
 
     private void ckBoxBathyMaskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxBathyMaskActionPerformed
-        
+
         txtFieldInshore.setEnabled(ckBoxBathyMask.isSelected());
         txtFieldOffshore.setEnabled(ckBoxBathyMask.isSelected());
     }//GEN-LAST:event_ckBoxBathyMaskActionPerformed
 
     private void rdBtnDecimalDegActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdBtnDecimalDegActionPerformed
-        
+
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             String lon = tablePolygon.getModel().getValueAt(i, 0).toString();
             String lat = tablePolygon.getModel().getValueAt(i, 1).toString();
@@ -1203,7 +1203,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_rdBtnDecimalDegActionPerformed
 
     private void rdBtnDegMinSecActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdBtnDegMinSecActionPerformed
-        
+
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             String lon = tablePolygon.getModel().getValueAt(i, 0).toString();
             String lat = tablePolygon.getModel().getValueAt(i, 1).toString();
@@ -1218,7 +1218,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         try {
-            
+
             if (hasZoneChanged) {
                 updateZone(zone);
             }
@@ -1237,7 +1237,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveAsActionPerformed
-        
+
         JFileChooser fc = new JFileChooser(zoneFile.getFile());
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setAcceptAllFileFilterUsed(false);
@@ -1258,7 +1258,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnSaveAsActionPerformed
 
     private void rdBtnDegDecimalMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdBtnDegDecimalMinActionPerformed
-        
+
 
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             String lon = tablePolygon.getModel().getValueAt(i, 0).toString();

@@ -10,7 +10,7 @@ ${licensePrefix}http://www.ird.fr
 ${licensePrefix}
 ${licensePrefix}Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
 ${licensePrefix}Contributors (alphabetically sorted):
-${licensePrefix}Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+${licensePrefix}Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
 ${licensePrefix}Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
 ${licensePrefix}Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
 ${licensePrefix}Stephane POUS, Nathan PUTMAN.
@@ -22,7 +22,7 @@ ${licensePrefix}mortality and recruitment. The tool uses as input time series of
 ${licensePrefix}temperature and salinity fields archived from oceanic models such as NEMO,
 ${licensePrefix}ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
 ${licensePrefix}generates output files that can be post-processed easily using graphic and
-${licensePrefix}statistical software. 
+${licensePrefix}statistical software.
 ${licensePrefix}
 ${licensePrefix}To cite Ichthyop, please refer to Lett et al. 2008
 ${licensePrefix}A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
@@ -31,7 +31,7 @@ ${licensePrefix}doi:10.1016/j.envsoft.2008.02.005
 ${licensePrefix}
 ${licensePrefix}This program is free software: you can redistribute it and/or modify
 ${licensePrefix}it under the terms of the GNU General Public License as published by
-${licensePrefix}the Free Software Foundation (version 3 of the License). For a full 
+${licensePrefix}the Free Software Foundation (version 3 of the License). For a full
 ${licensePrefix}description, see the LICENSE file.
 ${licensePrefix}
 ${licensePrefix}This program is distributed in the hope that it will be useful,
@@ -45,4 +45,3 @@ ${licensePrefix}
 <#if licenseLast??>
 ${licenseLast}
 </#if>
-

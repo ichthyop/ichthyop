@@ -9,7 +9,7 @@ http://www.ird.fr
 
 Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
 Contributors (alphabetically sorted):
-Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
 Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
 Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
 Stephane POUS, Nathan PUTMAN.
@@ -21,7 +21,7 @@ mortality and recruitment. The tool uses as input time series of velocity,
 temperature and salinity fields archived from oceanic models such as NEMO,
 ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
 generates output files that can be post-processed easily using graphic and
-statistical software. 
+statistical software.
 
 To cite Ichthyop, please refer to Lett et al. 2008
 A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
@@ -30,7 +30,7 @@ doi:10.1016/j.envsoft.2008.02.005
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation (version 3 of the License). For a full 
+the Free Software Foundation (version 3 of the License). For a full
 description, see the LICENSE file.
 
 This program is distributed in the hope that it will be useful,
@@ -122,4 +122,3 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     </thickness>
   </zone>
 </zones>
-

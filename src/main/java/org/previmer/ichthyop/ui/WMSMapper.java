@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.ui;
@@ -326,7 +326,7 @@ public class WMSMapper extends JXMapKit {
 
         return variableName;
     }
-    
+
     public String[] getVariableList() {
         List<String> list = new ArrayList<>();
         list.add("None");
@@ -601,7 +601,7 @@ public class WMSMapper extends JXMapKit {
     }
 
     /*private Color getMaskColor(int i, int j) {
-    
+
      NemoDataset dataset = (NemoDataset) getSimulationManager().getDataset();
      if (!dataset.getUMask(i, j) && !dataset.getVMask(i, j)) {
      return Color.ORANGE;
@@ -616,7 +616,7 @@ public class WMSMapper extends JXMapKit {
      return Color.DARK_GRAY;
      }
      return Color.CYAN;
-    
+
      }*/
     private Color getBathyColor(double depth) {
 
@@ -640,19 +640,19 @@ public class WMSMapper extends JXMapKit {
 
     /*
      * private Color getVarColor(double value) {
-     * 
+     *
      * Color low = Color.CYAN; Color high = Color.ORANGE;
-     * 
+     *
      * float xdepth; if (Double.isNaN(value)) { return (Color.darkGray); } else {
      * xdepth = (float) Math.abs(value - 10) / 15.f; xdepth = Math.max(0,
      * Math.min(xdepth, 1));
-     * 
+     *
      * } return (new Color((int) (xdepth * high.getRed() + (1 - xdepth) *
      * low.getRed()), (int) (xdepth * high.getGreen() + (1 - xdepth) *
      * low.getGreen()), (int) (xdepth * high.getBlue() + (1 - xdepth) *
      * low.getBlue()))); }
      */
-    
+
     private void drawGrid(Graphics2D g, JXMapViewer map) {
 
         IDataset dataset = getSimulationManager().getDataset();
@@ -789,7 +789,7 @@ public class WMSMapper extends JXMapKit {
                 g.fill(bar);
 
                 DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-                LocalDateTime dateTime = dateRef.plusSeconds((long) getTime(index));                
+                LocalDateTime dateTime = dateRef.plusSeconds((long) getTime(index));
                 String time = "Time: " + dateTime.format(dtFormat);
                 FontRenderContext context = g.getFontRenderContext();
                 Font font = new Font("Dialog", Font.PLAIN, 11);
@@ -1000,7 +1000,7 @@ public class WMSMapper extends JXMapKit {
     public String getKMZPath() {
         return getFile().getPath().replace(".nc", ".kmz");
     }
-    
+
     public String formatDate(DateTimeFormatter dtFormat, double time) {
         LocalDateTime dateNow = this.dateRef.plusSeconds((long) time);
         return dateNow.format(dtFormat);
@@ -1011,7 +1011,7 @@ public class WMSMapper extends JXMapKit {
         DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
         DateTimeFormatter dtFormat2 = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         Folder stepFolder = new Folder();
-        
+
         stepFolder.withName(this.formatDate(dtFormat2, getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
         if (getTime(i) < getTime(i + 1)) {
             stepFolder.createAndSetTimeSpan().withBegin(this.formatDate(dtFormat, getTime(i))).withEnd(this.formatDate(dtFormat, getTime(i + 1)));
@@ -1110,9 +1110,9 @@ public class WMSMapper extends JXMapKit {
             filename.append(File.separator);
             filename.append(id);
             filename.append("_img");
-            
+
             LocalDateTime dateNow = LocalDateTime.of(1900, 1, 1, 0, 0).plusSeconds((long)getTime(index));
-            
+
             filename.append(dateNow.format(dtFormat));
             filename.append(".png");
             try {

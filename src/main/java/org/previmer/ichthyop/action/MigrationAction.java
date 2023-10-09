@@ -8,7 +8,7 @@
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
@@ -259,7 +259,7 @@ public class MigrationAction extends AbstractAction {
         double realHour = (time / (60 * 60)) % 24;
         int hour = (int) Math.floor(realHour);
         double minute = (int) ((realHour - hour) * 60) ;
-        
+
         LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)

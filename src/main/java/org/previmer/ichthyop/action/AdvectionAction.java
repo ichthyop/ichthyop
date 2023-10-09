@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.action;
@@ -58,7 +58,7 @@ public class AdvectionAction extends AbstractAction {
     private boolean isForward;
     private boolean horizontal;
     private boolean vertical;
-    
+
     // Threshold for CFL error message
     public static final float VERTICAL_THRESHOLD_CFL = 1.0f;
 
@@ -94,19 +94,19 @@ public class AdvectionAction extends AbstractAction {
             vertical = true;
         }
     }
-    
+
     @Override
     public void init(IParticle particle) {
         // Nothing to do
     }
 
     @Override
-    public void execute(IParticle particle) {       
+    public void execute(IParticle particle) {
         if (isForward) {
             advectForward(particle, getSimulationManager().getTimeManager().getTime());
         } else {
             advectBackward(particle, getSimulationManager().getTimeManager().getTime());
-        } 
+        }
     }
 
     private void advectForward(IParticle particle, double time) throws
@@ -149,7 +149,7 @@ public class AdvectionAction extends AbstractAction {
                 getLogger().log(Level.WARNING, "CFL broken for W {0}", (float) dU[2]);
             }
         }
-           
+
         return dU;
     }
 
@@ -180,7 +180,7 @@ public class AdvectionAction extends AbstractAction {
                 return;
             }
             mvt = advectEuler(pgrid, time, dt);
-        } else {           
+        } else {
             mvt = advectRk4(pgrid = particle.getGridCoordinates(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
@@ -191,15 +191,15 @@ public class AdvectionAction extends AbstractAction {
             }
             mvt = advectRk4(pgrid, time, dt);
         }
-        
+
         if (!horizontal) {
             mvt[0] = 0;
             mvt[1] = 0;
         }
         if (!vertical && mvt.length > 2) {
             mvt[2] = 0;
-        }        
-        particle.increment(mvt);       
+        }
+        particle.increment(mvt);
     }
 
     /**
@@ -221,12 +221,12 @@ public class AdvectionAction extends AbstractAction {
         double[] pk = new double[dim];
 
         double[] k1 = advectEuler(p0, time, dt);
-           
+
         for (int i = 0; i < dim; i++) {
             pk[i] = p0[i] + .5d * k1[i];
         }
         if (getSimulationManager().getDataset().isOnEdge(pk)) {
-            return (dim > 2) 
+            return (dim > 2)
                     ? new double[]{.5d * k1[0], .5d * k1[1], 0}
                     : new double[]{.5d * k1[0], .5d * k1[1]};
         }

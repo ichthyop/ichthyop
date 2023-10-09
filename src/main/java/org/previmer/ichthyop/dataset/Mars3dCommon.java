@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -412,7 +412,7 @@ abstract class Mars3dCommon extends MarsCommon {
         double dz = kz - (double) k;
         double CO = 0.d;
         for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {     
+            for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
                     double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
@@ -437,7 +437,7 @@ abstract class Mars3dCommon extends MarsCommon {
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-        
+
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
@@ -446,7 +446,7 @@ abstract class Mars3dCommon extends MarsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-     
+
         for (int jj = 0; jj < 2; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -527,7 +527,7 @@ abstract class Mars3dCommon extends MarsCommon {
 
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-        
+
         getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
@@ -591,7 +591,7 @@ abstract class Mars3dCommon extends MarsCommon {
                             * u_tp1[k][j][i - 1];
                     if (Double.isNaN(Huon[k][j][i])) {
                         Huon[k][j][i] = 0.d;
-                        
+
                     }
                 }
             }
@@ -603,7 +603,7 @@ abstract class Mars3dCommon extends MarsCommon {
                             * v_tp1[k][j - 1][i];
                     if (Double.isNaN(Hvom[k][j][i])) {
                         Hvom[k][j][i] = 0.d;
-                        
+
                     }
                 }
             }
