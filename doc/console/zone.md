@@ -1,20 +1,21 @@
 ---
-substitutions:
-  color: |-
-    ```{image} _static/ico22/fill-color.png
-    ```
-  down: |-
-    ```{image} _static/ico22/down.png
-    ```
-  list-add: |-
-    ```{image} _static/ico22/list-add.png
-    ```
-  list-remove: |-
-    ```{image} _static/ico22/list-remove.png
-    ```
-  up: |-
-    ```{image} _static/ico22/up.png
-    ```
+myst:
+  substitutions:
+    color: |
+      ```{image} _static/ico22/fill-color.png
+      ```
+    down: |
+      ```{image} _static/ico22/down.png
+      ```
+    listadd: |
+      ```{image} _static/ico22/list-add.png
+      ```
+    listremove: |
+      ```{image} _static/ico22/list-remove.png
+      ```
+    up: |
+      ```{image} _static/ico22/up.png
+      ```
 ---
 
 # Zone definition
@@ -36,8 +37,8 @@ Ichthyop Zone editor
 
 The number of zones is managed on the left part of the panel.
 
-New zones can be added by clicking the {{ list-add }} button. When a zone is selected, it can be removed by
-clicking on the {{ list-remove }} button.
+New zones can be added by clicking the {{ listadd }} button. When a zone is selected, it can be removed by
+clicking on the {{ listremove }} button.
 
 The reordering of the zones is achieved by clicking on the {{ up }} and {{ down }} buttons.
 
@@ -50,7 +51,7 @@ When a zone is selected, the user can edit different parameters associated with 
 First, the user can enable or disable a zone by clicking on the {guilabel}`Enabled` tick box.
 
 The zones are defined by providing the points coordinates. Points can be added, removed and reordered by using the
-{{ list-add }}, {{ list-remove }}, {{ up }} and {{ down }} buttons, respectively. The user can also change the format of the points coordinates by clicking on the radio buttons in the {guilabel}`Options` bottom panel.
+{{ listadd }}, {{ listremove }}, {{ up }} and {{ down }} buttons, respectively. The user can also change the format of the points coordinates by clicking on the radio buttons in the {guilabel}`Options` bottom panel.
 
 Ichthyop defines two types of zones: one for release (see {numref}`zone-release`) problèmeand one for recruitment purposes.
 This type is chosen by using the {guilabel}`Type of zone` combo box. For release zones, the user can specify the number of

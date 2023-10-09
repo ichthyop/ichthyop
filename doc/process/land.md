@@ -17,7 +17,7 @@
 
 In the bouncing mode, the particle will bounce on the coast. First, whether the bouncing occurs on a meridional or a zonal coastline is determined.
 
-In case of a meridional coastline, as shown in {numref}`fig_bouncing`, the calculation of the new position is performed as follows.
+In case of a meridional coastline, as shown in {numref}`fig-bouncing`, the calculation of the new position is performed as follows.
 
 Let's assume that the particle is at the position $(x, y)$ and is moved at the postion $(x + \Delta x, y + \Delta y)$. We suppose that
 
