@@ -24,13 +24,10 @@ release
 process
 developer
 faq
-genindex
 biblio
 ```
 
 # Indices and tables
 
-- {ref}`modindex`
+- {ref}`genindex`
 - {ref}`search`
-
-% * :ref:`genindex`
