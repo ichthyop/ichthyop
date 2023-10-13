@@ -93,6 +93,9 @@ public class FvcomDataset extends AbstractDataset {
     private double[] dHdy;
     private double[] H0;
 
+    // Bathy center of the triangle
+    private double[] H_triangle;
+
     private double lonMin, latMin;
     private double lonMax, latMax;
 
@@ -122,6 +125,7 @@ public class FvcomDataset extends AbstractDataset {
     private String strW;
     private String strSigma;
     private String strBathy;
+    private String strBathyTriangle;
     private String strZeta;
     private String strTime;
     private String strTimeDim;
@@ -255,7 +259,7 @@ public class FvcomDataset extends AbstractDataset {
             z = (double) lk;
         } else {
             double pr = getDepth(x, y, lk);
-            z = Math.max(0.d, (double) lk + (depth - pr) / (getDepth(x, y, lk - 1) - pr));
+            z = Math.max(0.d, (double) lk + (depth - pr) / (getDepth(x, y, lk + 1) - pr));
         }
         return (z);
 
@@ -270,7 +274,7 @@ public class FvcomDataset extends AbstractDataset {
         // distance between the particle and the above W layer;
         double dz = z - kz;
 
-        double output = (1 - dz) * getDepth(x, y, kz) + dz * getDepth(x, y, kz);
+        double output = (1 - dz) * getDepth(x, y, kz) + dz * getDepth(x, y, kz + 1);
         return output;
 
     }
@@ -363,7 +367,12 @@ public class FvcomDataset extends AbstractDataset {
     /** We consider that a point is in water if it lies within a triangle. */
     @Override
     public boolean isInWater(double[] pGrid) {
-        return (this.findTriangle(pGrid) >= 0);
+        int iTriangle = this.findTriangle(pGrid);
+        if (iTriangle < 0) {
+            return false;
+        }
+        double depth = z2depth(pGrid[0], pGrid[1], pGrid[2]);
+        return (depth < H_triangle[iTriangle]);
     }
 
     @Override
@@ -610,6 +619,7 @@ public class FvcomDataset extends AbstractDataset {
 
         strSigma = getParameter("field_var_sigma");
         strBathy = getParameter("field_var_bathy");
+        strBathyTriangle = getParameter("field_var_bathy_triangle");
 
         strNodes = getParameter("field_var_nodes");
 
@@ -750,10 +760,20 @@ public class FvcomDataset extends AbstractDataset {
         this.dHdy = this.compute_dzeta_dx(HArray, awy);
         this.H0 = this.compute_dzeta_dx(HArray, aw0);
 
+        Index index;
+
+        Array HArrayTriangle = ncIn.findVariable(strBathyTriangle).read();
+        this.H_triangle = new double[nTriangles];
+        index = HArrayTriangle.getIndex();
+        for (int i = 0; i < this.nTriangles; i++) {
+            index.set(i);
+            H_triangle[i] = HArrayTriangle.getDouble(index);
+        }
+
         // Reading of the sigma array on Z levels
         Array sigArray = ncIn.findVariable(strSigma).read().reduce();
         sigma = new double[this.nLayer + 1];
-        Index index = sigArray.getIndex();
+        index = sigArray.getIndex();
         for (int k = 0; k < this.nLayer + 1; k++) {
             index.set(k);
             sigma[k] = sigArray.getDouble(index);
