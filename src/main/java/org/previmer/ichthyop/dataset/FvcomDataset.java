@@ -376,7 +376,7 @@ public class FvcomDataset extends AbstractDataset {
             return false;
         }
         double depth = z2depth(pGrid[0], pGrid[1], pGrid[2]);
-        return (z < H_triangle[iTriangle]);
+        return (depth < H_triangle[iTriangle]);
     }
 
     @Override
@@ -416,7 +416,7 @@ public class FvcomDataset extends AbstractDataset {
         if(triangle < 0) {
             return 0;
         } else {
-            return H_triangle[triangle];
+            return -H_triangle[triangle];
         }
     }
 

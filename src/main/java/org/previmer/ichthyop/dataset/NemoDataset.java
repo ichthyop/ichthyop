@@ -175,7 +175,7 @@ public class NemoDataset extends AbstractDataset {
      *
      */
     private double[][][] e3t, e3u, e3v;
-    private double[][] e1t, e2t, e1v, e2u;
+    private double[][] e1t, e2t, e1v, e2u, bathy;
     private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     private String str_gdepT, str_gdepW;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
@@ -258,6 +258,8 @@ public class NemoDataset extends AbstractDataset {
         } else {
             e3v = read_e3_field(nc, stre3v);
         }
+
+        this.computeBathy();
 
         if (!isGridInfoInOneFile) {
             nc.close();
@@ -1867,18 +1869,11 @@ public class NemoDataset extends AbstractDataset {
      */
     @Override
     public double getBathy(int i, int j) {
-
-        double bathy = 0.d;
         if (isInWater(i, j, nz - 1)) {
-            for (int k = 0; k < nz; k++) {
-                bathy += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i])
-                        ? 0.d
-                        : maskRho[k][j][i] * e3t[k][j][i];
-                //System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + e3t[k][j][i] + " " + bathy);
-            }
-            return bathy;
+            return bathy[j][i];
+        } else {
+            return Double.NaN;
         }
-        return Double.NaN;
     }
 
     @Override
@@ -1951,7 +1946,21 @@ public class NemoDataset extends AbstractDataset {
 
     @Override
     public double getBathyPos(double x, double y) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBathyPos'");
+        int i = (int) Math.floor(x);
+        int j = (int) Math.floor(y);
+        return bathy[j][i];
+    }
+
+    private void computeBathy() {
+        bathy = new double[ny][nx];
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                double bathy_tmp = 0;
+                for (int k = 0; k < nz; k++) {
+                    bathy_tmp += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i]) ? 0.d : maskRho[k][j][i] * e3t[k][j][i];
+                }
+                bathy[j][i] = bathy_tmp;
+            }
+        }
     }
 }

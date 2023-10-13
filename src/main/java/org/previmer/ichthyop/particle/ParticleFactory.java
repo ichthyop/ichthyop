@@ -111,6 +111,13 @@ public class ParticleFactory extends SimulationManagerAccessor {
         particle.setIndex(index);
         particle.setX(x);
         particle.setY(y);
+
+        // check whether the depth is below the local bathymetry
+        // if so, returns 0
+        if(depth <= getSimulationManager().getDataset().getBathyPos(x, y)) {
+            return null;
+        }
+
         particle.setDepth(depth);
         /* bugfixing 2011/06/28
          * setDepth but z unset and then calling isInWater ==> crash
