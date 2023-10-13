@@ -301,7 +301,7 @@ public class FvcomDataset extends AbstractDataset {
         double z = pGrid[2];
 
         // getting the value at the T-cell to which the particle belongs
-        int kz = (int) Math.floor(z);
+        int kz = (int) Math.max(0, Math.floor(z - 0.5));
         double dist = 1;
 
         index0.set(kz, iTriangle);

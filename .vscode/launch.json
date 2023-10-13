@@ -16,8 +16,8 @@
             "request": "launch",
             "mainClass": "org.previmer.ichthyop.ui.IchthyopApp",
             "projectName": "ichthyop",
-            "cwd": "",
-            "args": ""
+            "cwd": "/home/barrier/Work/ichthyop/issues/66",
+            "args": "cfg-fvcom-lily.xml"
         }
     ]
 }
