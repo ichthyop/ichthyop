@@ -255,7 +255,7 @@ public class FvcomDataset extends AbstractDataset {
         while ((lk >= 0) && (getDepth(x, y, lk) < depth)) {
             lk--;
         }
-        if (lk == (0)) {
+        if ((lk ==0) || (lk == nLayer)) {
             z = (double) lk;
         } else {
             double pr = getDepth(x, y, lk);
@@ -371,8 +371,9 @@ public class FvcomDataset extends AbstractDataset {
         if (iTriangle < 0) {
             return false;
         }
-        double depth = z2depth(pGrid[0], pGrid[1], pGrid[2]);
-        return (depth < H_triangle[iTriangle]);
+        return true;
+        // double depth = z2depth(pGrid[0], pGrid[1], pGrid[2]);
+        // return (depth < H_triangle[iTriangle]);
     }
 
     @Override
@@ -404,6 +405,12 @@ public class FvcomDataset extends AbstractDataset {
     public double getBathy(int i, int j) {
         return 0;
     }
+
+    @Override
+    public double getBathyPos(double x, double y) {
+        return 0;
+    }
+
 
     @Override
     public int get_nx() {

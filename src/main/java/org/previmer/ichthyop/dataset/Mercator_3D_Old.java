@@ -1800,4 +1800,10 @@ public class Mercator_3D_Old extends AbstractDataset {
             }
         }
     }
+
+    @Override
+    public double getBathyPos(double x, double y) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBathyPos'");
+    }
 }

@@ -309,4 +309,10 @@ public class Roms2dDataset extends RomsCommon {
         rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
     }
+
+    @Override
+    public double getBathyPos(double x, double y) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBathyPos'");
+    }
 }

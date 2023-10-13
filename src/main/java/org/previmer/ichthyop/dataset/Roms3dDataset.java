@@ -298,4 +298,10 @@ public class Roms3dDataset extends Roms3dCommon {
 
     }  // end of method
 
+    @Override
+    public double getBathyPos(double x, double y) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBathyPos'");
+    }
+
 }

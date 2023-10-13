@@ -1044,4 +1044,10 @@ public class Regular2DProjected extends AbstractDataset {
         return true;
     }
 
+    @Override
+    public double getBathyPos(double x, double y) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBathyPos'");
+    }
+
 }

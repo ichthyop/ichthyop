@@ -88,4 +88,10 @@ public class Mars3dOpendapDataset extends Mars3dCommon {
         }
         setAllFieldsTp1AtTime(rank);
     }
+
+    @Override
+    public double getBathyPos(double x, double y) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBathyPos'");
+    }
 }

@@ -99,4 +99,10 @@ public class Mars2dDataset extends Mars2dCommon {
         setAllFieldsTp1AtTime(rank);
 
     }
+
+    @Override
+    public double getBathyPos(double x, double y) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBathyPos'");
+    }
 }

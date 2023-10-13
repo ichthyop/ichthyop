@@ -1325,5 +1325,11 @@ public class NemoDataset_2D extends AbstractDataset {
         throw new UnsupportedOperationException("Method not supported in 2D"); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public double getBathyPos(double x, double y) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBathyPos'");
+    }
+
 
 }

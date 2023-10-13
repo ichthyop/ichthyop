@@ -84,6 +84,8 @@ public interface IDataset extends NextStepListener {
 
     public double getBathy(int i, int j);
 
+    public double getBathyPos(double x, double y);
+
     public int get_nx();
 
     public int get_ny();
