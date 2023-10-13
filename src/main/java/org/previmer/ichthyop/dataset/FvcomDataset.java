@@ -375,6 +375,13 @@ public class FvcomDataset extends AbstractDataset {
         if (iTriangle < 0) {
             return false;
         }
+
+        // If the z index is greater than the nLayer value,
+        // consider we are on water
+        if(pGrid[2] >= nLayer) {
+            return false;
+        }
+
         double depth = z2depth(pGrid[0], pGrid[1], pGrid[2]);
         return (depth < H_triangle[iTriangle]);
     }
