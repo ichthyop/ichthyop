@@ -268,6 +268,10 @@ public class FvcomDataset extends AbstractDataset {
     @Override
     public double z2depth(double x, double y, double z) {
 
+        if(z >= nLayer) {
+            return getDepth(x, y, nLayer);
+        }
+
         // index of the W layer above
         int kz = (int) Math.floor(z);
 
@@ -371,9 +375,8 @@ public class FvcomDataset extends AbstractDataset {
         if (iTriangle < 0) {
             return false;
         }
-        return true;
-        // double depth = z2depth(pGrid[0], pGrid[1], pGrid[2]);
-        // return (depth < H_triangle[iTriangle]);
+        double depth = z2depth(pGrid[0], pGrid[1], pGrid[2]);
+        return (z < H_triangle[iTriangle]);
     }
 
     @Override
@@ -408,7 +411,13 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double getBathyPos(double x, double y) {
-        return 0;
+        double[] pGrid = new double[] {x, y};
+        int triangle = this.findTriangle(pGrid);
+        if(triangle < 0) {
+            return 0;
+        } else {
+            return H_triangle[triangle];
+        }
     }
 
 
