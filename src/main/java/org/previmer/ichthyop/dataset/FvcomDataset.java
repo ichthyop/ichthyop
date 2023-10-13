@@ -365,7 +365,18 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        return getSpeed(pGrid, time, w_tp0, w_tp1, dwdx_0, dwdx_1, dwdy_0, dwdy_1);
+
+        double verticalVelocity = getSpeed(pGrid, time, w_tp0, w_tp1, dwdx_0, dwdx_1, dwdy_0, dwdy_1);
+
+        double x = pGrid[0];
+        double y = pGrid[1];
+        double z = pGrid[2];
+
+        int kz = (int) Math.max(0, Math.floor(z - 0.5));
+        double delta_depth = Math.abs(getDepth(x, y, kz + 1) - getDepth(x, y, kz));
+
+        return verticalVelocity / delta_depth;
+
     }
 
     /** We consider that a point is in water if it lies within a triangle. */
@@ -440,7 +451,7 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public int get_nz() {
-        return 0;
+        return nLayer;
     }
 
     @Override
