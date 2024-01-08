@@ -58,6 +58,22 @@ public class ReefOrientationAction extends AbstractAction {
         latBarycenter = new double[nZones];
         kappaBarycenter = new double[nZones];
 
+        for (int iZone = 0; iZone < nZones; iZone++) {
+            Zone zoneTemp = zones.get(iZone);
+
+            // Compute the barycenter of the zone
+            ArrayList<Float> lon = zoneTemp.getLon();
+            ArrayList<Float> lat = zoneTemp.getLat();
+            int nPol = lon.size();
+            for(int i = 0; i < nPol; i++) {
+                lonBarycenter[iZone] += lon.get(i);
+                latBarycenter[iZone] += lat.get(i);
+            }
+            lonBarycenter[iZone] /= nPol;
+            latBarycenter[iZone] /= nPol;
+            kappaBarycenter[iZone] = zoneTemp.getKappa();
+        }
+
     }
 
     @Override
