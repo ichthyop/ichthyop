@@ -306,7 +306,7 @@ public class XZone extends org.jdom2.Element {
     }
 
     public float getKappa() {
-        return Float.valueOf(getBathyMask().getChildTextNormalize(KAPPA));
+        return Float.valueOf(getChildTextNormalize(KAPPA));
     }
 
     public void setOffshoreLine(float depth) {

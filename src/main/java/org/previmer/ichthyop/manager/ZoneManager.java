@@ -101,21 +101,23 @@ public class ZoneManager extends AbstractManager {
                 Zone zone = new Zone(xzone.getTypeZone(), xzone.getKey(), index);
 
                 // if the zone is a target zone, we recover kappa value
-                if(type == TypeZone.TARGET) {
+                if (type == TypeZone.TARGET) {
                     zone.setKappa(xzone.getKappa());
+                } else {
+                    zone.setBathyMaskEnabled(xzone.isBathyMaskEnabled());
+                    zone.setOffshoreLine(xzone.getOffshoreLine());
+                    zone.setInshoreLine(xzone.getInshoreLine());
+                    zone.setThicknessEnabled(xzone.isThicknessEnabled());
+                    zone.setLowerDepth(xzone.getLowerDepth());
+                    zone.setUpperDepth(xzone.getUpperDepth());
+                    zone.setProportionParticles(xzone.getProportionParticles());
                 }
 
-                zone.setBathyMaskEnabled(xzone.isBathyMaskEnabled());
-                zone.setOffshoreLine(xzone.getOffshoreLine());
-                zone.setInshoreLine(xzone.getInshoreLine());
-                zone.setThicknessEnabled(xzone.isThicknessEnabled());
-                zone.setLowerDepth(xzone.getLowerDepth());
-                zone.setUpperDepth(xzone.getUpperDepth());
-                zone.setColor(xzone.getColor());
-                zone.setProportionParticles(xzone.getProportionParticles());
                 for (XPoint point : xzone.getPolygon()) {
                     zone.addPoint(point.createRhoPoint());
                 }
+
+                zone.setColor(xzone.getColor());
                 map.get(type).add(zone);
             }
         }
