@@ -76,6 +76,7 @@ public class XZone extends org.jdom2.Element {
     private static final String LINE_INSHORE = "line_inshore";
     private static final String LINE_OFFSHORE = "line_offshore";
     private static final String PROPORTION_PARTICLES = "proportion_particles";
+    private static final String KAPPA = "kappa";
 
     public XZone(Element xzone) {
         super(ZONE);
@@ -302,6 +303,10 @@ public class XZone extends org.jdom2.Element {
 
     public float getOffshoreLine() {
         return Float.valueOf(getBathyMask().getChildTextNormalize(LINE_OFFSHORE));
+    }
+
+    public float getKappa() {
+        return Float.valueOf(getBathyMask().getChildTextNormalize(KAPPA));
     }
 
     public void setOffshoreLine(float depth) {

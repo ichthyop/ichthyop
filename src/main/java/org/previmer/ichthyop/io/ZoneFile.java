@@ -78,7 +78,7 @@ public class ZoneFile {
             structure = new Document(new Element(ZONES));
             zones = new HashMap<>();
             try {
-                save(new String[]{});
+                save(new String[] {});
             } catch (FileNotFoundException ex) {
                 SimulationManager.getLogger().log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
@@ -119,7 +119,7 @@ public class ZoneFile {
 
     private void write(OutputStream out) throws IOException {
         org.jdom2.output.Format format = org.jdom2.output.Format.getPrettyFormat();
-        //format.setEncoding(System.getProperty("file.encoding"));
+        // format.setEncoding(System.getProperty("file.encoding"));
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(structure, out);
     }
@@ -129,16 +129,10 @@ public class ZoneFile {
     }
 
     /*
-    private Iterable getZones(TypeZone type) {
-        ArrayList<XZone> list = new ArrayList<>();
-        for (XZone xblock : zones.values()) {
-            if (xblock.getTypeZone().equals(type)) {
-                list.add(xblock);
-            }
-        }
-        return list;
-    }
-    */
+     * private Iterable getZones(TypeZone type) { ArrayList<XZone> list = new
+     * ArrayList<>(); for (XZone xblock : zones.values()) { if
+     * (xblock.getTypeZone().equals(type)) { list.add(xblock); } } return list; }
+     */
 
     public Collection<XZone> getZones() {
         List<XZone> list = new ArrayList<>(zones.values().size());
@@ -165,60 +159,46 @@ public class ZoneFile {
     }
 
     /*
-    private <E extends Content> List<XZone> readZones(final TypeZone type) {
-
-        Filter<E> filtre = new Filter<E>() {
-
-            private static final long serialVersionUID = -97784466558307682L;
-
-            @Override
-            public boolean matches(Object obj) {
-                if (!(obj instanceof Element)) {
-                    return false;
-                }
-                Element element = (Element) obj;
-                return element.getChildTextNormalize(XZone.TYPE_ZONE).equals(type.toString());
-            }
-
-            @Override
-            public List<E> filter(List<?> list) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public E filter(Object o) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public Filter<E> negate() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public Filter<E> or(Filter<?> filter) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public Filter<E> and(Filter<?> filter) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public <R> Filter<R> refine(Filter<R> filter) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
-
-        List<XZone> list = new ArrayList<>();
-        for (Content elt : structure.getRootElement().getContent(filtre)) {
-            list.add(new XZone((Element) elt));
-        }
-
-        return list;
-    }
-    */
+     * private <E extends Content> List<XZone> readZones(final TypeZone type) {
+     *
+     * Filter<E> filtre = new Filter<E>() {
+     *
+     * private static final long serialVersionUID = -97784466558307682L;
+     *
+     * @Override public boolean matches(Object obj) { if (!(obj instanceof Element))
+     * { return false; } Element element = (Element) obj; return
+     * element.getChildTextNormalize(XZone.TYPE_ZONE).equals(type.toString()); }
+     *
+     * @Override public List<E> filter(List<?> list) { throw new
+     * UnsupportedOperationException("Not supported yet."); //To change body of
+     * generated methods, choose Tools | Templates. }
+     *
+     * @Override public E filter(Object o) { throw new
+     * UnsupportedOperationException("Not supported yet."); //To change body of
+     * generated methods, choose Tools | Templates. }
+     *
+     * @Override public Filter<E> negate() { throw new
+     * UnsupportedOperationException("Not supported yet."); //To change body of
+     * generated methods, choose Tools | Templates. }
+     *
+     * @Override public Filter<E> or(Filter<?> filter) { throw new
+     * UnsupportedOperationException("Not supported yet."); //To change body of
+     * generated methods, choose Tools | Templates. }
+     *
+     * @Override public Filter<E> and(Filter<?> filter) { throw new
+     * UnsupportedOperationException("Not supported yet."); //To change body of
+     * generated methods, choose Tools | Templates. }
+     *
+     * @Override public <R> Filter<R> refine(Filter<R> filter) { throw new
+     * UnsupportedOperationException("Not supported yet."); //To change body of
+     * generated methods, choose Tools | Templates. } };
+     *
+     * List<XZone> list = new ArrayList<>(); for (Content elt :
+     * structure.getRootElement().getContent(filtre)) { list.add(new XZone((Element)
+     * elt)); }
+     *
+     * return list; }
+     */
 
     private HashMap<String, XZone> createMap() {
         HashMap<String, XZone> lmap = new HashMap<>();
@@ -231,7 +211,7 @@ public class ZoneFile {
     }
 
     private void addZone(XZone zone) {
-        //zone.prepairForWriting();
+        // zone.prepairForWriting();
         structure.getRootElement().addContent(zone.detach());
     }
 

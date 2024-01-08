@@ -99,6 +99,12 @@ public class ZoneManager extends AbstractManager {
             if (xzone.getTypeZone().equals(type) && xzone.isEnabled()) {
                 int index = map.get(type).size();
                 Zone zone = new Zone(xzone.getTypeZone(), xzone.getKey(), index);
+
+                // if the zone is a target zone, we recover kappa value
+                if(type == TypeZone.TARGET) {
+                    zone.setKappa(xzone.getKappa());
+                }
+
                 zone.setBathyMaskEnabled(xzone.isBathyMaskEnabled());
                 zone.setOffshoreLine(xzone.getOffshoreLine());
                 zone.setInshoreLine(xzone.getInshoreLine());

@@ -1,162 +1,187 @@
 package org.previmer.ichthyop.action.orientation;
 
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Level;
 
+import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
 public class ReefOrientationAction extends AbstractAction {
 
-  private double maximumDistance;
-  private double horDiffOrient;
-  private double dtturb;
-  private double swimmingSpeedHatch;
-  private double swimmingSpeedSettle;
-  public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    private double maximumDistance;
+    private double horDiffOrient;
+    private double dtturb;
+    private double swimmingSpeedHatch;
+    private double swimmingSpeedSettle;
+    public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
-  private double secs_in_day = 86400;
+    private int nZones;
+    private double lonBarycenter[];
+    private double latBarycenter[];
+    private double kappaBarycenter[];
 
-  private Random randomGenerator = new Random();
-  double dt;
+    private double secs_in_day = 86400;
 
-  @Override
-  public void loadParameters() throws Exception {
+    private Random randomGenerator = new Random();
+    double dt;
 
-    maximumDistance = Double.valueOf(getParameter("maximum.distance"));
-    swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
-    swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
+    @Override
+    public void loadParameters() throws Exception {
 
-    dt = getSimulationManager().getTimeManager().get_dt();
-  }
+        maximumDistance = Double.valueOf(getParameter("maximum.distance"));
+        swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
+        swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
 
+        // Load the target areas, i.e. the zones in which the target areas will be
+        // defined:
+        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("target_file"), TypeZone.TARGET);
+        ArrayList<Zone>zones = getSimulationManager().getZoneManager().getZones(TypeZone.TARGET);
+        if (zones == null || zones.size() == 0) {
+            String message = String.format("No target zones defined in %s", getParameter("target_file"));
+            getLogger().log(Level.SEVERE, message);
+        }
 
-  @Override
-  public void execute(IParticle particle) {
+        initializeTargets(zones);
+
+        dt = getSimulationManager().getTimeManager().get_dt();
+
+    }
+
+    private void initializeTargets(ArrayList<Zone>zones) {
+
+        nZones = zones.size();
+        lonBarycenter = new double[nZones];
+        latBarycenter = new double[nZones];
+        kappaBarycenter = new double[nZones];
+
+    }
+
+    @Override
+    public void execute(IParticle particle) {
 
         double[] mvt = getDlonDlat(particle);
         double newLon = particle.getLon() + mvt[0];
         double newLat = particle.getLat() + mvt[1];
         double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
-        double[] posIncr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
+        double[] posIncr = new double[] { newPos[0] - particle.getX(), newPos[1] - particle.getY() };
         particle.increment(posIncr);
 
-  }
+    }
 
-  public double[] getDlonDlat(IParticle particle) {
+    public double[] getDlonDlat(IParticle particle) {
 
-    double uorient, vorient;
-    int N = 5;
-    double[] latBarycenter = new double[N];
-    double[] lonBarycenter = new double[N];
-    double[] kappaBarycenter = new double[N];
+        double uorient, vorient;
 
-    double[] distance = this.computeReefDistance(particle, lonBarycenter, latBarycenter);
+        double[] distance = this.computeReefDistance(particle, lonBarycenter, latBarycenter);
 
-    int closestReefIndex = this.findSmallestDistance(distance);
-    double closestReefDistance = distance[closestReefIndex];
+        int closestReefIndex = this.findSmallestDistance(distance);
+        double closestReefDistance = distance[closestReefIndex];
 
-    if (closestReefDistance > maximumDistance) {
+        if (closestReefDistance > maximumDistance) {
 
-      double htvelscl = Math.sqrt((2 * horDiffOrient) / dtturb);
-      double norm1 = randomGenerator.nextGaussian();
-      double norm2 = randomGenerator.nextGaussian();
+            double htvelscl = Math.sqrt((2 * horDiffOrient) / dtturb);
+            double norm1 = randomGenerator.nextGaussian();
+            double norm2 = randomGenerator.nextGaussian();
 
-      uorient = norm1 * htvelscl;
-      vorient = norm2 * htvelscl;
+            uorient = norm1 * htvelscl;
+            vorient = norm2 * htvelscl;
 
-    } else {
+        } else {
 
-      uorient = 0;
-      vorient = 0;
+            uorient = 0;
+            vorient = 0;
 
-      double d = 1 - (closestReefDistance / maximumDistance);
-      double thetaPref = -haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
-          latBarycenter[closestReefIndex]);
+            double d = 1 - (closestReefDistance / maximumDistance);
+            double thetaPref = -haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
+                    latBarycenter[closestReefIndex]);
 
-      double Kappa_reef = kappaBarycenter[closestReefIndex];
+            double Kappa_reef = kappaBarycenter[closestReefIndex];
 
-      double thetaCurrent = haverSine(particle.getOldLon(), particle.getOldLat(), particle.getLon(), particle.getLat());
-      double mu = -d * (thetaCurrent - thetaPref);
+            double thetaCurrent = haverSine(particle.getOldLon(), particle.getOldLat(), particle.getLon(),
+                    particle.getLat());
+            double mu = -d * (thetaCurrent - thetaPref);
 
-      VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef);
+            VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef);
 
-      double ti = vonMises.nextDouble();
-      double theta = ti - thetaCurrent - mu;
+            double ti = vonMises.nextDouble();
+            double theta = ti - thetaCurrent - mu;
 
-      double age = particle.getAge() / (secs_in_day);
-      double timeMax = getSimulationManager().getTimeManager().getSimulationDuration() / (secs_in_day);
-      double PLD = timeMax / (secs_in_day);
-      double swimmingSpeed = swimmingSpeedHatch
-          + Math.pow(10, ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
-      swimmingSpeed = swimmingSpeed / 100;
+            double age = particle.getAge() / (secs_in_day);
+            double timeMax = getSimulationManager().getTimeManager().getSimulationDuration() / (secs_in_day);
+            double PLD = timeMax / (secs_in_day);
+            double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
+                    ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
+            swimmingSpeed = swimmingSpeed / 100;
 
-      // Compute u and v orientation velocity;
-      uorient = swimmingSpeed * Math.cos(theta);
-      vorient = swimmingSpeed * Math.sin(theta);
+            // Compute u and v orientation velocity;
+            uorient = swimmingSpeed * Math.cos(theta);
+            vorient = swimmingSpeed * Math.sin(theta);
+
+        }
+
+        double dx = uorient * dt;
+        double dy = vorient * dt;
+
+        double[] latlon = getSimulationManager().getDataset().xy2latlon(particle.getX(), particle.getY());
+        double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
+        double dLon = dx / one_deg_lon_meter;
+        double dLat = dy / ONE_DEG_LATITUDE_IN_METER;
+
+        return new double[] { dLon, dLat };
 
     }
 
-    double dx = uorient * dt;
-    double dy = vorient * dt;
+    /** Haversine formula to compute angles from lat and lon */
+    private double haverSine(double lon1, double lat1, double lon2, double lat2) {
 
-    double[] latlon = getSimulationManager().getDataset().xy2latlon(particle.getX(), particle.getY());
-    double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
-    double dLon = dx / one_deg_lon_meter;
-    double dLat = dy / ONE_DEG_LATITUDE_IN_METER;
+        double rlon1 = Math.toRadians(lon1);
+        double rlat1 = Math.toRadians(lat1);
+        double rlon2 = Math.toRadians(lon2);
+        double rlat2 = Math.toRadians(lat2);
+        double X = Math.cos(rlat2) * Math.sin(rlon2 - rlon1);
+        double Y = Math.cos(rlat1) * Math.sin(rlat2) - Math.sin(rlat1) * Math.cos(rlat2) * Math.cos(rlon2 - rlon1);
+        return Math.atan2(Y, X);
 
-    return new double[] { dLon, dLat };
-
-
-  }
-
-  /** Haversine formula to compute angles from lat and lon */
-  private double haverSine(double lon1, double lat1, double lon2, double lat2) {
-
-    double rlon1 = Math.toRadians(lon1);
-    double rlat1 = Math.toRadians(lat1);
-    double rlon2 = Math.toRadians(lon2);
-    double rlat2 = Math.toRadians(lat2);
-    double X = Math.cos(rlat2) * Math.sin(rlon2 - rlon1);
-    double Y = Math.cos(rlat1) * Math.sin(rlat2) - Math.sin(rlat1) * Math.cos(rlat2) * Math.cos(rlon2 - rlon1);
-    return Math.atan2(Y, X);
-
-  }
-
-  @Override
-  public void init(IParticle particle) {
-  }
-
-  public int findSmallestDistance(double[] distance) {
-
-    int p = -1;
-    double minDistance = Double.MAX_VALUE;
-    for (int k = 0; k < distance.length; k++) {
-      if (distance[k] <= minDistance) {
-        p = k;
-        minDistance = distance[k];
-      }
     }
 
-    return p;
-
-  }
-
-  public double[] computeReefDistance(IParticle particle, double[] lonBarycenter, double[] latBarycenter) {
-
-    int NReefs = lonBarycenter.length;
-    double[] distance = new double[NReefs];
-
-    double lonParticle = particle.getLon();
-    double latParticle = particle.getLat();
-
-    for (int k = 0; k < NReefs; k++) {
-      distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
-          latBarycenter[k], lonBarycenter[k]);
+    @Override
+    public void init(IParticle particle) {
     }
 
-    return distance;
+    public int findSmallestDistance(double[] distance) {
 
-  }
+        int p = -1;
+        double minDistance = Double.MAX_VALUE;
+        for (int k = 0; k < distance.length; k++) {
+            if (distance[k] <= minDistance) {
+                p = k;
+                minDistance = distance[k];
+            }
+        }
+
+        return p;
+
+    }
+
+    public double[] computeReefDistance(IParticle particle, double[] lonBarycenter, double[] latBarycenter) {
+
+        int NReefs = lonBarycenter.length;
+        double[] distance = new double[NReefs];
+
+        double lonParticle = particle.getLon();
+        double latParticle = particle.getLat();
+
+        for (int k = 0; k < NReefs; k++) {
+            distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
+                    latBarycenter[k], lonBarycenter[k]);
+        }
+
+        return distance;
+
+    }
 
 }
