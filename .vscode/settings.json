@@ -10,4 +10,5 @@
     "java.debug.settings.vmArgs": " ",
     "files.trimTrailingWhitespace": true,
     "java.compile.nullAnalysis.mode": "automatic",
+    "editor.detectIndentation": false,
 }
