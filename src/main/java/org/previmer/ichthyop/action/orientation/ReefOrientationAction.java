@@ -23,6 +23,7 @@ public class ReefOrientationAction extends AbstractAction {
     private double lonBarycenter[];
     private double latBarycenter[];
     private double kappaBarycenter[];
+    ArrayList<Zone>zones;
 
     private double secs_in_day = 86400;
 
@@ -38,20 +39,18 @@ public class ReefOrientationAction extends AbstractAction {
 
         // Load the target areas, i.e. the zones in which the target areas will be
         // defined:
-        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("target_file"), TypeZone.TARGET);
-        ArrayList<Zone>zones = getSimulationManager().getZoneManager().getZones(TypeZone.TARGET);
+        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.TARGET);
+        zones = getSimulationManager().getZoneManager().getZones(TypeZone.TARGET);
         if (zones == null || zones.size() == 0) {
             String message = String.format("No target zones defined in %s", getParameter("target_file"));
             getLogger().log(Level.SEVERE, message);
         }
 
-        initializeTargets(zones);
-
         dt = getSimulationManager().getTimeManager().get_dt();
 
     }
 
-    private void initializeTargets(ArrayList<Zone>zones) {
+    private void initializeTargets() {
 
         nZones = zones.size();
         lonBarycenter = new double[nZones];
@@ -65,12 +64,16 @@ public class ReefOrientationAction extends AbstractAction {
             ArrayList<Float> lon = zoneTemp.getLon();
             ArrayList<Float> lat = zoneTemp.getLat();
             int nPol = lon.size();
-            for(int i = 0; i < nPol; i++) {
+            if (nPol == 0) {
+                String message = String.format("No Polygon defined in %s", zoneTemp.getKey());
+                getLogger().log(Level.SEVERE, message);
+            }
+            for(int i = 0; i < nPol - 1; i++) {
                 lonBarycenter[iZone] += lon.get(i);
                 latBarycenter[iZone] += lat.get(i);
             }
-            lonBarycenter[iZone] /= nPol;
-            latBarycenter[iZone] /= nPol;
+            lonBarycenter[iZone] /= (nPol - 1);
+            latBarycenter[iZone] /= (nPol - 1);
             kappaBarycenter[iZone] = zoneTemp.getKappa();
         }
 
@@ -166,6 +169,9 @@ public class ReefOrientationAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
+
+        initializeTargets();
+
     }
 
     public int findSmallestDistance(double[] distance) {
