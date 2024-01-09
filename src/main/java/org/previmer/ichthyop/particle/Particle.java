@@ -208,4 +208,14 @@ public class Particle extends GridPoint implements IParticle {
     public double getOldLon() {
         return this.oldLon;
     }
+
+    @Override
+    public void setOldLat(double oldLat) {
+        this.oldLat = oldLat;
+    }
+
+    @Override
+    public void setOldLon(double oldLon) {
+        this.oldLon = oldLon;
+    }
 }

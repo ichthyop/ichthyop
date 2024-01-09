@@ -102,6 +102,9 @@ public interface IParticle {
     public double getOldLat();
     public double getOldLon();
 
+    public void setOldLat(double oldLat);
+    public void setOldLon(double oldLon);
+
     /**
      * Gets the depth
      *
