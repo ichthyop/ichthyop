@@ -48,6 +48,13 @@ public class ReefOrientationAction extends AbstractAction {
 
         dt = getSimulationManager().getTimeManager().get_dt();
 
+        if (swimmingSpeedHatch > swimmingSpeedSettle) {
+            getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
+            double temp = swimmingSpeedHatch;
+            swimmingSpeedHatch = swimmingSpeedSettle;
+            swimmingSpeedSettle = temp;
+        }
+
     }
 
     private void initializeTargets() {
@@ -102,12 +109,6 @@ public class ReefOrientationAction extends AbstractAction {
 
         if (closestReefDistance > maximumDistance) {
 
-            // double htvelscl = Math.sqrt((2 * horDiffOrient) / dt);
-            // double norm1 = randomGenerator.nextGaussian();
-            // double norm2 = randomGenerator.nextGaussian();
-
-            // uorient = norm1 * htvelscl;
-            // vorient = norm2 * htvelscl;
             uorient = 0;
             vorient = 0;
 
@@ -129,15 +130,12 @@ public class ReefOrientationAction extends AbstractAction {
             VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef);
 
             double ti = vonMises.nextDouble();
-            double theta = ti - thetaCurrent - mu;
+            double theta = ti + thetaCurrent + mu;
 
-            double age = particle.getAge() / (secs_in_day);
-            double timeMax = getSimulationManager().getTimeManager().getSimulationDuration() / (secs_in_day);
+            double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
+            double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
             double PLD = timeMax / (secs_in_day);
-            // double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
-            //         ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
-            double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
-                    ((Math.log10(age) / Math.log10(PLD)) * (swimmingSpeedSettle - swimmingSpeedHatch)));
+            double swimmingSpeed = swimmingSpeedHatch + Math.pow(10, (Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch));
             swimmingSpeed = swimmingSpeed / 100;
 
             // Compute u and v orientation velocity;
