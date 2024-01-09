@@ -24,6 +24,7 @@ public class ReefOrientationAction extends AbstractAction {
     private double latBarycenter[];
     private double kappaBarycenter[];
     ArrayList<Zone>zones;
+    double PLD;
 
     private double secs_in_day = 86400;
 
@@ -133,8 +134,7 @@ public class ReefOrientationAction extends AbstractAction {
             double theta = ti + thetaCurrent + mu;
 
             double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
-            double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
-            double PLD = timeMax / (secs_in_day);
+
             double swimmingSpeed = swimmingSpeedHatch + Math.pow(10, (Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch));
             swimmingSpeed = swimmingSpeed / 100;
 
@@ -173,6 +173,8 @@ public class ReefOrientationAction extends AbstractAction {
     public void init(IParticle particle) {
 
         initializeTargets();
+        double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
+        PLD = timeMax / (secs_in_day);
 
     }
 
