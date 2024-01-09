@@ -1,7 +1,6 @@
 package org.previmer.ichthyop.action.orientation;
 
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.logging.Level;
 
 import org.previmer.ichthyop.TypeZone;
@@ -13,8 +12,6 @@ import org.previmer.ichthyop.util.VonMisesRandom;
 public class ReefOrientationAction extends AbstractAction {
 
     private double maximumDistance;
-    private double horDiffOrient;
-    private double dtturb;
     private double swimmingSpeedHatch;
     private double swimmingSpeedSettle;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
@@ -28,7 +25,6 @@ public class ReefOrientationAction extends AbstractAction {
 
     private double secs_in_day = 86400;
 
-    private Random randomGenerator = new Random();
     double dt;
 
     @Override
@@ -108,18 +104,13 @@ public class ReefOrientationAction extends AbstractAction {
         int closestReefIndex = this.findSmallestDistance(distance);
         double closestReefDistance = distance[closestReefIndex];
 
-        if (closestReefDistance > maximumDistance) {
+        uorient = 0;
+        vorient = 0;
 
-            uorient = 0;
-            vorient = 0;
-
-        } else {
-
-            uorient = 0;
-            vorient = 0;
+        if (closestReefDistance <= maximumDistance) {
 
             double d = 1 - (closestReefDistance / maximumDistance);
-            double thetaPref = -haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
+            double thetaPref = haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
                     latBarycenter[closestReefIndex]);
 
             double Kappa_reef = kappaBarycenter[closestReefIndex];
@@ -156,7 +147,17 @@ public class ReefOrientationAction extends AbstractAction {
 
     }
 
-    /** Haversine formula to compute angles from lat and lon */
+    /** Haversine formula to compute angles from lat and lon.
+     * Cf. https://www.movable-type.co.uk/scripts/latlong.html
+     *
+     * TODO Check formula (inversion of X and Y)
+     *
+     * @param lon1
+     * @param lat1
+     * @param lon2
+     * @param lat2
+     * @return
+     */
     private double haverSine(double lon1, double lat1, double lon2, double lat2) {
 
         double rlon1 = Math.toRadians(lon1);
