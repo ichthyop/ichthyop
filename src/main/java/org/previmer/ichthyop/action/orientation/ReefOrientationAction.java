@@ -149,23 +149,24 @@ public class ReefOrientationAction extends AbstractAction {
 
     /** Haversine formula to compute angles from lat and lon.
      * Cf. https://www.movable-type.co.uk/scripts/latlong.html
+     * Cf. https://copyprogramming.com/howto/javascript-find-degree-between-two-geo-coordinates-javascript
      *
      * TODO Check formula (inversion of X and Y)
      *
-     * @param lon1
-     * @param lat1
-     * @param lon2
-     * @param lat2
+     * @param lonstart
+     * @param latstart
+     * @param lonend
+     * @param latend
      * @return
      */
-    private double haverSine(double lon1, double lat1, double lon2, double lat2) {
+    private double haverSine(double lonstart, double latstart, double lonend, double latend) {
 
-        double rlon1 = Math.toRadians(lon1);
-        double rlat1 = Math.toRadians(lat1);
-        double rlon2 = Math.toRadians(lon2);
-        double rlat2 = Math.toRadians(lat2);
-        double X = Math.cos(rlat2) * Math.sin(rlon2 - rlon1);
-        double Y = Math.cos(rlat1) * Math.sin(rlat2) - Math.sin(rlat1) * Math.cos(rlat2) * Math.cos(rlon2 - rlon1);
+        double rlonstart = Math.toRadians(lonstart);
+        double rlatstart = Math.toRadians(latstart);
+        double rlonend = Math.toRadians(lonend);
+        double rlatend = Math.toRadians(latend);
+        double Y = Math.sin(rlonend - rlonstart) * Math.cos(rlatend);
+        double X = Math.cos(rlatstart) * Math.sin(rlatend) - Math.sin(rlatstart) * Math.cos(rlatend) * Math.cos(rlonend - rlonstart);
         return Math.atan2(Y, X);
 
     }
