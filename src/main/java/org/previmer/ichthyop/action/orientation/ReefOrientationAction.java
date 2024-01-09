@@ -102,12 +102,14 @@ public class ReefOrientationAction extends AbstractAction {
 
         if (closestReefDistance > maximumDistance) {
 
-            double htvelscl = Math.sqrt((2 * horDiffOrient) / dtturb);
-            double norm1 = randomGenerator.nextGaussian();
-            double norm2 = randomGenerator.nextGaussian();
+            // double htvelscl = Math.sqrt((2 * horDiffOrient) / dt);
+            // double norm1 = randomGenerator.nextGaussian();
+            // double norm2 = randomGenerator.nextGaussian();
 
-            uorient = norm1 * htvelscl;
-            vorient = norm2 * htvelscl;
+            // uorient = norm1 * htvelscl;
+            // vorient = norm2 * htvelscl;
+            uorient = 0;
+            vorient = 0;
 
         } else {
 
@@ -132,8 +134,10 @@ public class ReefOrientationAction extends AbstractAction {
             double age = particle.getAge() / (secs_in_day);
             double timeMax = getSimulationManager().getTimeManager().getSimulationDuration() / (secs_in_day);
             double PLD = timeMax / (secs_in_day);
+            // double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
+            //         ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
             double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
-                    ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
+                    ((Math.log10(age) / Math.log10(PLD)) * (swimmingSpeedSettle - swimmingSpeedHatch)));
             swimmingSpeed = swimmingSpeed / 100;
 
             // Compute u and v orientation velocity;
