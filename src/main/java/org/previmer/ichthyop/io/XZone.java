@@ -266,6 +266,9 @@ public class XZone extends org.jdom2.Element {
     }
 
     public float getUpperDepth() {
+        if(null == getThickness().getChildTextNormalize(UPPER_DEPTH)) {
+            return 0;
+        }
         return Float.valueOf(getThickness().getChildTextNormalize(UPPER_DEPTH));
     }
 

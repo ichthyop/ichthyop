@@ -86,6 +86,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import org.jdesktop.application.ResourceMap;
+import org.jdom2.Element;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.io.IOTools;
@@ -136,6 +137,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         rdBtnDecimalDeg.addPropertyChangeListener(pl);
         rdBtnDegDecimalMin.addPropertyChangeListener(pl);
         textNParticles.addPropertyChangeListener(pl);
+        txtFieldKappa.addPropertyChangeListener(pl);
+
         //
         cbBoxType.addActionListener(al);
         ckBoxThickness.addActionListener(al);
@@ -144,6 +147,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnDeleteZone.addActionListener(al);
         btnUpZone.addActionListener(al);
         btnDownZone.addActionListener(al);
+
     }
 
     private void removeChangeListeners(PropertyChangeListener pl, ActionListener al) {
@@ -168,6 +172,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         rdBtnDecimalDeg.removePropertyChangeListener(pl);
         rdBtnDegDecimalMin.removePropertyChangeListener(pl);
         textNParticles.removePropertyChangeListener(pl);
+        txtFieldKappa.removePropertyChangeListener(pl);
+
         //
         cbBoxType.removeActionListener(al);
         ckBoxThickness.removeActionListener(al);
@@ -214,17 +220,26 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         setPanelZoneEnabled(true);
         ckBoxEnabled.setSelected(zone.isEnabled());
         cbBoxType.setSelectedItem(zone.getTypeZone());
+
+        boolean isTargetZone = (zone.getTypeZone() == TypeZone.TARGET);
+        if(isTargetZone) {
+            txtFieldKappa.setValue(zone.getKappa());
+        }
+
         repaintBtnColor(zone.getColor());
-        txtFieldUpperDepth.setValue(zone.getUpperDepth());
-        txtFieldLowerDepth.setValue(zone.getLowerDepth());
-        txtFieldInshore.setValue(zone.getInshoreLine());
-        txtFieldOffshore.setValue(zone.getOffshoreLine());
-        ckBoxBathyMask.setSelected(zone.isBathyMaskEnabled());
-        ckBoxThickness.setSelected(zone.isThicknessEnabled());
-        txtFieldUpperDepth.setEnabled(ckBoxThickness.isSelected());
-        txtFieldLowerDepth.setEnabled(ckBoxThickness.isSelected());
-        txtFieldInshore.setEnabled(ckBoxBathyMask.isSelected());
-        txtFieldOffshore.setEnabled(ckBoxBathyMask.isSelected());
+
+        if (!isTargetZone) {
+            txtFieldUpperDepth.setValue(zone.getUpperDepth());
+            txtFieldLowerDepth.setValue(zone.getLowerDepth());
+            txtFieldInshore.setValue(zone.getInshoreLine());
+            txtFieldOffshore.setValue(zone.getOffshoreLine());
+            ckBoxBathyMask.setSelected(zone.isBathyMaskEnabled());
+            ckBoxThickness.setSelected(zone.isThicknessEnabled());
+            txtFieldUpperDepth.setEnabled(ckBoxThickness.isSelected());
+            txtFieldLowerDepth.setEnabled(ckBoxThickness.isSelected());
+            txtFieldInshore.setEnabled(ckBoxBathyMask.isSelected());
+            txtFieldOffshore.setEnabled(ckBoxBathyMask.isSelected());
+        }
 
         Vector<Vector<String>> vector = new Vector<>();
         for (XPoint point : zone.getPolygon()) {
@@ -264,16 +279,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
         if(zone.getTypeZone() == TypeZone.RELEASE) {
             this.textNParticles.setValue(zone.getProportionParticles());
-            this.textNParticles.setEnabled(true);
-            this.labelNParticles.setEnabled(true);
         } else {
             this.textNParticles.setValue(0);
-            this.textNParticles.setEnabled(false);
-            this.labelNParticles.setEnabled(false);
         }
 
         hasZoneChanged = false;
         addChangeListeners(this, this);
+
     }
 
     public void setPanelZoneEnabled(final boolean enabled) {
@@ -299,18 +311,28 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 return comp;
             }
         });
+
+        TypeZone typeZone = (TypeZone) cbBoxType.getSelectedItem();
         btnUpPoint.setEnabled(enabled);
         btnDownPoint.setEnabled(enabled);
         btnNewPoint.setEnabled(enabled);
         btnDeletePoint.setEnabled(enabled);
         cbBoxType.setEnabled(enabled);
         btnColor.setEnabled(enabled);
-        ckBoxBathyMask.setEnabled(enabled);
-        txtFieldInshore.setEnabled(enabled && ckBoxBathyMask.isSelected());
-        txtFieldOffshore.setEnabled(enabled && ckBoxBathyMask.isSelected());
-        ckBoxThickness.setEnabled(enabled);
-        txtFieldUpperDepth.setEnabled(enabled && ckBoxThickness.isSelected());
-        txtFieldLowerDepth.setEnabled(enabled && ckBoxThickness.isSelected());
+        ckBoxBathyMask.setEnabled(enabled && (typeZone != TypeZone.TARGET));
+        txtFieldInshore.setEnabled(enabled && ckBoxBathyMask.isSelected() && (typeZone != TypeZone.TARGET));
+        txtFieldOffshore.setEnabled(enabled && ckBoxBathyMask.isSelected() && (typeZone != TypeZone.TARGET));
+        ckBoxThickness.setEnabled(enabled && (typeZone != TypeZone.TARGET));
+        txtFieldUpperDepth.setEnabled(enabled && ckBoxThickness.isSelected() && (typeZone != TypeZone.TARGET));
+        txtFieldLowerDepth.setEnabled(enabled && ckBoxThickness.isSelected() && (typeZone != TypeZone.TARGET));
+
+        txtFieldKappa.setEnabled(enabled && (typeZone == TypeZone.TARGET));
+        labelKappa.setEnabled(enabled && (typeZone == TypeZone.TARGET));
+
+        textNParticles.setEnabled(enabled && (typeZone != TypeZone.TARGET));
+        labelNParticles.setEnabled(enabled && (typeZone == TypeZone.TARGET));
+
+
     }
 
     public void save() {
@@ -325,6 +347,12 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         zone.setEnabled(ckBoxEnabled.isSelected());
         zone.setColor(btnColor.getBackground());
         zone.setType((TypeZone) cbBoxType.getSelectedItem());
+
+        // If target zone, need to update the kappa value
+        if(zone.getTypeZone() == TypeZone.TARGET) {
+            zone.setKappa(Float.valueOf(txtFieldKappa.getText()));
+        }
+
         zone.setBathyMaskEnabled(ckBoxBathyMask.isSelected());
         zone.setInshoreLine(Float.valueOf(txtFieldInshore.getText()));
         zone.setOffshoreLine(Float.valueOf(txtFieldOffshore.getText()));
@@ -376,7 +404,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
-        //System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
+        System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
         String prop = evt.getPropertyName();
         if (prop.equals("enabled")
                 || prop.equals("value")
@@ -397,10 +425,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }
 
     public void actionPerformed(ActionEvent e) {
+        System.out.println("ActionPerformed" + e.getSource());
         hasZoneChanged = true;
         btnSave.setEnabled(true);
-        textNParticles.setVisible(zone.getTypeZone() == TypeZone.RELEASE);
-        labelNParticles.setVisible(zone.getTypeZone() == TypeZone.RELEASE);
     }
 
     public ResourceMap getResourceMap() {
@@ -467,7 +494,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         rdBtnDecimalDeg = new javax.swing.JRadioButton();
         rdBtnDegMinSec = new javax.swing.JRadioButton();
         rdBtnDegDecimalMin = new javax.swing.JRadioButton();
-        jLabel1 = new javax.swing.JLabel();
+        labelKappa = new javax.swing.JLabel();
         txtFieldKappa = new javax.swing.JFormattedTextField();
         btnSave = new javax.swing.JButton();
         btnSaveAs = new javax.swing.JButton();
@@ -936,8 +963,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                     .addComponent(rdBtnDegDecimalMin)))
         );
 
-        jLabel1.setText("Kappa parameter (target zones):");
-        jLabel1.setName("jLabel1"); // NOI18N
+        labelKappa.setText("Kappa parameter (target zones):");
+        labelKappa.setName("labelKappa"); // NOI18N
 
         txtFieldKappa.setName("txtFieldKappa"); // NOI18N
         txtFieldKappa.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
@@ -973,7 +1000,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                                         .addGap(18, 18, 18)
                                         .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(pnlZoneLayout.createSequentialGroup()
-                                        .addComponent(jLabel1)
+                                        .addComponent(labelKappa)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(txtFieldKappa)))
                                 .addGap(36, 36, 36)))))
@@ -997,7 +1024,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                             .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
+                            .addComponent(labelKappa)
                             .addComponent(txtFieldKappa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
                         .addComponent(pnlThickness, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1417,7 +1444,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JCheckBox ckBoxBathyMask;
     private javax.swing.JCheckBox ckBoxEnabled;
     private javax.swing.JCheckBox ckBoxThickness;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -1427,6 +1453,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JToolBar jToolBar2;
+    private javax.swing.JLabel labelKappa;
     private javax.swing.JLabel labelNParticles;
     private javax.swing.JLabel lblFile;
     private javax.swing.JLabel lblInshore;

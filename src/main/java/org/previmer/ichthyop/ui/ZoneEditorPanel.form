@@ -296,7 +296,7 @@
                                                       <Component id="textNParticles" min="-2" pref="116" max="-2" attributes="0"/>
                                                   </Group>
                                                   <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="labelKappa" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                                       <Component id="txtFieldKappa" max="32767" attributes="0"/>
                                                   </Group>
@@ -331,7 +331,7 @@
                                       </Group>
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
-                                          <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="labelKappa" alignment="3" min="-2" max="-2" attributes="0"/>
                                           <Component id="txtFieldKappa" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace pref="37" max="32767" attributes="0"/>
@@ -883,10 +883,10 @@
                         </Component>
                       </SubComponents>
                     </Container>
-                    <Component class="javax.swing.JLabel" name="jLabel1">
+                    <Component class="javax.swing.JLabel" name="labelKappa">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Kappa parameter (target zones):"/>
-                        <Property name="name" type="java.lang.String" value="jLabel1" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="labelKappa" noResource="true"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JFormattedTextField" name="txtFieldKappa">
