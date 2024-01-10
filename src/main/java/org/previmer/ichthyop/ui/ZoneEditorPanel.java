@@ -360,9 +360,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         zone.setType((TypeZone) cbBoxType.getSelectedItem());
 
         // If target zone, need to update the kappa value
-        if(zone.getTypeZone() == TypeZone.TARGET) {
-            zone.setKappa(Float.valueOf(txtFieldKappa.getText()));
-        }
+        zone.setKappa(Float.valueOf(txtFieldKappa.getText()));
 
         zone.setBathyMaskEnabled(ckBoxBathyMask.isSelected());
         zone.setInshoreLine(Float.valueOf(txtFieldInshore.getText()));
@@ -751,7 +749,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         pnlThickness.setName("pnlThickness"); // NOI18N
 
         txtFieldUpperDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
+        txtFieldUpperDepth.setText("0");
         txtFieldUpperDepth.setName("txtFieldUpperDepth"); // NOI18N
+        txtFieldUpperDepth.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtFieldUpperDepthActionPerformed(evt);
+            }
+        });
 
         ckBoxThickness.setText(bundle.getString("ckBoxThickness.text")); // NOI18N
         ckBoxThickness.setName("ckBoxThickness"); // NOI18N
@@ -769,6 +773,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         lblLowerDepth.setName("lblLowerDepth"); // NOI18N
 
         txtFieldLowerDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
+        txtFieldLowerDepth.setText("0");
         txtFieldLowerDepth.setName("txtFieldLowerDepth"); // NOI18N
 
         javax.swing.GroupLayout pnlThicknessLayout = new javax.swing.GroupLayout(pnlThickness);
@@ -776,20 +781,19 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         pnlThicknessLayout.setHorizontalGroup(
             pnlThicknessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlThicknessLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(pnlThicknessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlThicknessLayout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addGroup(pnlThicknessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(pnlThicknessLayout.createSequentialGroup()
-                                .addComponent(lblLowerDepth)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFieldLowerDepth))
-                            .addGroup(pnlThicknessLayout.createSequentialGroup()
-                                .addComponent(lblUpperDepth)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtFieldUpperDepth, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addComponent(ckBoxThickness))
+                        .addGap(18, 18, 18)
+                        .addGroup(pnlThicknessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblLowerDepth)
+                            .addComponent(lblUpperDepth))
+                        .addGap(27, 27, 27)
+                        .addGroup(pnlThicknessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtFieldUpperDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
+                            .addComponent(txtFieldLowerDepth)))
+                    .addGroup(pnlThicknessLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(ckBoxThickness)))
                 .addContainerGap())
         );
         pnlThicknessLayout.setVerticalGroup(
@@ -812,6 +816,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         pnlBathyMask.setName("pnlBathyMask"); // NOI18N
 
         txtFieldInshore.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
+        txtFieldInshore.setText("0");
         txtFieldInshore.setName("txtFieldInshore"); // NOI18N
 
         ckBoxBathyMask.setText(bundle.getString("ckBoxBathyMask.text")); // NOI18N
@@ -826,6 +831,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         lblInshore.setName("lblInshore"); // NOI18N
 
         txtFieldOffshore.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
+        txtFieldOffshore.setText("0");
         txtFieldOffshore.setName("txtFieldOffshore"); // NOI18N
 
         lblOffshore.setText(bundle.getString("lblOffshore.text")); // NOI18N
@@ -906,7 +912,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         labelNParticles.setName("labelNParticles"); // NOI18N
 
         textNParticles.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getPercentInstance())));
+        textNParticles.setText("0");
         textNParticles.setName("textNParticles"); // NOI18N
+        textNParticles.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textNParticlesActionPerformed(evt);
+            }
+        });
         textNParticles.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 textNParticlesPropertyChange(evt);
@@ -978,6 +990,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         labelKappa.setText("Kappa parameter (target zones):");
         labelKappa.setName("labelKappa"); // NOI18N
 
+        txtFieldKappa.setText("0");
         txtFieldKappa.setName("txtFieldKappa"); // NOI18N
         txtFieldKappa.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -1432,6 +1445,14 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private void txtFieldKappaPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtFieldKappaPropertyChange
         hasZoneChanged = true;
     }//GEN-LAST:event_txtFieldKappaPropertyChange
+
+    private void textNParticlesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textNParticlesActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textNParticlesActionPerformed
+
+    private void txtFieldUpperDepthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFieldUpperDepthActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFieldUpperDepthActionPerformed
 
     private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_textNParticlesPropertyChange
         hasZoneChanged = true;

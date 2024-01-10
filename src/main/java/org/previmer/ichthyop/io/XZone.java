@@ -185,10 +185,16 @@ public class XZone extends org.jdom2.Element {
     }
 
     public Element getBathyMask() {
+        if (null == getChild(BATHY_MASK)) {
+            addContent(new Element(BATHY_MASK));
+        }
         return getChild(BATHY_MASK);
     }
 
     public Element getThickness() {
+        if (null == getChild(THICKNESS)) {
+            addContent(new Element(THICKNESS));
+        }
         return getChild(THICKNESS);
     }
 
