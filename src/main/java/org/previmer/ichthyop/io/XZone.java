@@ -309,6 +309,14 @@ public class XZone extends org.jdom2.Element {
         return Float.valueOf(getChildTextNormalize(KAPPA));
     }
 
+    // Adding a setter for Kappa values
+    public void setKappa(float kappa) {
+        if (null == getChild(KAPPA)) {
+            this.addContent(new Element(KAPPA));
+        }
+        getChild(KAPPA).setText(String.valueOf(kappa));
+    }
+
     public void setOffshoreLine(float depth) {
         if (null == getBathyMask().getChild(LINE_OFFSHORE)) {
             getBathyMask().addContent(new Element(LINE_OFFSHORE));
@@ -326,6 +334,7 @@ public class XZone extends org.jdom2.Element {
         }
         getBathyMask().getChild(ENABLED).setText(String.valueOf(enabled));
     }
+
 
     public class XPoint extends org.jdom2.Element {
 
