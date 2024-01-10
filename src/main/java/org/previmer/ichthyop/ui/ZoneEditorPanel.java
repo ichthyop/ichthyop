@@ -468,7 +468,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         rdBtnDegMinSec = new javax.swing.JRadioButton();
         rdBtnDegDecimalMin = new javax.swing.JRadioButton();
         jLabel1 = new javax.swing.JLabel();
-        kappaTextField = new javax.swing.JTextField();
+        txtFieldKappa = new javax.swing.JFormattedTextField();
         btnSave = new javax.swing.JButton();
         btnSaveAs = new javax.swing.JButton();
         lblFile = new javax.swing.JLabel();
@@ -939,10 +939,10 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         jLabel1.setText("Kappa parameter (target zones):");
         jLabel1.setName("jLabel1"); // NOI18N
 
-        kappaTextField.setName("kappaTextField"); // NOI18N
-        kappaTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                kappaTextFieldActionPerformed(evt);
+        txtFieldKappa.setName("txtFieldKappa"); // NOI18N
+        txtFieldKappa.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                txtFieldKappaPropertyChange(evt);
             }
         });
 
@@ -969,14 +969,14 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                                 .addGap(12, 12, 12)
                                 .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(pnlZoneLayout.createSequentialGroup()
-                                        .addComponent(jLabel1)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(kappaTextField))
-                                    .addGroup(pnlZoneLayout.createSequentialGroup()
                                         .addComponent(labelNParticles)
                                         .addGap(18, 18, 18)
-                                        .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                        .addComponent(textNParticles, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(pnlZoneLayout.createSequentialGroup()
+                                        .addComponent(jLabel1)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(txtFieldKappa)))
+                                .addGap(36, 36, 36)))))
                 .addContainerGap())
         );
         pnlZoneLayout.setVerticalGroup(
@@ -998,8 +998,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                         .addGap(18, 18, 18)
                         .addGroup(pnlZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1)
-                            .addComponent(kappaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                            .addComponent(txtFieldKappa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
                         .addComponent(pnlThickness, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(pnlBathyMask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -1390,9 +1390,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
     }//GEN-LAST:event_ckBoxEnabledActionPerformed
 
-    private void kappaTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kappaTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_kappaTextFieldActionPerformed
+    private void txtFieldKappaPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtFieldKappaPropertyChange
+        hasZoneChanged = true;
+    }//GEN-LAST:event_txtFieldKappaPropertyChange
 
     private void textNParticlesPropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_textNParticlesPropertyChange
         hasZoneChanged = true;
@@ -1427,7 +1427,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JToolBar jToolBar2;
-    private javax.swing.JTextField kappaTextField;
     private javax.swing.JLabel labelNParticles;
     private javax.swing.JLabel lblFile;
     private javax.swing.JLabel lblInshore;
@@ -1451,6 +1450,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JFormattedTextField textNParticles;
     private javax.swing.JToolBar toolBarZone;
     private javax.swing.JFormattedTextField txtFieldInshore;
+    private javax.swing.JFormattedTextField txtFieldKappa;
     private javax.swing.JFormattedTextField txtFieldLowerDepth;
     private javax.swing.JFormattedTextField txtFieldOffshore;
     private javax.swing.JFormattedTextField txtFieldUpperDepth;
