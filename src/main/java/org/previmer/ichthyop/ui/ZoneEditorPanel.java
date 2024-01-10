@@ -312,6 +312,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             }
         });
 
+
+        this.updateElements(enabled);
+
+    }
+
+    /** Function to update the display of Zone elements */
+    private void updateElements(final boolean enabled) {
         TypeZone typeZone = (TypeZone) cbBoxType.getSelectedItem();
         btnUpPoint.setEnabled(enabled);
         btnDownPoint.setEnabled(enabled);
@@ -320,9 +327,14 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         cbBoxType.setEnabled(enabled);
         btnColor.setEnabled(enabled);
         ckBoxBathyMask.setEnabled(enabled && (typeZone != TypeZone.TARGET));
+        lblInshore.setEnabled(enabled && ckBoxBathyMask.isSelected() && (typeZone != TypeZone.TARGET));
+        lblOffshore.setEnabled(enabled && ckBoxBathyMask.isSelected() && (typeZone != TypeZone.TARGET));
         txtFieldInshore.setEnabled(enabled && ckBoxBathyMask.isSelected() && (typeZone != TypeZone.TARGET));
         txtFieldOffshore.setEnabled(enabled && ckBoxBathyMask.isSelected() && (typeZone != TypeZone.TARGET));
         ckBoxThickness.setEnabled(enabled && (typeZone != TypeZone.TARGET));
+
+        lblUpperDepth.setEnabled(enabled && ckBoxThickness.isSelected() && (typeZone != TypeZone.TARGET));
+        lblLowerDepth.setEnabled(enabled && ckBoxThickness.isSelected() && (typeZone != TypeZone.TARGET));
         txtFieldUpperDepth.setEnabled(enabled && ckBoxThickness.isSelected() && (typeZone != TypeZone.TARGET));
         txtFieldLowerDepth.setEnabled(enabled && ckBoxThickness.isSelected() && (typeZone != TypeZone.TARGET));
 
@@ -331,7 +343,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
         textNParticles.setEnabled(enabled && (typeZone != TypeZone.TARGET));
         labelNParticles.setEnabled(enabled && (typeZone == TypeZone.TARGET));
-
 
     }
 
@@ -428,6 +439,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         System.out.println("ActionPerformed" + e.getSource());
         hasZoneChanged = true;
         btnSave.setEnabled(true);
+        this.updateElements(ckBoxEnabled.isSelected());
     }
 
     public ResourceMap getResourceMap() {
