@@ -117,12 +117,13 @@ public class ReefOrientationAction extends AbstractAction {
 
             double thetaCurrent = haverSine(particle.getOldLon(), particle.getOldLat(), particle.getLon(),
                     particle.getLat());
-            double mu = -d * (thetaCurrent - thetaPref);
+            double mu = d * (thetaPref - thetaCurrent);
 
             VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef);
 
             double ti = vonMises.nextDouble();
-            double theta = ti + thetaCurrent + mu;
+
+            double theta = ti + mu + thetaCurrent;
 
             double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
 
