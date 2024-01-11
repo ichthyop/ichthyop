@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "org.previmer.ichthyop.ui.IchthyopApp",
             "projectName": "ichthyop",
-            "cwd": "/home/barrier/Work/ichthyop/larval-orientation/reef",
+            "cwd": "/home/barrier/Work/ichthyop/larval-orientation/ichthyop",
             "args": "cfg/test_reef_orientation.xml"
         }
     ]
