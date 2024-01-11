@@ -23,7 +23,7 @@ public class RheotaxisOrientationAction extends AbstractAction {
     public void loadParameters() throws Exception {
         swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
         swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
-        vonMisesKappa = Math.toRadians(Double.valueOf(getParameter("swimming.von.mises.kappa")));
+        vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
 
         if (swimmingSpeedHatch > swimmingSpeedSettle) {
             getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
@@ -64,10 +64,11 @@ public class RheotaxisOrientationAction extends AbstractAction {
         double uv = Math.sqrt(uf * uf + vf * vf);
 
         double ti = vonMises.nextDouble();
+        // ti = 0;
 
         // Compute rheotaxis heading
         // i.e. the heading opposite to the current
-        double thetaRheo = -Math.atan2(vf, uf);
+        double thetaRheo = Math.atan2(vf, uf) + Math.PI;
         double theta = thetaRheo + ti;
 
         // Larvae cannot swim against the current. Therefore,
