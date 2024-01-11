@@ -203,15 +203,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                         }
                     }
                 }
-            } else {
-                /* Warn user in case no block of this type is enable */
-                StringBuffer msg = new StringBuffer();
-                msg.append(getResourceMap().getString("noBlockEnabled.text.part1"));
-                msg.append(" <");
-                msg.append(type.toString());
-                msg.append("> ");
-                msg.append(getResourceMap().getString("noBlockEnabled.text.part2"));
-                JOptionPane.showMessageDialog(this, msg.toString());
             }
         }
     }
