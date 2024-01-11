@@ -13,8 +13,8 @@ The changes in particle longitude (:math:`\lambda`) and latitude (:math:`\phi`) 
 .. math::
 
     \Delta \lambda_0 = \frac{\Delta  t \times U_W }{\frac{R \pi}{180} \times \cos(\frac{\pi \phi}{ 180})}
-  
-.. math:: 
+
+.. math::
 
     \Delta \phi_0 =  \frac{\Delta  t \times V_W}{ \frac{R \pi}{180}}
 
@@ -30,4 +30,3 @@ The changes in particle longitude (:math:`\lambda`) and latitude (:math:`\phi`) 
 .. note::
 
     :math:`R` is the Earth Radius and equals 6367.74 km. In the code, :math:`\dfrac{R \pi}{180}`, which is the distance in m of a 1 degree cell,  is  approximated to 111138 m
-

@@ -23,3 +23,4 @@ Parameters associated with these processes must be included in :samp:`action` bl
    process/swim
    process/wave
    process/land
+   process/orientation
