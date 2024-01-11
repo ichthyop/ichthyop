@@ -1,6 +1,6 @@
 package org.previmer.ichthyop.action.orientation;
 
-import java.util.Random;
+import java.util.logging.Level;
 
 import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
@@ -16,14 +16,22 @@ public class RheotaxisOrientationAction extends AbstractAction {
     private VonMisesRandom vonMises;
     private double secs_in_day = 86400;
 
-    private Random randomGenerator = new Random();
     double dt;
+    private double PLD;
 
     @Override
     public void loadParameters() throws Exception {
         swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
         swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
         vonMisesKappa = Math.toRadians(Double.valueOf(getParameter("swimming.von.mises.kappa")));
+
+        if (swimmingSpeedHatch > swimmingSpeedSettle) {
+            getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
+            double temp = swimmingSpeedHatch;
+            swimmingSpeedHatch = swimmingSpeedSettle;
+            swimmingSpeedSettle = temp;
+        }
+
     }
 
     @Override
@@ -39,13 +47,10 @@ public class RheotaxisOrientationAction extends AbstractAction {
     /** Computes the longitude/latitude increment */
     private double[] getDlonDlat(IParticle particle) {
 
-        double age = particle.getAge() / (secs_in_day);
-        double timeMax = getSimulationManager().getTimeManager().getSimulationDuration() / (secs_in_day);
-        double PLD = timeMax / (secs_in_day);
+        double age = (particle.getAge() + Float.MIN_VALUE) / (secs_in_day);
         double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
                 ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
         swimmingSpeed = swimmingSpeed / 100;
-        double norm_swim = Math.abs(swimmingSpeed);
 
         double[] pGrid;
         if(getSimulationManager().getDataset().is3D()) {
@@ -61,20 +66,17 @@ public class RheotaxisOrientationAction extends AbstractAction {
         double ti = vonMises.nextDouble();
 
         // Compute rheotaxis heading
+        // i.e. the heading opposite to the current
         double thetaRheo = -Math.atan2(vf, uf);
         double theta = thetaRheo + ti;
 
-        double uorient = 0;
-        double vorient = 0;
+        // Larvae cannot swim against the current. Therefore,
+        // if the swimming speed is greater that the current, we
+        // set the swimming speed as equal to the current
+        swimmingSpeed = Math.min(swimmingSpeed, uv);
 
-        if (norm_swim < uv) {
-            // Compute u and v rheotaxis velocity
-            uorient = swimmingSpeed * Math.cos(theta);
-            vorient = swimmingSpeed * Math.sin(theta);
-        } else {
-            uorient = uv * Math.cos(theta);
-            vorient = uv * Math.sin(theta);
-        }
+        double uorient = swimmingSpeed * Math.cos(theta);
+        double vorient = swimmingSpeed * Math.sin(theta);
 
         double dx = uorient * dt;
         double dy = vorient * dt;
@@ -90,8 +92,13 @@ public class RheotaxisOrientationAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
+
         vonMises = new VonMisesRandom(0, vonMisesKappa);
         dt = getSimulationManager().getTimeManager().get_dt();
+
+        double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
+        PLD = timeMax / (secs_in_day);
+
     }
 
 }
