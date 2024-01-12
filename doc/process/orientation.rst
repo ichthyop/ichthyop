@@ -5,9 +5,10 @@ Active swimming has been implemented in Ichthyop following the work of Romain Ch
 Three active swimming behaviours have been implemented: the rheotaxis orientation (i.e. against the current), the
 cardinal orientation (i.e toward a given direction) and the reef orientation, i.e. orientation toward points of interests.
 
-These three implementations will be described, but first the commmon features are presented
+These three implementations involve the computation of a swimming velocity and direction. The former is common to all
+three methods, but the directions depend on the method considered.
 
-Common features
+Swimming velocity
 ---------------------
 
 The orientation processes all share common features. They both depend on a swimming velocity and random directions. The methods described
@@ -22,7 +23,13 @@ Swimming velocity is computed following :cite:`staatermanOrientationBehaviorFish
 with :math:`V_{hatch}` and :math:`V_{settle}` the larval velocity at hatching and settle, :math:`A` the age of the larva and
 :math:`PLD` the transport duraction.
 
-Random directions are, in the three methods, drafted following a Von Mises distribution:
+.. plot:: process/_static/plot_vel_age.py
+    :align: center
+
+Von Mises distributions
+-----------------------------
+
+Von Mises distribution is used in all three methods.The Von Mises distribution is given by:
 
 .. math::
 
@@ -40,17 +47,15 @@ parameter. The distribution is as follows:
 For computation purposes, all the Von Mises drafts performed in Ichthyop are done by using :math:`mu = 0`. The
 angles are thus centerred around 0. Then, the :math:`mu` value is added.
 
-
-.. note::
-
-    The methods differ in the values of the :math:`\mu` and :math:`\kappa` parameters.
-
 .. note::
 
     :math:`\theta = 0` is eastward, :math:`\theta = \frac{\pi}{2}` is northward, etc.
 
+Computation of displacement
+--------------------------------
 
-When the angle is drafted, the larva displacement (in :math:`m`) is computed as follows:
+Given a swimming velocity :math:`V` and a direction :math:`\theta`,
+the larva displacement (in :math:`m`) is computed as follows:
 
 .. math::
 
