@@ -81,3 +81,42 @@ Cardinal orientation
 
 In cardinal orientation, the user provides a fixed heading :math:`\theta_{card}` and a fixed :math:`\kappa` parameter.
 Then, at each time step, a new angle is randomly drafted following a Von Misses distribution :math:`f(\theta, \theta_{card}, \mu)`.
+
+Reef orientation
+--------------------
+
+In the reef orientation method, the larva will target the closest target area (for instance coral reef).
+These areas are defined in an ``XML`` zone file by a polygon and a zone-specific :math:`\kappa` parameter. The user also provides the sensory detection threshold of the larva (maximum detection distance :math:`\beta`).
+
+If the distance between the particle and the barycenter of the closest reef (:math:`D`) is below
+the detection thereshold :math:`\beta`, the larva will swim in the direction of the reef.
+
+
+.. _ref_orientation:
+
+.. plot:: process/_static/draw_circle_reef.py
+    :align: center
+    :caption: Reef orientation process
+
+First, the angle of the current trajectory, :math:`\theta_{current}`, is computed by using
+the particle position at the previous time step (blue point) and the actual position (red point).
+
+The direction toward the reef, :math:`\theta_{reef}` is computed by using the actual position of the particle and the reef
+position (orange point).
+
+The turning angle :math:`\theta_{turning}` is given by:
+
+.. math::
+
+    \theta_{turning} = \theta_{reef} - \theta_{current}
+
+The turning angle is ponderated by the ratio of the distance from the reef and
+the detection threshold as follows:
+
+.. math::
+
+    \theta = \left(1 - \dfrac{D}{\beta}\right) \theta_{turning}
+
+.. math::
+
+    \theta = \left(1 - \dfrac{D}{\beta}\right) \left(\theta_{reef} - \theta_{current}\right)

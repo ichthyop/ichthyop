@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 plt.rcParams['font.size'] = 15
 
-plt.figure(figsize = (18, 7))
+plt.figure(figsize = (10, 10))
 
 xnew = 0
 ynew = 0
@@ -37,6 +37,8 @@ print(yreef)
 plt.plot(xreef, yreef, marker='o', color='orange')
 plt.gca().annotate('$R$', xy=(xreef + 0.1, yreef), xycoords='data', color='orange')
 
+plt.gca().annotate(r'$D$', xy=(0.5*(xreef) + 0.02, 0.5*yreef), xycoords='data', color='orange', ha='left')
+
 plt.axvline(xnew, color='k', ls='--', lw=0.5)
 plt.axhline(ynew, color='k', ls='--', lw=0.5)
 
@@ -64,7 +66,7 @@ rtmp = 0.4
 plt.plot(0 + rtmp * np.cos(tmp_angle), 0 + rtmp * np.sin(tmp_angle), color='plum', ls='--')
 plt.gca().annotate(r'$\theta_{turning}$', xy=(-0.43, -0.34), xycoords='data', color='plum')
 
-off = 0.1
+off = 0.05
 plt.xlim(xreef - off, xold + off)
 plt.ylim(yreef - off, yold + off)
 plt.gca().set_aspect('equal')
