@@ -80,7 +80,7 @@ Cardinal orientation
 -------------------------
 
 In cardinal orientation, the user provides a fixed heading :math:`\theta_{card}` and a fixed :math:`\kappa` parameter.
-Then, at each time step, a new angle is randomly drafted following a Von Misses distribution :math:`f(\theta, \theta_{card}, \mu)`.
+Then, at each time step, a new angle is randomly drafted following a Von Misses distribution :math:`f(\theta, \theta_{card}, \kappa)`.
 
 Reef orientation
 --------------------
@@ -99,10 +99,29 @@ the detection thereshold :math:`\beta`, the larva will swim in the direction of 
     :caption: Reef orientation process
 
 First, the angle of the current trajectory, :math:`\theta_{current}`, is computed by using
-the particle position at the previous time step (blue point) and the actual position (red point).
+the particle position at the previous time step (blue point) and the actual position (red point). This is done by using
+the haversine formula:
 
-The direction toward the reef, :math:`\theta_{reef}` is computed by using the actual position of the particle and the reef
-position (orange point).
+.. math::
+
+    Y = \sin(\lambda_{dest} - \lambda_{origin}) \cos(\phi_{dest})
+
+
+.. math::
+
+    X =
+    \cos(\phi_{origin})  \sin(\phi_{dest}) - \sin(\phi_{origin})  \cos(\phi_{dest}) cos(\lambda_{dest} - \lambda_{origin})
+
+
+.. math::
+
+    \theta = \arctan2 (Y, X)
+
+with :math:`\phi_{origin}` and :math:`\lambda_{origin}` the latitude and longitude of the initial position, and
+with :math:`\phi_{dest}` and :math:`\lambda_{dest}` the latitude and longitude of the target destination.
+
+The direction toward the reef, :math:`\theta_{reef}` is computed by using the same formula on the actual position of the particle and the reef
+position and the reef location (orange point).
 
 The turning angle :math:`\theta_{turning}` is given by:
 
@@ -110,13 +129,17 @@ The turning angle :math:`\theta_{turning}` is given by:
 
     \theta_{turning} = \theta_{reef} - \theta_{current}
 
-The turning angle is ponderated by the ratio of the distance from the reef and
+The turning angle is then ponderated by the ratio of the distance from the reef to
 the detection threshold as follows:
 
 .. math::
 
-    \theta = \left(1 - \dfrac{D}{\beta}\right) \theta_{turning}
+    \theta_{ponderated} = \left(1 - \dfrac{D}{\beta}\right) \theta_{turning}
 
 .. math::
 
-    \theta = \left(1 - \dfrac{D}{\beta}\right) \left(\theta_{reef} - \theta_{current}\right)
+    \theta_{ponderated} = \left(1 - \dfrac{D}{\beta}\right) \left(\theta_{reef} - \theta_{current}\right)
+
+Therefore, the closest to the reef, the strongest the turning angle.
+
+Then, a random angle is picked up following a Von Mises distribution :math:`f(\theta, \theta_{ponderated}, \kappa_{reef})`
