@@ -19,6 +19,8 @@ public class ReefOrientationAction extends AbstractAction {
     private int nZones;
     private double lonBarycenter[];
     private double latBarycenter[];
+    private double xBarycenter[];
+    private double yBarycenter[];
     private double kappaBarycenter[];
     ArrayList<Zone>zones;
     double PLD;
@@ -59,6 +61,8 @@ public class ReefOrientationAction extends AbstractAction {
         nZones = zones.size();
         lonBarycenter = new double[nZones];
         latBarycenter = new double[nZones];
+        xBarycenter = new double[nZones];
+        yBarycenter = new double[nZones];
         kappaBarycenter = new double[nZones];
 
         for (int iZone = 0; iZone < nZones; iZone++) {
@@ -79,7 +83,12 @@ public class ReefOrientationAction extends AbstractAction {
             lonBarycenter[iZone] /= (nPol - 1);
             latBarycenter[iZone] /= (nPol - 1);
             kappaBarycenter[iZone] = zoneTemp.getKappa();
+            double xy[] = getSimulationManager().getDataset().latlon2xy(latBarycenter[iZone], lonBarycenter[iZone]);
+            xBarycenter[iZone] = xy[0];
+            yBarycenter[iZone] = xy[1];
+
         }
+
 
     }
 
@@ -109,14 +118,24 @@ public class ReefOrientationAction extends AbstractAction {
 
         if (closestReefDistance <= maximumDistance) {
 
+            double thetaPref, thetaCurrent;
+
             double d = 1 - (closestReefDistance / maximumDistance);
-            double thetaPref = haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
-                    latBarycenter[closestReefIndex]);
+
+            // thetaPref = haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
+            //         latBarycenter[closestReefIndex]);
+            // thetaCurrent = haverSine(particle.getOldLon(), particle.getOldLat(), particle.getLon(),
+            //         particle.getLat());
 
             double Kappa_reef = kappaBarycenter[closestReefIndex];
 
-            double thetaCurrent = haverSine(particle.getOldLon(), particle.getOldLat(), particle.getLon(),
-                    particle.getLat());
+            double xyParticule[] = getSimulationManager().getDataset().latlon2xy(particle.getLat(), particle.getLon());
+            double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(), particle.getOldLon());
+            double xyReef[] = new double[] {xBarycenter[closestReefIndex], yBarycenter[closestReefIndex]};
+
+            thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
+            thetaCurrent = Math.atan2(xyOrigin[1] - xyParticule[1], xyOrigin[0] - xyParticule[0]) + Math.PI;
+
             double mu = d * (thetaPref - thetaCurrent);
 
             VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef);
