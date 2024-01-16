@@ -50,7 +50,7 @@ angle_current = angle_old + np.pi
 tmp_angle = np.linspace(0, angle_current, 100)
 rtmp = 0.2
 plt.plot(0 + rtmp * np.cos(tmp_angle), 0 + rtmp * np.sin(tmp_angle), color='k', ls='--')
-plt.gca().annotate(r'$\theta_{current}$', xy=(xnew + 0.2, ynew+0.05), xycoords='data', color='k')
+plt.gca().annotate(r'$\theta_{actual}$', xy=(xnew + 0.2, ynew+0.05), xycoords='data', color='k')
 
 
 plt.plot([xnew, xreef], [ynew, yreef], color='orange', ls='--')

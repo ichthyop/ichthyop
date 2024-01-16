@@ -82,6 +82,31 @@ Cardinal orientation
 In cardinal orientation, the user provides a fixed heading :math:`\theta_{card}` and a fixed :math:`\kappa` parameter.
 Then, at each time step, a new angle is randomly drafted following a Von Misses distribution :math:`f(\theta, \theta_{card}, \kappa)`.
 
+Rheotaxis orientation
+-------------------------
+
+In the rheotaxis orientation method, the particles swim against the current. The user only provides a kappa parameter.
+
+First, the angle of the current is computed as follows:
+
+.. math::
+
+    \theta_{current} = \arctan2(V_{current}, U_{current})
+
+Then, the angle that the particle must follow is given by adding :math:`\pi`:
+
+.. math::
+
+    \theta_{direction} = \theta_{current} + \pi
+
+Finally, a random angle is picked up following a Von Mises distribution :math:`f(\theta, \theta_{direction}, \kappa_{reef})`
+
+.. _ref_rheo:
+
+.. plot:: process/_static/draw_rheo_trajectories.py
+    :align: center
+    :caption: Trajectory using rheotaxis orientation
+
 Reef orientation
 --------------------
 
@@ -97,7 +122,7 @@ the detection thereshold :math:`\beta`, the larva will swim in the direction of 
     :align: center
     :caption: Reef orientation process
 
-First, the angle of the current trajectory, :math:`\theta_{current}`, is computed by using
+First, the angle of the current trajectory, :math:`\theta_{actual}`, is computed by using
 the particle position at the previous time step (blue point) and the actual position (red point).
 
 .. math::
@@ -110,7 +135,7 @@ the particle position at the previous time step (blue point) and the actual posi
 
 .. math::
 
-    \theta_{current} = \arctan2(\Delta Y, \Delta X) + \pi
+    \theta_{actual} = \arctan2(\Delta Y, \Delta X) + \pi
 
 The direction toward the reef, :math:`\theta_{reef}` is also computed.
 
@@ -135,7 +160,7 @@ The turning angle :math:`\theta_{turning}` is given by:
 
 .. math::
 
-    \theta_{turning} = \theta_{reef} - \theta_{current}
+    \theta_{turning} = \theta_{reef} - \theta_{actual}
 
 The turning angle is then ponderated by the ratio of the distance from the reef to
 the detection threshold as follows:
@@ -146,7 +171,7 @@ the detection threshold as follows:
 
 .. math::
 
-    \theta_{ponderated} = \left(1 - \dfrac{D}{\beta}\right) \left(\theta_{reef} - \theta_{current}\right)
+    \theta_{ponderated} = \left(1 - \dfrac{D}{\beta}\right) \left(\theta_{reef} - \theta_{actual}\right)
 
 Therefore, the closest to the reef, the strongest the turning angle.
 
