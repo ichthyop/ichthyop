@@ -99,29 +99,38 @@ the detection thereshold :math:`\beta`, the larva will swim in the direction of 
     :caption: Reef orientation process
 
 First, the angle of the current trajectory, :math:`\theta_{current}`, is computed by using
-the particle position at the previous time step (blue point) and the actual position (red point). This is done by using
-the haversine formula:
+the particle position at the previous time step (blue point) and the actual position (red point).
 
 .. math::
 
-    Y = \sin(\lambda_{dest} - \lambda_{origin}) \cos(\phi_{dest})
-
-
-.. math::
-
-    X =
-    \cos(\phi_{origin})  \sin(\phi_{dest}) - \sin(\phi_{origin})  \cos(\phi_{dest}) cos(\lambda_{dest} - \lambda_{origin})
-
+    \Delta_X = (X_{t - 1} - X_{t})
 
 .. math::
 
-    \theta = \arctan2 (Y, X)
+    \Delta_Y = (Y_{t - 1} - Y_{t})
 
-with :math:`\phi_{origin}` and :math:`\lambda_{origin}` the latitude and longitude of the initial position, and
-with :math:`\phi_{dest}` and :math:`\lambda_{dest}` the latitude and longitude of the target destination.
+.. math::
 
-The direction toward the reef, :math:`\theta_{reef}` is computed by using the same formula on the actual position of the particle and the reef
-position and the reef location (orange point).
+    \theta_{current} = \arctan2(\Delta Y, \Delta X) + \pi
+
+The direction toward the reef, :math:`\theta_{reef}` is also computed.
+
+.. math::
+
+    \Delta_X = (X_{reef} - X_{t})
+
+.. math::
+
+    \Delta_Y = (Y_{reef} - Y_{t})
+
+.. math::
+
+    \theta_{reef} = \arctan2(\Delta Y, \Delta X)
+
+.. warning::
+
+    The angles are computed in the :math:`(X, Y)` space. Therefore, longitude and latitude coordinates
+    are converted in :math:`(X, Y)` using the ``latlon2xy`` Dataset methods.
 
 The turning angle :math:`\theta_{turning}` is given by:
 
