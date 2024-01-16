@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
 
-config = 'reef'
+config = 'control'
 
 if os.path.isdir('ichthyop_output'):
     pattern = os.path.join('ichthyop_output', config, '*nc')
@@ -46,10 +46,4 @@ ax = plt.axes(projection = projout)
 ax.scatter(lon[:, :], lat[:, :], c=t2d, marker='.', transform=projin, s=0.5, cmap=mpl.colormaps['jet'])
 feat = ax.add_feature(cfeature.LAND)
 feat = ax.add_feature(cfeature.COASTLINE)
-xp = np.array([51.625, 52.625, 52.625,51.625, 51.625])
-yp = np.array([-1.179878E1, -1.179878E1, -1.079878E1, -1.079878E1, -1.179878E1])
-ax.plot(xp, yp, transform=projin, color='k', ls='--')
-xp = np.array([51.625, 52.625 - 0.5, 52.625 - 0.5,51.625, 51.625]) - 1
-yp = np.array([-1.179878E1 + 0.5, -1.179878E1 + 0.5, -1.079878E1, -1.079878E1, -1.179878E1 + 0.5]) - 0.25
-ax.plot(xp, yp, transform=projin, color='k', ls='--')
 ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)

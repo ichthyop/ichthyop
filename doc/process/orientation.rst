@@ -8,6 +8,12 @@ cardinal orientation (i.e toward a given direction) and the reef orientation, i.
 These three implementations involve the computation of a swimming velocity and direction. The former is common to all
 three methods, but the directions depend on the method considered.
 
+.. _ref_control:
+
+.. plot:: process/_static/draw_control_trajectories.py
+    :align: center
+    :caption: Trajectory without orientation
+
 Swimming velocity
 ---------------------
 
@@ -81,6 +87,12 @@ Cardinal orientation
 
 In cardinal orientation, the user provides a fixed heading :math:`\theta_{card}` and a fixed :math:`\kappa` parameter.
 Then, at each time step, a new angle is randomly drafted following a Von Misses distribution :math:`f(\theta, \theta_{card}, \kappa)`.
+
+.. _ref_cardinal:
+
+.. plot:: process/_static/draw_card_trajectories.py
+    :align: center
+    :caption: Trajectory with cardinal orientation
 
 Rheotaxis orientation
 -------------------------
