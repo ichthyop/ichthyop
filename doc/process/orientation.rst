@@ -91,7 +91,6 @@ These areas are defined in an ``XML`` zone file by a polygon and a zone-specific
 If the distance between the particle and the barycenter of the closest reef (:math:`D`) is below
 the detection thereshold :math:`\beta`, the larva will swim in the direction of the reef.
 
-
 .. _ref_orientation:
 
 .. plot:: process/_static/draw_circle_reef.py
@@ -152,3 +151,13 @@ the detection threshold as follows:
 Therefore, the closest to the reef, the strongest the turning angle.
 
 Then, a random angle is picked up following a Von Mises distribution :math:`f(\theta, \theta_{ponderated}, \kappa_{reef})`
+
+An example of a trajectory is provided below. In this case, two
+target destinations are provided (black boxes). The same :math:`\kappa` value was
+used for both ares (1.2) and the :math:`\beta` parameter has been set equal to 3 km.
+
+.. _ref_orientation_2:
+
+.. plot:: process/_static/draw_reef_trajectories.py
+    :align: center
+    :caption: Trajectory using reef orientation
