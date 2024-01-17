@@ -55,7 +55,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="400.0" prefWidth="740.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -96,7 +96,7 @@
         </Menu>
       </menus>
     </MenuBar>
-    <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+    <AnchorPane maxHeight="-1.0" maxWidth="-1.0" VBox.vgrow="ALWAYS">
       <children>
             <GridPane hgap="10.0" vgap="5.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
               <columnConstraints>
@@ -131,13 +131,13 @@
                               <Font name="System Bold" size="13.0" />
                            </font>
                         </Label>
-                        <ListView prefHeight="242.0" prefWidth="200.0" />
+                        <ListView />
                      </children>
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowSpan="10">
                      <children>
                         <CheckBox mnemonicParsing="false" text="Enabled" VBox.vgrow="NEVER" />
-                        <TableView prefHeight="242.0" prefWidth="200.0">
+                        <TableView>
                           <columns>
                             <TableColumn prefWidth="75.0" text="Lon" />
                             <TableColumn prefWidth="75.0" text="Lat" />
@@ -148,14 +148,14 @@
                         </TableView>
                      </children>
                   </VBox>
-                  <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowSpan="2">
+                  <VBox prefHeight="200.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowSpan="2">
                      <children>
                         <Label text="Type of Zone">
                            <font>
                               <Font name="System Bold" size="13.0" />
                            </font>
                         </Label>
-                        <ChoiceBox prefWidth="150.0" />
+                        <ChoiceBox />
                      </children>
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.rowSpan="2">
@@ -229,9 +229,22 @@
                         </HBox>
                      </children>
                   </VBox>
-                  <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="4" GridPane.columnSpan="2147483647" GridPane.rowIndex="2">
+                  <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="2">
                      <children>
-                        <Label text="Proportion of released particles:">
+                        <Label text="\% of released particles:">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font>
+                        </Label>
+                        <TextField />
+                     </children>
+                     <GridPane.margin>
+                        <Insets bottom="5.0" />
+                     </GridPane.margin>
+                  </VBox>
+                  <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                     <children>
+                        <Label text="Kappa parameter:">
                            <font>
                               <Font name="System Bold" size="13.0" />
                            </font>
