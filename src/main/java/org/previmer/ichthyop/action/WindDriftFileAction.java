@@ -8,7 +8,7 @@
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
@@ -126,7 +126,7 @@ public class WindDriftFileAction extends WindDriftAction {
      * Meridional component of the wind velocity field at time t + dt
      */
     static Array vw_tp1;
-    
+
     /**
      * U wind variable
      */
@@ -293,7 +293,7 @@ public class WindDriftFileAction extends WindDriftAction {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
         int fileRank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
-        
+
         open(getFile(fileRank));
         readTimeLength();
         rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
@@ -314,7 +314,7 @@ public class WindDriftFileAction extends WindDriftAction {
         return listInputFiles.get(fileRank);
     }
 
-    
+
 
     void readLonLat() throws IOException {
         Array arrLon = null, arrLat = null;

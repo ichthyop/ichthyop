@@ -1,5 +1,12 @@
 {
     "java.autobuild.enabled": true,
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.format.settings.url": ".vscode/eclipse-formatter.xml"
+    "java.format.settings.url": ".vscode/eclipse-formatter.xml",
+    "esbonio.sphinx.confDir": "${workspaceRoot}/doc",
+    "esbonio.sphinx.buildDir": "${confDir}/_build",
+    "esbonio.server.excludedModules": [
+        "os"
+    ],
+    "java.debug.settings.vmArgs": " ",
+    "files.trimTrailingWhitespace": true,
 }

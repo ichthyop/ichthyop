@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.manager;
@@ -77,13 +77,13 @@ public class TimeManager extends AbstractManager {
     //public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
     public static final DateTimeFormatter NEW_INPUT_DURATION_FORMAT = DateTimeFormatter.ofPattern("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
     public static final int YEAR_REF = 1900;
-    
+
     // Array containing the latest day of each month. Used only when no leap calendar is used.
     public static final double[] monthEdges = {31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
-    
+
     /** Reference date: 1900-01-01 00:00 */
     public static final LocalDateTime DATE_REF = LocalDateTime.of(YEAR_REF, 1, 1, 0, 0);
-    
+
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -126,42 +126,42 @@ public class TimeManager extends AbstractManager {
     //  */
     // private SimpleDateFormat outputDateFormat;
     private final EventListenerList listeners = new EventListenerList();
-    
+
     private boolean noLeapCalendarEnabled;
-    
+
     private IchthyopDuration ichthyopDuration;
-    
+
     /** Interface for getting the duration between two dates. Function
      * called depends on the calendar type.
     */
     @FunctionalInterface
     public interface IchthyopDuration {
-        public double getDuration(LocalDateTime DATE_REF, LocalDateTime date0);        
+        public double getDuration(LocalDateTime DATE_REF, LocalDateTime date0);
     }
-    
+
     public boolean isNoLeapEnabled() {
-        return noLeapCalendarEnabled;   
+        return noLeapCalendarEnabled;
     }
-    
+
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
     public static TimeManager getInstance() {
         return timeManager;
     }
-    
-    /** Method for getting the time in seconds since reference date for gregorian 
+
+    /** Method for getting the time in seconds since reference date for gregorian
      * calendar. */
     public static double getDurationLeap(LocalDateTime DATE_REF, LocalDateTime date0) {
         return Duration.between(DATE_REF, date0).getSeconds();
     }
-    
+
     /**
      * Method for getting the time in seconds since reference date for noleap
      * calendar.
      */
     public static double getDurationNoLeap(LocalDateTime DATE_REF, LocalDateTime date0) {
-        
+
         int year = date0.getYear();
         int month = date0.getMonth().getValue();
         int day = date0.getDayOfMonth();
@@ -172,20 +172,20 @@ public class TimeManager extends AbstractManager {
         double duration = month_offset + (year - YEAR_REF) * Constant.ONE_YEAR + (day - 1) * Constant.ONE_DAY
                 + hour * Constant.ONE_HOUR + minute * Constant.ONE_MINUTE + seconds;
         return duration;
-    
+
     }
 
     public void firstStepTriggered() throws Exception {
         fireNextStepTriggered();
     }
-    
+
     public String getTimeOfOrigin() {
         String output = getParameter("time_origin");
         return output;
     }
 
     private void loadParameters() throws Exception {
-        
+
         // Define whether to use the no leap calendar or not.
         // If no parameter is found, assume that gregorian calendar is considered.
         noLeapCalendarEnabled = false;
@@ -199,13 +199,13 @@ public class TimeManager extends AbstractManager {
         } catch (NullPointerException ex) {
             noLeapCalendarEnabled = false;
         }
-        
+
         if (noLeapCalendarEnabled) {
             ichthyopDuration = (date1, date2) -> getDurationNoLeap(date1, date2);
         } else {
             ichthyopDuration = (date1, date2) -> getDurationLeap(date1, date2);
         }
-                
+
         /* time step */
         dt = Integer.valueOf(getParameter("time_step"));
 
@@ -234,7 +234,7 @@ public class TimeManager extends AbstractManager {
         /* output date format */
         //outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         //outputDateFormat.setCalendar(calendar);
-        
+
     }
 
     public boolean keepDrifting() {
@@ -467,7 +467,7 @@ public class TimeManager extends AbstractManager {
     // public SimpleDateFormat getInputDateFormat() {
     //     return INPUT_DATE_FORMAT;
     // }
-    
+
     // public DateTimeFormatter getNewInputDurationFormat() {
     //     return NEW_INPUT_DURATION_FORMAT;
     // }
@@ -475,7 +475,7 @@ public class TimeManager extends AbstractManager {
     // public DateTimeFormatter getNewInputDateFormat() {
     //     return NEW_INPUT_DATE_FORMAT;
     // }
-    
+
     //---------- End of class
 
     public enum TimeDirection {

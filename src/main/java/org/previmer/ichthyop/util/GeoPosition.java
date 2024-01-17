@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,39 +20,39 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.util;
 
 /**
- * An immutable coordinate in the real (geographic) world, 
+ * An immutable coordinate in the real (geographic) world,
  * composed of a latitude and a longitude.
  * @author rbair
  */
 public class GeoPosition {
     private double latitude;
     private double longitude;
-    
+
     /**
      * Creates a new instance of GeoPosition from the specified
      * latitude and longitude. These are double values in decimal degrees, not
@@ -76,10 +76,10 @@ public class GeoPosition {
         this.latitude = coords[0];
         this.longitude = coords[1];
     }
-    
+
     /**
      * Creates a new instance of GeoPosition from the specified
-     * latitude and longitude. 
+     * latitude and longitude.
      * Each are specified as degrees, minutes, and seconds; not
      * as decimal degrees. Use the other constructor for those.
      * @param latDegrees the degrees part of the current latitude
@@ -94,7 +94,7 @@ public class GeoPosition {
         this(latDegrees + (latMinutes + latSeconds/60.0)/60.0,
              lonDegrees + (lonMinutes + lonSeconds/60.0)/60.0);
     }
-    
+
     /**
      * Get the latitude as decimal degrees
      * @return the latitude as decimal degrees
@@ -102,7 +102,7 @@ public class GeoPosition {
     public double getLatitude() {
         return latitude;
     }
-    
+
     /**
      * Get the longitude as decimal degrees
      * @return the longitude as decimal degrees
@@ -110,7 +110,7 @@ public class GeoPosition {
     public double getLongitude() {
         return longitude;
     }
-    
+
     /**
      * Returns true the specified GeoPosition and this GeoPosition represent
      * the exact same latitude and longitude coordinates.
@@ -133,10 +133,10 @@ public class GeoPosition {
         hash = 37 * hash + (int) (Double.doubleToLongBits(this.longitude) ^ (Double.doubleToLongBits(this.longitude) >>> 32));
         return hash;
     }
-    
+
     /**
      * {@inheritDoc}
-     * @return 
+     * @return
      */
     @Override
     public String toString() {
