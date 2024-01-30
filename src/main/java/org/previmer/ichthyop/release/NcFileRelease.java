@@ -149,8 +149,17 @@ public class NcFileRelease extends AbstractRelease {
             }
 
             particle = ParticleFactory.createGeoParticle(index, lon, lat, depth, ParticleMortality.getMortality(mortalityArr.get(rank, i)));
-            getSimulationManager().getSimulation().getPopulation().add(particle);
-            index++;
+
+            // nbarrier: adding a patch to discard particles that cannot be added
+            // (either inLand, onEdge or with incompatible depths
+            // issue 80
+            if(particle != null) {
+                getSimulationManager().getSimulation().getPopulation().add(particle);
+                index++;
+            } else {
+                String message = String.format("Particle number %d from restart file cannot be used.", i);
+                getLogger().log(Level.INFO, message);
+            }
         }
 
         nc.close();

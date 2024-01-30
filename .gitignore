@@ -1,9 +1,8 @@
 dist
 target
-nbactions.xml 
+nbactions.xml
 nbproject
 manifest.mf
-**html
 **.sh
 cfg
 output
@@ -19,5 +18,6 @@ doc/*sh
 doc/**/_static/*svg
 doc/**/_static/*pdf
 doc/ichthyop_output
-
 doc/_static/javadoc
+
+**/.DS_Store

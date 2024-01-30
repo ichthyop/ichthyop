@@ -400,11 +400,15 @@ abstract public class Roms3dCommon extends RomsCommon {
         final double dx = x - (double) i;
         final double dy = y - (double) j;
         final double dz = kz - (double) k;
+        
+        // patch for Luisa
+        int nk = (z == 0) ? 1 : 2;
+        
         double co;
         double z_r;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
+                for (int kk = 0; kk < nk; kk++) {
                     co = Math.abs((1.d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
@@ -824,16 +828,19 @@ abstract public class Roms3dCommon extends RomsCommon {
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+
         Variable variable = nc.findVariable(name);
+        int[] variableShape = variable.getShape();
         int[] origin = null, shape = null;
-        switch (variable.getShape().length) {
+
+        switch (variableShape.length) {
             case 4:
                 origin = new int[]{rank, 0, jpo, ipo};
-                shape = new int[]{1, nz, ny, nx};
+                shape = new int[]{1, nz, Math.min(ny, variableShape[2]), Math.min(ny, variableShape[3])};
                 break;
             case 2:
                 origin = new int[]{jpo, ipo};
-                shape = new int[]{ny, nx};
+                shape = new int[]{Math.min(ny, variableShape[2]), Math.min(ny, variableShape[3])};
                 break;
             case 3:
                 if (!variable.isUnlimited()) {
