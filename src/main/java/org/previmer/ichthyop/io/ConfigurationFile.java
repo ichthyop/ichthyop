@@ -71,6 +71,7 @@ public class ConfigurationFile {
     public final static String LONG_NAME = "long_name";
     public final static String VERSION = "version";
     public final static String DATE = "date";
+    public boolean isFixedSeed = false;
 
     public ConfigurationFile(File file) {
         this.file = file;
@@ -179,7 +180,6 @@ public class ConfigurationFile {
      Iterator<XBlock> it = this.getAllBlocks().iterator();
         while(it.hasNext()) {
             XBlock block = it.next();
-            System.out.println(block);
             BlockType type = block.getType();
             String blockKey = block.getKey();
             String id = new BlockId(type, blockKey).toString();
@@ -315,6 +315,16 @@ public class ConfigurationFile {
         map.remove(key);
         structure.getRootElement().removeContent(getBlock(type, key));
     }
+
+    public boolean isFixedSeed() {
+        XParameter param = this.getXParameter("fixed_seed");
+        if (param == null) {
+            return false;
+        } else {
+            return Boolean.valueOf(param.getValue());
+        }
+    }
+
 }
 
 class BlockId {
@@ -342,4 +352,5 @@ class BlockId {
         id.append(getBlockKey());
         return id.toString();
     }
+
 }

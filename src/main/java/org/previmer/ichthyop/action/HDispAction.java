@@ -45,6 +45,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.MTRandom;
+import org.previmer.ichthyop.manager.ParameterManager;
 import org.previmer.ichthyop.particle.IParticle;
 
 /**
@@ -88,7 +89,12 @@ public class HDispAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        random = new MTRandom();
+        boolean isFixedSeed = ParameterManager.getInstance().getConfigurationFile().isFixedSeed();
+        if (isFixedSeed) {
+            random = new MTRandom(getSimulationManager().getIndexSimulation());
+        } else {
+            random = new MTRandom();
+        }
         epsilon = Double.valueOf(getParameter("epsilon"));
         epsilon16 = Math.pow(epsilon, 1.d / 6.d);
     }
