@@ -197,6 +197,10 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
         return map.get(key);
     }
 
+    public boolean containsXParameter(final String key) {
+        return map.containsKey(key);
+    }
+
     public Collection<XParameter> getXParameters() {
         List<XParameter> list = new ArrayList<>(map.values().size());
         Iterator<String> it = sortedKey.iterator();

@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -172,6 +173,23 @@ public class ConfigurationFile {
             }
         }
         return list;
+    }
+
+    public XParameter getXParameter(String key) {
+     Iterator<XBlock> it = this.getAllBlocks().iterator();
+        while(it.hasNext()) {
+            XBlock block = it.next();
+            System.out.println(block);
+            BlockType type = block.getType();
+            String blockKey = block.getKey();
+            String id = new BlockId(type, blockKey).toString();
+            if(map.get(id).containsXParameter(key)) {
+                return getXParameter(type, blockKey, key);
+            }
+        }
+
+        return null;
+
     }
 
     public XParameter getXParameter(BlockType type, String blockKey, String key) {
