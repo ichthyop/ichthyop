@@ -79,8 +79,8 @@ public class SurfaceRelease extends AbstractRelease {
                 if (counter++ > DROP_MAX) {
                     throw new NullPointerException("{Release surface} Unable to release particle.");
                 }
-                double x = Math.random() * (nx - 1);
-                double y = Math.random() * (ny - 1);
+                double x = this.getRandomDraft() * (nx - 1);
+                double y = this.getRandomDraft() * (ny - 1);
                 particle = ParticleFactory.createSurfaceParticle(index, x, y, is3D);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);
