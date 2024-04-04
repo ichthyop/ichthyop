@@ -9,7 +9,7 @@ The Ichthyop model is available on [GitHub](https://github.com/ichthyop/ichthyop
 
 ## Using executables
 
-Ichthyop users can download Ichthyop executables [here](https://github.com/ichthyop/ichthyop/tags). Choose a version, and download the {samp}`ichthyop-X.Y.Z-jar-with-dependencies.jar` file (replacing {samp}`X.Y.Z` by the version number).
+Ichthyop users can download Ichthyop executables [here](https://github.com/ichthyop/ichthyop/releases). Choose a version, and download the {samp}`ichthyop-X.Y.Z-jar-with-dependencies.jar` file (replacing {samp}`X.Y.Z` by the version number).
 
 ## From source
 
