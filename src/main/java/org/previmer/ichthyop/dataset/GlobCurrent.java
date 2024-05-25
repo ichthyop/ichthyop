@@ -232,7 +232,7 @@ public class GlobCurrent extends AbstractDataset {
      *
      */
     @Override
-    public double get_dUx(double[] pGrid, double time) {
+    public double get_dUx(double[] pGrid, double time, boolean normalize) {
 
         double du = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -243,6 +243,7 @@ public class GlobCurrent extends AbstractDataset {
         double dy = pGrid[1] - (double) j;
         double CO = 0.d;
         double x;
+
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 {
@@ -258,7 +259,11 @@ public class GlobCurrent extends AbstractDataset {
                     CO += co;
                     x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
                     if (!Double.isNaN(x)) {
-                        du += x * co / dxu[j + jj];
+                        if (normalize) {
+                            du += x * co / dxu[j + jj];
+                        } else {
+                            du += x * co;
+                        }
                     }
                 }
             }
@@ -270,7 +275,7 @@ public class GlobCurrent extends AbstractDataset {
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
+    public double get_dVy(double[] pGrid, double time, boolean normalize) {
 
         double dv = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -294,7 +299,11 @@ public class GlobCurrent extends AbstractDataset {
                 CO += co;
                 x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
                 if (!Double.isNaN(x)) {
-                    dv += x * co / dyv;
+                    if (normalize) {
+                        dv += x * co / dyv;
+                    } else {
+                        dv += x * co;
+                    }
                 }
             }
         }

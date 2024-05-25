@@ -430,7 +430,7 @@ abstract class Mars3dCommon extends MarsCommon {
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
+    public double get_dVy(double[] pGrid, double time, boolean normalize) {
         double dv = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -456,7 +456,11 @@ abstract class Mars3dCommon extends MarsCommon {
                     CO += co;
                     if (!(Float.isNaN(v_tp0[k + kk][j + jj - 1][i + ii]) || Float.isNaN(v_tp1[k + kk][j + jj - 1][i + ii]))) {
                         double x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
-                        dv += 2.d * x * co / (dyv[j + jj - 1][i + ii] + dyv[j + jj][i + ii]);
+                        if (normalize) {
+                            dv += 2.d * x * co / (dyv[j + jj - 1][i + ii] + dyv[j + jj][i + ii]);
+                        } else {
+                            dv += x * co;
+                        }
                     }
                 }
             }
@@ -468,7 +472,7 @@ abstract class Mars3dCommon extends MarsCommon {
     }
 
     @Override
-    public double get_dUx(double[] pGrid, double time) {
+    public double get_dUx(double[] pGrid, double time, boolean normalize) {
 
         double du = 0.d;
         double ix, jy, kz;
@@ -494,7 +498,11 @@ abstract class Mars3dCommon extends MarsCommon {
                     CO += co;
                     if (!(Float.isNaN(u_tp0[k + kk][j + jj][i + ii - 1]) || Float.isNaN(u_tp1[k + kk][j + jj][i + ii - 1]))) {
                         double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
-                        du += 2.d * x * co / (dxu[j + jj][i + ii - 1] + dxu[j + jj][i + ii]);
+                        if (normalize) {
+                            du += 2.d * x * co / (dxu[j + jj][i + ii - 1] + dxu[j + jj][i + ii]);
+                        } else {
+                            du += x * co;
+                        }
                     }
                 }
             }

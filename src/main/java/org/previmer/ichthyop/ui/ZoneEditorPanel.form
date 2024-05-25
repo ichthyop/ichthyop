@@ -25,7 +25,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="jSplitPane1" max="32767" attributes="1"/>
+                      <Component id="jSplitPane1" pref="936" max="32767" attributes="1"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
@@ -62,9 +62,6 @@
   <SubComponents>
     <Container class="javax.swing.JSplitPane" name="jSplitPane1">
       <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="null"/>
-        </Property>
         <Property name="dividerLocation" type="int" value="250"/>
         <Property name="name" type="java.lang.String" value="jSplitPane1" noResource="true"/>
       </Properties>
@@ -122,7 +119,6 @@
               <SubComponents>
                 <Container class="javax.swing.JToolBar" name="toolBarZone">
                   <Properties>
-                    <Property name="floatable" type="boolean" value="false"/>
                     <Property name="rollover" type="boolean" value="true"/>
                     <Property name="name" type="java.lang.String" value="toolBarZone" noResource="true"/>
                   </Properties>
@@ -216,7 +212,6 @@
                         <Property name="selectionModel" type="javax.swing.ListSelectionModel" editor="org.netbeans.modules.form.editors2.JTableSelectionModelEditor">
                           <JTableSelectionModel selectionMode="0"/>
                         </Property>
-                        <Property name="showVerticalLines" type="boolean" value="false"/>
                       </Properties>
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="tableZone.getSelectionModel().addListSelectionListener(this);"/>
@@ -292,12 +287,21 @@
                                               <EmptySpace max="32767" attributes="0"/>
                                               <Component id="pnlColor" min="-2" max="-2" attributes="0"/>
                                           </Group>
-                                          <Group type="102" alignment="1" attributes="0">
+                                          <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
-                                              <Component id="labelNParticles" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                                              <Component id="textNParticles" min="-2" pref="116" max="-2" attributes="0"/>
-                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                                  <Group type="102" alignment="0" attributes="0">
+                                                      <Component id="labelNParticles" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                                      <Component id="textNParticles" min="-2" pref="116" max="-2" attributes="0"/>
+                                                  </Group>
+                                                  <Group type="102" alignment="0" attributes="0">
+                                                      <Component id="labelKappa" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                                      <Component id="txtFieldKappa" max="32767" attributes="0"/>
+                                                  </Group>
+                                              </Group>
+                                              <EmptySpace min="-2" pref="36" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
                                   </Group>
@@ -325,9 +329,14 @@
                                           <Component id="labelNParticles" alignment="3" min="-2" max="-2" attributes="0"/>
                                           <Component id="textNParticles" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
-                                      <Component id="pnlThickness" max="32767" attributes="0"/>
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="3" attributes="0">
+                                          <Component id="labelKappa" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="txtFieldKappa" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace pref="37" max="32767" attributes="0"/>
+                                      <Component id="pnlThickness" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="pnlBathyMask" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
@@ -388,7 +397,6 @@
                       <SubComponents>
                         <Container class="javax.swing.JToolBar" name="jToolBar2">
                           <Properties>
-                            <Property name="floatable" type="boolean" value="false"/>
                             <Property name="rollover" type="boolean" value="true"/>
                             <Property name="name" type="java.lang.String" value="jToolBar2" noResource="true"/>
                           </Properties>
@@ -497,24 +505,23 @@
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Group type="103" alignment="0" groupAlignment="0" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" alignment="1" attributes="0">
-                                          <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
-                                          <Group type="103" groupAlignment="1" attributes="0">
-                                              <Group type="102" attributes="0">
-                                                  <Component id="lblLowerDepth" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="txtFieldLowerDepth" max="32767" attributes="0"/>
-                                              </Group>
-                                              <Group type="102" attributes="0">
-                                                  <Component id="lblUpperDepth" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                                  <Component id="txtFieldUpperDepth" min="-2" pref="197" max="-2" attributes="0"/>
-                                              </Group>
+                                          <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                                          <Group type="103" groupAlignment="0" attributes="0">
+                                              <Component id="lblLowerDepth" min="-2" max="-2" attributes="0"/>
+                                              <Component id="lblUpperDepth" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                          <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
+                                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                              <Component id="txtFieldUpperDepth" pref="197" max="32767" attributes="0"/>
+                                              <Component id="txtFieldLowerDepth" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
-                                      <Component id="ckBoxThickness" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Group type="102" attributes="0">
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="ckBoxThickness" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                   </Group>
                                   <EmptySpace min="-2" max="-2" attributes="0"/>
                               </Group>
@@ -535,7 +542,7 @@
                                       <Component id="lblLowerDepth" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="txtFieldLowerDepth" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="53" max="32767" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -546,8 +553,12 @@
                             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
                               <Format format="###0.###" subtype="-1" type="0"/>
                             </Property>
+                            <Property name="text" type="java.lang.String" value="0"/>
                             <Property name="name" type="java.lang.String" value="txtFieldUpperDepth" noResource="true"/>
                           </Properties>
+                          <Events>
+                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtFieldUpperDepthActionPerformed"/>
+                          </Events>
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="ckBoxThickness">
                           <Properties>
@@ -582,6 +593,7 @@
                             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
                               <Format format="###0.###" subtype="-1" type="0"/>
                             </Property>
+                            <Property name="text" type="java.lang.String" value="0"/>
                             <Property name="name" type="java.lang.String" value="txtFieldLowerDepth" noResource="true"/>
                           </Properties>
                         </Component>
@@ -647,6 +659,7 @@
                             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
                               <Format format="###0.###" subtype="-1" type="0"/>
                             </Property>
+                            <Property name="text" type="java.lang.String" value="0"/>
                             <Property name="name" type="java.lang.String" value="txtFieldInshore" noResource="true"/>
                           </Properties>
                         </Component>
@@ -674,6 +687,7 @@
                             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
                               <Format format="###0.###" subtype="-1" type="0"/>
                             </Property>
+                            <Property name="text" type="java.lang.String" value="0"/>
                             <Property name="name" type="java.lang.String" value="txtFieldOffshore" noResource="true"/>
                           </Properties>
                         </Component>
@@ -748,9 +762,10 @@
                         <Component class="javax.swing.JComboBox" name="cbBoxType">
                           <Properties>
                             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                              <StringArray count="2">
+                              <StringArray count="3">
                                 <StringItem index="0" value="release"/>
                                 <StringItem index="1" value="recruitment"/>
+                                <StringItem index="2" value="target"/>
                               </StringArray>
                             </Property>
                             <Property name="name" type="java.lang.String" value="cbBoxType" noResource="true"/>
@@ -772,9 +787,11 @@
                         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
                           <Format subtype="0" type="3"/>
                         </Property>
+                        <Property name="text" type="java.lang.String" value="0"/>
                         <Property name="name" type="java.lang.String" value="textNParticles" noResource="true"/>
                       </Properties>
                       <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textNParticlesActionPerformed"/>
                         <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="textNParticlesPropertyChange"/>
                       </Events>
                     </Component>
@@ -874,6 +891,21 @@
                         </Component>
                       </SubComponents>
                     </Container>
+                    <Component class="javax.swing.JLabel" name="labelKappa">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Kappa parameter (target zones):"/>
+                        <Property name="name" type="java.lang.String" value="labelKappa" noResource="true"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JFormattedTextField" name="txtFieldKappa">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="0"/>
+                        <Property name="name" type="java.lang.String" value="txtFieldKappa" noResource="true"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="txtFieldKappaPropertyChange"/>
+                      </Events>
+                    </Component>
                   </SubComponents>
                 </Container>
               </SubComponents>

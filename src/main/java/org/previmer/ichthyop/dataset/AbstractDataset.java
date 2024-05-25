@@ -72,6 +72,16 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         this.distGetter = distGetter;
     }
 
+    @Override
+    public double get_dUx(double[] pGrid, double time) {
+        return get_dUx(pGrid, time, true);
+    }
+
+    @Override
+    public double get_dVy(double[] pGrid, double time) {
+        return get_dVy(pGrid, time, true);
+    }
+
     /** Get the method for distance calculation.
      * @return  */
     public DistanceGetter getDistGetter() {

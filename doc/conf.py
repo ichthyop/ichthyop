@@ -17,6 +17,7 @@
 import os
 import re
 from glob import glob
+import subprocess  
 
 # -- Project information -----------------------------------------------------
 
@@ -132,3 +133,31 @@ numfig_secnum_depth = (1)
 
 import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
+#html_context = {
+#        'css_files': [
+#            '_static/theme_overrides.css',  # override wide tables in RTD theme
+#           ],
+#        }
+
+if not os.path.isdir('ichthyop_output'):
+    os.mkdir('ichthyop_output')
+
+conflist = glob(os.path.join('ichthyop_configs', '*'))
+conflist.sort()
+
+confnames = [os.path.basename(f) for f in conflist]
+for conf in confnames:
+    if os.path.isdir(os.path.join('ichthyop_output', conf)):
+        print(f"Configuration {conf} already exists in output directory")
+        continue
+    else:
+        jarname = glob(os.path.join('..', 'target', 'ichthyop*[0-9].jar'))
+        print(jarname)
+        jarname.sort()
+        jarname = jarname[-1] 
+        print(jarname)
+        command = ['java', '-jar', jarname, os.path.join('ichthyop_configs', conf, f'{conf}.xml')]
+        print(command)
+        result = subprocess.run(command, capture_output=False, text=False, stdout=subprocess.DEVNULL)

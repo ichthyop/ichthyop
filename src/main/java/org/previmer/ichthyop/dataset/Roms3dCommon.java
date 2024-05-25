@@ -461,7 +461,7 @@ abstract public class Roms3dCommon extends RomsCommon {
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
+    public double get_dVy(double[] pGrid, double time, boolean normalize) {
         double dv = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -486,7 +486,11 @@ abstract public class Roms3dCommon extends RomsCommon {
                     CO += co;
                     double x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
                     if (!Double.isNaN(x)) {
-                        dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                        if (normalize) {
+                            dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                        } else {
+                            dv += x * co;
+                        }
                     }
 
                 }
@@ -499,7 +503,7 @@ abstract public class Roms3dCommon extends RomsCommon {
     }
 
     @Override
-    public double get_dUx(double[] pGrid, double time) {
+    public double get_dUx(double[] pGrid, double time, boolean normalize) {
 
         double du = 0.d;
         double ix, jy, kz;
@@ -525,7 +529,11 @@ abstract public class Roms3dCommon extends RomsCommon {
                     CO += co;
                     double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
                     if (!Double.isNaN(x)) {
-                        du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                        if (normalize) {
+                            du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                        } else {
+                            du += x * co;
+                        }
                     }
 
                 }

@@ -67,6 +67,8 @@ public class SysActionMove extends AbstractSysAction {
 
     @Override
     public void execute(Particle particle) {
+        particle.setOldLon(particle.getLon());
+        particle.setOldLat(particle.getLat());
         if (!particle.isLocked()) {
             checkCoastlineAndMove(particle);
             if (particle.isOnEdge()) {
