@@ -44,8 +44,11 @@
 
 package org.previmer.ichthyop.release;
 
+import java.util.Random;
+
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.event.ReleaseEvent;
+import org.previmer.ichthyop.manager.ParameterManager;
 
 /**
  *
@@ -60,9 +63,20 @@ public abstract class AbstractRelease extends SimulationManagerAccessor {
     abstract public int release(ReleaseEvent event) throws Exception;
 
     abstract public int getNbParticles();
+    private final Random randomGenerator;
 
     public AbstractRelease() {
         releaseKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
+        boolean isFixedSeed = ParameterManager.getInstance().getConfigurationFile().isFixedSeed();
+        if (isFixedSeed) {
+            randomGenerator = new Random(getSimulationManager().getIndexSimulation());
+        } else {
+            randomGenerator = new Random();
+        }
+    }
+
+    public double getRandomDraft() {
+        return randomGenerator.nextDouble();
     }
 
     String getParameter(String key) {

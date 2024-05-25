@@ -200,25 +200,6 @@ abstract class RomsCommon extends AbstractDataset {
         setAllFieldsTp1AtTime(rank);
     }
 
-    /*
-    private void test() {
-
-        for (int i = 0; i < 100; i++) {
-            double x0 = Math.random() * (nx - 2);
-            double y0 = Math.random() * (ny - 2);
-            double[] latlon = xy2latlon(x0, y0);
-            double[] xy = null;
-            for (int j = 0; j < 200; j++) {
-                xy = latlon2xy(latlon[1], latlon[0]);
-                latlon = this.xy2latlon(xy[0], xy[1]);
-            }
-            double errx = (xy[0] - x0) / x0;
-            double erry = (xy[1] - y0) / y0;
-            System.out.println("x: " + x0 + " errx: " + errx + " y: " + y0 + " erry: " + erry);
-        }
-    }
-    */
-
     void readConstantField(String gridFile) throws IOException {
 
         int[] origin = new int[]{jpo, ipo};

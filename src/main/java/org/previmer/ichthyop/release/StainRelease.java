@@ -102,7 +102,7 @@ public class StainRelease extends AbstractRelease {
                 GeoPosition point = getGeoPosition();
                 double depth = Double.NaN;
                 if (is3D) {
-                    depth = depth_stain + thickness_stain * (Math.random() - 0.5d);
+                    depth = depth_stain + thickness_stain * (this.getRandomDraft() - 0.5d);
                 }
                 if (depth > 0) {
                     depth *= -1.d;
@@ -119,12 +119,12 @@ public class StainRelease extends AbstractRelease {
 
         double lat, one_deg_longitude_meter, lon;
         if (!getSimulationManager().getDataset().isProjected()) {
-            lat = lat_stain + 2.d * radius_stain * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
+            lat = lat_stain + 2.d * radius_stain * (this.getRandomDraft() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
             one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * lat_stain / 180.d);
-            lon = lon_stain + 2 * radius_stain * (Math.random() - 0.5d) / one_deg_longitude_meter;
+            lon = lon_stain + 2 * radius_stain * (this.getRandomDraft() - 0.5d) / one_deg_longitude_meter;
         } else {
-            lat = lat_stain + 2.d * radius_stain * (Math.random() - 0.5d);
-            lon = lon_stain + 2.d * radius_stain * (Math.random() - 0.5d);
+            lat = lat_stain + 2.d * radius_stain * (this.getRandomDraft() - 0.5d);
+            lon = lon_stain + 2.d * radius_stain * (this.getRandomDraft() - 0.5d);
         }
         if (getSimulationManager().getDataset().getDistGetter().getDistance(lat, lon, lat_stain, lon_stain) > radius_stain) {
             return getGeoPosition();
