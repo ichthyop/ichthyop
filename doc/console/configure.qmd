@@ -2,29 +2,18 @@
 
 Here you will find the usual "File menu" functions : create a new configuration file, open an existing one, close it or save and save as the configuration file.
 
-:::{figure} _static/step1-configure.png
-:align: center
+![Step 1, configure](console/_static/step1-configure.png)
 
-Step 1, configure
-:::
 
 ### New configuration file
 
-:::{figure} _static/new.png
-:align: center
-
-Step 1, create a new configuration file
-:::
+![Step 1, create a new configuration file](console/_static/new.png)
 
 The application comes with some preset examples of configuration files (the templates). Select one of the templates, change the name of the configuration if the suggested name does not suit you and click on the Create button.
 
 ### Content of the configuration file
 
-:::{figure} _static/edit.png
-:align: center
-
-Step 1, edit the configuration file
-:::
+![Step 1, edit the configuration file](console/_static/edit.png)
 
 The configuration file is organized in several categories and each category contains several blocks of parameters.
 

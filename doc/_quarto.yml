@@ -1,6 +1,9 @@
 project:
   type: book
 
+resources:
+  - console/_static/
+
 book:
   title: "Ichthyop User Guide"
   author: "Nicolas Barrier"

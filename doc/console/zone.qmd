@@ -2,25 +2,18 @@
 
 In Ichthyop, the user can define zones, either release zones or recruitment zones.
 
-The zones can be edited using the GUI, as shown in {numref}`figure-gui-zone`
+The zones can be edited using the GUI, as shown in @fig-gui-zone
 
-(figure-gui-zone)=
-
-:::{figure} _static/zone.png
-:align: center
-:width: 600px
-
-Ichthyop Zone editor
-:::
+![Ichthyop Zone editor](console/_static/zone.png){#fig-gui-zone}
 
 ### Adding, removing and renaming zones
 
 The number of zones is managed on the left part of the panel.
 
-New zones can be added by clicking the {{ listadd }} button. When a zone is selected, it can be removed by
-clicking on the {{ listremove }} button.
+New zones can be added by clicking the ![](console/_static/ico22/list-add.png) button. When a zone is selected, it can be removed by
+clicking on the ![](console/_static/ico22/list-remove.png) button.
 
-The reordering of the zones is achieved by clicking on the {{ up }} and {{ down }} buttons.
+The reordering of the zones is achieved by clicking on the ![](console/_static/ico22/up.png) and ![](console/_static/ico22/down.png) buttons.
 
 When double-clicking on the name of the zone on the left panel, the user can edit the zone name.
 
@@ -31,23 +24,23 @@ When a zone is selected, the user can edit different parameters associated with 
 First, the user can enable or disable a zone by clicking on the {guilabel}`Enabled` tick box.
 
 The zones are defined by providing the points coordinates. Points can be added, removed and reordered by using the
-{{ listadd }}, {{ listremove }}, {{ up }} and {{ down }} buttons, respectively. The user can also change the format of the points coordinates by clicking on the radio buttons in the {guilabel}`Options` bottom panel.
+![](console/_static/ico22/list-add.png), ![](console/_static/ico22/list-remove.png), ![](console/_static/ico22/up.png) and ![](console/_static/ico22/down.png) buttons, respectively. The user can also change the format of the points coordinates by clicking on the radio buttons in the `Options` bottom panel.
 
-Ichthyop defines two types of zones: one for release (see {numref}`zone-release`) problèmeand one for recruitment purposes.
-This type is chosen by using the {guilabel}`Type of zone` combo box. For release zones, the user can specify the number of
+Ichthyop defines two types of zones: one for release (see @sec-zone-release) problèmeand one for recruitment purposes.
+This type is chosen by using the `Type of zone` combo box. For release zones, the user can specify the number of
 particles that will be released in the zone (only if the `user_defined_nparticles` parameter is
-set equal to true, cf {numref}`zone-release`). It is done by filling the {guilabel}`Number of released particles` textbox
-and pressing {guilabel}`ENTER`
+set equal to true, cf @sec-zone-release). It is done by filling the `Number of released particles` textbox
+and pressing `ENTER`
 
 Each zone is associated with a color, that will be used to its representation in the graphical interface during the
 preview and the display of the simulation results.
-This color can be edited by using the {{ color }} button.
+This color can be edited by using the ![](console/_static/ico22/fill-color.png) button.
 
 In the case of 3D simulations, you can specify the depth range to use in the zone. To activate this feature,
-click on the {guilabel}`Activated` tick box of the {guilabel}`Thickness` panel.
+click on the `Activated` tick box of the `Thickness` panel.
 You can provide the lower and upper depth that must be considered in the given zone (negative values).
 
 In 3D simulations, you can also specify the bathymetric range that you want to include, for
 instance if you want to release particles only
 on the ocean shelf (i.e depth less than 200m). This can be done by activating the feature by clicking on the
-{samp}`Activated` tick box of the {guilabel}`Bathymetric mask` panel.
+`Activated` tick box of the `Bathymetric mask` panel.

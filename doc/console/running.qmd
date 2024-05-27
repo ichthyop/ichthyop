@@ -1,10 +1,6 @@
 ## Running
 
-:::{figure} _static/step2-simulate.png
-:align: center
-
-Step 2, simulation
-:::
+![Step 2, simulation](console/_static/step2-simulate.png)
 
 You may want to preview the simulated area. Click on the "Preview" button. The main interest in previewing the area is that the application will check if the simulation is correctly set up. Here "correctly" does not mean you made a relevant parametrization in terms of physics or biology, but at least the application had found all the parameters required for starting the simulation. More specifically, Ichthyop will attempt to read the geographical variables (longitude, latitude and depth) from the dataset in order to draw the area. It should also display the release and the recruitment zones if they have been defined and activated in the configuration file. Make sure what you see is what you expect, and go back to "Step 1: configure" in case not.
 
