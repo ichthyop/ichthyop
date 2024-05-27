@@ -1,4 +1,4 @@
-# Random swimming
+## Random swimming
 
 Ichthyop allows particles to randomly swim. This is achieved by using the
 `SwimmingAction.java`. The velocity may vary with the age of the particle.

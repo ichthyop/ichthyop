@@ -1,4 +1,4 @@
-# Orientation
+## Orientation
 
 Active swimming has been implemented in Ichthyop following the work of Romain Chaput.
 Three active swimming behaviours have been implemented: the rheotaxis orientation (i.e. against the current), the
@@ -7,21 +7,99 @@ cardinal orientation (i.e toward a given direction) and the reef orientation, i.
 These three implementations involve the computation of a swimming velocity and direction. The former is common to all
 three methods, but the directions depend on the method considered.
 
-(ref-control)=
+```{python}
+#| echo: false
+#| output: false
 
-```{eval-rst}
-.. plot:: process/_static/draw_control_trajectories.py
-    :align: center
-    :caption: Trajectory without orientation
+import os
+from glob import glob
+import subprocess
+
+conflist = glob(os.path.join('ichthyop_configs', '*'))
+conflist.sort()
+
+confnames = [os.path.basename(f) for f in conflist]
+for conf in confnames:
+    if os.path.isdir(os.path.join('ichthyop_output', conf)):
+        print(f"Configuration {conf} already exists in output directory")
+        continue
+    else:
+        jarname = glob(os.path.join('..', 'target', 'ichthyop*[0-9].jar'))
+        print(jarname)
+        jarname.sort()
+        jarname = jarname[-1]
+        print(jarname)
+        command = ['java', '-jar', jarname, os.path.join('ichthyop_configs', conf, f'{conf}.xml')]
+        print(command)
+        result = subprocess.run(command, capture_output=False, text=False, stdout=subprocess.DEVNULL)
 ```
 
-## Swimming velocity
+
+```{python}
+#|label: fig-ref-control
+#|fig-cap: "Trajectory without orientation"
+#|echo: false
+#|output: false
+
+import xarray as xr
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import os
+from glob import glob
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib as mpl
+
+config = 'control'
+
+if os.path.isdir('ichthyop_output'):
+    pattern = os.path.join('ichthyop_output', config, '*nc')
+else :
+    pattern = os.path.join('..', '..', 'ichthyop_output', config, '*nc')
+pattern
+
+filelist = glob(pattern)
+filelist
+
+data = xr.open_mfdataset(filelist, decode_times=False)
+data
+
+# +
+lon = data['lon'].values
+lat = data['lat'].values
+mort = data['mortality'].values
+
+lon = np.ma.masked_where(mort > 0, lon)
+lat = np.ma.masked_where(mort > 0, lat)
+ntime, ndrifters = lon.shape
+
+# +
+time = np.arange(ntime)
+drifters = np.arange(ndrifters)
+
+d2d, t2d = np.meshgrid(drifters, time)
+
+# +
+plt.figure()
+
+projin = ccrs.PlateCarree()
+projout = ccrs.PlateCarree()
+
+ax = plt.axes(projection = projout)
+ax.scatter(lon[:, :], lat[:, :], c=t2d, marker='.', transform=projin, s=0.5, cmap=mpl.colormaps['jet'])
+feat = ax.add_feature(cfeature.LAND)
+feat = ax.add_feature(cfeature.COASTLINE)
+ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
+```
+
+### Swimming velocity
 
 The orientation processes all share common features. They both depend on a swimming velocity and random directions. The methods described
 below differ on the way the random directions are drafted.
 
 Swimming velocity is computed following {cite}`staatermanOrientationBehaviorFish2012`:
 
+#|echo: false
 $$
 V = V_{hatch} + (V_{settle} - V_{hatch}) ^ {\log(age) / \log(PLD)}
 $$
@@ -29,12 +107,31 @@ $$
 with $V_{hatch}$ and $V_{settle}$ the larval velocity at hatching and settle, $A$ the age of the larva and
 $PLD$ the transport duraction.
 
-```{eval-rst}
-.. plot:: process/_static/plot_vel_age.py
-    :align: center
+```{python}
+#|echo: false
+#|output: false
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.special import i0
+
+PLD = 10
+x = np.linspace(0, PLD, 1000)[1:]
+
+vhatch = 10
+vsettle = 200
+
+vel = vhatch + np.power(vsettle - vhatch, np.log10(x)/np.log10(PLD))
+
+plt.figure()
+plt.plot(x, vel)
+plt.xlabel('Age (days)')
+plt.ylabel('$V (cm.s^{-1})$')
+plt.xlim(x.min(), x.max())
+plt.title('$PLD = %dd, V_{hatch}=%d cm.s^{-1}, V_{settle}=%d cm.s^{-1}$' %(PLD, vhatch, vsettle))
+plt.show()
 ```
 
-## Von Mises distributions
+### Von Mises distributions
 
 Von Mises distribution is used in all three methods.The Von Mises distribution is given by:
 
@@ -60,7 +157,7 @@ angles are thus centerred around 0. Then, the $mu$ value is added.
 $\theta = 0$ is eastward, $\theta = \frac{\pi}{2}$ is northward, etc.
 :::
 
-## Computation of displacement
+### Computation of displacement
 
 Given a swimming velocity $V$ and a direction $\theta$,
 the larva displacement (in $m$) is computed as follows:
@@ -83,7 +180,7 @@ $$
 \Delta \varphi = \dfrac{\Delta Y}{111138 }
 $$
 
-## Cardinal orientation
+### Cardinal orientation
 
 In cardinal orientation, the user provides a fixed heading $\theta_{card}$ and a fixed $\kappa$ parameter.
 Then, at each time step, a new angle is randomly drafted following a Von Misses distribution $f(\theta, \theta_{card}, \kappa)$.
@@ -96,7 +193,7 @@ Then, at each time step, a new angle is randomly drafted following a Von Misses 
     :caption: Trajectory with cardinal orientation
 ```
 
-## Rheotaxis orientation
+### Rheotaxis orientation
 
 In the rheotaxis orientation method, the particles swim against the current. The user only provides a kappa parameter.
 
@@ -122,7 +219,7 @@ Finally, a random angle is picked up following a Von Mises distribution $f(\thet
     :caption: Trajectory using rheotaxis orientation
 ```
 
-## Reef orientation
+### Reef orientation
 
 In the reef orientation method, the larva will target the closest target area (for instance coral reef).
 These areas are defined in an `XML` zone file by a polygon and a zone-specific $\kappa$ parameter. The user also provides the sensory detection threshold of the larva (maximum detection distance $\beta$).

@@ -1,6 +1,6 @@
-# Wave drift
+## Wave drift
 
-Ichthyop can take into account the effects of waves on the particles trajectories, following the Stokes drift equations of {cite}`stokes_2009`:
+Ichthyop can take into account the effects of waves on the particles trajectories, following the Stokes drift equations of @stokes_2009:
 
 $$
 U_{S} = w \times k \times a^2 \times \exp\left(2 \times k \times z\right)
@@ -33,8 +33,5 @@ with  $U_{wave}$ and $V_{wave}$ the zonal and meridional stokes components, $T_{
 the wave period, $U_{cur}$ and $V_{cur}$ the zonal and meridional ocean current components, $z$
 the depth and  $F$ a multiplication factor provided by the user.
 
-```{eval-rst}
-.. todo::
 
-    Add references for Ichthyop use and implementation
-```
+<!-- TODO Add references for Ichthyop use and implementation -->

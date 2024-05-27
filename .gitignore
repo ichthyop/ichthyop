@@ -25,5 +25,6 @@ _book
 doc/index.log
 doc/index.tex
 *jupyter_cache*
+*site_libs*
 
 **/.DS_Store

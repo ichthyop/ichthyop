@@ -1,13 +1,13 @@
-(growth-proc)=
 
-# Growth
+
+## Growth {#sec-growth-proc}
 
 There is 2 different implementations of the growth module. They can be selected by setting the
 `class_name` parameter in the `action.growth` action configuration block.
 
-## Linear growth
+### Linear growth
 
-To use the linear growth method described in {cite}`LETT20081210`, choose the `LinearGrowthAction.java` class.
+To use the linear growth method described in @LETT20081210, choose the `LinearGrowthAction.java` class.
 
 Length increment is provided as follows:
 
@@ -20,13 +20,10 @@ a half-saturation constant (`half_saturation` parameter). If the latter is not d
 
 The name of the food and temperature variables are provided by the `food_field` and `temperature_field` parameters.
 
-```{eval-rst}
-.. todo::
+<!-- TODO Add the description of the DEB module -->
 
-    Add the description of the DEB module
-```
 
-## Sole growth
+### Sole growth
 
 If the {samp}`SoleGrowthAction.java` class is selected, the growth model used in {cite}`TANNER201778` is
 used. It relies on the growth equation from {cite}`fonds1979laboratory` and given by:
@@ -38,6 +35,3 @@ $$
 with $L$ the length, $T$ the temperature and $\Delta t$ the time step in days, and $C_1$ and $C_2$ are parameters (`c1` and `c2` respectively).
 
 The temperature field is provided by the `temperature_field` parameter.
-
-```{index} c1, c2
-```

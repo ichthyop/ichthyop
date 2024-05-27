@@ -1,6 +1,6 @@
-# Buoyancy
+## Buoyancy
 
-The buoyancy module allow to vertically displace a particle, depending on it's density and on the sea water density, following {cite}`parada2003modelling`.
+The buoyancy module allow to vertically displace a particle, depending on it's density and on the sea water density, following @parada2003modelling.
 
 The buoyancy-induced vertical velocity of the particle is given by:
 

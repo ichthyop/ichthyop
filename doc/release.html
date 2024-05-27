@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="quarto-1.4.551" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+
+
+<title>Ichthyop User Guide – 4  Particle release</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+<!-- htmldependencies:E3FAD763 -->
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn"
+      data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" 
+      aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation"
+      onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <h1 class="quarto-secondary-nav-title no-breadcrumbs"></h1>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" 
+        aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation"
+        onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="/index.html" class="sidebar-logo-link">
+      <img src="/_static/logo-ichthyop.svg" alt="" class="sidebar-logo py-0 d-lg-inline d-none"/>
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="/">
+      Ichthyop User Guide
+      </a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/ichthyop/ichthyop/"  title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="/Ichthyop-User-Guide.pdf"  title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/start.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>1</span>  <span class='chapter-title'>Getting started</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/ichconf.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>2</span>  <span class='chapter-title'>Ichthyop configuration</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/console.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>3</span>  <span class='chapter-title'>Ichthyop console</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/release.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class='chapter-number'>4</span>  <span class='chapter-title'>Particle release</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>5</span>  <span class='chapter-title'>Ichthyop processes</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" ></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <div id="quarto-toc-target"></div>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-release" class="quarto-section-identifier"><span class="chapter-number">4</span>  <span class="chapter-title">Particle release</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#stain-release" id="toc-stain-release"><span class="header-section-number">4.1</span> Stain release</a></li>
+  <li><a href="#sec-zone-release" id="toc-sec-zone-release"><span class="header-section-number">4.2</span> Zone release</a></li>
+  <li><a href="#text-release" id="toc-text-release"><span class="header-section-number">4.3</span> Text release</a></li>
+  <li><a href="#patchy-release" id="toc-patchy-release"><span class="header-section-number">4.4</span> Patchy release</a></li>
+  <li><a href="#surface-and-bottom-releases" id="toc-surface-and-bottom-releases"><span class="header-section-number">4.5</span> Surface and bottom releases</a></li>
+  <li><a href="#netcdf-release" id="toc-netcdf-release"><span class="header-section-number">4.6</span> Netcdf release</a></li>
+  <li><a href="#release-schedule" id="toc-release-schedule"><span class="header-section-number">5</span> Release schedule</a></li>
+  </ul>
+</nav>
+<p>In the present section, the different release processes that are implemented within Ichthyop are described. The parameters that are associated with the release processes must be included within <code>release</code> blocks (cf. <a href="#sec-xml-config" class="quarto-xref"><span class="quarto-unresolved-ref">sec-xml-config</span></a>).</p>
+<section id="stain-release" class="level2" data-number="4.1">
+<h2 data-number="4.1"><span class="header-section-number">4.1</span> Stain release</h2>
+<p>The release stain (<code>StainRelease.java</code>) consits of releasing particles within a given circle. The user provides the longitude and latitudes of the release stain, the radius of the release stain (in <span class="math inline">\(m\)</span>) and the number of particles to release.</p>
+<p>For a 3D simulation, the user also provides the depth and the thickness of the release stains (both in <span class="math inline">\(m\)</span>).</p>
+<p>An example of a stain release is provided in <a href="#fig-stain-release" class="quarto-xref">Figure <span class="quarto-unresolved-ref">fig-stain-release</span></a></p>
+<div id="fig-stain-release" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-stain-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="release/_static/release_stain.svg" class="img-fluid" />
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stain-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure 4.1: Example of a stain release.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-zone-release" class="level2" data-number="4.2">
+<h2 data-number="4.2"><span class="header-section-number">4.2</span> Zone release</h2>
+<p>The zone release method (<code>ZoneRelease.java</code>) allows to release particles in different areas, which are defined in an XML zone file (<code>zone_file</code> parameter).</p>
+<p>By default, the number of particles released in each zone (<span class="math inline">\(N_k\)</span>) is equal to</p>
+<p><span class="math display">\[
+N_k = N_{tot} \times \dfrac{S_{k}}{\sum_{i=1}^{N}S_i}
+\]</span></p>
+<p>with <span class="math inline">\(N_{tot}\)</span> the total number of released particles, <span class="math inline">\(S_k\)</span> the surface of the <span class="math inline">\(k^{th}\)</span> release area and <span class="math inline">\(N\)</span> the number of release areas.</p>
+<p>However, if the <code>user_defined_nparticles</code> parameter is set equal to <code>true</code>, then the proportion of the particles to release in each zone is defined by the user.</p>
+<p>An example of zone release is provided below.</p>
+<div id="fig-zone-release" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-zone-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="release/_static/release_zones.svg" class="img-fluid" />
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-zone-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure 4.2: Example of a zone release.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="text-release" class="level2" data-number="4.3">
+<h2 data-number="4.3"><span class="header-section-number">4.3</span> Text release</h2>
+<p>If the user wants to simulate some specific trajectories, for instance DCPs or buoys, particles can be relased by providing a text file containing the release coordinates (<code>TxtFileRelease.java</code>). The name of the text file is given by the <code>txtfile</code> parameter.</p>
+<p>The file must be formatted as follows:</p>
+<pre><code># 3D simulations
+# longitude latitude depth
+-5.45 48.30 -5
+-5.45 48.30 -10
+-5.45 48.30 -15
+-5.45 48.30 -20</code></pre>
+<p>Each line is a drifter. Each character starting with <code>#</code> is considered as a comment. If the depth column is not provided, depth will be set equal to 0.</p>
+<p>For 2D simulations, the depth column will be ignored.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class='callout-icon'></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Note that the columns must be separated by spaces.</p>
+</div>
+</div>
+</section>
+<section id="patchy-release" class="level2" data-number="4.4">
+<h2 data-number="4.4"><span class="header-section-number">4.4</span> Patchy release</h2>
+<p>The patchy release method (<code>PatchyRelease.java</code>) can be viewed as an extension of the release stain method, where several stains are randomly created.</p>
+<p>The number of stains is given by the <code>number_patches</code> parameter. The number of particles per stain is given by the <code>number_agregated</code> parameter. The radius and thickness (if 3D simulation) for each patch is given by the <code>radius_patch</code> and <code>thickness_patch</code> parameters, respectively.</p>
+<p>Additionnally, there is the possibility to release patches in each release zone. This is achieved by setting the <code>per_zone</code> parameter to true. An example is provided in <a href="#fig-zone-patchy-release" class="quarto-xref">Figure <span class="quarto-unresolved-ref">fig-zone-patchy-release</span></a>.</p>
+<p>If this parameter is set to false, the bounding box around the defined release zones (if any) or the full domain is used to release the patches, as shown in <a href="#fig-uniform-patchy-release" class="quarto-xref">Figure <span class="quarto-unresolved-ref">fig-uniform-patchy-release</span></a>.</p>
+<div id="fig-zone-patchy-release" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-zone-patchy-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="release/_static/release_patchy_zones.svg" class="img-fluid" />
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-zone-patchy-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure 4.3: Example of a patchy zone release.
+</figcaption>
+</figure>
+</div>
+<div id="fig-uniform-patchy-release" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-uniform-patchy-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="release/_static/release_patchy_uniform.svg" class="img-fluid" />
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-uniform-patchy-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure 4.4: Example of a patchy uniform release.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="surface-and-bottom-releases" class="level2" data-number="4.5">
+<h2 data-number="4.5"><span class="header-section-number">4.5</span> Surface and bottom releases</h2>
+<p>The surface and bottom release methods (<code>SurfaceRelease.java</code> and <code>BottonRelease.java</code>) allow to randomly release particles over the entire domain, either on the surface or at the bottom (for 3D simulations only).</p>
+<p>The only parameter required by these methods is the number of particles (<code>number_particles</code> parameter). There is no control over the area where the particles are released.</p>
+<p>An example of a surface release is shown in <a href="#fig-plot-surface-release" class="quarto-xref">Figure <span class="quarto-unresolved-ref">fig-plot-surface-release</span></a>.</p>
+<div id="fig-plot-surface-release" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-plot-surface-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="release/_static/release_surface.svg" class="img-fluid" />
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-plot-surface-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure 4.5: Example of a surface release.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="netcdf-release" class="level2" data-number="4.6">
+<h2 data-number="4.6"><span class="header-section-number">4.6</span> Netcdf release</h2>
+<p>Ichthyop also offers the possibility to use an Ichthyop output file as a simulation starting point (<code>NcFileRelease.java</code>). This initialization method only takes a <code>ncfile</code> parameter, which provides the location of the NetCDF to use as a restart.</p>
+</section>
+<section id="release-schedule" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Release schedule</h1>
+<p>In Ichthyop, there is the possibility to schedule release events. These events are parameterized in the <code>release.schedule</code> option block.</p>
+<p>It mainly contains two parameters:</p>
+<ul>
+<li><code>is_enabled</code> specifies whether release events schedule is activated or not</li>
+<li><code>events</code> is list of release date strings, which are formatted as the beginning simulation parameter (<code>year YYYY month MM day DD at YY:MM</code>).</li>
+</ul>
+<p>The resulting output file will contain the same number of time-steps as in the case of a simple release, but the number of particles will be multiplied by the number of release events.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class='callout-icon'></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The output time array will be consistent with the beginning simulation time (<code>initial_time</code> parameter), <strong>not with the release schedule dates</strong>.</p>
+</div>
+</div>
+<div id="quarto-navigation-envelope" class="hidden">
+<p><span class="hidden" data-render-id="quarto-int-sidebar-title">Ichthyop User Guide</span> <span class="hidden" data-render-id="quarto-int-navbar-title">Ichthyop User Guide</span> <span class="hidden" data-render-id="quarto-int-next"><span class="chapter-number">5</span>  <span class="chapter-title">Ichthyop processes</span></span> <span class="hidden" data-render-id="quarto-int-prev"><span class="chapter-number">3</span>  <span class="chapter-title">Ichthyop console</span></span> <span class="hidden" data-render-id="quarto-int-sidebar:/index.htmlPreface">Preface</span> <span class="hidden" data-render-id="quarto-int-sidebar:/start.html&lt;span-class=&#39;chapter-number&#39;&gt;1&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Getting-started&lt;/span&gt;"><span class="chapter-number">1</span>  <span class="chapter-title">Getting started</span></span> <span class="hidden" data-render-id="quarto-int-sidebar:/ichconf.html&lt;span-class=&#39;chapter-number&#39;&gt;2&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Ichthyop-configuration&lt;/span&gt;"><span class="chapter-number">2</span>  <span class="chapter-title">Ichthyop configuration</span></span> <span class="hidden" data-render-id="quarto-int-sidebar:/console.html&lt;span-class=&#39;chapter-number&#39;&gt;3&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Ichthyop-console&lt;/span&gt;"><span class="chapter-number">3</span>  <span class="chapter-title">Ichthyop console</span></span> <span class="hidden" data-render-id="quarto-int-sidebar:/release.html&lt;span-class=&#39;chapter-number&#39;&gt;4&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Particle-release&lt;/span&gt;"><span class="chapter-number">4</span>  <span class="chapter-title">Particle release</span></span> <span class="hidden" data-render-id="quarto-int-sidebar:/process.html&lt;span-class=&#39;chapter-number&#39;&gt;5&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Ichthyop-processes&lt;/span&gt;"><span class="chapter-number">5</span>  <span class="chapter-title">Ichthyop processes</span></span> <span class="hidden" data-render-id="quarto-breadcrumbs-&lt;span-class=&#39;chapter-number&#39;&gt;4&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Particle-release&lt;/span&gt;"><span class="chapter-number">4</span>  <span class="chapter-title">Particle release</span></span></p>
+</div>
+<div id="quarto-meta-markdown" class="hidden">
+<p><span class="hidden" data-render-id="quarto-metatitle">Ichthyop User Guide - <span id="sec-release" class="quarto-section-identifier"><span class="chapter-number">4</span>  <span class="chapter-title">Particle release</span></span></span> <span class="hidden" data-render-id="quarto-twittercardtitle">Ichthyop User Guide - <span id="sec-release" class="quarto-section-identifier"><span class="chapter-number">4</span>  <span class="chapter-title">Particle release</span></span></span> <span class="hidden" data-render-id="quarto-ogcardtitle">Ichthyop User Guide - <span id="sec-release" class="quarto-section-identifier"><span class="chapter-number">4</span>  <span class="chapter-title">Particle release</span></span></span> <span class="hidden" data-render-id="quarto-metasitename">Ichthyop User Guide</span> <span class="hidden" data-render-id="quarto-twittercarddesc"></span> <span class="hidden" data-render-id="quarto-ogcardddesc"></span></p>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id = "quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a  href="/console.html" class="pagination-link" aria-label="Ichthyop console">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class='chapter-number'>3</span>  <span class='chapter-title'>Ichthyop console</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a  href="/process.html" class="pagination-link" aria-label="Ichthyop processes">
+        <span class="nav-page-text"><span class='chapter-number'>5</span>  <span class='chapter-title'>Ichthyop processes</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+</body>
+
+</html>

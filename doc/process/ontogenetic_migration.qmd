@@ -1,4 +1,4 @@
-# Ontogenetic vertical migration
+## Ontogenetic vertical migration
 
 The ontogenetic migration module controls the migration to different habitats as a function of age. Its implementation in Ichthyop follows the CMS one. It uses the CMS configuration file (`cms_ovm_config_file` parameter), which is formatted as follows:
 

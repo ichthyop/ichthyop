@@ -1,9 +1,12 @@
 project:
   type: book
 
+bibliography: _static/biblio.bib
+
 resources:
   - console/_static/
   - release/_static/
+  - process/_static/
 
 book:
   title: "Ichthyop User Guide"
@@ -14,6 +17,7 @@ book:
     - ichconf.qmd
     - console.qmd
     - release.qmd
+    - process.qmd
   search: true
   repo-url: https://github.com/ichthyop/ichthyop/
   repo-actions: [edit]
