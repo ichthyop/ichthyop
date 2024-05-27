@@ -1,10 +1,9 @@
-(zone-xml-config)=
 
-## Zone configuration file
+## Zone configuration file {#sec-zone-xml-config}
 
 Zone configuration files are also managed via a dedicated XML file. The file must be as follows:
 
-```HTML
+```XML
 <?xml version="1.0" encoding="UTF-8"?>
 <zones>
 
@@ -24,7 +23,7 @@ Each zone is defined on a `zone` tag, which contain the following tags:
 
 An example of a zone definition is provided below.
 
-```HTML
+```XML
 <zone>
     <key>Release zone 2</key>
     <enabled>true</enabled>

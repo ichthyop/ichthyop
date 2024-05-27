@@ -1,6 +1,4 @@
-(xml-config)=
-
-## Simulation configuration file
+## Simulation configuration file {#sec-xml-config}
 
 Ichthyop simulations are configured using [XML](https://en.wikipedia.org/wiki/XML) configuration files. It should always start as follows:
 
@@ -16,10 +14,10 @@ Ichthyop simulations are configured using [XML](https://en.wikipedia.org/wiki/XM
 
 Ichthyop is configured by blocks, each block managing a specific aspect of the model. The blocks are as follows:
 
-- {samp}`ACTION`: Block of parameters related to the {samp}`action` classes (cf. {numref}`process`).
-- {samp}`RELEASE`: Block of parameters related to the {samp}`release` classes (cf. {numref}`release`)
-- {samp}`DATASET`: Block of parameters related to the {samp}`datasets` classes.
-- {samp}`OPTION`: Block of parameters related to the remaining parameters.
+- `ACTION`: Block of parameters related to the `action` classes (cf. {numref}`process`).
+- `RELEASE`: Block of parameters related to the `release` classes (cf. {numref}`release`)
+- `DATASET`: Block of parameters related to the `datasets` classes.
+- `OPTION`: Block of parameters related to the remaining parameters.
 
 New blocks can be added in the XML file as follows:
 
@@ -32,12 +30,12 @@ New blocks can be added in the XML file as follows:
 </block>
 ```
 
-The {samp}`key` tag is used to identify the configuration block. The {samp}`tree_path` tag is used in the Ichthyop console to
-create the parameter tree. The {samp}`description` field is used to display the block description in the
+The `key` tag is used to identify the configuration block. The `tree_path` tag is used in the Ichthyop console to
+create the parameter tree. The `description` field is used to display the block description in the
 Ichthyop console.
 
-The {samp}`enabled` tag specifies whether the block should be considered by Ichthyop or not. By default, all blocks are enabled.
-But for the {samp}`RELEASE` and {samp}`DATASET`, one and only one block must be activated.
+The `enabled` tag specifies whether the block should be considered by Ichthyop or not. By default, all blocks are enabled.
+But for the `RELEASE` and `DATASET`, one and only one block must be activated.
 
 ### Configuration parameters
 
@@ -48,7 +46,7 @@ To each block is associated a list of parameters. This list of parameter is adde
 </parameters>
 ```
 
-Inside the {samp}`parameters` tags, new parameters are defined as follows:
+Inside the `parameters` tags, new parameters are defined as follows:
 
 ```XML
 <parameter>
@@ -61,25 +59,25 @@ Inside the {samp}`parameters` tags, new parameters are defined as follows:
 </parameter>
 ```
 
-The {samp}`key` tag allows to identify the parameter, while the {samp}`value` tag specifies the value of the parameter. The
-remaining tags are only used by the Ichthyop console.  The {samp}`long_name` and {samp}`description` tags are used by the console
+The `key` tag allows to identify the parameter, while the `value` tag specifies the value of the parameter. The
+remaining tags are only used by the Ichthyop console.  The `long_name` and `description` tags are used by the console
 to provide informations about the parameter.
 
-The {samp}`format` tag specifies the parameter format, which will be used by the console parameter editor. The accepted values are:
+The `format` tag specifies the parameter format, which will be used by the console parameter editor. The accepted values are:
 
-- {samp}`path`: For files and folders
-- {samp}`date`: For dates (format must be {samp}`year YYYY month MM day at HH:MM`)
-- {samp}`duration`: For duration (format must be {samp}`###### day(s) ### hour(s) ### minute(s)`)
-- {samp}`float`: For real values
-- {samp}`integer`: For integer values.
-- {samp}`class`: For class parameters. It allow the user to choose an existing Ichthyop class in the configuration file.
-- {samp}`list`: For a list of string parameters, separated by {samp}`,`
-- {samp}`boolean`: For boolean parameters. It allows the user to select `true` or `false` using a simple combo box.
-- {samp}`combo`: For parameters with a limited set of values, which can be selected in the console with a combo box.
-- {samp}`lonlat`: For geographical coordinates.
+- `path`: For files and folders
+- `date`: For dates (format must be `year YYYY month MM day at HH:MM`)
+- `duration`: For duration (format must be `###### day(s) ### hour(s) ### minute(s)`)
+- `float`: For real values
+- `integer`: For integer values.
+- `class`: For class parameters. It allow the user to choose an existing Ichthyop class in the configuration file.
+- `list`: For a list of string parameters, separated by `,`
+- `boolean`: For boolean parameters. It allows the user to select `true` or `false` using a simple combo box.
+- `combo`: For parameters with a limited set of values, which can be selected in the console with a combo box.
+- `lonlat`: For geographical coordinates.
 
-In the case of {samp}`combo` parameters, the list of accepted parameters is specified by
-providing as many {samp}`accepted` tags as necessary. For instance:
+In the case of `combo` parameters, the list of accepted parameters is specified by
+providing as many `accepted` tags as necessary. For instance:
 
 ```XML
 <parameter>
@@ -95,9 +93,9 @@ providing as many {samp}`accepted` tags as necessary. For instance:
 ```
 
 If a parameter should appear as hidden in the Ichthyop console, it can be specified by adding the
-{samp}`hidden="true"` argument to the {samp}`parameter` tag, as shown below:
+`hidden="true"` argument to the `parameter` tag, as shown below:
 
-```HTML
+```XML
 <parameter hidden="true">
 </parameter>
 ```
@@ -106,14 +104,14 @@ If a parameter should appear as hidden in the Ichthyop console, it can be specif
 
 In order to test different values for a given parameter, a `serial` tag can be added as follows:
 
-```HTML
+```XML
 <parameter type="serial">
 </parameter>
 ```
 
 Different values are provided by replicating the `value` parameter as follows:
 
-```HTML
+```XML
 <parameter type="serial">
   <key>initial_time</key>
   <long_name>Beginning of simulation</long_name>

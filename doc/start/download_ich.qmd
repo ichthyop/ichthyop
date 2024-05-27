@@ -1,6 +1,5 @@
-(osm-inst)=
 
-## Downloading Ichthyop
+## Downloading Ichthyop {#sec-osm-inst}
 
 The Ichthyop model is available on [GitHub](https://github.com/ichthyop/ichthyop). There is two ways to recover Ichthyop:
 

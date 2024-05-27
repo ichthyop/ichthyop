@@ -1,6 +1,5 @@
-(time-config)=
 
-## Time configuration
+## Time configuration {#sec-time-config}
 
 ### Beginning of the simulation
 
