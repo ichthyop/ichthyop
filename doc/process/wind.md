@@ -24,6 +24,6 @@ $$
 \Delta \phi = \varepsilon \times F \times \left(\Delta \lambda_0 \times \sin\left(\frac{\theta \pi}{180}\right) + \Delta \phi_0 \times \sin\left(\frac{\theta \pi}{180}\right)\right)
 $$
 
-:::{note}
+:::{.callout-note}
 $R$ is the Earth Radius and equals 6367.74 km. In the code, $\dfrac{R \pi}{180}$, which is the distance in m of a 1 degree cell,  is  approximated to 111138 m
 :::

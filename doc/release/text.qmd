@@ -20,6 +20,6 @@ If the depth column is not provided, depth will be set equal to 0.
 
 For 2D simulations, the depth column will be ignored.
 
-:::{danger}
+:::{.callout-caution}
 Note that the columns must be separated by spaces.
 :::

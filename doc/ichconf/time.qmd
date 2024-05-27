@@ -24,7 +24,7 @@ If a NetCDF `time::units` attribute is defined, Ichthyop will try to infer the N
 If it fails (i.e. the `time::units` attribute does not follow the convention) or if no `time::units` attribute is found,
 Ichthyop will read the `time_origin` parameter from the `app.time` option block, which must be defined following the CF conventions.
 
-:::{danger}
+:::{.callout-caution}
 When reading two datasets (an ocean currents dataset and a wind dataset for instance), if none meets the CF convention, Ichthyop
 will apply the units defined in the `time_origin` parameter to both datasets, even though they may have different time units.
 **Therefeore, in this case, it is strongly recommended to manually include CF-like  time units attributes to each dataset (cf. below).**
@@ -61,7 +61,7 @@ for f in filelist:
     data.to_netcdf(f)
 ```
 
-:::{note}
+:::{.callout-note}
 The user must replace `time` by the name of the time variable which is used by Ichthyop.
 Common values are `time`, `scrum_time`, `time_counter`, `ocean_time`.
 

@@ -20,6 +20,6 @@ The sunset and sunrise hours are set by the `sunset` and `sunrise` parameters, w
 
 If the growth module is deactivated, the user must provide the minimum age (in days) at which the particle starts to migrate (`age_min` parameter). If the growth module is activated, it manages the activation or deactivation of the daily migration.
 
-:::{warning}
+:::{.callout-warning}
 When the target depth is greater than the total depth, the particle does not move.
 :::

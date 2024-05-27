@@ -122,7 +122,7 @@ Different values are provided by replicating the `value` parameter as follows:
 </parameter>
 ```
 
-:::{danger}
+:::{.callout-caution}
 **Using the GUI, additionnal values can be provided to serial parameters only when hidden parameters are
 displayed**
 :::

@@ -19,7 +19,7 @@ The first line provides the number of time steps in the CMS file, the second lin
 
 The remaining lines provide the probability matrix $P_{z, t}$.
 
-:::{note}
+:::{.callout-note}
 The sum of the probability matrix along the depth dimension should equal 100.
 :::
 

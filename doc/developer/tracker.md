@@ -55,7 +55,7 @@ calling the `addZoneDimension(TypeZone zoneType)` method. Custom dimensions can 
 `addRuntimeAttributes` defines additional attributes associated with the variable to be saved. Attributes are
 added by calling the `addAttribute(Attribute attribute)` method.
 
-:::{note}
+:::{.callout-note}
 Compulsory attributes and variable names
 are defined using properties files, see {numref}`tracker-prop`
 :::

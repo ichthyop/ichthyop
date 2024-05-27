@@ -56,7 +56,7 @@ parameter. The distribution is as follows:
 For computation purposes, all the Von Mises drafts performed in Ichthyop are done by using $mu = 0$. The
 angles are thus centerred around 0. Then, the $mu$ value is added.
 
-:::{note}
+:::{.callout-note}
 $\theta = 0$ is eastward, $\theta = \frac{\pi}{2}$ is northward, etc.
 :::
 
@@ -167,7 +167,7 @@ $$
 \theta_{reef} = \arctan2(\Delta Y, \Delta X)
 $$
 
-:::{warning}
+:::{.callout-warning}
 The angles are computed in the $(X, Y)$ space. Therefore, longitude and latitude coordinates
 are converted in $(X, Y)$ using the `latlon2xy` Dataset methods.
 :::

@@ -41,7 +41,7 @@ sudo apt-get install netcdf4
 To install the library on a Windows system, download the pre-built libraries ib
 [Unidata website](https://docs.unidata.ucar.edu/netcdf-c/current/winbin.html)
 
-:::{danger}
+:::{.callout-caution}
 During the install process, make sure that the location of the library is added to
 the {samp}`PATH`
 :::

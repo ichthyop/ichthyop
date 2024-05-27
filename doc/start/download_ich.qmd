@@ -26,6 +26,6 @@ mvn package
 
 The executable will be generated in the `target` folder.
 
-:::{warning}
+:::{.callout-warning}
 To use the command line, Maven needs to be installed (see instructions on <https://maven.apache.org/install.html>)
 :::
