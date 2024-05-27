@@ -1,6 +1,6 @@
 (zone-xml-config)=
 
-# Zone configuration file
+## Zone configuration file
 
 Zone configuration files are also managed via a dedicated XML file. The file must be as follows:
 

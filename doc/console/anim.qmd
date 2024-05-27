@@ -1,4 +1,4 @@
-# Animation
+## Animation
 
 Here you will find the usual "File menu" functions : create a new configuration file, open an existing one, close it or save and save as the configuration file.
 

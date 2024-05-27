@@ -1,24 +1,4 @@
----
-myst:
-  substitutions:
-    color: |
-      ```{image} _static/ico22/fill-color.png
-      ```
-    down: |
-      ```{image} _static/ico22/down.png
-      ```
-    listadd: |
-      ```{image} _static/ico22/list-add.png
-      ```
-    listremove: |
-      ```{image} _static/ico22/list-remove.png
-      ```
-    up: |
-      ```{image} _static/ico22/up.png
-      ```
----
-
-# Zone definition
+## Zone definition
 
 In Ichthyop, the user can define zones, either release zones or recruitment zones.
 
@@ -33,7 +13,7 @@ The zones can be edited using the GUI, as shown in {numref}`figure-gui-zone`
 Ichthyop Zone editor
 :::
 
-## Adding, removing and renaming zones
+### Adding, removing and renaming zones
 
 The number of zones is managed on the left part of the panel.
 
@@ -44,7 +24,7 @@ The reordering of the zones is achieved by clicking on the {{ up }} and {{ down 
 
 When double-clicking on the name of the zone on the left panel, the user can edit the zone name.
 
-## Editing a zone
+### Editing a zone
 
 When a zone is selected, the user can edit different parameters associated with the zone.
 

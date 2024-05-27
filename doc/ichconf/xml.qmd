@@ -1,6 +1,6 @@
 (xml-config)=
 
-# Simulation configuration file
+## Simulation configuration file
 
 Ichthyop simulations are configured using [XML](https://en.wikipedia.org/wiki/XML) configuration files. It should always start as follows:
 
@@ -12,7 +12,7 @@ Ichthyop simulations are configured using [XML](https://en.wikipedia.org/wiki/XM
 </icstructure>
 ```
 
-## Configuration blocks
+### Configuration blocks
 
 Ichthyop is configured by blocks, each block managing a specific aspect of the model. The blocks are as follows:
 
@@ -39,7 +39,7 @@ Ichthyop console.
 The {samp}`enabled` tag specifies whether the block should be considered by Ichthyop or not. By default, all blocks are enabled.
 But for the {samp}`RELEASE` and {samp}`DATASET`, one and only one block must be activated.
 
-## Configuration parameters
+### Configuration parameters
 
 To each block is associated a list of parameters. This list of parameter is added in the XML as follows:
 
@@ -69,7 +69,7 @@ The {samp}`format` tag specifies the parameter format, which will be used by the
 
 - {samp}`path`: For files and folders
 - {samp}`date`: For dates (format must be {samp}`year YYYY month MM day at HH:MM`)
-- {samp}`duration`: For duration (format must be {samp}`#### day(s) ## hour(s) ## minute(s)`)
+- {samp}`duration`: For duration (format must be {samp}`###### day(s) ### hour(s) ### minute(s)`)
 - {samp}`float`: For real values
 - {samp}`integer`: For integer values.
 - {samp}`class`: For class parameters. It allow the user to choose an existing Ichthyop class in the configuration file.
@@ -102,7 +102,7 @@ If a parameter should appear as hidden in the Ichthyop console, it can be specif
 </parameter>
 ```
 
-## Serial parameters
+### Serial parameters
 
 In order to test different values for a given parameter, a `serial` tag can be added as follows:
 
@@ -120,7 +120,7 @@ Different values are provided by replicating the `value` parameter as follows:
   <value>year 2001 month 10 day 20 at 00:00</value>
   <value>year 2001 month 10 day 21 at 00:00</value>
   <format>date</format>
-  <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
+  <description>Set the beginning date and time of the simulation. Format: year ###### month ### day ### at HH:mm.</description>
 </parameter>
 ```
 

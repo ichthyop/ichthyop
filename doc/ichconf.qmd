@@ -1,0 +1,5 @@
+## Ichthyop configuration
+
+{{< include ichconf/xml.qmd >}}
+{{< include ichconf/zone-xml.qmd >}}
+{{< include ichconf/time.qmd >}}

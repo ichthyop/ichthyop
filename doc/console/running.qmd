@@ -1,4 +1,4 @@
-# Running
+## Running
 
 :::{figure} _static/step2-simulate.png
 :align: center

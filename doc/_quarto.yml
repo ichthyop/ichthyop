@@ -1,0 +1,34 @@
+project:
+  type: book
+
+book:
+  title: "Ichthyop User Guide"
+  author: "Nicolas Barrier"
+  chapters:
+    - index.qmd
+    - start.qmd
+    - ichconf.qmd
+    - console.qmd
+  search: true
+  repo-url: https://github.com/ichthyop/ichthyop/
+  repo-actions: [edit]
+  downloads: [pdf]
+  sidebar:
+    style: "docked"
+    logo: _static/logo-ichthyop.svg
+  favicon: _static/logo-ichthyop.svg
+  page-navigation: true
+  issue-url: "https://github.com/ichthyop/ichthyop/issues"
+
+execute:
+  cache: true
+
+jupyter: python3
+
+format:
+  html:
+    number-sections: true
+    theme: cosmo
+
+  pdf:
+    fontfamily: libertinus

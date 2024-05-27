@@ -1,14 +1,14 @@
 (time-config)=
 
-# Time configuration
+## Time configuration
 
-## Beginning of the simulation
+### Beginning of the simulation
 
 In Ichthyop, the user provides the time at which the simulation should start. This `initial_time` parameter, which must be
 defined in the `app.time` option block, must be formatted as `year YYYY month MM day DD at HH:MM`, with `YYYY` the year, `MM` the
 month, `DD` the day, `HH` the hour and `MM` the minutes where the simulation should start.
 
-## Reading NetCDF times
+### Reading NetCDF times
 
 When reading a NetCDF file (ocean currents, temperature, wind, wave, etc.), Ichthyop will determine the units in which NetCDF time is stored.
 These units must meet the [CF Metadata Conventions](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/build/ch04s04.html)
