@@ -19,6 +19,8 @@ doc/**/_static/*svg
 doc/**/_static/*pdf
 doc/ichthyop_output
 doc/_static/javadoc
+doc/*html
+doc/.quarto
 
 input
 _book
