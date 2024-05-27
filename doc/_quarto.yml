@@ -3,6 +3,7 @@ project:
 
 resources:
   - console/_static/
+  - release/_static/
 
 book:
   title: "Ichthyop User Guide"
@@ -12,6 +13,7 @@ book:
     - start.qmd
     - ichconf.qmd
     - console.qmd
+    - release.qmd
   search: true
   repo-url: https://github.com/ichthyop/ichthyop/
   repo-actions: [edit]

@@ -1,6 +1,5 @@
-(zone-release)=
 
-# Zone release
+## Zone release {#sec-zone-release}
 
 The zone release method (`ZoneRelease.java`) allows to release particles in different areas, which are defined in an XML zone file (`zone_file` parameter).
 
@@ -16,11 +15,4 @@ However, if the `user_defined_nparticles` parameter is set equal to `true`, then
 
 An example of zone release is provided below.
 
-(fig-zone-release)=
-
-:::{figure} _static/release_zones.*
-:align: center
-:width: 600
-
-Example of a zone release.
-:::
+![Example of a zone release.](release/_static/release_zones.svg){#fig-zone-release}

@@ -1,4 +1,4 @@
-# Text release
+## Text release
 
 If the user wants to simulate some specific trajectories, for instance DCPs or buoys, particles can be relased
 by providing a text file containing the release coordinates (`TxtFileRelease.java`). The name of the text file is
