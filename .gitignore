@@ -20,4 +20,6 @@ doc/**/_static/*pdf
 doc/ichthyop_output
 doc/_static/javadoc
 
+input
+
 **/.DS_Store
