@@ -1,22 +1,33 @@
 # Particles
 
-Ichthyop particles (`Particle.java` class) contains the attributes described in {numref}`table-attr-part`.
+Ichthyop particles (`Particle.java` class) contains the attributes described in @tbl-attr-part.
 
-(table-attr-part)=
 
-```{eval-rst}
-.. csv-table:: Particle state variables
-   :file: _static/particle.csv
-   :delim: ;
-   :header-rows: 1
-   :class: tight-table
-```
+| Variable   | Description                                | Type                               | Units         |
+|------------|--------------------------------------------|------------------------------------|---------------|
+| x          | Particle x position within the grid        | float, $\in [0, N_{x} - 1]$      |               |
+| y          | Particle y position within the grid        | float, $\in [0, N_{y} - 1]$      |               |
+| z          | Particle z position within the grid        | float, $\in [0, N_{z} - 1]$      |               |
+| dx         | Particle increment/decrement of x position | float                              |               |
+| dy         | Particle increment/decrement of y position | float                              |               |
+| dz         | Particle increment/decrement of z position | float                              |               |
+| lat        | Particle longitude                         | float                              | Degrees East  |
+| lon        | Particle latitude                          | float                              | Degrees North |
+| depth      | Particle depth                             | float, \< 0                        | m             |
+| index      | Particle index                             | int, $\in [0, N_{part} - 1]$     |               |
+| age        | Particle age                               | int                                | seconds       |
+| deathCause | Mortality status                           | `ParticleMortality`                |               |
+| living     | True if a particle is alive                | bool                               |               |
+| locked     | True if a particle is locked               | bool                               |               |
+| layers     | List of additional particle layers         | `List<ParticleLayer>`              |               |
+
+: Particle state variables {#tbl-attr-part}
 
 When using Ichthyop with additional processes, such as growth or DEB processes, additional variables need to be tracked.
 
 This is done by firsr creating a layer class, which should extend the `ParticleLayer.java` class. An exemple if provided as follows:
 
-```java
+``` java
 package org.previmer.ichthyop.particle;
 
 public class LengthParticleLayer extends ParticleLayer {
@@ -46,16 +57,29 @@ This class contains additional particle attributes (here, for instance `length`)
 
 These new variables can be accessed as follows:
 
-```java
+``` java
 LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
 lengthLayer.setLength(length_init);
 ```
 
-During the first call to the `getLayer` method applied to a given layer class, the latter will be instanciated, initialized and add to the
-particle's `layers` list attribute, as shown below.
+During the first call to the `getLayer` method applied to a given layer class, the latter will be instanciated, initialized and add to the particle's `layers` list attribute, as shown below.
 
-```{eval-rst}
-.. mermaid:: _static/mermaid/particle_layer.md
-    :caption: Getting particle additional layer
-    :align: center
+```{mermaid}
+//| fig-cap: Order in which managers are mobilized.
+graph TD;
+
+    id1("Call to getLayer()")
+    id2{"Already called?"}
+
+    id1-->id2
+
+    id3(Create Layer)
+    id4(Init. layer)
+    id5(Get layer)
+
+    id2 -->|No| id3
+    id3 --> id4
+    id4 --> id5
+
+    id2 -->|Yes| id5
 ```

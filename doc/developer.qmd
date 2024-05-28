@@ -1,16 +1,9 @@
-(developer)=
-
-# Developer documentation
+# Developer documentation {#sec-developer}
 
 In this section, the Ichthyop console is described.
 
-```{toctree}
-:caption: 'Contents:'
-:maxdepth: 2
-
-developer/manager_initialization.md
-developer/particle.md
-developer/grid.md
-developer/new_action.md
-developer/tracker.md
-```
+{{< include developer/manager_initialization.qmd >}}
+{{< include developer/particle.qmd >}}
+<!-- {{< include developer/grid.qmd >}}
+{{< include developer/new_action.qmd >}}
+{{< include developer/tracker.qmd >}} -->

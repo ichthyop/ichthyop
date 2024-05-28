@@ -7,6 +7,8 @@ resources:
   - console/_static/
   - release/_static/
   - process/_static/
+  - developer/_static
+  - developer/grid/_static
 
 book:
   title: "Ichthyop User Guide"
@@ -18,6 +20,7 @@ book:
     - console.qmd
     - release.qmd
     - process.qmd
+    - developer.qmd
   search: true
   repo-url: https://github.com/ichthyop/ichthyop/
   repo-actions: [edit]
