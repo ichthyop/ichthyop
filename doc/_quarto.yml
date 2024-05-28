@@ -41,6 +41,7 @@ format:
   html:
     number-sections: true
     theme: cosmo
+    number-depth: 3
 
   pdf:
     fontfamily: libertinus

@@ -1,10 +1,5 @@
-# Grid management
+## Grid management
 
-```{toctree}
-:caption: 'Contents:'
-:maxdepth: 1
-
-grid/nemo.md
-grid/roms
-grid/mars
-```
+{{< include developer/grid/nemo.qmd >}}
+<!-- {{< include grid/roms.qmd >}}
+{{< include grid/mars.qmd >}} -->

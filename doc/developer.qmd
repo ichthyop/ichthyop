@@ -4,6 +4,6 @@ In this section, the Ichthyop console is described.
 
 {{< include developer/manager_initialization.qmd >}}
 {{< include developer/particle.qmd >}}
-<!-- {{< include developer/grid.qmd >}}
-{{< include developer/new_action.qmd >}}
-{{< include developer/tracker.qmd >}} -->
+{{< include developer/grid.qmd >}}
+<!-- {{< include developer/new_action.qmd >}} -->
+<!-- {{< include developer/tracker.qmd >}} -->

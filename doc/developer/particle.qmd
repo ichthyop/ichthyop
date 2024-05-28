@@ -1,4 +1,4 @@
-# Particles
+## Particles
 
 Ichthyop particles (`Particle.java` class) contains the attributes described in @tbl-attr-part.
 

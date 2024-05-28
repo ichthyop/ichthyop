@@ -21,6 +21,7 @@ doc/ichthyop_output
 doc/_static/javadoc
 doc/*html
 doc/.quarto
+doc/*process_files*
 
 input
 _book
