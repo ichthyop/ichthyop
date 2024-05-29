@@ -1,8 +1,8 @@
 ### NEMO grid
 
 ```{python}
-#| echo: true
-#| output: true
+#| echo: false
+#| output: false
 import os
 import subprocess
 

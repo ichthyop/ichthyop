@@ -1,7 +1,8 @@
 ### ROMS grid
 
 ```{python}
-
+#| echo: false
+#| output: false
 import os
 import subprocess
 cwd = os.getcwd()
@@ -16,7 +17,7 @@ In this section, the main features of the ROMS grid and the implications in Icht
 
 The horizontal grid layout of the ROMS model is shown below:
 
-![ROMS staggered grid structure](developer/grid/_static/roms_grid_1.svg)
+![ROMS staggered grid structure](developer/grid/_static/roms_grid_1.png)
 
 Contrary to NEMO and MARS, the `U` points are located on the *western* face, while velocities are
 located on the *southern* faces. However, However, as indicated on the [Wikiroms page](https://www.myroms.org/wiki/Numerical_Solution_Technique), while the `T` interior domain has $(N_y, N_x)$ dimensions,
@@ -85,7 +86,7 @@ The excluded domain is represented below:
 
 The vertical coordinate system of ROMS is discussed on [WikiRoms](https://www.myroms.org/wiki/Vertical_S-coordinate) and shown below.
 
-![Vertical grid in the ROMS model](developer/grid/_static/roms_vertical_grid.svg)
+![Vertical grid in the ROMS model](developer/grid/_static/roms_vertical_grid.png)
 
 The vertical coordinate in ROMS is $\sigma$, which varies between $-1$ (ocean bottom) and $0$ (ocean surface). There are two implementations of the $\sigma$ to $z$ conversion, both using sea-level anomalies ($\zeta$) and bathymetry ($h$).
 

@@ -1,7 +1,8 @@
 ### MARS grid
 
 ```{python}
-
+#| echo: false
+#| output: false
 import os
 import subprocess
 cwd = os.getcwd()
