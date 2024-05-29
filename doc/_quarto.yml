@@ -21,6 +21,7 @@ book:
     - release.qmd
     - process.qmd
     - developer.qmd
+    - faq.qmd
   search: true
   repo-url: https://github.com/ichthyop/ichthyop/
   repo-actions: [edit]
