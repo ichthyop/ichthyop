@@ -1,6 +1,4 @@
-(new-tracker)=
-
-# Adding output variable
+# Adding output variable {#sec-new-tracker}
 
 When including new processes to Ichthyop (cf. {numref}`new-action`), the storage of additional variable may be required.
 For instance, in the growth processes  (see {numref}`growth-proc`), in which particle length is a state variable, it is necessary to

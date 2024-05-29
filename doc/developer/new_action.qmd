@@ -1,3 +1,2 @@
-(new-action)=
 
-# Adding new processes
+# Adding new processes {#sec-new-action}

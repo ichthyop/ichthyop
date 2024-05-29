@@ -15,13 +15,23 @@ book:
   author: "Nicolas Barrier"
   chapters:
     - index.qmd
-    - start.qmd
-    - ichconf.qmd
-    - console.qmd
-    - release.qmd
-    - process.qmd
-    - developer.qmd
-    - faq.qmd
+    - part: user_guide.qmd
+      chapters:
+        - start.qmd
+        - ichconf.qmd
+        - console.qmd
+        - faq.qmd
+    - part: documentation.qmd
+      chapters:
+        - release.qmd
+        - process.qmd
+    - part: developer.qmd
+      chapters:
+        - developer/manager_initialization.qmd
+        - developer/particle.qmd
+        - developer/grid.qmd
+        - developer/new_action.qmd
+        - developer/tracker.qmd
     - biblio.qmd
   search: true
   repo-url: https://github.com/ichthyop/ichthyop/
