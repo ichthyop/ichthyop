@@ -1,6 +1,6 @@
-## FAQ
+# FAQ
 
-### What to do when Ichthyop does not manage my ocean dataset
+## What to do when Ichthyop does not manage my ocean dataset
 
 Ichthyop developers cannot manage all the different ocean datasets that exist. First, there
 are too many of them which rely on different assumptions, such as grid layout, vertical coordinates, etc.
@@ -12,13 +12,13 @@ If your model does not belon to the list, one possibility is to do a bit of pre-
 to convert your input files to a regular, depth-based ocean grid. Different tools can help you with that,
 such as the [XESMF](https://xesmf.readthedocs.io/en/latest/) Python package.
 
-### What to do when Ichthyop suddenly fails to launch ?
+## What to do when Ichthyop suddenly fails to launch ?
 
 Situation: without apparent reason, Ichthyop fails to launch, either from GUI or command line. It looks like it starts and crashed instantly.
 
 Solution: delete Ichthyop persistence files (the files that store the information to restart your ichthyop session as it was when you last closed it) In Windows environment such files are gathered in a hidden directory ~/AppData/Local. In this folder delete the ichthyop directory of the previmer/ichthyop directory. In Linux or Mac environement delete the ~/.ichthyop folder. Try to run Ichthyop again.
 
-### How to launch Ichthyop from command line ?
+## How to launch Ichthyop from command line ?
 
 First you have to open a command prompt window on your computer.
 
@@ -52,7 +52,7 @@ java -jar ichthyop-3.2.jar cfg/your_configuration_file.xml
 
 With your_configuration_file.xml the name of the XML configuration files that you first created from the UI and that you saved in the cfg/ folder.
 
-### What are the different coastline behaviours in Ichthyop?
+## What are the different coastline behaviours in Ichthyop?
 
 First you may want to read {numref}`spatial-int`
 
@@ -67,7 +67,7 @@ Ichthyop offers four different behaviours at coastline:
 
 (spatial-int)=
 
-### How does spatial interpolation work in Ichthyop?
+## How does spatial interpolation work in Ichthyop?
 
 A particle in Ichthyop only knows about its environment what is provided by the outputs of the hydrodynamic model. Such information, for instance the zonal and meridional current velocities, are usually provided on an Arakawa C-grid, every U-point and V-point respectively.
 
@@ -141,7 +141,7 @@ X3 will be considered as "close to coast" if any of cells (i,j-1) (i+1,j) (i+1,j
 
 X4 will be considered as "close to coast" if any of cells (i,j-1) (i-1,j) (i-1,j-1) is on land.
 
-### How does Ichthyop manage time ?
+## How does Ichthyop manage time ?
 
 Time management is tricky to handle because on the computer side a given time is usually expressed as a number of seconds elapsed since a time origin (e.g. 13629116520 seconds elapsed between 1900/01/01 00:00 and 2014/09/04 09:42), whereas the user expects to read time in a human readable format (e.g. 2014/09/04 09:42).
 
@@ -168,7 +168,7 @@ Last bu not least: what if your hydrodynamic dataset uses an other calendar than
 1. Contact the developpers and ask how much work would it be to include your calendar in Ichthyop ?
 2. Select an existing calendar that is the most similar to yours and trick Ichthyop by providing a human readable time that you know it will be converted in the correct time value for the hydrodynamic dataset (thanks to the **Time converter** utility program).
 
-### How does Ichthyop interpolate the hydrodynamic dataset in time ?
+## How does Ichthyop interpolate the hydrodynamic dataset in time ?
 
 Let's say that the hydrodynamics output dataset is archived with a 5 days time step and Ichthyop runs with a 1 hour time step.
 
@@ -182,7 +182,7 @@ Tr(t) = (1 - x) * Tr(tn) + x * Tr(tnp1)
 
 with `x = ( time(t) - time(tn) ) / ( time(tnp1) - time(tn) )`
 
-### Why do I get warning "CFL broken for W 1.208" ?
+## Why do I get warning "CFL broken for W 1.208" ?
 
 CFL stands for [Courant–Friedrichs–Lewy condition](https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition). It is a necessary condition for stability while solving the equation of movement in Ichthyop.
 
