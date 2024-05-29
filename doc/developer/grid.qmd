@@ -1,5 +1,5 @@
 ## Grid management
 
 {{< include developer/grid/nemo.qmd >}}
-<!-- {{< include grid/roms.qmd >}}
-{{< include grid/mars.qmd >}} -->
+{{< include developer/grid/roms.qmd >}}
+{{< include developer/grid/mars.qmd >}}

@@ -1,29 +1,22 @@
-# ROMS grid
+### ROMS grid
 
-```{eval-rst}
-.. ipython:: python
-    :suppress:
+```{python}
 
-    import os
-    import subprocess
-    cwd = os.getcwd()
+import os
+import subprocess
+cwd = os.getcwd()
 
-    fpath = "developer/grid/_static/roms.py"
-    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+fpath = "developer/grid/_static/roms.py"
+subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 ```
 
 In this section, the main features of the ROMS grid and the implications in Ichthyop are summarized.
 
-## Horizontal
+#### Horizontal
 
 The horizontal grid layout of the ROMS model is shown below:
 
-:::{figure} _static/roms_grid_1.*
-:align: center
-:width: 600 px
-
-ROMS staggered grid structure
-:::
+![ROMS staggered grid structure](developer/grid/_static/roms_grid_1.svg)
 
 Contrary to NEMO and MARS, the `U` points are located on the *western* face, while velocities are
 located on the *southern* faces. However, However, as indicated on the [Wikiroms page](https://www.myroms.org/wiki/Numerical_Solution_Technique), while the `T` interior domain has $(N_y, N_x)$ dimensions,
@@ -31,25 +24,17 @@ the `U` domain is $(N_y, N_x - 1)$ points while and `V` domain is $(N_y - 1, N_x
 Indeed, the first row for V and the first column for U are discarded. Therefore, the structure of the input ROMS grid is
 as follows:
 
-:::{figure} _static/ichthyop_grid_roms.*
-:align: center
-:width: 600 px
+![ROMS grid as interpreted by Ichthyop](developer/grid/_static/ichthyop_grid_roms.svg)
 
-ROMS grid as interpreted by Ichthyop
-:::
 
-### Land-sea mask
+##### Land-sea mask
 
-:::{figure} _static/land_sea_mask_roms.*
-:align: center
-:width: 600 px
+![Land-sea masking for ROMS grid](developer/grid/_static/land_sea_mask_roms.svg)
 
-Land-sea masking for ROMS grid
-:::
 
-### Interpolation
+##### Interpolation
 
-#### T interpolation
+###### T interpolation
 
 Given a given position index of a particle with the `T` grid, the determination of the interpolation is done as follows:
 
@@ -59,14 +44,10 @@ Given a given position index of a particle with the `T` grid, the determination 
 
 An illustration is given below
 
-:::{figure} _static/interpolation_t_roms.*
-:align: center
-:width: 600 px
+![Interpolation of T points from ROMS grid](developer/grid/_static/interpolation_t_roms.svg)
 
-Interpolation of T points from ROMS grid
-:::
 
-#### U interpolation
+###### U interpolation
 
 Interpolation of `U` variables is done as follows:
 
@@ -74,14 +55,10 @@ Interpolation of `U` variables is done as follows:
 - Then, the `j` index of the `U` grid line below the particle is found. This is done by using `floor` on the `y - 0.5` value. The `-0.5` is to move from the computation grid to the `U` grid system.
 - The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
 
-:::{figure} _static/interpolation_u_roms.*
-:align: center
-:width: 600 px
+![Interpolation of U points from ROMS grid](developer/grid/_static/interpolation_u_roms.svg)
 
-Interpolation of U points from ROMS grid
-:::
 
-#### V interpolation
+###### V interpolation
 
 Interpolation of `V` variables is done as follows:
 
@@ -89,39 +66,26 @@ Interpolation of `V` variables is done as follows:
 - Then, the `j` index of the `V` grid line below the particle is found. This is done by using `floor` on the `y - 1` value. The `-1` is to move from the computation grid to the `U` grid system.
 - The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
 
-:::{figure} _static/interpolation_v_roms.*
-:align: center
-:width: 600 px
+![Interpolation of V points from ROMS grid](developer/grid/_static/interpolation_v_roms.svg)
 
-Interpolation of V points from ROMS grid
-:::
 
-### Is on edge
+##### Is on edge
 
 A particle is considered to be out of domain when $x \leq 1$ (no possible interpolation of U on the western face), when $y \geq N_x - 1$
 (no possible interpolation of U on the eastern face), when $y \leq 1$ (no possible interpolation of V on the southern domain) or when $y \geq N_y - 1$ (no possible interpolation of V on the northern part of the domain).
 
 The excluded domain is represented below:
 
-:::{figure} _static/is_on_edge_roms.*
-:align: center
-:width: 600 px
+![Excluded domain in the Ichthyop ROMS simulations.](developer/grid/_static/is_on_edge_roms.svg)
 
-Excluded domain in the Ichthyop ROMS simulations.
-:::
 
-## Vertical
+#### Vertical
 
-### Sigma coordinate
+##### Sigma coordinate
 
 The vertical coordinate system of ROMS is discussed on [WikiRoms](https://www.myroms.org/wiki/Vertical_S-coordinate) and shown below.
 
-:::{figure} _static/roms_vertical_grid.*
-:align: center
-:width: 400 px
-
-Vertical grid in the ROMS model
-:::
+![Vertical grid in the ROMS model](developer/grid/_static/roms_vertical_grid.svg)
 
 The vertical coordinate in ROMS is $\sigma$, which varies between $-1$ (ocean bottom) and $0$ (ocean surface). There are two implementations of the $\sigma$ to $z$ conversion, both using sea-level anomalies ($\zeta$) and bathymetry ($h$).
 
