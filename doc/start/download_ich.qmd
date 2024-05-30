@@ -1,0 +1,31 @@
+
+## Downloading Ichthyop {#sec-osm-inst}
+
+The Ichthyop model is available on [GitHub](https://github.com/ichthyop/ichthyop). There is two ways to recover Ichthyop:
+
+- Using executable files (`.jar` files).
+- From source files.
+
+### Using executables
+
+Ichthyop users can download Ichthyop executables [here](https://github.com/ichthyop/ichthyop/releases). Choose a version, and download the {samp}`ichthyop-X.Y.Z-jar-with-dependencies.jar` file (replacing {samp}`X.Y.Z` by the version number).
+
+### From source
+
+To get the source code, type in a Terminal (Unix/MacOs) or Git Bash prompt (Windows):
+
+```bash
+git clone https://github.com/ichthyop/ichthyop.git
+```
+
+The code can then be compiled either using IDE (NetBeans, VSCode) or using the following command line:
+
+```bash
+mvn package
+```
+
+The executable will be generated in the `target` folder.
+
+:::{.callout-warning}
+To use the command line, Maven needs to be installed (see instructions on <https://maven.apache.org/install.html>)
+:::

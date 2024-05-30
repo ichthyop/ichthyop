@@ -19,7 +19,15 @@ doc/**/_static/*svg
 doc/**/_static/*pdf
 doc/ichthyop_output
 doc/_static/javadoc
+doc/*html
+doc/.quarto
+doc/*process_files*
 
 input
+_book
+doc/index.log
+doc/index.tex
+*jupyter_cache*
+*site_libs*
 
 **/.DS_Store

@@ -1,0 +1,32 @@
+## Manager initialization
+
+When an Ichthyop simulation is launched, managers are mobilized in the following order (cf. `SimulationManager.mobiliseManagers()` method):
+
+```{mermaid}
+%%| fig-align: center
+%%| fig-cap: "Order in which managers are mobilized."
+%%| label: fig-managers
+graph TD;
+
+    id0("Dataset Manager")
+    id1("Release Manager")
+    id2("Time Manager");
+    id3("Action Manager");
+    id4("Zone Manager");
+    id5("Output Manager");
+
+    classDef className fill:lightblue,stroke:black,stroke-width:3px,color:black
+
+    id0 --> id1
+    id1 --> id2
+    id2 --> id3
+    id3 --> id4
+    id4 --> id5
+```
+
+This order is the one in which the managers will be setup and then initialized.
+
+During the setup process, the `setupPerformed` methods, implemented on all the manager classes, will be called.
+
+After this setup process, the managers will be initialized. This will be achieved by calling
+the `initializePerformed` methods,  implemented on all the manager classes.

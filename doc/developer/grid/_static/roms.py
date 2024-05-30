@@ -15,7 +15,7 @@
 
 # # ROMS grid
 #
-# ## Horizontal 
+# ## Horizontal
 #
 # The horizontal grid layout of the ROMS model is shown below:
 #
@@ -68,12 +68,12 @@ for x in np.arange(xmax - 1):
     for y in range(ymax):
         #lu = plt.plot(x - 0.5, y, marker='.', color='r')
         lu = plt.text(x + 1, y + 0.5, '%d,%d' %(x,y), bbox=bbox, ha='center', va='center', color='w', zorder=100)
-        
+
 bbox['fc'] = 'powderblue'
 for x in np.arange(0, xmax):
     for y in range(ymax - 1):
         #lv = plt.plot(x, y - 0.5, marker='.', color='b')
-        lv = plt.text(x + 0.5, y + 1, '%d,%d' %(x,y), bbox=bbox, ha='center', va='center', color='k')
+        lv = plt.text(x + 0.5, y + 1, '%d,%d' %(x,y), bbopenox=bbox, ha='center', va='center', color='k')
 
 #l = plt.legend([lt, lu, lv], ['T', 'U', 'V'], ncol=1, loc='right', bbox_to_anchor=(1.2, 0.6))
 savefig('ichthyop_grid_roms')
@@ -243,16 +243,16 @@ savefig('is_on_edge_roms', bbox='tight')
 plt.rcParams['lines.markersize'] = 2
 
 def plot_points(x, y, color):
-    
+
     print('+++++++++++++ ', x, y)
     plt.plot(x, y, color=color, marker='o', markersize=6)
     i = np.round(x - 0.5)
     j = np.round(y - 0.5)
     print(i, j)
-    
+
     i -= 0.5
     j -= 0.5
-    
+
     jout = [j + 0.5, j + 0.5, j + 1.5, j + 1.5]
     iout = [i + 0.5, i + 1.5, i + 1.5, i + 0.5]
     points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
@@ -278,7 +278,7 @@ savefig('land_sea_mask_roms', bbox='tight')
 
 # +
 def plot_poly(i, j, color):
-        
+
     iout = [i + 0.5 - 0.5, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5]
     jout = [j + 0.5 - 0.5, j + 0.5 - 0.5, j + 0.5 - 0.5 + 1, j + 0.5 - 0.5 + 1]
     points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
@@ -291,12 +291,12 @@ def plot_points(ix, jy, color):
     j = np.round(jy - 0.5)
     i = np.round(ix - 0.5)
     points = []
-    
+
     if(j == np.floor(jy - 0.5)):
         jj = 1
     else:
         jj = -1
-    
+
     if(i == np.floor(ix - 0.5)):
         ii = 1
     else:
@@ -304,7 +304,7 @@ def plot_points(ix, jy, color):
     plot_poly(i + ii, j + jj, color)
     plot_poly(i, j + jj, color)
     plot_poly(i + ii, j, color)
-            
+
 plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -362,7 +362,7 @@ plt.title('Close to Coast')
 #
 # $z(x,y,\sigma,t) = h(x,y) S(x,y,\sigma) + \zeta(x,y,t) \left[1 + \dfrac{h(x, y)S(x,y,\sigma)}{h(x, y)}\right]$
 
-# In this form, both formulations can be expressed as: 
+# In this form, both formulations can be expressed as:
 #
 # $z(x,y,\sigma,t) = H_0(x, y, \sigma) + \zeta(x,y,t) \left[1 + \dfrac{H_0(x, y, \sigma)}{h(x, y)}\right]$
 #
@@ -373,5 +373,3 @@ plt.title('Close to Coast')
 # For the UCLa formulation:
 #
 # $H_0(x, y, \sigma) = h(x, y) S(x, y, \sigma) $
-
-
