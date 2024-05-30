@@ -131,9 +131,15 @@ public class ReefOrientationAction extends AbstractAction {
         double uorient, vorient;
 
         double[] distance = this.computeReefDistance(particle, lonBarycenter, latBarycenter);
+        double[] point = new double[] {particle.getLon(), particle.getLat()};
 
+        // computes the index of the closest reef
         int closestReefIndex = this.findSmallestDistance(distance);
         double closestReefDistance = distance[closestReefIndex];
+
+        // extract the closest point (can be on edge)
+        // this is the target point
+        double[] closestPoint = findClosestPointPolygon(point, lonBarycenter[closestReefIndex], lonBarycenter[closestReefIndex]);
 
         uorient = 0;
         vorient = 0;
@@ -151,14 +157,12 @@ public class ReefOrientationAction extends AbstractAction {
 
             double Kappa_reef = kappaBarycenter[closestReefIndex];
 
-            // double xyParticule[] = getSimulationManager().getDataset().latlon2xy(particle.getLat(), particle.getLon());
-            // double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(), particle.getOldLon());
-            // double xyReef[] = new double[] {xBarycenter[closestReefIndex], yBarycenter[closestReefIndex]};
+            double xyParticule[] = getSimulationManager().getDataset().latlon2xy(particle.getLat(), particle.getLon());
+            double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(), particle.getOldLon());
+            double xyReef[] = getSimulationManager().getDataset().latlon2xy(closestPoint[1], closestPoint[0]);
 
-            // thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
-            // thetaCurrent = Math.atan2(xyOrigin[1] - xyParticule[1], xyOrigin[0] - xyParticule[0]) + Math.PI;
-            thetaPref = 0;
-            thetaCurrent = 0;
+            thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
+            thetaCurrent = Math.atan2(xyOrigin[1] - xyParticule[1], xyOrigin[0] - xyParticule[0]) + Math.PI;
 
             double mu = d * (thetaPref - thetaCurrent);
 
@@ -239,6 +243,7 @@ public class ReefOrientationAction extends AbstractAction {
 
     }
 
+    // Computes the distance to reef, considering the closest point to the particle. Can be on edge.
     public double[] computeReefDistance(IParticle particle, double[][] lonBarycenter, double[][] latBarycenter) {
 
         int NReefs = lonBarycenter.length;
@@ -246,11 +251,18 @@ public class ReefOrientationAction extends AbstractAction {
 
         double lonParticle = particle.getLon();
         double latParticle = particle.getLat();
+        double[] point = new double[] {lonParticle, latParticle};
 
-        // for (int k = 0; k < NReefs; k++) {
-        //     distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
-        //             latBarycenter[k], lonBarycenter[k]);
-        // }
+        for (int k = 0; k < NReefs; k++) {
+
+            double[] xp = lonBarycenter[k];
+            double[] yp = latBarycenter[k];
+
+            double[] closestPoint = findClosestPointPolygon(point, xp, yp);
+
+            distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
+                    closestPoint[1], closestPoint[0]);
+        }
 
         return distance;
 
