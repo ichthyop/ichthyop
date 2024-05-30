@@ -2,6 +2,7 @@ package org.previmer.ichthyop.action.orientation;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
+import java.awt.geom.Line2D;
 
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
@@ -17,10 +18,10 @@ public class ReefOrientationAction extends AbstractAction {
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
     private int nZones;
-    private double lonBarycenter[];
-    private double latBarycenter[];
-    private double xBarycenter[];
-    private double yBarycenter[];
+    private double lonBarycenter[][];
+    private double latBarycenter[][];
+    private double xBarycenter[][];
+    private double yBarycenter[][];
     private double kappaBarycenter[];
     ArrayList<Zone>zones;
     double PLD;
@@ -59,10 +60,10 @@ public class ReefOrientationAction extends AbstractAction {
     private void initializeTargets() {
 
         nZones = zones.size();
-        lonBarycenter = new double[nZones];
-        latBarycenter = new double[nZones];
-        xBarycenter = new double[nZones];
-        yBarycenter = new double[nZones];
+        lonBarycenter = new double[nZones][];
+        latBarycenter = new double[nZones][];
+        xBarycenter = new double[nZones][];
+        yBarycenter = new double[nZones][];
         kappaBarycenter = new double[nZones];
 
         for (int iZone = 0; iZone < nZones; iZone++) {
@@ -71,25 +72,46 @@ public class ReefOrientationAction extends AbstractAction {
             // Compute the barycenter of the zone
             ArrayList<Float> lon = zoneTemp.getLon();
             ArrayList<Float> lat = zoneTemp.getLat();
+
+            // Got the number of points
             int nPol = lon.size();
+
+            // If the polygon is closed, remove the last point
+            if ((lon.get(0) == lon.get(nPol - 1)) && (lat.get(0) == lat.get(nPol - 1))) {
+                nPol--;
+            }
+
             if (nPol == 0) {
                 String message = String.format("No Polygon defined in %s", zoneTemp.getKey());
                 getLogger().log(Level.SEVERE, message);
             }
-            for(int i = 0; i < nPol - 1; i++) {
-                lonBarycenter[iZone] += lon.get(i);
-                latBarycenter[iZone] += lat.get(i);
+
+            lonBarycenter[iZone] = new double[nPol + 1];
+            latBarycenter[iZone] = new double[nPol + 1];
+            xBarycenter[iZone] = new double[nPol + 1];
+            yBarycenter[iZone] = new double[nPol + 1];
+
+            // if polygon has 4 points, we set the first 4 points
+            for (int i = 0; i < nPol; i++) {
+                lonBarycenter[iZone][i] += lon.get(i);
+                latBarycenter[iZone][i] += lat.get(i);
             }
-            lonBarycenter[iZone] /= (nPol - 1);
-            latBarycenter[iZone] /= (nPol - 1);
+
+            // Add the last point
+            lonBarycenter[iZone][nPol] += lon.get(0);
+            latBarycenter[iZone][nPol] += lat.get(0);
+
             kappaBarycenter[iZone] = zoneTemp.getKappa();
-            double xy[] = getSimulationManager().getDataset().latlon2xy(latBarycenter[iZone], lonBarycenter[iZone]);
-            xBarycenter[iZone] = xy[0];
-            yBarycenter[iZone] = xy[1];
 
+            for (int i = 0; i < nPol; i++) {
+
+                double xy[] = getSimulationManager().getDataset().latlon2xy(latBarycenter[iZone][i],
+                        lonBarycenter[iZone][i]);
+                xBarycenter[iZone][i] = xy[0];
+                yBarycenter[iZone][i] = xy[1];
+
+            }
         }
-
-
     }
 
     @Override
@@ -129,12 +151,14 @@ public class ReefOrientationAction extends AbstractAction {
 
             double Kappa_reef = kappaBarycenter[closestReefIndex];
 
-            double xyParticule[] = getSimulationManager().getDataset().latlon2xy(particle.getLat(), particle.getLon());
-            double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(), particle.getOldLon());
-            double xyReef[] = new double[] {xBarycenter[closestReefIndex], yBarycenter[closestReefIndex]};
+            // double xyParticule[] = getSimulationManager().getDataset().latlon2xy(particle.getLat(), particle.getLon());
+            // double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(), particle.getOldLon());
+            // double xyReef[] = new double[] {xBarycenter[closestReefIndex], yBarycenter[closestReefIndex]};
 
-            thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
-            thetaCurrent = Math.atan2(xyOrigin[1] - xyParticule[1], xyOrigin[0] - xyParticule[0]) + Math.PI;
+            // thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
+            // thetaCurrent = Math.atan2(xyOrigin[1] - xyParticule[1], xyOrigin[0] - xyParticule[0]) + Math.PI;
+            thetaPref = 0;
+            thetaCurrent = 0;
 
             double mu = d * (thetaPref - thetaCurrent);
 
@@ -215,7 +239,7 @@ public class ReefOrientationAction extends AbstractAction {
 
     }
 
-    public double[] computeReefDistance(IParticle particle, double[] lonBarycenter, double[] latBarycenter) {
+    public double[] computeReefDistance(IParticle particle, double[][] lonBarycenter, double[][] latBarycenter) {
 
         int NReefs = lonBarycenter.length;
         double[] distance = new double[NReefs];
@@ -223,13 +247,82 @@ public class ReefOrientationAction extends AbstractAction {
         double lonParticle = particle.getLon();
         double latParticle = particle.getLat();
 
-        for (int k = 0; k < NReefs; k++) {
-            distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
-                    latBarycenter[k], lonBarycenter[k]);
-        }
+        // for (int k = 0; k < NReefs; k++) {
+        //     distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
+        //             latBarycenter[k], lonBarycenter[k]);
+        // }
 
         return distance;
 
     }
+
+    public double[] findClosestPointPolygon(double[] point, double[] xPolygon, double[] yPolygon) {
+
+        double minDistance = Double.MAX_VALUE;
+        double[] final_closest = new double[2];
+
+        int nEdges = xPolygon.length - 1;
+
+        for (int i = 0; i < nEdges; i++) {
+
+            double[] start = new double[] { xPolygon[i], yPolygon[i] };
+            double[] end = new double[] { xPolygon[i + 1], yPolygon[i + 1] };
+
+            double[] temp_closest = closestPoint(start, end, point);
+
+            double dist = Math.sqrt(Math.pow(temp_closest[0] - point[0], 2) + Math.pow(temp_closest[1] - point[1], 2));
+
+            if (dist <= minDistance) {
+                final_closest = temp_closest;
+                minDistance = dist;
+            }
+        }
+
+        return final_closest;
+
+    }
+
+
+    public double dotproduct(double[] lineStartA, double[] lineEndB) {
+        return lineStartA[0] * lineEndB[0] + lineStartA[1] * lineEndB[1];
+    }
+
+    public double[] closestPoint(double[] lineStartA, double[] lineEndB, double[] thePoint) {
+
+        // calculates displacement from point to start edge
+        double[] w = new double[2];
+        w[0] = thePoint[0] - lineStartA[0];
+        w[1] = thePoint[1] - lineStartA[1];
+
+        // computes the displacement between start and end of the line
+        double[] tempLineEndB = new double[2];
+        tempLineEndB[0] = lineEndB[0] - lineStartA[0];
+        tempLineEndB[1] = lineEndB[1] - lineStartA[1];
+
+        // calculates the projection of w onto the line
+        double proj = dotproduct(w, tempLineEndB);
+        double[] output = new double[2];
+
+        // endpoint 0 is closest point
+        if (proj <= 0.0) {
+            output[0] = lineStartA[0];
+            output[1] = lineStartA[1];
+        } else {
+            // square
+            double vsq = dotproduct(tempLineEndB, tempLineEndB);
+            // B^2
+            proj /= vsq;
+            // endpoint 1 is closest point
+            if (proj >= 1) {
+                output[0] = lineEndB[0];
+                output[1] = lineEndB[1];
+            } else {
+                output[0] = lineStartA[0] + (tempLineEndB[0] * proj);
+                output[1] = lineStartA[1] + (tempLineEndB[1] * proj);
+            }
+        }
+        return output;
+    }
+
 
 }

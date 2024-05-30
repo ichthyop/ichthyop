@@ -67,8 +67,8 @@ public class TestReefAction {
     ConfigurationFile cfgFile;
     ReefOrientationAction action;
 
-    double[] lonp = new double[] {-3, 5, 8, 5, -5};
-    double[] latp = new double[] {0, 0, 13, 18, 10};
+    double[] lonp = new double[] {-3, 5, 8, 5, -5, -3};
+    double[] latp = new double[] {0, 0, 13, 18, 10, 0};
 
     @BeforeAll
     public void prepareData() throws Exception {
@@ -86,14 +86,20 @@ public class TestReefAction {
         double[] point = new double[2];
         double[] output;
 
-        point = new double[] {12, 15};
         double expected[] = new double[] {8, 13};
-        // output = action.findClosestPointPolygon(point, lonp, latp);
-        // assertArrayEquals(expected, output);
+        point = new double[] {12, 15};
+        output = action.findClosestPointPolygon(point, lonp, latp);
+        assertArrayEquals(expected, output);
 
-        point = new double[] {-1, 3};
-        expected[0] = 3.5;
+        expected[0] = -3.5;
         expected[1] = 2.5;
+        point = new double[] {-1, 3};
+        output = action.findClosestPointPolygon(point, lonp, latp);
+        assertArrayEquals(expected, output);
+
+        expected[0] = -3.8461538462;
+        expected[1] = 4.2307692308;
+        point = new double[] {-10, 3};
         output = action.findClosestPointPolygon(point, lonp, latp);
         assertArrayEquals(expected, output);
 
