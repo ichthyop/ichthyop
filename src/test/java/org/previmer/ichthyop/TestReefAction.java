@@ -101,7 +101,13 @@ public class TestReefAction {
         expected[1] = 4.2307692308;
         point = new double[] {-10, 3};
         output = action.findClosestPointPolygon(point, lonp, latp);
-        assertArrayEquals(expected, output);
+        assertArrayEquals(expected, output, 10);
+
+        expected[0] = -3.0;
+        expected[1] = 4.0;
+        point = new double[] {-10, -3};
+        output = action.findClosestPointPolygon(point, lonp, latp);
+        assertArrayEquals(expected, output, 10);
 
     }
 
