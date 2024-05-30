@@ -369,7 +369,7 @@ public class DatasetUtil {
 
     /**
      * Computes the geodesic distance between the two points (lat1, lon1) and
-     * (lat2, lon2)
+     * (lat2, lon2). Haversine formula
      *
      * @param lat1 a double, the latitude of the first point
      * @param lon1 a double, the longitude of the first point
