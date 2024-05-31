@@ -160,6 +160,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M6</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                </configuration>
+            </plugin>
+
             <!-- Copy dependencies in lib folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
