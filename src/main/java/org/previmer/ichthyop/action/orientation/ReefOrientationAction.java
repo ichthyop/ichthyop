@@ -139,7 +139,7 @@ public class ReefOrientationAction extends AbstractAction {
 
         // extract the closest point (can be on edge)
         // this is the target point
-        double[] closestPoint = findClosestPointPolygon(point, lonBarycenter[closestReefIndex], lonBarycenter[closestReefIndex]);
+        double[] closestPoint = findClosestPointPolygon(point, lonBarycenter[closestReefIndex], latBarycenter[closestReefIndex]);
 
         uorient = 0;
         vorient = 0;
