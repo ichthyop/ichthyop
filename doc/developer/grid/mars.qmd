@@ -6,8 +6,9 @@
 import os
 import subprocess
 cwd = os.getcwd()
+print(cwd)
 
-fpath = "developer/grid/_static/mars.py"
+fpath = "grid/_static/mars.py"
 subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 ```
 
@@ -17,13 +18,13 @@ In this section, the main features of the MARS grid and the implications in Icht
 
 In MARS, the 3D structure of the grid is the same as the one in NEMO:
 
-![MARS staggered grid structure](developer/grid/_static/mars_schema_discretisation.jpg)
+![MARS staggered grid structure](grid/_static/mars_schema_discretisation.jpg)
 
 #### Vertical
 
 The vertical coordinate of the Mars model is called $\sigma$, which varies from -1 at seabed to 0 at the surface. In MARS, if the number of `T` points on the vertical is `kmax`, the number of `W` points is `kmax + 1`. For a given `T` cell located at the `k` index, the corresponding `W` point is located below. `k=0` corresponds to the bottom, while `k=kmax` corresponds to the surface.
 
-![MARS grid structure.](developer/grid/_static/mars_schema_discretisation2.jpg)
+![MARS grid structure.](grid/_static/mars_schema_discretisation2.jpg)
 
 
 The conversion from $\sigma$ to $z$, using generalized $\sigma$ levels, is given in [Dumas (2009)](https://mars3d.ifremer.fr/docs/_static/2009_11_22_DocMARS_GB.pdf) (equation 1.29):

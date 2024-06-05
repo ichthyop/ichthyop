@@ -30,7 +30,7 @@ working_directory
 if working_directory.endswith('_static'):
     outdir = './'
 else:
-    outdir = os.path.join('developer', 'grid', '_static')
+    outdir = os.path.join('grid', '_static')
 print("++++++++++++++++++++++++++++++++++++++++++ ", outdir)
 
 def savefig(figname, bbox=None):
@@ -73,7 +73,7 @@ bbox['fc'] = 'powderblue'
 for x in np.arange(0, xmax):
     for y in range(ymax - 1):
         #lv = plt.plot(x, y - 0.5, marker='.', color='b')
-        lv = plt.text(x + 0.5, y + 1, '%d,%d' %(x,y), bbopenox=bbox, ha='center', va='center', color='k')
+        lv = plt.text(x + 0.5, y + 1, '%d,%d' %(x,y), bbox=bbox, ha='center', va='center', color='k')
 
 #l = plt.legend([lt, lu, lv], ['T', 'U', 'V'], ncol=1, loc='right', bbox_to_anchor=(1.2, 0.6))
 savefig('ichthyop_grid_roms')
