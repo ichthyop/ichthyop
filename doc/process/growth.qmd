@@ -25,8 +25,8 @@ The name of the food and temperature variables are provided by the `food_field` 
 
 ### Sole growth
 
-If the {samp}`SoleGrowthAction.java` class is selected, the growth model used in {cite}`TANNER201778` is
-used. It relies on the growth equation from {cite}`fonds1979laboratory` and given by:
+If the {samp}`SoleGrowthAction.java` class is selected, the growth model used in @TANNER201778 is
+used. It relies on the growth equation from @fonds1979laboratory and given by:
 
 $$
 \Delta L = C_1 \times T^{C_2} \times \Delta t
