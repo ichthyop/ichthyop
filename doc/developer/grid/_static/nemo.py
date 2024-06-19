@@ -20,7 +20,7 @@ working_directory
 if working_directory.endswith('_static'):
     outdir = './'
 else:
-    outdir = os.path.join('developer', 'grid', '_static')
+    outdir = os.path.join('grid', '_static')
 print("++++++++++++++++++++++++++++++++++++++++++ ", outdir)
 
 # # NEMO grid
@@ -137,7 +137,7 @@ def plot_points(ix, jy, color):
             #print('dx = ', cox, 'dy = ', coy)
             plt.plot(i + ii + 0.5, j + jj + 0.5, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
-            
+
 fig = plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -161,7 +161,7 @@ plt.savefig(os.path.join(outdir, 't_interpolation_nemo.pdf'))
 #
 # Interpolation of `U` variables is done as follows:
 #
-# - First, the `i` index of the `U` point right of the particle is found by using `round(x)`. 
+# - First, the `i` index of the `U` point right of the particle is found by using `round(x)`.
 # - Then, the `j` index of the `U` grid line below the particle is found. This is done by using `floor` on the `y` value
 # - The box used to average the variable is therefore defined by the `[i - 1, i]` and `[j, j + 1]` squares.
 
@@ -185,7 +185,7 @@ def plot_points(ix, jy, color):
             print(cox, coy)
             plt.plot(i + ii + 1, j + jj + 0.5, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
-            
+
 plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -226,7 +226,7 @@ def plot_points(ix, jy, color):
             print(cox, coy)
             plt.plot(i + ii + 0.5, j + jj + 1, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
-            
+
 plt.figure()
 ax = plt.gca()
 ax.set_xlim(0, xmax)
@@ -258,13 +258,13 @@ def plot_points(ix, jy, color):
     j = np.round(jy - 0.5)
     i = np.round(ix - 0.5)
     points = []
-    
+
     iout = [i + 0.5 - 0.5, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5]
     jout = [j + 0.5 - 0.5, j + 0.5 - 0.5, j + 0.5 - 0.5 + 1, j + 0.5 - 0.5 + 1]
     points = [(ii, jj) for ii, jj in zip(iout, jout)]
     p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
     plt.plot(i + 0.5, j + 0.5, marker='o', color=color)
-            
+
 plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -293,7 +293,7 @@ ymax = 8
 plt.rcParams['lines.markersize'] = 2
 
 def plot_poly(i, j, color):
-        
+
     iout = [i + 0.5 - 0.5, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5]
     jout = [j + 0.5 - 0.5, j + 0.5 - 0.5, j + 0.5 - 0.5 + 1, j + 0.5 - 0.5 + 1]
     points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
@@ -306,12 +306,12 @@ def plot_points(ix, jy, color):
     j = np.round(jy - 0.5)
     i = np.round(ix - 0.5)
     points = []
-    
+
     if(j == np.floor(jy - 0.5)):
         jj = 1
     else:
         jj = -1
-    
+
     if(i == np.floor(ix - 0.5)):
         ii = 1
     else:
@@ -319,7 +319,7 @@ def plot_points(ix, jy, color):
     plot_poly(i + ii, j + jj, color)
     plot_poly(i, j + jj, color)
     plot_poly(i + ii, j, color)
-            
+
 plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -346,7 +346,7 @@ xmax = 12
 ymax = 8
 
 plt.rcParams['lines.markersize'] = 2
-            
+
 plt.figure()
 ax = plt.gca()
 ax.set_xticks(np.arange(0, xmax))
@@ -444,13 +444,13 @@ plt.grid(True, which='minor')
 for v in np.arange(-0.5, zmax + 1 + 0.5):
     plt.axhline(v, color='k', linestyle='--', linewidth=2)
     plt.text(0, v, '%d' %(v + 0.5), bbox=bbox)
-    
+
 for v in np.arange(0, zmax + 1):
     color = cmap((v) / (zmax + 1))
     print((v) / (zmax + 1))
     p = ax.add_patch(Polygon([(x0 - 0.5, v -0.5), (x0 + 0.5, v-0.5), (x0 + 0.5, v + 0.5), (x0 -0.5, v + 0.5)], closed=True,
                             facecolor=color, alpha=0.5))
-    
+
 ax.get_xaxis().set_visible(False)  # removes xlabel
 plt.xlim(-0.5, 0.5)
 plt.ylim(zmax + 0.5, -0.52)
@@ -533,7 +533,7 @@ def plot_point(x, kz, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
     k = np.floor(kz - 0.5)
     plt.plot(x, kz, marker='o', color=color, markersize=6)
-    
+
     for kk in range(2):
         print(k + kk)
         plt.plot(0, k + kk + 0.5, marker=markers[kk], color=color, markersize=12)
@@ -565,7 +565,7 @@ def plot_point(x, kz, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
     k = np.floor(kz)
     plt.plot(x, kz, marker='o', color=color, markersize=6)
-    
+
     for kk in range(2):
         print(k + kk)
         coz = 1 - abs(kz - (k + kk - 0.5))
@@ -597,8 +597,8 @@ def plot_point(x, kz, color):
     plt.plot(x, kz, marker='o', color=color, markersize=6)
     p = ax.add_patch(Polygon([(x0 - 0.5, v -0.5), (x0 + 0.5, v-0.5), (x0 + 0.5, v + 0.5), (x0 -0.5, v + 0.5)], closed=True,
                             facecolor=color, edgecolor=None, alpha=0.3))
-    
-    
+
+
 #     for kk in range(2):
 #         print(k + kk)
 #         coz = 1 - abs(kz - (k + kk - 0.5))

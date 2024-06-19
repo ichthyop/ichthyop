@@ -97,7 +97,7 @@ ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
 The orientation processes all share common features. They both depend on a swimming velocity and random directions. The methods described
 below differ on the way the random directions are drafted.
 
-Swimming velocity is computed following {cite}`staatermanOrientationBehaviorFish2012`:
+Swimming velocity is computed following @staatermanOrientationBehaviorFish2012:
 
 #|echo: false
 $$
