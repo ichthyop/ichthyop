@@ -6,6 +6,7 @@
 - Documentation conversion from Sphinx to Quarto.
 - Adding the possibility to fix the random seed to insure reproducibility of the results.
 - Adding additional unit tests (`TestGetParameter.java`, `TestReefAction.java`, `TestVmDistribution.java`)
+- Adding the possibility to read Stockes velocity in `Roms3dCommon.java`
 
 ## Changes in 3.3.16
 
