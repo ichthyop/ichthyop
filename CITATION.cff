@@ -38,6 +38,6 @@ preferred-citation:
   volume: 23
   year: 2008
 title: "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics"
-version: 3.3.16
+version: 3.3.17
 date-released: 2023-02-28
 doi: 10.5281/zenodo.4243813
