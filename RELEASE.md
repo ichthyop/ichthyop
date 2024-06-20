@@ -1,5 +1,12 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.17
+
+- Adding a first version of orientation, based on Romain Chaput's thesis. **To be improved**
+- Documentation conversion from Sphinx to Quarto.
+- Adding the possibility to fix the random seed to insure reproducibility of the results.
+- Adding additional unit tests (`TestGetParameter.java`, `TestReefAction.java`, `TestVmDistribution.java`)
+
 ## Changes in 3.3.16
 
 ### Bug fix
