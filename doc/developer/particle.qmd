@@ -65,7 +65,7 @@ lengthLayer.setLength(length_init);
 During the first call to the `getLayer` method applied to a given layer class, the latter will be instanciated, initialized and add to the particle's `layers` list attribute, as shown below.
 
 ```{mermaid}
-//| fig-cap: Order in which managers are mobilized.
+%%| fig-cap: Order in which managers are mobilized.
 graph TD;
 
     id1("Call to getLayer()")

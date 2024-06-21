@@ -1,21 +1,37 @@
 # Adding output variable {#sec-new-tracker}
 
-When including new processes to Ichthyop (cf. {numref}`new-action`), the storage of additional variable may be required.
-For instance, in the growth processes  (see {numref}`growth-proc`), in which particle length is a state variable, it is necessary to
+When including new processes to Ichthyop (cf. @sec-new-action), the storage of additional variable may be required.
+For instance, in the growth processes  (see @sec-growth-proc), in which particle length is a state variable, it is necessary to
 save length in the output NetCDF file. This is done by creating a new Java class associated with
 a property file.
 
 # Creating java class
 
 Creating the Java class depends on what type of variable you want to save, as shown
-in {numref}`fig-output-diag`.
+in @fig-output-diag.
 
 (fig-output-diag)=
 
-```{eval-rst}
-.. mermaid:: _static/mermaid/output.md
-    :caption: Adding new variables to the output file.
-    :align: center
+```{mermaid}
+%%| label: fig-output-diag
+%%| fig-cap: Adding variable
+    graph TD;
+
+    id1("Creating new tracker")
+    id2{"One value per particle?"}
+
+    id3(AbstractTracker)
+    id4("<i>track()<br>addRuntimeAttributes()<br>setDimensions()<br>createArray()</i>")
+
+    id5(FloatTracker<br>IntegerTracker)
+    id6("<i>getValue()</i>")
+
+    id1 --> id2
+    id2 -->|No| id3
+    id2 -->|Yes| id5
+
+    id3 --> id4
+    id5 --> id6
 ```
 
 ## General case
@@ -55,7 +71,7 @@ added by calling the `addAttribute(Attribute attribute)` method.
 
 :::{.callout-note}
 Compulsory attributes and variable names
-are defined using properties files, see {numref}`tracker-prop`
+are defined using properties files, see @sec-tracker-prop
 :::
 
 `createArray` initializes the `Array` object that will be used to store the output variable.
@@ -81,9 +97,7 @@ public class LengthTracker extends FloatTracker {
 In this case, the only method to define is the `getValue(IParticle particle)`, which specifies which particle's
 state variable is to be extracted for the given tracker.
 
-(tracker-prop)=
-
-# Creating property file
+# Creating property file {#sec-tracker-prop}
 
 In addition to the tracker java class, a property file must be included in the `io/resources/` folder. The name of this
 file must me the same as the Java class, except for the `.properties` suffix. For instance, the property file associated
