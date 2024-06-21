@@ -62,9 +62,7 @@ def is_over_land(x, y):
 # -
 
 def savefig(figname):
-    
     plt.savefig(os.path.join(dirout, figname + '.svg'), bbox_inches='tight')
-    plt.savefig(os.path.join(dirout, figname + '.pdf'), bbox_inches='tight')
 
 
 def inpolygon(x, y, x_pol, y_pol):
@@ -107,7 +105,7 @@ def plot_bkg():
 
 def _plot_single_zone(lonzone, latzone, color='gray', hatch='/'):
     xy = np.transpose(np.array([lonzone, latzone])) # 7 x 2
-    p = mp.patches.Polygon(xy, closed=True, 
+    p = mp.patches.Polygon(xy, closed=True,
                fill=False, hatch=hatch, color=color, linewidth=2)
     plt.gca().add_artist(p)
 
@@ -122,7 +120,7 @@ def zone_release_particles(N, xzone, yzone):
     while(cpt != N):
         xp = np.random.uniform(xmin, xmax)
         yp = np.random.uniform(ymin, ymax)
-            
+
         if inpolygon(xp, yp, xzone, yzone) & ~is_over_land(xp, yp):
             xout[cpt] = xp
             yout[cpt] = yp
@@ -147,16 +145,16 @@ def geodesicDistance(lat1, lon1, lat2, lon2) :
 
 
 def stain_release_particles(N, xp, yp, radius):
-    
+
     xout = np.zeros([N])
     yout = np.zeros([N])
 
-    cpt = 0 
+    cpt = 0
     niter = 0
     ONE_DEG_LATITUDE_IN_METER = 111138.
-    
+
     while(cpt != N):
-        
+
         lat = yp + 2 * radius * (np.random.uniform() - 0.5) / ONE_DEG_LATITUDE_IN_METER
         one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * np.cos(np.pi * yp / 180)
         lon = xp + 2 * radius * (np.random.uniform() - 0.5) / one_deg_longitude_meter
@@ -168,10 +166,10 @@ def stain_release_particles(N, xp, yp, radius):
         if niter == 6000:
             print("Max iter reached")
             return
-    
+
         niter += 1
-    
-    return xout, yout    
+
+    return xout, yout
 
 
 # -
@@ -222,14 +220,14 @@ xxxp, yyyp = zone_release_particles(10, lonzone1, latzone1)
 for xp, yp in zip(xxxp, yyyp):
     lonp, latp = stain_release_particles(50, xp, yp, 10000)
     plt.plot(lonp, latp, marker='.', linestyle='none', color=col1)
-    
+
 xxxp, yyyp = zone_release_particles(10, lonzone2, latzone2)
 for xp, yp in zip(xxxp, yyyp):
     lonp, latp = stain_release_particles(50, xp, yp, 10000)
     plt.plot(lonp, latp, marker='.', linestyle='none', color=col2)
 
 plt.title('Patchy zone release')
-    
+
 savefig('release_patchy_zones')
 
 # +
@@ -253,7 +251,7 @@ for xp, yp in zip(xxxp, yyyp):
     plt.plot(lonp, latp, marker='.', linestyle='none', color='gray')
 
 plt.title('Patchy uniform release')
-    
+
 savefig('release_patchy_uniform')
 
 # +
@@ -268,10 +266,8 @@ yzone = [ymin, ymin, ymax, ymax, ymin]
 
 xxxp, yyyp = zone_release_particles(1000, xzone, yzone)
 plt.plot(xxxp, yyyp, marker='.', linestyle='none', color='gray')
-    
+
 plt.title('Surface release')
-    
+
 savefig('release_surface')
 # -
-
-

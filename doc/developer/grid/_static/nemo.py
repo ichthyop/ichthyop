@@ -100,7 +100,6 @@ p = ax.add_patch(Polygon([(x0, 0), (x0 + 1, 0), (x0 + 1, ymax), (x0, ymax)], clo
                                  hatch='\\\\', facecolor='none', edgecolor=color))
 plt.title('Zonal cyclicity')
 plt.savefig(os.path.join(outdir, 'zonal_cyclicity_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'zonal_cyclicity_nemo.pdf'))
 # -
 
 # ### Interpolation
@@ -154,7 +153,6 @@ plot_points(8.3, 2.7, 'orange')
 #plot_points(11, 3, 'plum')
 plt.title('Interpolation of T variables')
 plt.savefig(os.path.join(outdir, 't_interpolation_nemo.svg'))
-plt.savefig(os.path.join(outdir, 't_interpolation_nemo.pdf'))
 # -
 
 # #### Interpolation of U variables
@@ -201,7 +199,6 @@ plot_points(8.2, 6.1, 'g')
 plot_points(8.3, 2.7, 'orange')
 plt.title('Interpolation of U variables')
 plt.savefig(os.path.join(outdir, 'u_interpolation_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'u_interpolation_nemo.pdf'))
 # -
 
 # #### Interpolation of V variables
@@ -241,7 +238,6 @@ plot_points(8.2, 6.1, 'g')
 plot_points(8.3, 2.7, 'orange')
 plt.title('Interpolation of V variables')
 plt.savefig(os.path.join(outdir, 'v_interpolation_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'v_interpolation_nemo.pdf'))
 # -
 
 # ### Land sea-mask
@@ -281,7 +277,6 @@ plot_points(8.2, 6.1, 'g')
 plot_points(8.3, 2.7, 'orange')
 plt.title('Land-sea mask')
 plt.savefig(os.path.join(outdir, 'landsea_mask_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'landsea_mask_nemo.pdf'))
 # -
 
 # ### Close to coast
@@ -336,7 +331,6 @@ plot_points(8.2, 6.1, 'g')
 plot_points(8.3, 2.7, 'orange')
 plt.title('Close to Coast')
 plt.savefig(os.path.join(outdir, 'close_to_coast_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'close_to_coast_nemo.pdf'))
 # -
 
 # ### Is On Edge
@@ -383,7 +377,6 @@ p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, 
 
 plt.title('Is On Edge')
 plt.savefig(os.path.join(outdir, 'is_on_edge_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'is_on_edge_nemo.pdf'))
 # -
 
 # ## Vertical
@@ -455,7 +448,6 @@ ax.get_xaxis().set_visible(False)  # removes xlabel
 plt.xlim(-0.5, 0.5)
 plt.ylim(zmax + 0.5, -0.52)
 plt.savefig(os.path.join(outdir, 'vertical_indexing_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'vertical_indexing_nemo.pdf'))
 # -
 
 # In this case, for a `T` point at the `k` index, the corresponding `W` point is located above.
@@ -493,7 +485,6 @@ for v in np.arange(0, zmax + 1):
 plt.xlim(-0.5, 0.5)
 plt.ylim(-0.52, zmax + 0.5)
 plt.savefig(os.path.join(outdir, 'corrected_vertical_indexing_nemo.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'corrected_vertical_indexing_nemo.pdf'), bbox_inches='tight')
 # -
 
 # ### Scale factors.
@@ -554,7 +545,6 @@ plt.ylim(0, zmax)
 plot_point(-0.3, 2.7, 'red')
 plot_point(0.2, 5.3, 'blue')
 plt.savefig(os.path.join(outdir, 'vertical_t_interpolation_nemo.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'vertical_t_interpolation_nemo.pdf'), bbox_inches='tight')
 # -
 
 # #### Interpolation of W variable
@@ -587,7 +577,6 @@ plt.ylim(-0.1, zmax + 0.1)
 plot_point(-0.3, 2.7, 'red')
 plot_point(0.2, 5.3, 'blue')
 plt.savefig(os.path.join(outdir, 'vertical_w_interpolation_nemo.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'vertical_w_interpolation_nemo.pdf'), bbox_inches='tight')
 # +
 def plot_point(x, kz, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
@@ -619,5 +608,4 @@ plt.ylim(0, zmax)
 plot_point(-0.3, 2.7, 'red')
 plot_point(0.2, 5.3, 'blue')
 plt.savefig(os.path.join(outdir, 'vertical_landsea_mask_nemo.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'vertical_landsea_mask_nemo.pdf'), bbox_inches='tight')
 # -

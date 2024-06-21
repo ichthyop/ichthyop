@@ -66,22 +66,19 @@ c1 = plt.plot([xxx[iok][-1], xxx[iok][-1]], [yor, yor + 1 - yor], linestyle=':')
 plt.annotate('$\Delta y_1$', (xxx[iok][-1] + 0.1, 0.5 * (yor + yyy[iok][-1])), ha='center', va='center', color=c1[0].get_color())
 
 c2 = plt.plot([xxx[ibis][-1], xxx[ibis][-1]], [ybis[-1], ybis[-1] + 1 - ybis[-1]], linestyle=':', color='blue')
-plt.annotate('$-\Delta y_2$', (xxx[ibis][-1] + 0.15, 0.5 * (ybis[-1] + ybis[-1] + 1 - ybis[-1])), 
+plt.annotate('$-\Delta y_2$', (xxx[ibis][-1] + 0.15, 0.5 * (ybis[-1] + ybis[-1] + 1 - ybis[-1])),
              ha='center', va='center', color=c2[0].get_color())
 
 c3 = plt.plot([xxx[ibis][-1], xxx[ibis][-1]], [yor + dy, yor + dy + 1 - (yor + dy)], color='c', linestyle=':')
-plt.annotate('$\Delta y_2$', (xxx[ibis][-1] + 0.15, 0.5 * (yor + dy + yor + dy + 1 - (yor + dy))), 
+plt.annotate('$\Delta y_2$', (xxx[ibis][-1] + 0.15, 0.5 * (yor + dy + yor + dy + 1 - (yor + dy))),
              ha='center', va='center', color=c3[0].get_color())
 
 y1 = yor
 y2 = ybis[-1]
 c4 = plt.plot([xxx[ibis][-1], xxx[ibis][-1]], [y1, y2], color='r', linestyle=':')
-plt.annotate('$\Delta y_{cor}$', (xxx[ibis][-1] + 0.15, 0.5 * (y1 + y2)), 
+plt.annotate('$\Delta y_{cor}$', (xxx[ibis][-1] + 0.15, 0.5 * (y1 + y2)),
              ha='center', va='center', color=c4[0].get_color())
 
 
 plt.savefig(os.path.join(outdir, 'bouncing.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'bouncing.pdf'), bbox_inches='tight')
 # -
-
-
