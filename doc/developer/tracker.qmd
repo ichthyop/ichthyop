@@ -5,16 +5,14 @@ For instance, in the growth processes  (see @sec-growth-proc), in which particle
 save length in the output NetCDF file. This is done by creating a new Java class associated with
 a property file.
 
-# Creating java class
+## Creating java class
 
 Creating the Java class depends on what type of variable you want to save, as shown
 in @fig-output-diag.
 
-(fig-output-diag)=
-
 ```{mermaid}
 %%| label: fig-output-diag
-%%| fig-cap: Adding variable
+%%| fig-cap: Adding a new tracker
     graph TD;
 
     id1("Creating new tracker")
@@ -34,7 +32,7 @@ in @fig-output-diag.
     id5 --> id6
 ```
 
-## General case
+### General case
 
 Adding new variables can be achieved by creating new tracker class in the `org.previmer.ichthyop.io` package, which inherits
 from the `AbstractTracker` java class. It must override the 4 methods, as shown below for the `LengthTracker` class:
@@ -79,7 +77,7 @@ The dimensions of the array depends on the dimension of the output variables.
 
 `track()` is the method that is called at each output time-step and which writes the variable in the NetCDF.
 
-## Simple case
+### Simple case
 
 Usually, new variables consist in tracking one single particle property, such as length for instance. In this case, the new
 tracker class can inherits either from the `FloatTracker` or the `IntegerTracker` classes as follows:
@@ -97,7 +95,7 @@ public class LengthTracker extends FloatTracker {
 In this case, the only method to define is the `getValue(IParticle particle)`, which specifies which particle's
 state variable is to be extracted for the given tracker.
 
-# Creating property file {#sec-tracker-prop}
+## Creating property file {#sec-tracker-prop}
 
 In addition to the tracker java class, a property file must be included in the `io/resources/` folder. The name of this
 file must me the same as the Java class, except for the `.properties` suffix. For instance, the property file associated
