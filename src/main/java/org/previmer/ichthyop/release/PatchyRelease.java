@@ -122,11 +122,11 @@ public class PatchyRelease extends AbstractRelease {
                     if (counter++ > DROP_MAX) {
                         throw new NullPointerException("{Patchy release} Unable to release particle. Check out the zone definitions.");
                     }
-                    double x = xmin + Math.random() * (xmax - xmin);
-                    double y = ymin + Math.random() * (ymax - ymin);
+                    double x = xmin + this.getRandomDraft() * (xmax - xmin);
+                    double y = ymin + this.getRandomDraft() * (ymax - ymin);
                     double depth = Double.NaN;
                     if (is3D) {
-                        depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
+                        depth = -1.d * (upDepth + this.getRandomDraft() * (lowDepth - upDepth));
                     }
                     particle = ParticleFactory.createZoneParticle(index, x, y, depth);
                 }
@@ -140,12 +140,12 @@ public class PatchyRelease extends AbstractRelease {
                         if (counter++ > DROP_MAX) {
                             throw new NullPointerException("{Patchy release} Unable to release particle. Check out the patchy release definition.");
                         }
-                        double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
+                        double lat = particle.getLat() + radius_patch * (this.getRandomDraft() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
                         double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
-                        double lon = particle.getLon() + radius_patch * (Math.random() - 0.5d) / one_deg_longitude_meter;
+                        double lon = particle.getLon() + radius_patch * (this.getRandomDraft() - 0.5d) / one_deg_longitude_meter;
                         double depth = Double.NaN;
                         if (is3D) {
-                            depth = particle.getDepth() + thickness_patch * (Math.random() - 0.5d);
+                            depth = particle.getDepth() + thickness_patch * (this.getRandomDraft() - 0.5d);
                         }
                         particlePatch = ParticleFactory.createGeoParticle(index, lon, lat, depth);
                     }
@@ -195,11 +195,11 @@ public class PatchyRelease extends AbstractRelease {
                 if (counter++ > DROP_MAX) {
                     throw new NullPointerException("{Patchy release} Unable to release particle. Check out the zone definitions.");
                 }
-                double x = xmin + Math.random() * (xmax - xmin);
-                double y = ymin + Math.random() * (ymax - ymin);
+                double x = xmin + this.getRandomDraft() * (xmax - xmin);
+                double y = ymin + this.getRandomDraft() * (ymax - ymin);
                 double depth = Double.NaN;
                 if (is3D) {
-                    depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
+                    depth = -1.d * (upDepth + this.getRandomDraft() * (lowDepth - upDepth));
                 }
                 particle = ParticleFactory.createZoneParticle(index, x, y, depth);
             }
@@ -214,12 +214,12 @@ public class PatchyRelease extends AbstractRelease {
                     if (counter++ > DROP_MAX) {
                         throw new NullPointerException("{Patchy release} Unable to release particle. Check out the patchy release definition.");
                     }
-                    double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
+                    double lat = particle.getLat() + radius_patch * (this.getRandomDraft() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
                     double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
-                    double lon = particle.getLon() + radius_patch * (Math.random() - 0.5d) / one_deg_longitude_meter;
+                    double lon = particle.getLon() + radius_patch * (this.getRandomDraft() - 0.5d) / one_deg_longitude_meter;
                     double depth = Double.NaN;
                     if (is3D) {
-                        depth = particle.getDepth() + thickness_patch * (Math.random() - 0.5d);
+                        depth = particle.getDepth() + thickness_patch * (this.getRandomDraft() - 0.5d);
                     }
                     particlePatch = ParticleFactory.createGeoParticle(index, lon, lat, depth);
                 }

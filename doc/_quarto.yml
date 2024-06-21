@@ -1,0 +1,66 @@
+project:
+  type: book
+
+bibliography: _static/biblio.bib
+
+resources:
+  - console/_static/
+  - release/_static/
+  - process/_static/
+  - developer/_static
+  - developer/grid/_static
+
+book:
+  title: "Ichthyop User Guide (3.3.17)"
+  author:
+    - name: "Nicolas Barrier"
+      orcid: 0000-0002-1693-4719
+    - name: "Philippe Verley"
+      orcid: 0000-0002-5686-2764
+    - name: Gwendoline Andres
+    - name: "Christophe Lett"
+      orcid: 0000-0001-5809-2452
+  chapters:
+    - index.qmd
+    - part: user_guide.qmd
+      chapters:
+        - start.qmd
+        - ichconf.qmd
+        - console.qmd
+        - faq.qmd
+    - part: documentation.qmd
+      chapters:
+        - release.qmd
+        - process.qmd
+    - part: developer.qmd
+      chapters:
+        - developer/manager_initialization.qmd
+        - developer/particle.qmd
+        - developer/grid.qmd
+        - developer/new_action.qmd
+        - developer/tracker.qmd
+    - biblio.qmd
+  search: true
+  repo-url: https://github.com/ichthyop/ichthyop/
+  repo-actions: [edit]
+  downloads: [pdf]
+  sidebar:
+    style: "docked"
+    logo: _static/logo-ichthyop.svg
+  favicon: _static/logo-ichthyop.svg
+  page-navigation: true
+  issue-url: "https://github.com/ichthyop/ichthyop/issues"
+
+execute:
+  cache: true
+
+jupyter: python3
+
+format:
+  html:
+    number-sections: true
+    theme: cosmo
+    number-depth: 3
+
+  pdf:
+    fontfamily: libertinus

@@ -133,6 +133,9 @@ public class Zone extends SimulationManagerAccessor {
      */
     private double proportionParticles;
 
+    // Kappa value for the
+    private float kappa;
+
     /**
      * Creates a new zone.
      *
@@ -174,6 +177,14 @@ public class Zone extends SimulationManagerAccessor {
      */
     public String getKey() {
         return key;
+    }
+
+    public void setKappa(float kappa) {
+        this.kappa = kappa;
+    }
+
+    public float getKappa() {
+        return this.kappa;
     }
 
     public void setThicknessEnabled(boolean enabled) {

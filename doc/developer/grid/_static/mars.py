@@ -50,7 +50,6 @@ print("++++++++++++++++++++++++++++++++++++++++++ ", outdir)
 
 def savefig(figname, bbox=None):
     plt.savefig(os.path.join(outdir, figname + '.svg'), bbox_inches=bbox)
-    plt.savefig(os.path.join(outdir, figname + '.pdf'), bbox_inches=bbox)
 
 
 # +
@@ -96,7 +95,7 @@ plt.title('Interpolation of T variables')
 #
 # Interpolation of `U` variables is done as follows:
 #
-# - First, the `i` index of the `U` point right of the particle is found by using `round(x)`. 
+# - First, the `i` index of the `U` point right of the particle is found by using `round(x)`.
 # - Then, the `j` index of the `U` grid line below the particle is found. This is done by using `floor` on the `y` value
 # - The box used to average the variable is therefore defined by the `[i - 1, i]` and `[j, j + 1]` squares.
 
@@ -205,7 +204,7 @@ def plot_point(x, kz, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
     k = np.floor(kz)
     plt.plot(x, kz, marker='o', color=color, markersize=4)
-    
+
     for kk in range(2):
         print(k + kk)
         coz = 1 - abs(kz - (k + kk))
@@ -237,7 +236,7 @@ def plot_point(x, kz, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
     k = np.round(kz)
     plt.plot(x, kz, marker='o', color=color, markersize=4)
-    
+
     for kk in range(2):
         print(k + kk - 0.5)
         coz = 1 - abs(kz - (k + kk - 0.5))

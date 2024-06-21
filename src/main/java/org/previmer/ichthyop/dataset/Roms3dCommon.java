@@ -125,10 +125,15 @@ abstract public class Roms3dCommon extends RomsCommon {
      */
     private String strCs_r, strCs_w, strHC;
 
+    private String strUStokes, strVStokes;
+    float[][][] v_stokes_tp1;
+    float[][][] u_stokes_tp1;
+
     /**
      * True if W should be read, false if should be computed.
      */
     private boolean readW;
+    private boolean read_stokesvelocity;
 
     /**
      * Name of the W variable is read.
@@ -217,6 +222,16 @@ abstract public class Roms3dCommon extends RomsCommon {
         /* load common parameters*/
         super.loadParameters();
 
+        if (findParameter("read_stokesvelocity")) {
+            read_stokesvelocity = Boolean.valueOf(getParameter("read_stokes_velocity"));
+            strUStokes = getParameter("field_var_u_stokes");
+            strVStokes = getParameter("field_var_v_stokes");
+
+        } else {
+            read_stokesvelocity = false;
+            getLogger().warning("Ichthyop will not read stokes velocity");
+        }
+
         /* load 3D parameters */
         strZDim = getParameter("field_dim_z");
         strZeta = getParameter("field_var_zeta");
@@ -233,7 +248,6 @@ abstract public class Roms3dCommon extends RomsCommon {
         if (readW) {
             strW = getParameter("field_var_w");
         }
-
     }
 
     /**
@@ -400,11 +414,15 @@ abstract public class Roms3dCommon extends RomsCommon {
         final double dx = x - (double) i;
         final double dy = y - (double) j;
         final double dz = kz - (double) k;
+        
+        // patch for Luisa
+        int nk = (z == 0) ? 1 : 2;
+        
         double co;
         double z_r;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
+                for (int kk = 0; kk < nk; kk++) {
                     co = Math.abs((1.d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
@@ -457,7 +475,7 @@ abstract public class Roms3dCommon extends RomsCommon {
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
+    public double get_dVy(double[] pGrid, double time, boolean normalize) {
         double dv = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
@@ -482,7 +500,11 @@ abstract public class Roms3dCommon extends RomsCommon {
                     CO += co;
                     double x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
                     if (!Double.isNaN(x)) {
-                        dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                        if (normalize) {
+                            dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                        } else {
+                            dv += x * co;
+                        }
                     }
 
                 }
@@ -495,7 +517,7 @@ abstract public class Roms3dCommon extends RomsCommon {
     }
 
     @Override
-    public double get_dUx(double[] pGrid, double time) {
+    public double get_dUx(double[] pGrid, double time, boolean normalize) {
 
         double du = 0.d;
         double ix, jy, kz;
@@ -521,7 +543,11 @@ abstract public class Roms3dCommon extends RomsCommon {
                     CO += co;
                     double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
                     if (!Double.isNaN(x)) {
-                        du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                        if (normalize) {
+                            du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                        } else {
+                            du += x * co;
+                        }
                     }
 
                 }
@@ -652,7 +678,33 @@ abstract public class Roms3dCommon extends RomsCommon {
         } else {
             w_tp1 = computeW();
         }
-
+        if (read_stokesvelocity) {
+            try {
+                // Add the U-Stokes velocity to the current velocity
+                arr = ncIn.findVariable(strUStokes).read(origin, new int[]{1, nz, ny, nx}).reduce();
+                index = arr.getIndex();
+                for (int k = 0; k < nz; k++) {
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            u_tp1[k][j][i] += arr.getFloat(index.set(k, j, i));
+                        }
+                    }
+                }
+                arr = ncIn.findVariable(strVStokes).read(origin, new int[]{1, nz, ny, nx}).reduce();
+                index = arr.getIndex();
+                for (int k = 0; k < nz; k++) {
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            v_tp1[k][j][i] += arr.getFloat(index.set(k, j, i));
+                        }
+                    }
+                }
+            } catch (IOException | InvalidRangeException ex) {
+                IOException ioex = new IOException("Error reading Stokes velocity " + ex.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
+            }
+        }
     }
 
     protected float[][][] computeW() throws IOException, InvalidRangeException {
@@ -816,16 +868,19 @@ abstract public class Roms3dCommon extends RomsCommon {
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+
         Variable variable = nc.findVariable(name);
+        int[] variableShape = variable.getShape();
         int[] origin = null, shape = null;
-        switch (variable.getShape().length) {
+
+        switch (variableShape.length) {
             case 4:
                 origin = new int[]{rank, 0, jpo, ipo};
-                shape = new int[]{1, nz, ny, nx};
+                shape = new int[]{1, nz, Math.min(ny, variableShape[2]), Math.min(ny, variableShape[3])};
                 break;
             case 2:
                 origin = new int[]{jpo, ipo};
-                shape = new int[]{ny, nx};
+                shape = new int[]{Math.min(ny, variableShape[2]), Math.min(ny, variableShape[3])};
                 break;
             case 3:
                 if (!variable.isUnlimited()) {

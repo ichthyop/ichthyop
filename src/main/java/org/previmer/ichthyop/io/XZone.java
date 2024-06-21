@@ -76,6 +76,7 @@ public class XZone extends org.jdom2.Element {
     private static final String LINE_INSHORE = "line_inshore";
     private static final String LINE_OFFSHORE = "line_offshore";
     private static final String PROPORTION_PARTICLES = "proportion_particles";
+    private static final String KAPPA = "kappa";
 
     public XZone(Element xzone) {
         super(ZONE);
@@ -184,10 +185,16 @@ public class XZone extends org.jdom2.Element {
     }
 
     public Element getBathyMask() {
+        if (null == getChild(BATHY_MASK)) {
+            addContent(new Element(BATHY_MASK));
+        }
         return getChild(BATHY_MASK);
     }
 
     public Element getThickness() {
+        if (null == getChild(THICKNESS)) {
+            addContent(new Element(THICKNESS));
+        }
         return getChild(THICKNESS);
     }
 
@@ -265,6 +272,9 @@ public class XZone extends org.jdom2.Element {
     }
 
     public float getUpperDepth() {
+        if(null == getThickness().getChildTextNormalize(UPPER_DEPTH)) {
+            return 0;
+        }
         return Float.valueOf(getThickness().getChildTextNormalize(UPPER_DEPTH));
     }
 
@@ -304,6 +314,18 @@ public class XZone extends org.jdom2.Element {
         return Float.valueOf(getBathyMask().getChildTextNormalize(LINE_OFFSHORE));
     }
 
+    public float getKappa() {
+        return Float.valueOf(getChildTextNormalize(KAPPA));
+    }
+
+    // Adding a setter for Kappa values
+    public void setKappa(float kappa) {
+        if (null == getChild(KAPPA)) {
+            this.addContent(new Element(KAPPA));
+        }
+        getChild(KAPPA).setText(String.valueOf(kappa));
+    }
+
     public void setOffshoreLine(float depth) {
         if (null == getBathyMask().getChild(LINE_OFFSHORE)) {
             getBathyMask().addContent(new Element(LINE_OFFSHORE));
@@ -321,6 +343,7 @@ public class XZone extends org.jdom2.Element {
         }
         getBathyMask().getChild(ENABLED).setText(String.valueOf(enabled));
     }
+
 
     public class XPoint extends org.jdom2.Element {
 

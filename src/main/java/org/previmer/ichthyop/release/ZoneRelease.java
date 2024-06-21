@@ -98,7 +98,7 @@ public class ZoneRelease extends AbstractRelease {
             totalPercentage += zone.getProportionParticles();
         }
 
-        if (totalPercentage != 1) {
+        if (Math.abs(totalPercentage - 1) > Math.pow(10, -8)) {
             StringBuilder sb = new StringBuilder();
             sb.append("Total proportion must be less equan than 100. ");
             sb.append("Actual proportion is ");
@@ -200,11 +200,11 @@ public class ZoneRelease extends AbstractRelease {
                     if (counter++ > DROP_MAX) {
                         throw new NullPointerException("Unable to release particle in release zone " + zone.getIndex() + ". Check out the zone definitions.");
                     }
-                    double x = xmin + Math.random() * (xmax - xmin);
-                    double y = ymin + Math.random() * (ymax - ymin);
+                    double x = xmin + this.getRandomDraft() * (xmax - xmin);
+                    double y = ymin + this.getRandomDraft() * (ymax - ymin);
                     double depth = Double.NaN;
                     if (is3D) {
-                        depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
+                        depth = -1.d * (upDepth + this.getRandomDraft() * (lowDepth - upDepth));
                     }
                     particle = ParticleFactory.createZoneParticle(index, x, y, depth);
                 }

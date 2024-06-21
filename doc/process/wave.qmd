@@ -1,0 +1,37 @@
+## Wave drift
+
+Ichthyop can take into account the effects of waves on the particles trajectories, following the Stokes drift equations of @stokes_2009:
+
+$$
+U_{S} = w \times k \times a^2 \times \exp\left(2 \times k \times z\right)
+$$
+
+In Ichthyop, the user provides zonal and meridional wave stokes drift and
+the wave periods. The horizontal displacement of particles is computed as follows:
+
+$$
+\|U_{wave}\| = U_{wave}^2 + V_{wave}^2
+$$
+
+$$
+\lambda_{wave} =  \|U_{wave}\| \times T_{wave}
+$$
+
+$$
+k_{wave} =  \dfrac{2 \pi}{\lambda_{wave}}
+$$
+
+$$
+\Delta X = F \times U_{cur} \times \Delta t \times \exp\left(2 \times k_{wave} \times z\right)
+$$
+
+$$
+\Delta Y = F \times V_{cur} \times \Delta t \times \exp\left(2 \times k_{wave} \times z\right)
+$$
+
+with  $U_{wave}$ and $V_{wave}$ the zonal and meridional stokes components, $T_{wave}$
+the wave period, $U_{cur}$ and $V_{cur}$ the zonal and meridional ocean current components, $z$
+the depth and  $F$ a multiplication factor provided by the user.
+
+
+<!-- TODO Add references for Ichthyop use and implementation -->

@@ -77,6 +77,8 @@ public class ParticleFactory extends SimulationManagerAccessor {
         } else {
             particle.kill(mortality);
         }
+        particle.setOldLat(particle.getLat());
+        particle.setOldLon(particle.getLon());
         return particle;
     }
 
@@ -102,6 +104,8 @@ public class ParticleFactory extends SimulationManagerAccessor {
             return null;
         }
         particle.grid2Geo();
+        particle.setOldLat(particle.getLat());
+        particle.setOldLon(particle.getLon());
         return particle;
     }
 
@@ -134,6 +138,8 @@ public class ParticleFactory extends SimulationManagerAccessor {
         }
         particle.grid2Geo();
         particle.geo2Grid();
+        particle.setOldLat(particle.getLat());
+        particle.setOldLon(particle.getLon());
         return particle;
     }
 
@@ -164,6 +170,8 @@ public class ParticleFactory extends SimulationManagerAccessor {
          * Converts (x, y, z) into (lon, lat, depth)
          */
         particle.grid2Geo();
+        particle.setOldLat(particle.getLat());
+        particle.setOldLon(particle.getLon());
         return particle;
     }
 }

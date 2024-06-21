@@ -99,8 +99,8 @@ public class BottomRelease extends AbstractRelease {
                 if (counter++ > DROP_MAX) {
                     throw new NullPointerException("{Zone Release} Unable to release particle. Check out the zone definitions.");
                 }
-                double x = xmin + Math.random() * (xmax - xmin);
-                double y = ymin + Math.random() * (ymax - ymin);
+                double x = xmin + this.getRandomDraft() * (xmax - xmin);
+                double y = ymin + this.getRandomDraft() * (ymax - ymin);
                 particle = ParticleFactory.createBottomParticle(index, x, y);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);

@@ -1,0 +1,9 @@
+# Ichthyop console {#sec-console}
+
+In this section, the Ichthyop console is described.
+
+{{< include console/configure.qmd >}}
+{{< include console/zone.qmd >}}
+{{< include console/running.qmd >}}
+{{< include console/visu.qmd >}}
+{{< include console/anim.qmd >}}

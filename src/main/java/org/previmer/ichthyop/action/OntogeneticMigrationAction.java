@@ -271,9 +271,9 @@ public class OntogeneticMigrationAction extends AbstractAction {
         float proba;
         int iDepth;
         do {
-            iDepth = (int) Math.round((depth.length - 1) * Math.random());
+            iDepth = (int) Math.round((depth.length - 1) * this.getRandomDraft());
             proba = probability[iTime][iDepth];
-        } while (proba <= 0 || proba < (Math.random() * maxProbability[iTime]));
+        } while (proba <= 0 || proba < (this.getRandomDraft() * maxProbability[iTime]));
 
         // Set the depth of the particle, around the selected depth level
         double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), -depth[iDepth]) - particle.getZ();

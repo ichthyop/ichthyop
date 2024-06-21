@@ -44,8 +44,11 @@
 
 package org.previmer.ichthyop.action;
 
+import java.util.Random;
+
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.manager.ParameterManager;
 import org.previmer.ichthyop.particle.IParticle;
 
 /**
@@ -55,6 +58,7 @@ import org.previmer.ichthyop.particle.IParticle;
 public abstract class AbstractAction extends SimulationManagerAccessor {
 
     private final String actionKey;
+    private final Random randomGenerator;
 
     abstract public void loadParameters() throws Exception;
 
@@ -64,6 +68,16 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
 
     public AbstractAction() {
         actionKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
+        boolean isFixedSeed = ParameterManager.getInstance().getConfigurationFile().isFixedSeed();
+        if (isFixedSeed) {
+            randomGenerator = new Random(getSimulationManager().getIndexSimulation());
+        } else {
+            randomGenerator = new Random();
+        }
+    }
+
+    public double getRandomDraft() {
+        return randomGenerator.nextDouble();
     }
 
     public String getBlockKey() {

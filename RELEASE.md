@@ -1,5 +1,19 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.17
+
+### New features
+
+- Adding a first version of orientation, based on Romain Chaput's thesis. **To be improved**
+- Documentation conversion from Sphinx to Quarto.
+- Adding the possibility to fix the random seed to insure reproducibility of the results.
+- Adding additional unit tests (`TestGetParameter.java`, `TestReefAction.java`, `TestVmDistribution.java`)
+- Adding the possibility to read Stockes velocity in `Roms3dCommon.java`
+
+### Bug fix
+
+- In `MigrationAction.java`, in case of constant depth, check if the particle is below the sea-bed. If so, the particle does not move.
+
 ## Changes in 3.3.16
 
 ### Bug fix

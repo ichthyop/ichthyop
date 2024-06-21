@@ -70,6 +70,10 @@ public interface IDataset extends NextStepListener {
 
     double get_dVy(double[] pGrid, double time);
 
+    double get_dUx(double[] pGrid, double time, boolean normalize);
+
+    double get_dVy(double[] pGrid, double time, boolean normalize);
+
     double get_dWz(double[] pGrid, double time);
 
     public boolean isInWater(double[] pGrid);

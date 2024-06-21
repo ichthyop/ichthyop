@@ -47,6 +47,7 @@ package org.previmer.ichthyop.action;
 import org.previmer.ichthyop.util.MTRandom;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.dataset.IDataset;
+import org.previmer.ichthyop.manager.ParameterManager;
 
 /**
  *
@@ -58,7 +59,12 @@ public class VDispAction extends AbstractAction {
     private String kv_field;
 
     public void loadParameters() throws Exception {
-        random = new MTRandom(true);
+        boolean isFixedSeed = ParameterManager.getInstance().getConfigurationFile().isFixedSeed();
+        if (isFixedSeed) {
+            random = new MTRandom(getSimulationManager().getIndexSimulation());
+        } else {
+            random = new MTRandom();
+        }
         kv_field = getParameter("kv_field");
         getSimulationManager().getDataset().requireVariable(kv_field, getClass());
     }

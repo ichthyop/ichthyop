@@ -119,9 +119,9 @@ public class SwimmingAction extends AbstractAction {
     public void execute(IParticle particle) {
 
         // Find the swimming velocity for this particle
-        double speed = getSpeed(particle) * (constant ? 1.d : 2.d*Math.random());
+        double speed = getSpeed(particle) * (constant ? 1.d : 2.d*this.getRandomDraft());
         // Random x component of the swimming velocity
-        double u = randomDir() * Math.random() * speed;
+        double u = randomDir() * this.getRandomDraft() * speed;
         // y component such as sqrt(x2 + y2) = speed
         double v = randomDir() * Math.sqrt(speed * speed - u * u);
 
@@ -162,7 +162,7 @@ public class SwimmingAction extends AbstractAction {
      * @return -1 or 1 randomly
      */
     private double randomDir() {
-        return Math.random() < 0.5 ? -1.d : 1.d;
+        return this.getRandomDraft() < 0.5 ? -1.d : 1.d;
     }
 
 }

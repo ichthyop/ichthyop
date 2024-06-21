@@ -369,7 +369,7 @@ public class DatasetUtil {
 
     /**
      * Computes the geodesic distance between the two points (lat1, lon1) and
-     * (lat2, lon2)
+     * (lat2, lon2). Haversine formula
      *
      * @param lat1 a double, the latitude of the first point
      * @param lon1 a double, the longitude of the first point
@@ -449,7 +449,7 @@ public class DatasetUtil {
 
         // Recover the time values for the corresponding index
         Array timeArr = nc.findVariable(strTime).read();
-        long time = (long) timeArr.getDouble(timeArr.getIndex().set(index));
+        double time = timeArr.getDouble(timeArr.getIndex().set(index));
 
         String units;
         // Converts string into lower case.
@@ -465,7 +465,7 @@ public class DatasetUtil {
 
     }
 
-    public static double getDate(long time, String units) {
+    public static double getDate(double time, String units) {
         if(TimeManager.getInstance().isNoLeapEnabled()) {
             return getDateNoLeap(time, units);
         } else {
@@ -473,24 +473,36 @@ public class DatasetUtil {
         }
     }
 
-    public static double getDateLeap(long time, String units) {
+    public static double getDateLeap(double time, String units) {
 
         LocalDateTime finalDate, dateUnit;
         try {
-            dateUnit = getDateUnit(time, units);
+            dateUnit = getDateUnit(units);
         } catch(Exception e) {
             units = TimeManager.getInstance().getTimeOfOrigin();
-            dateUnit = getDateUnit(time, units);
+            dateUnit = getDateUnit(units);
         }
 
+        long time_integer = (long) Math.floor(time);
+
+        // Compute the time delta between the rounded value and the real
+        // value. Delta is in the same unit as time (day, minute, hour).
+        double delta = time - time_integer;
+
         if (units.contains("second")) {
-            finalDate = dateUnit.plusSeconds(time);
+            finalDate = dateUnit.plusSeconds(time_integer);
         } else if (units.contains("hour")) {
-            finalDate = dateUnit.plusHours(time);
+            // Convert the delta in seconds;
+            long delta_integer = (long) (delta * Constant.ONE_HOUR);
+            finalDate = dateUnit.plusHours(time_integer).plusSeconds(delta_integer);
         } else if (units.contains("minute")) {
-            finalDate = dateUnit.plusMinutes(time);
+            // Convert the delta in seconds;
+            long delta_integer = (long) (delta * Constant.ONE_MINUTE);
+            finalDate = dateUnit.plusMinutes(time_integer).plusSeconds(delta_integer);
         } else {
-            finalDate = dateUnit.plusDays(time);
+            // Convert the delta in seconds;
+            long delta_integer = (long) (delta * Constant.ONE_DAY);
+            finalDate = dateUnit.plusDays(time_integer).plusSeconds(delta_integer);
         }
 
         double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
@@ -499,14 +511,14 @@ public class DatasetUtil {
 
     }
 
-    public static double getDateNoLeap(long time, String units) {
+    public static double getDateNoLeap(double time, String units) {
 
         LocalDateTime dateUnit;
         try {
-            dateUnit = getDateUnit(time, units);
+            dateUnit = getDateUnit(units);
         } catch(Exception e) {
             units = TimeManager.getInstance().getTimeOfOrigin();
-            dateUnit = getDateUnit(time, units);
+            dateUnit = getDateUnit(units);
         }
 
         if (units.contains("hour")) {
@@ -552,7 +564,7 @@ public class DatasetUtil {
 
     }
 
-    public static LocalDateTime getDateUnit(long time, String units) {
+    public static LocalDateTime getDateUnit(String units) {
 
         // Date formatter to extract NetCDF time
         DateTimeFormatter dateFormatter;

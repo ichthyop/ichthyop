@@ -100,7 +100,6 @@ p = ax.add_patch(Polygon([(x0, 0), (x0 + 1, 0), (x0 + 1, ymax), (x0, ymax)], clo
                                  hatch='\\\\', facecolor='none', edgecolor=color))
 plt.title('Zonal cyclicity')
 plt.savefig(os.path.join(outdir, 'zonal_cyclicity_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'zonal_cyclicity_nemo.pdf'))
 # -
 
 # ### Interpolation
@@ -137,7 +136,7 @@ def plot_points(ix, jy, color):
             #print('dx = ', cox, 'dy = ', coy)
             plt.plot(i + ii + 0.5, j + jj + 0.5, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
-            
+
 fig = plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -154,14 +153,13 @@ plot_points(8.3, 2.7, 'orange')
 #plot_points(11, 3, 'plum')
 plt.title('Interpolation of T variables')
 plt.savefig(os.path.join(outdir, 't_interpolation_nemo.svg'))
-plt.savefig(os.path.join(outdir, 't_interpolation_nemo.pdf'))
 # -
 
 # #### Interpolation of U variables
 #
 # Interpolation of `U` variables is done as follows:
 #
-# - First, the `i` index of the `U` point right of the particle is found by using `round(x)`. 
+# - First, the `i` index of the `U` point right of the particle is found by using `round(x)`.
 # - Then, the `j` index of the `U` grid line below the particle is found. This is done by using `floor` on the `y` value
 # - The box used to average the variable is therefore defined by the `[i - 1, i]` and `[j, j + 1]` squares.
 
@@ -185,7 +183,7 @@ def plot_points(ix, jy, color):
             print(cox, coy)
             plt.plot(i + ii + 1, j + jj + 0.5, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
-            
+
 plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -201,7 +199,6 @@ plot_points(8.2, 6.1, 'g')
 plot_points(8.3, 2.7, 'orange')
 plt.title('Interpolation of U variables')
 plt.savefig(os.path.join(outdir, 'u_interpolation_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'u_interpolation_nemo.pdf'))
 # -
 
 # #### Interpolation of V variables
@@ -226,7 +223,7 @@ def plot_points(ix, jy, color):
             print(cox, coy)
             plt.plot(i + ii + 0.5, j + jj + 1, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
-            
+
 plt.figure()
 ax = plt.gca()
 ax.set_xlim(0, xmax)
@@ -241,7 +238,6 @@ plot_points(8.2, 6.1, 'g')
 plot_points(8.3, 2.7, 'orange')
 plt.title('Interpolation of V variables')
 plt.savefig(os.path.join(outdir, 'v_interpolation_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'v_interpolation_nemo.pdf'))
 # -
 
 # ### Land sea-mask
@@ -258,13 +254,13 @@ def plot_points(ix, jy, color):
     j = np.round(jy - 0.5)
     i = np.round(ix - 0.5)
     points = []
-    
+
     iout = [i + 0.5 - 0.5, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5]
     jout = [j + 0.5 - 0.5, j + 0.5 - 0.5, j + 0.5 - 0.5 + 1, j + 0.5 - 0.5 + 1]
     points = [(ii, jj) for ii, jj in zip(iout, jout)]
     p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
     plt.plot(i + 0.5, j + 0.5, marker='o', color=color)
-            
+
 plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -281,7 +277,6 @@ plot_points(8.2, 6.1, 'g')
 plot_points(8.3, 2.7, 'orange')
 plt.title('Land-sea mask')
 plt.savefig(os.path.join(outdir, 'landsea_mask_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'landsea_mask_nemo.pdf'))
 # -
 
 # ### Close to coast
@@ -293,7 +288,7 @@ ymax = 8
 plt.rcParams['lines.markersize'] = 2
 
 def plot_poly(i, j, color):
-        
+
     iout = [i + 0.5 - 0.5, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5]
     jout = [j + 0.5 - 0.5, j + 0.5 - 0.5, j + 0.5 - 0.5 + 1, j + 0.5 - 0.5 + 1]
     points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
@@ -306,12 +301,12 @@ def plot_points(ix, jy, color):
     j = np.round(jy - 0.5)
     i = np.round(ix - 0.5)
     points = []
-    
+
     if(j == np.floor(jy - 0.5)):
         jj = 1
     else:
         jj = -1
-    
+
     if(i == np.floor(ix - 0.5)):
         ii = 1
     else:
@@ -319,7 +314,7 @@ def plot_points(ix, jy, color):
     plot_poly(i + ii, j + jj, color)
     plot_poly(i, j + jj, color)
     plot_poly(i + ii, j, color)
-            
+
 plt.figure()
 ax = plt.gca()
 plt.xlim(0, xmax)
@@ -336,7 +331,6 @@ plot_points(8.2, 6.1, 'g')
 plot_points(8.3, 2.7, 'orange')
 plt.title('Close to Coast')
 plt.savefig(os.path.join(outdir, 'close_to_coast_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'close_to_coast_nemo.pdf'))
 # -
 
 # ### Is On Edge
@@ -346,7 +340,7 @@ xmax = 12
 ymax = 8
 
 plt.rcParams['lines.markersize'] = 2
-            
+
 plt.figure()
 ax = plt.gca()
 ax.set_xticks(np.arange(0, xmax))
@@ -383,7 +377,6 @@ p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, 
 
 plt.title('Is On Edge')
 plt.savefig(os.path.join(outdir, 'is_on_edge_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'is_on_edge_nemo.pdf'))
 # -
 
 # ## Vertical
@@ -444,18 +437,17 @@ plt.grid(True, which='minor')
 for v in np.arange(-0.5, zmax + 1 + 0.5):
     plt.axhline(v, color='k', linestyle='--', linewidth=2)
     plt.text(0, v, '%d' %(v + 0.5), bbox=bbox)
-    
+
 for v in np.arange(0, zmax + 1):
     color = cmap((v) / (zmax + 1))
     print((v) / (zmax + 1))
     p = ax.add_patch(Polygon([(x0 - 0.5, v -0.5), (x0 + 0.5, v-0.5), (x0 + 0.5, v + 0.5), (x0 -0.5, v + 0.5)], closed=True,
                             facecolor=color, alpha=0.5))
-    
+
 ax.get_xaxis().set_visible(False)  # removes xlabel
 plt.xlim(-0.5, 0.5)
 plt.ylim(zmax + 0.5, -0.52)
 plt.savefig(os.path.join(outdir, 'vertical_indexing_nemo.svg'))
-plt.savefig(os.path.join(outdir, 'vertical_indexing_nemo.pdf'))
 # -
 
 # In this case, for a `T` point at the `k` index, the corresponding `W` point is located above.
@@ -493,7 +485,6 @@ for v in np.arange(0, zmax + 1):
 plt.xlim(-0.5, 0.5)
 plt.ylim(-0.52, zmax + 0.5)
 plt.savefig(os.path.join(outdir, 'corrected_vertical_indexing_nemo.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'corrected_vertical_indexing_nemo.pdf'), bbox_inches='tight')
 # -
 
 # ### Scale factors.
@@ -533,7 +524,7 @@ def plot_point(x, kz, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
     k = np.floor(kz - 0.5)
     plt.plot(x, kz, marker='o', color=color, markersize=6)
-    
+
     for kk in range(2):
         print(k + kk)
         plt.plot(0, k + kk + 0.5, marker=markers[kk], color=color, markersize=12)
@@ -554,7 +545,6 @@ plt.ylim(0, zmax)
 plot_point(-0.3, 2.7, 'red')
 plot_point(0.2, 5.3, 'blue')
 plt.savefig(os.path.join(outdir, 'vertical_t_interpolation_nemo.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'vertical_t_interpolation_nemo.pdf'), bbox_inches='tight')
 # -
 
 # #### Interpolation of W variable
@@ -565,7 +555,7 @@ def plot_point(x, kz, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
     k = np.floor(kz)
     plt.plot(x, kz, marker='o', color=color, markersize=6)
-    
+
     for kk in range(2):
         print(k + kk)
         coz = 1 - abs(kz - (k + kk - 0.5))
@@ -587,7 +577,6 @@ plt.ylim(-0.1, zmax + 0.1)
 plot_point(-0.3, 2.7, 'red')
 plot_point(0.2, 5.3, 'blue')
 plt.savefig(os.path.join(outdir, 'vertical_w_interpolation_nemo.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'vertical_w_interpolation_nemo.pdf'), bbox_inches='tight')
 # +
 def plot_point(x, kz, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
@@ -597,8 +586,8 @@ def plot_point(x, kz, color):
     plt.plot(x, kz, marker='o', color=color, markersize=6)
     p = ax.add_patch(Polygon([(x0 - 0.5, v -0.5), (x0 + 0.5, v-0.5), (x0 + 0.5, v + 0.5), (x0 -0.5, v + 0.5)], closed=True,
                             facecolor=color, edgecolor=None, alpha=0.3))
-    
-    
+
+
 #     for kk in range(2):
 #         print(k + kk)
 #         coz = 1 - abs(kz - (k + kk - 0.5))
@@ -619,5 +608,4 @@ plt.ylim(0, zmax)
 plot_point(-0.3, 2.7, 'red')
 plot_point(0.2, 5.3, 'blue')
 plt.savefig(os.path.join(outdir, 'vertical_landsea_mask_nemo.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(outdir, 'vertical_landsea_mask_nemo.pdf'), bbox_inches='tight')
 # -

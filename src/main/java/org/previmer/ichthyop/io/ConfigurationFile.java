@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,6 +71,7 @@ public class ConfigurationFile {
     public final static String LONG_NAME = "long_name";
     public final static String VERSION = "version";
     public final static String DATE = "date";
+    public boolean isFixedSeed = false;
 
     public ConfigurationFile(File file) {
         this.file = file;
@@ -172,6 +174,22 @@ public class ConfigurationFile {
             }
         }
         return list;
+    }
+
+    public XParameter getXParameter(String key) {
+     Iterator<XBlock> it = this.getAllBlocks().iterator();
+        while(it.hasNext()) {
+            XBlock block = it.next();
+            BlockType type = block.getType();
+            String blockKey = block.getKey();
+            String id = new BlockId(type, blockKey).toString();
+            if(map.get(id).containsXParameter(key)) {
+                return getXParameter(type, blockKey, key);
+            }
+        }
+
+        return null;
+
     }
 
     public XParameter getXParameter(BlockType type, String blockKey, String key) {
@@ -297,6 +315,16 @@ public class ConfigurationFile {
         map.remove(key);
         structure.getRootElement().removeContent(getBlock(type, key));
     }
+
+    public boolean isFixedSeed() {
+        XParameter param = this.getXParameter("fixed_seed");
+        if (param == null) {
+            return false;
+        } else {
+            return Boolean.valueOf(param.getValue());
+        }
+    }
+
 }
 
 class BlockId {
@@ -324,4 +352,5 @@ class BlockId {
         id.append(getBlockKey());
         return id.toString();
     }
+
 }

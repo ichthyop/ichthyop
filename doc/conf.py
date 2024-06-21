@@ -16,6 +16,8 @@
 
 import os
 import re
+from glob import glob
+import subprocess  
 
 # -- Project information -----------------------------------------------------
 
@@ -23,7 +25,7 @@ project = 'Ichthyop'
 copyright = '2020, Nicolas Barrier'
 author = 'Nicolas Barrier'
 
-# Recover the Ichthyop version based 
+# Recover the Ichthyop version based
 pom_file = os.path.join('..', 'pom.xml')
 with open(pom_file, 'r') as fpom:
     lines = fpom.readlines()
@@ -33,7 +35,7 @@ with open(pom_file, 'r') as fpom:
             version = regex.match(l).groups()[0]
             break
 
-# include to to references        
+# include to to references
 todo_include_todos = True
 todo_emit_warnings = True
 
@@ -51,13 +53,12 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.githubpages',
     'sphinxcontrib.bibtex',
-    #'sphinxcontrib.video',
     'sphinxcontrib.programoutput',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
-    # 'sphinxcontrib.plantuml',
     'sphinxcontrib.mermaid',
+    'myst_parser'
 ]
 
 plantuml = 'plantuml'
@@ -66,9 +67,6 @@ plantuml_latex_output_format = 'pdf'
 
 mermaid_pdfcrop = 'pdfcrop'
 #mermaid_output_format = 'png'
-
-with open('alias.rst', 'r') as pr:
-        rst_prolog = pr.read()
 
 autodoc_default_flags = ['members', 'undoc-members', 'private-members']
 autodoc_default_flags = ['members']
@@ -81,9 +79,32 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.rst']
-source_suffix = ['.rst']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 exclude_patterns += ['**/*.ipynb']
+exclude_patterns += glob(os.path.join('developer','_static', 'mermaid', '*md'))
+source_suffix = {'.md': 'markdown'}
+
+myst_enable_extensions = [
+    "amsmath",
+    "attrs_inline",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "linkify",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+
+myst_substitutions = {
+  'ich': 'Ichthyop',
+  'nc': 'NetCDF',
+}
 
 bibtex_bibfiles = ['_static/biblio.bib']
 
@@ -98,6 +119,11 @@ bibtex_bibfiles = ['_static/biblio.bib']
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_logo = '_static/logo-ichthyop.svg'
+
+html_css_files = [
+    'theme_overrides.css',
+]
 
 # use figure numbers for referencing figures
 numfig = True
@@ -114,3 +140,24 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 #            '_static/theme_overrides.css',  # override wide tables in RTD theme
 #           ],
 #        }
+
+if not os.path.isdir('ichthyop_output'):
+    os.mkdir('ichthyop_output')
+
+conflist = glob(os.path.join('ichthyop_configs', '*'))
+conflist.sort()
+
+confnames = [os.path.basename(f) for f in conflist]
+for conf in confnames:
+    if os.path.isdir(os.path.join('ichthyop_output', conf)):
+        print(f"Configuration {conf} already exists in output directory")
+        continue
+    else:
+        jarname = glob(os.path.join('..', 'target', 'ichthyop*[0-9].jar'))
+        print(jarname)
+        jarname.sort()
+        jarname = jarname[-1] 
+        print(jarname)
+        command = ['java', '-jar', jarname, os.path.join('ichthyop_configs', conf, f'{conf}.xml')]
+        print(command)
+        result = subprocess.run(command, capture_output=False, text=False, stdout=subprocess.DEVNULL)

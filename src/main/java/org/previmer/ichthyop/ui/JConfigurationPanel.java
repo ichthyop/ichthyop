@@ -183,7 +183,28 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         setParameterEditorEnabled(ckBoxBlock.isSelected());
         ensureSingleBlockSelection(BlockType.DATASET);
         ensureSingleBlockSelection(BlockType.RELEASE);
+        ensureSingleActionSelection("action.orientation");
         firePropertyChange("configurationFile", null, null);
+    }
+
+    private void ensureSingleActionSelection(String prefix) {
+        BlockType type = BlockType.ACTION;
+        XBlock selectedBlock = blockTree.getSelectedBlock();
+        if (selectedBlock.getType().equals(type)) {
+            // If the selected block is of type action and has been enabled
+            if (selectedBlock.isEnabled()) {
+                for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
+                    // Loop over all the blocks of action type
+                    if (!block.getKey().equals(selectedBlock.getKey())) {
+                        // If the block is different from the selected one, we check that both have the same
+                        // prefix. If true, we deactivate the block.
+                        if ((block.getKey().startsWith(prefix)) && (selectedBlock.getKey().startsWith(prefix))) {
+                            blockTree.get(block.getTreePath()).setEnabled(false);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void ensureSingleBlockSelection(BlockType type) {
