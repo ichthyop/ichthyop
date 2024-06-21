@@ -11,8 +11,15 @@ resources:
   - developer/grid/_static
 
 book:
-  title: "Ichthyop User Guide"
-  author: "Nicolas Barrier"
+  title: "Ichthyop User Guide (3.3.17)"
+  author:
+    - name: "Nicolas Barrier"
+      orcid: 0000-0002-1693-4719
+    - name: "Philippe Verley"
+      orcid: 0000-0002-5686-2764
+    - name: Gwendoline Andres
+    - name: "Christophe Lett"
+      orcid: 0000-0001-5809-2452
   chapters:
     - index.qmd
     - part: user_guide.qmd
