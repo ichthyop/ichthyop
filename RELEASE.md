@@ -1,5 +1,12 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.17.2
+
+### Bug fix
+
+- Correction of a bug in the `Roms3dCommon.java` file. Two parameter names, `read_stokes_velocity` and `read_stokesvelocity` were used, which caused issues. The first parameter name was kept.
+
+
 ## Changes in 3.3.17.1
 
 ### Bug fix
