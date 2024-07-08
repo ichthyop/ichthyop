@@ -222,7 +222,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         /* load common parameters*/
         super.loadParameters();
 
-        if (findParameter("read_stokesvelocity")) {
+        if (findParameter("read_stokes_velocity")) {
             read_stokesvelocity = Boolean.valueOf(getParameter("read_stokes_velocity"));
         } else {
             read_stokesvelocity = false;
