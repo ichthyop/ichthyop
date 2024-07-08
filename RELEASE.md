@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.17.1
+
+### Bug fix
+
+- Correction of a bug in the `Roms3dCommon.java` file. The `field_var_u_stokes` and `field_var_v_stokes` were needed when the `read_stokes_velocity` parameter was set, even if set to `false`.
+
 ## Changes in 3.3.17
 
 ### New features

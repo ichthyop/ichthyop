@@ -224,12 +224,14 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         if (findParameter("read_stokesvelocity")) {
             read_stokesvelocity = Boolean.valueOf(getParameter("read_stokes_velocity"));
-            strUStokes = getParameter("field_var_u_stokes");
-            strVStokes = getParameter("field_var_v_stokes");
-
         } else {
             read_stokesvelocity = false;
             getLogger().warning("Ichthyop will not read stokes velocity");
+        }
+
+        if(read_stokesvelocity){
+            strUStokes = getParameter("field_u_stokes");
+            strVStokes = getParameter("field_v_stokes");
         }
 
         /* load 3D parameters */
@@ -414,10 +416,10 @@ abstract public class Roms3dCommon extends RomsCommon {
         final double dx = x - (double) i;
         final double dy = y - (double) j;
         final double dz = kz - (double) k;
-        
+
         // patch for Luisa
         int nk = (z == 0) ? 1 : 2;
-        
+
         double co;
         double z_r;
         for (int ii = 0; ii < 2; ii++) {
