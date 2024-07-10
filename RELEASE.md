@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.17.3
+
+### Bug fix
+
+- Correction of a bug in the `Roms3dCommon.java` file. Correction of the dimensions of the Stokes velocities.
+
 ## Changes in 3.3.17.2
 
 ### Bug fix
