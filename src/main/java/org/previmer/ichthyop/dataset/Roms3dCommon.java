@@ -683,19 +683,19 @@ abstract public class Roms3dCommon extends RomsCommon {
         if (read_stokesvelocity) {
             try {
                 // Add the U-Stokes velocity to the current velocity
-                arr = ncIn.findVariable(strUStokes).read(origin, new int[]{1, nz, ny, nx}).reduce();
+                arr = ncIn.findVariable(strUStokes).read(origin, new int[]{1, nz, ny, nx - 1}).reduce();
                 index = arr.getIndex();
                 for (int k = 0; k < nz; k++) {
                     for (int j = 0; j < ny; j++) {
-                        for (int i = 0; i < nx; i++) {
+                        for (int i = 0; i < nx - 1; i++) {
                             u_tp1[k][j][i] += arr.getFloat(index.set(k, j, i));
                         }
                     }
                 }
-                arr = ncIn.findVariable(strVStokes).read(origin, new int[]{1, nz, ny, nx}).reduce();
+                arr = ncIn.findVariable(strVStokes).read(origin, new int[]{1, nz, ny - 1, nx}).reduce();
                 index = arr.getIndex();
                 for (int k = 0; k < nz; k++) {
-                    for (int j = 0; j < ny; j++) {
+                    for (int j = 0; j < ny - 1; j++) {
                         for (int i = 0; i < nx; i++) {
                             v_tp1[k][j][i] += arr.getFloat(index.set(k, j, i));
                         }
