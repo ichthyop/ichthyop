@@ -154,8 +154,8 @@ import org.previmer.ichthyop.particle.ParticleFactory;
                      double y = ymin + randomGenerator.nextDouble() * (ymax - ymin);
                      double depth = Double.NaN;
                      if (is3D) {
-                        // Take bathymetry, release five m above bottom.
-                         depth = getSimulationManager().getDataset().getBathyPos(x,y)+5;
+                        // Take bathymetry, release layer above bottom.
+                         depth = getSimulationManager().getDataset().getBathyPos(x,y)*0.9;
                      }
                      particle = ParticleFactory.createZoneParticle(index, x, y, depth);
                  }
