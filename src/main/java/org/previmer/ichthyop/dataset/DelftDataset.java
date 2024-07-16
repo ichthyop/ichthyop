@@ -437,14 +437,14 @@ public class DelftDataset extends AbstractDataset {
         return nLayer;
     }
 
-    @Override
+    @Override //DELFT all in m so make 1 to effectively remove grid displacement
     public double getdxi(int j, int i) {
-        return 0;
+        return 1;
     }
 
     @Override
     public double getdeta(int j, int i) {
-        return 0;
+        return 1;
     }
 
     /*
