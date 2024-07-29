@@ -47,7 +47,7 @@ public class RheotaxisOrientationAction extends AbstractAction {
     /** Computes the longitude/latitude increment */
     private double[] getDlonDlat(IParticle particle) {
 
-        double age = (particle.getAge() + Float.MIN_VALUE) / (secs_in_day);
+        double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
         double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
                 ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
         swimmingSpeed = swimmingSpeed / 100;

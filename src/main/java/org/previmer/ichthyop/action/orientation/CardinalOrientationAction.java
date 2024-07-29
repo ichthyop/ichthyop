@@ -61,7 +61,7 @@ public class CardinalOrientationAction extends AbstractAction {
         // Preferred direction plus stochastic behavior
         double theta = thetaCard + ti;
 
-        double age = particle.getAge() / (secs_in_day);
+        double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
 
         double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
                 ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
