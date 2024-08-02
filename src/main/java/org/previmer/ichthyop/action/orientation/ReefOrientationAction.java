@@ -10,11 +10,10 @@ import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
-public class ReefOrientationAction extends AbstractAction {
+public class ReefOrientationAction extends OrientationVelocity {
 
     private double maximumDistance;
-    private double swimmingSpeedHatch;
-    private double swimmingSpeedSettle;
+
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
     private int nZones;
@@ -24,18 +23,15 @@ public class ReefOrientationAction extends AbstractAction {
     private double yBarycenter[][];
     private double kappaBarycenter[];
     ArrayList<Zone>zones;
-    double PLD;
-
-    private double secs_in_day = 86400;
 
     double dt;
 
     @Override
     public void loadParameters() throws Exception {
 
+        super.loadParameters();
+
         maximumDistance = Double.valueOf(getParameter("maximum.distance"));
-        swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
-        swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
 
         // Load the target areas, i.e. the zones in which the target areas will be
         // defined:
@@ -48,12 +44,7 @@ public class ReefOrientationAction extends AbstractAction {
 
         dt = getSimulationManager().getTimeManager().get_dt();
 
-        if (swimmingSpeedHatch > swimmingSpeedSettle) {
-            getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
-            double temp = swimmingSpeedHatch;
-            swimmingSpeedHatch = swimmingSpeedSettle;
-            swimmingSpeedSettle = temp;
-        }
+        initializeTargets();
 
     }
 
@@ -172,10 +163,7 @@ public class ReefOrientationAction extends AbstractAction {
 
             double theta = ti + mu + thetaCurrent;
 
-            double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
-
-            double swimmingSpeed = swimmingSpeedHatch + Math.pow(10, (Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch));
-            swimmingSpeed = swimmingSpeed / 100;
+            double swimmingSpeed = getVelocity(particle);
 
             // Compute u and v orientation velocity;
             uorient = swimmingSpeed * Math.cos(theta);
@@ -221,10 +209,6 @@ public class ReefOrientationAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-
-        initializeTargets();
-        double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
-        PLD = timeMax / (secs_in_day);
 
     }
 
