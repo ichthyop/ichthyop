@@ -22,16 +22,37 @@ public class ReefOrientationAction extends OrientationVelocity {
     private double xBarycenter[][];
     private double yBarycenter[][];
     private double kappaBarycenter[];
-    ArrayList<Zone>zones;
+    ArrayList<Zone> zones;
+    private boolean isInitialized = false;
+    private double ageMin;
+    private double ageMax;
 
     double dt;
 
     @Override
     public void loadParameters() throws Exception {
 
+        double secs_in_day = 86400;
+
         super.loadParameters();
 
         maximumDistance = Double.valueOf(getParameter("maximum.distance"));
+
+        // Provides age in days
+        if(getParameter("age.min") != null) {
+            ageMin = Double.valueOf(getParameter("age.min"));
+        } else {
+            ageMin = 0;
+        }
+
+        if(getParameter("age.max") != null) {
+            ageMax = Double.valueOf(getParameter("age.max"));
+        } else {
+            ageMax = Double.MAX_VALUE;
+        }
+
+        ageMin *= secs_in_day;
+        ageMax *= secs_in_day;
 
         // Load the target areas, i.e. the zones in which the target areas will be
         // defined:
@@ -43,8 +64,6 @@ public class ReefOrientationAction extends OrientationVelocity {
         }
 
         dt = getSimulationManager().getTimeManager().get_dt();
-
-        initializeTargets();
 
     }
 
@@ -108,6 +127,10 @@ public class ReefOrientationAction extends OrientationVelocity {
     @Override
     public void execute(IParticle particle) {
 
+        if(particle.getAge() < ageMin || particle.getAge() >= ageMax) {
+            return;
+        }
+
         double[] mvt = getDlonDlat(particle);
         double newLon = particle.getLon() + mvt[0];
         double newLat = particle.getLat() + mvt[1];
@@ -122,7 +145,7 @@ public class ReefOrientationAction extends OrientationVelocity {
         double uorient, vorient;
 
         double[] distance = this.computeReefDistance(particle, lonBarycenter, latBarycenter);
-        double[] point = new double[] {particle.getLon(), particle.getLat()};
+        double[] point = new double[] { particle.getLon(), particle.getLat() };
 
         // computes the index of the closest reef
         int closestReefIndex = this.findSmallestDistance(distance);
@@ -130,7 +153,8 @@ public class ReefOrientationAction extends OrientationVelocity {
 
         // extract the closest point (can be on edge)
         // this is the target point
-        double[] closestPoint = findClosestPointPolygon(point, lonBarycenter[closestReefIndex], latBarycenter[closestReefIndex]);
+        double[] closestPoint = findClosestPointPolygon(point, lonBarycenter[closestReefIndex],
+                latBarycenter[closestReefIndex]);
 
         uorient = 0;
         vorient = 0;
@@ -141,15 +165,11 @@ public class ReefOrientationAction extends OrientationVelocity {
 
             double d = 1 - (closestReefDistance / maximumDistance);
 
-            // thetaPref = haverSine(particle.getLon(), particle.getLat(), lonBarycenter[closestReefIndex],
-            //         latBarycenter[closestReefIndex]);
-            // thetaCurrent = haverSine(particle.getOldLon(), particle.getOldLat(), particle.getLon(),
-            //         particle.getLat());
-
             double Kappa_reef = kappaBarycenter[closestReefIndex];
 
             double xyParticule[] = getSimulationManager().getDataset().latlon2xy(particle.getLat(), particle.getLon());
-            double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(), particle.getOldLon());
+            double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(),
+                    particle.getOldLon());
             double xyReef[] = getSimulationManager().getDataset().latlon2xy(closestPoint[1], closestPoint[0]);
 
             thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
@@ -183,9 +203,10 @@ public class ReefOrientationAction extends OrientationVelocity {
 
     }
 
-    /** Haversine formula to compute angles from lat and lon.
-     * Cf. https://www.movable-type.co.uk/scripts/latlong.html
-     * Cf. https://copyprogramming.com/howto/javascript-find-degree-between-two-geo-coordinates-javascript
+    /**
+     * Haversine formula to compute angles from lat and lon. Cf.
+     * https://www.movable-type.co.uk/scripts/latlong.html Cf.
+     * https://copyprogramming.com/howto/javascript-find-degree-between-two-geo-coordinates-javascript
      *
      * TODO Check formula (inversion of X and Y)
      *
@@ -202,14 +223,18 @@ public class ReefOrientationAction extends OrientationVelocity {
         double rlonend = Math.toRadians(lonend);
         double rlatend = Math.toRadians(latend);
         double Y = Math.sin(rlonend - rlonstart) * Math.cos(rlatend);
-        double X = Math.cos(rlatstart) * Math.sin(rlatend) - Math.sin(rlatstart) * Math.cos(rlatend) * Math.cos(rlonend - rlonstart);
+        double X = Math.cos(rlatstart) * Math.sin(rlatend)
+                - Math.sin(rlatstart) * Math.cos(rlatend) * Math.cos(rlonend - rlonstart);
         return Math.atan2(Y, X);
 
     }
 
     @Override
     public void init(IParticle particle) {
-
+        if (isInitialized == false) {
+            initializeTargets();
+            isInitialized = true;
+        }
     }
 
     public int findSmallestDistance(double[] distance) {
@@ -227,7 +252,8 @@ public class ReefOrientationAction extends OrientationVelocity {
 
     }
 
-    // Computes the distance to reef, considering the closest point to the particle. Can be on edge.
+    // Computes the distance to reef, considering the closest point to the particle.
+    // Can be on edge.
     public double[] computeReefDistance(IParticle particle, double[][] lonBarycenter, double[][] latBarycenter) {
 
         int NReefs = lonBarycenter.length;
@@ -235,7 +261,7 @@ public class ReefOrientationAction extends OrientationVelocity {
 
         double lonParticle = particle.getLon();
         double latParticle = particle.getLat();
-        double[] point = new double[] {lonParticle, latParticle};
+        double[] point = new double[] { lonParticle, latParticle };
 
         for (int k = 0; k < NReefs; k++) {
 
@@ -278,7 +304,6 @@ public class ReefOrientationAction extends OrientationVelocity {
 
     }
 
-
     public double dotproduct(double[] lineStartA, double[] lineEndB) {
         return lineStartA[0] * lineEndB[0] + lineStartA[1] * lineEndB[1];
     }
@@ -319,6 +344,4 @@ public class ReefOrientationAction extends OrientationVelocity {
         }
         return output;
     }
-
-
 }
