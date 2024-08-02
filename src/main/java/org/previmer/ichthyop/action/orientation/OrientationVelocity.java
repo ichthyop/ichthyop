@@ -21,12 +21,14 @@ import com.opencsv.exceptions.CsvException;
 
 public abstract class OrientationVelocity extends AbstractAction {
 
-    private double swimmingSpeedHatch;
-    private double swimmingSpeedSettle;
     private double secs_in_day = 86400;
-    private double PLD;
-    private double[] ageCsv;
-    private double[] speedCsv;
+
+    private double swimmingSpeedHatch; // cm
+    private double swimmingSpeedSettle; // cm
+    private double PLD; // days
+
+    private double[] ageCsv; // age array from CSV (seconds)
+    private double[] speedCsv; // speed array (m/s);
 
     @FunctionalInterface
     public interface InnerOrientationVelocity {
@@ -39,11 +41,12 @@ public abstract class OrientationVelocity extends AbstractAction {
     public void loadParameters() throws Exception {
 
         String key = "swimming.speed.csv.enabled";
-        if(getParameter(key) != null && Boolean.valueOf(getParameter(key))) {
+        if (getParameter(key) != null && Boolean.valueOf(getParameter(key))) {
             velocityMethod = (IParticle particle) -> getVelocityCsv(particle);
-            initVelocityCsv()
+            initVelocityCsv();
         } else {
 
+            // values in cm/s
             swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
             swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
 
@@ -54,8 +57,6 @@ public abstract class OrientationVelocity extends AbstractAction {
                 swimmingSpeedSettle = temp;
             }
 
-            double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
-            PLD = timeMax / (secs_in_day);
             velocityMethod = (IParticle particle) -> getVelocityPLD(particle);
 
         }
@@ -64,7 +65,8 @@ public abstract class OrientationVelocity extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-
+        double timeMax = getSimulationManager().getTimeManager().getTransportDuration(); // seconds
+        PLD = timeMax / (secs_in_day); // seconds / (seconds / day) = day
     }
 
     public double getVelocity(IParticle particle) {
@@ -73,19 +75,29 @@ public abstract class OrientationVelocity extends AbstractAction {
 
     public double getVelocityPLD(IParticle particle) {
 
-        double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
+        // particle.getAge() in seconds
+        // secs_in_day = 24 * 60 * 60 s.day^{-1}
+        // age now in days
+        double age = particle.getAge() / (secs_in_day);
+
+        if (age == 0) {
+            return 0;
+        }
+
+        // speed in cm/s
         double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
                 (Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch));
-        swimmingSpeed = swimmingSpeed / 100;
+
+        swimmingSpeed = swimmingSpeed / 100; // convert in m/s
         return swimmingSpeed;
     }
 
     public double getVelocityCsv(IParticle particle) {
 
-        double age = particle.getAge() / (secs_in_day);
+        double age = particle.getAge(); // seconds
         for (int i = 0; i < ageCsv.length - 1; i++) {
             if ((age >= ageCsv[i]) && (age < ageCsv[i + 1])) {
-                return speedCsv[i];
+                return speedCsv[i]; // value already in m/s
             }
         }
 
@@ -119,11 +131,11 @@ public abstract class OrientationVelocity extends AbstractAction {
             ageCsv = new double[lines.size() - 1];
             speedCsv = new double[ageCsv.length];
 
-            // read ageCsv (hours converted to seconds) and densities
+            // read ageCsv (days converted to seconds) and
             for (int i = 0; i < ageCsv.length; i++) {
                 String[] line = lines.get(i + 1);
-                ageCsv[i] = Double.valueOf(line[0]) * 3600.f;
-                speedCsv[i] = Double.valueOf(line[1]);
+                ageCsv[i] = Double.valueOf(line[0]) * secs_in_day; // age in seconds
+                speedCsv[i] = Double.valueOf(line[1]) / 100; // values in m/s
             }
         } catch (IOException ex) {
             Logger.getLogger(BuoyancyAction.class.getName()).log(Level.SEVERE, null, ex);

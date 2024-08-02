@@ -21,6 +21,8 @@ public class CardinalOrientationAction extends OrientationVelocity {
     @Override
     public void loadParameters() throws Exception {
 
+        super.loadParameters();
+
         thetaCard = Math.toRadians(Double.valueOf(getParameter("swimming.cardinal.heading")));
         vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
 
