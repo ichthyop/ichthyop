@@ -12,6 +12,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     private double secs_in_day = 86400;
     double PLD;
 
+    @FunctionalInterface
     public interface InnerOrientationVelocity {
         double getVelocity(IParticle particle);
     }
@@ -41,7 +42,7 @@ public abstract class OrientationVelocity extends AbstractAction {
 
     }
 
-    public double getVvelocityMethodelocity(IParticle particle) {
+    public double getVelocity(IParticle particle) {
         return velocityMethod.getVelocity(particle);
     }
 
