@@ -6,37 +6,54 @@ import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
-public class CardinalOrientationAction extends AbstractAction {
+public class CardinalOrientationAction extends OrientationVelocity {
 
-    private double swimmingSpeedHatch;
-    private double swimmingSpeedSettle;
     private double thetaCard;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private double dt;
     private double vonMisesKappa;
-    private double PLD;
+    private double ageMin;
+    private double ageMax;
 
     private VonMisesRandom vonMises;
     private double secs_in_day = 86400;
 
     @Override
     public void loadParameters() throws Exception {
-        swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
-        swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
+
+        super.loadParameters();
+
         thetaCard = Math.toRadians(Double.valueOf(getParameter("swimming.cardinal.heading")));
         vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
 
-        if (swimmingSpeedHatch > swimmingSpeedSettle) {
-            getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
-            double temp = swimmingSpeedHatch;
-            swimmingSpeedHatch = swimmingSpeedSettle;
-            swimmingSpeedSettle = temp;
+        // Provides age in days
+        if (getParameter("age.min") != null) {
+            ageMin = Double.valueOf(getParameter("age.min"));
+        } else {
+            ageMin = 0;
         }
+
+        if (getParameter("age.max") != null) {
+            ageMax = Double.valueOf(getParameter("age.max"));
+        } else {
+            ageMax = Double.MAX_VALUE;
+        }
+
+        ageMin *= secs_in_day;
+        ageMax *= secs_in_day;
+
+        vonMises = new VonMisesRandom(0, vonMisesKappa);
+        dt = getSimulationManager().getTimeManager().get_dt();
 
     }
 
     @Override
     public void execute(IParticle particle) {
+
+        if(particle.getAge() < ageMin || particle.getAge() >= ageMax) {
+            return;
+        }
+
         double[] mvt = getDlonDlat(particle);
         double newLon = particle.getLon() + mvt[0];
         double newLat = particle.getLat() + mvt[1];
@@ -47,10 +64,7 @@ public class CardinalOrientationAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-        vonMises = new VonMisesRandom(0, vonMisesKappa);
-        dt = getSimulationManager().getTimeManager().get_dt();
-        double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
-        PLD = timeMax / (secs_in_day);
+
     }
 
     private double[] getDlonDlat(IParticle particle) {
@@ -61,11 +75,7 @@ public class CardinalOrientationAction extends AbstractAction {
         // Preferred direction plus stochastic behavior
         double theta = thetaCard + ti;
 
-        double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
-
-        double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
-                ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
-        swimmingSpeed = swimmingSpeed / 100;
+        double swimmingSpeed = getVelocity(particle);
 
         // Compute u and v orientation velocity
         double uorient = swimmingSpeed * Math.cos(theta);

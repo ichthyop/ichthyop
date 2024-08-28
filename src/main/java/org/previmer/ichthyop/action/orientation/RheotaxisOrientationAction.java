@@ -6,12 +6,11 @@ import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
-public class RheotaxisOrientationAction extends AbstractAction {
+public class RheotaxisOrientationAction extends OrientationVelocity {
 
-    private double swimmingSpeedHatch;
-    private double swimmingSpeedSettle;
     private double vonMisesKappa;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    private double ageMin, ageMax;
 
     private VonMisesRandom vonMises;
     private double secs_in_day = 86400;
@@ -21,21 +20,35 @@ public class RheotaxisOrientationAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
-        swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
+        super.loadParameters();
         vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
+        double secs_in_day = 86400;
 
-        if (swimmingSpeedHatch > swimmingSpeedSettle) {
-            getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
-            double temp = swimmingSpeedHatch;
-            swimmingSpeedHatch = swimmingSpeedSettle;
-            swimmingSpeedSettle = temp;
+        // Provides age in days
+        if (getParameter("age.min") != null) {
+            ageMin = Double.valueOf(getParameter("age.min"));
+        } else {
+            ageMin = 0;
         }
+
+        if (getParameter("age.max") != null) {
+            ageMax = Double.valueOf(getParameter("age.max"));
+        } else {
+            ageMax = Double.MAX_VALUE;
+        }
+
+        ageMin *= secs_in_day;
+        ageMax *= secs_in_day;
 
     }
 
     @Override
     public void execute(IParticle particle) {
+
+        if(particle.getAge() < ageMin || particle.getAge() >= ageMax) {
+            return;
+        }
+
         double[] mvt = getDlonDlat(particle);
         double newLon = particle.getLon() + mvt[0];
         double newLat = particle.getLat() + mvt[1];
@@ -47,10 +60,7 @@ public class RheotaxisOrientationAction extends AbstractAction {
     /** Computes the longitude/latitude increment */
     private double[] getDlonDlat(IParticle particle) {
 
-        double age = particle.getAge() / (secs_in_day) + Float.MIN_VALUE;
-        double swimmingSpeed = swimmingSpeedHatch + Math.pow(10,
-                ((Math.log10(age) / Math.log10(PLD)) * Math.log10(swimmingSpeedSettle - swimmingSpeedHatch)));
-        swimmingSpeed = swimmingSpeed / 100;
+        double swimmingSpeed = getVelocity(particle);
 
         double[] pGrid;
         if(getSimulationManager().getDataset().is3D()) {
