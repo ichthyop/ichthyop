@@ -1,0 +1,35 @@
+## Horizontal dispersion
+
+Horizontal dispersion is implemented following @PELIZ2007215. The horizontal velocity component due to diffusion is:
+
+$$
+u_T = \delta \sqrt{\dfrac{2 K_h}{\Delta t}}
+$$
+
+with $\Delta t$ the time step, $\delta$ a random number between -1 and 1 and $K_h$ the imposed explicit Lagrangian horizontal diffusion.
+
+The value of $K_h$ depends on the mean mesh size where the partical is located:
+
+$$
+K_h = \epsilon^{1/3} l^{4/3}
+$$
+
+with $l$ is the mean mesh size and $\epsilon$ is the turbulent dissipation rate (in $m^2.s^{-3}$).
+
+In the Ichythop implementation (`HDispAction.java`), the displacement is computed:
+
+$$
+\Delta X = u_T \times \Delta t
+$$
+
+Combining all together, we obtain the following equation:
+
+$$
+\Delta X = \delta \times  \sqrt{\dfrac{2  \epsilon^{1/3} l^{4/3}}{\Delta t}} \times \Delta t
+$$
+
+By putting the rightmost $\Delta t$ within the square root, and by putting the $l$ and $\epsilon$ terms outside, this expression can be simplified as follows:
+
+$$
+\Delta X = \delta \times  \sqrt{2 {\Delta t}} \times  \epsilon^{1/6} \times l^{2/3}
+$$

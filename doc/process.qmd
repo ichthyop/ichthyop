@@ -11,6 +11,7 @@ Parameters associated with these processes must be included in `action` blocks. 
 {{< include process/lethal_ts.qmd >}}
 {{< include process/buoyancy.qmd >}}
 {{< include process/migration.qmd >}}
+{{< include process/hor_dis.qmd >}}
 {{< include process/ontogenetic_migration.qmd >}}
 {{< include process/wind.qmd >}}
 {{< include process/swim.qmd >}}
