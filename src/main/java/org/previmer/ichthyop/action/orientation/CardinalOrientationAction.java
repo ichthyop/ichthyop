@@ -27,13 +27,13 @@ public class CardinalOrientationAction extends OrientationVelocity {
         vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
 
         // Provides age in days
-        if (getParameter("age.min") != null) {
+        if (!isNull("age.min")) {
             ageMin = Double.valueOf(getParameter("age.min"));
         } else {
             ageMin = 0;
         }
 
-        if (getParameter("age.max") != null) {
+        if (!isNull("age.max")) {
             ageMax = Double.valueOf(getParameter("age.max"));
         } else {
             ageMax = Double.MAX_VALUE;

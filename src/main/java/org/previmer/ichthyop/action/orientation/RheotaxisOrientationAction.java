@@ -25,13 +25,13 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
         double secs_in_day = 86400;
 
         // Provides age in days
-        if (getParameter("age.min") != null) {
+        if (!isNull("age.min")) {
             ageMin = Double.valueOf(getParameter("age.min"));
         } else {
             ageMin = 0;
         }
 
-        if (getParameter("age.max") != null) {
+        if (!isNull("age.max")) {
             ageMax = Double.valueOf(getParameter("age.max"));
         } else {
             ageMax = Double.MAX_VALUE;
