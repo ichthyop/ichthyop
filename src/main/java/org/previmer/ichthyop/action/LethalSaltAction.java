@@ -101,8 +101,8 @@ public class LethalSaltAction extends AbstractAction {
                  * If not just load constant lethal temperature egg
              */
             ages = new float[1];
-            freshLethalSal = new float[]{Float.valueOf(getParameter("fresh_lethal_salinity_egg"))};
-            salineLethalSal = new float[]{Float.valueOf(getParameter("saline_lethal_salinity_egg"))};
+            freshLethalSal = new float[]{Float.valueOf(getParameter("fresh_lethal_salinity"))};
+            salineLethalSal = new float[]{Float.valueOf(getParameter("saline_lethal_salinity"))};
             FLAG_LETHAL_SALT_FUNCTION = false;
         }
 
