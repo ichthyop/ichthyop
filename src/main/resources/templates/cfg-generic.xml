@@ -1,7 +1,8 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<--- version="1.0" encoding="UTF-8"?>
 <icstructure>
   <long_name>Generic Ichthyop configuration file</long_name>
   <description>The file has few pre-defined parameters.</description>
+    <version date="2017/03/23">3.3</version>
   <block type="option">
     <tree_path>Time/General time options</tree_path>
     <key>app.time</key>
@@ -138,7 +139,7 @@
   </block>
   <block type="dataset">
     <key>dataset.mercator3d</key>
-    <tree_path>Main/MERCATOR3D</tree_path>
+    <tree_path>Dataset/MERCATOR3D</tree_path>
     <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MECATOR 2D model</description>
     <parameters>
       <parameter>
@@ -2849,6 +2850,60 @@
       </parameter>
     </parameters>
   </block>
+<block type="action">
+    <key>action.lethal_salt</key>
+    <tree_path>Biology/Lethal salinity</tree_path>
+    <enabled>false</enabled>
+    <description>Block of option for setting up the mortality by salinity.</description>
+    <parameters>
+    <parameter>
+        <key>lethal_salt_file</key>
+        <long_name>Lethal salinity file</long_name>
+        <value/>
+        <format>textfile</format>
+        <default/>
+        <template>lethal_salinity.csv</template>
+        <description>Lethal salinity as an age function. The parameter is the pathname of CSV file (semicolon separator) that contains three columns. Headers Time(hour);Fresh salinity;Salty salinity. Click on new, type a new file name and Ichthyop will generate a CSV template. If this parameter is left void, ichthyop assumes constant lethal temperatures.</description>
+      </parameter>
+       <parameter>
+        <key>fresh_lethal_salinity</key>
+        <long_name>Fresh lethal salinity [PSU]</long_name>
+        <value>14.0</value>
+        <default>14.0</default>
+        <format>float</format>
+        <description>Fresh lethal water salinity [PSU] for the particles.</description>
+      </parameter>
+      <parameter>
+        <key>saline_lethal_salinity</key>
+        <long_name>Salty lethal salinity [PSU]</long_name>
+        <value>22.0</value>
+        <default>22.0</default>
+        <format>float</format>
+        <description>Salty lethal water salinity [PSU] for the particles.</description>
+      </parameter>
+<parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.LethalSaltAction</value>
+        <default>org.previmer.ichthyop.action.LethalSaltAction</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this action.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>low</value>
+        <default>low</default>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+      </parameter>
+  </parameters>
+  </block>    
   <block type="action">
     <key>action.lethal_temp</key>
     <tree_path>Biology/Lethal temperature</tree_path>
@@ -2981,11 +3036,11 @@
       </parameter>
       <parameter>
         <key>stage_thresholds</key>
-        <long_name>Initial length of the stages [millimetre]</long_name>
+        <long_name>Initial length of the stages [millimeter]</long_name>
         <value>"0.025" "2.8" "4.5"</value>
         <default>"0.025" "2.8" "4.5"</default>
         <format>list</format>
-        <description>Initial length for each physiological stage of the larva life history, in millimetre. Ichthyop assumes that the first length provided corresponds to the egg length.</description>
+        <description>Initial length for each physiological stage of the larva life history, in millimeter. Ichthyop assumes that the first length provided corresponds to the egg length.</description>
       </parameter>
       <parameter hidden="true">
         <key>length_tracker</key>
@@ -3232,6 +3287,262 @@
         <accepted>high</accepted>
         <accepted>highest</accepted>
         <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+      </parameter>
+    </parameters>
+  </block>
+<block type="action">
+    <key>action.orientation.reef</key>
+    <tree_path>Transport/Orientation/Reef</tree_path>
+    <enabled>true</enabled>
+    <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
+    <parameters>
+      <parameter>
+        <key>maximum.distance</key>
+        <long_name>Maximum distance [meter]</long_name>
+        <value>300000.0</value>
+        <default>20.0</default>
+        <format>float</format>
+        <description>Maximum distance</description>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.hatch</key>
+        <long_name>Swimming speed hatch [cm/s]</long_name>
+        <value>1.0</value>
+        <default>1</default>
+        <format>float</format>
+        <description>Swimming speed hatch [cm/s]</description>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.settle</key>
+        <long_name>Swimming speed settle [cm/s]</long_name>
+        <value>50.0</value>
+        <default>10</default>
+        <format>float</format>
+        <description>Swimming speed settle [cm/s]</description>
+      </parameter>
+      <parameter>
+        <key>zone_file</key>
+        <long_name>Orientation Zone File</long_name>
+        <value>ichthyop_configs/reef/zone-target.xml</value>
+        <default>zone-target.xml</default>
+        <format>zonefile</format>
+        <template>target-zone-indian.xml</template>
+        <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone (recruitment zone for instance).</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.orientation.ReefOrientationAction</value>
+        <default>org.previmer.ichthyop.action.orientation.ReefOrientationAction</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this dataset.</description>
+      </parameter>
+      <parameter hidden="true">
+        <long_name>priority</long_name>
+        <key>priority</key>
+        <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+        <value>high</value>
+        <default>high</default>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.csv.enabled</key>
+        <long_name>True if velocity from CSV</long_name>
+        <value>true</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>True if velocity from CSV</description>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.csv.file</key>
+        <long_name>Path to the velocity CSV file</long_name>
+        <value>ichthyop_configs/combined/velocity.csv</value>
+        <default>ichthyop_configs/combined/velocity.csv</default>
+        <format>path</format>
+        <description>Path to velocity file</description>
+      </parameter>
+      <parameter>
+        <key>age.min</key>
+        <long_name>Min age (days) when this orientation mode is activated</long_name>
+        <value>0</value>
+        <default>0</default>
+        <format>float</format>
+        <description>Min age (days) when this orientation mode is activated</description>
+      </parameter>
+      <parameter>
+        <key>age.max</key>
+        <long_name>Min age (days) when this orientation mode is activated</long_name>
+        <value>1.0</value>
+        <default>10</default>
+        <format>float</format>
+        <description>Min age (days) when this orientation mode is activated</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.orientation.cardinal</key>
+    <tree_path>Transport/Orientation/Cardinal</tree_path>
+    <enabled>true</enabled>
+    <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
+    <parameters>
+      <parameter>
+        <key>swimming.speed.hatch</key>
+        <long_name>Swimming speed hatch [cm/s]</long_name>
+        <value>1.0</value>
+        <default>1</default>
+        <format>float</format>
+        <description>Swimming speed hatch [cm/s]</description>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.settle</key>
+        <long_name>Swimming speed settle [cm/s]</long_name>
+        <value>100.0</value>
+        <default>1000</default>
+        <format>float</format>
+        <description>Swimming speed settle [cm/s]</description>
+      </parameter>
+      <parameter>
+        <key>swimming.von.mises.kappa</key>
+        <long_name>Von Mises parameter</long_name>
+        <value>1.5</value>
+        <default>10</default>
+        <format>float</format>
+        <description>Von Mises Kappa parameter</description>
+      </parameter>
+      <parameter>
+        <key>swimming.cardinal.heading</key>
+        <long_name>Heading</long_name>
+        <value>60.0</value>
+        <default>10</default>
+        <format>float</format>
+        <description>Heading</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.orientation.CardinalOrientationAction</value>
+        <default>org.previmer.ichthyop.action.orientation.CardinalOrientationAction</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this dataset.</description>
+      </parameter>
+      <parameter hidden="true">
+        <long_name>priority</long_name>
+        <key>priority</key>
+        <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+        <value>high</value>
+        <default>high</default>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.csv.enabled</key>
+        <long_name>True if velocity from CSV</long_name>
+        <value>false</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>True if velocity from CSV</description>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.csv.file</key>
+        <long_name>Path to the velocity CSV file</long_name>
+        <value>ichthyop_configs/combined/velocity.csv</value>
+        <default>ichthyop_configs/combined/velocity.csv</default>
+        <format>path</format>
+        <description>Path to velocity file</description>
+      </parameter>
+      <parameter>
+        <key>age.min</key>
+        <long_name>Min age (days) when this orientation mode is activated</long_name>
+        <value>1.0</value>
+        <default>0</default>
+        <format>float</format>
+        <description>Min age (days) when this orientation mode is activated</description>
+      </parameter>
+      <parameter>
+        <key>age.max</key>
+        <long_name>Min age (days) when this orientation mode is activated</long_name>
+        <value>2.0</value>
+        <default>10</default>
+        <format>float</format>
+        <description>Min age (days) when this orientation mode is activated</description>
+      </parameter>
+    </parameters>
+  </block>  
+  <block type="action">
+    <key>action.orientation.rheotaxis</key>
+    <tree_path>Transport/Orientation/Rheotaxis</tree_path>
+    <enabled>true</enabled>
+    <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
+    <parameters>
+      <parameter>
+        <key>swimming.speed.hatch</key>
+        <long_name>Swimming speed hatch [m/s]</long_name>
+        <value>1.0</value>
+        <default>1</default>
+        <format>float</format>
+        <description>Swimming speed hatch [m/s]</description>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.settle</key>
+        <long_name>Swimming speed settle [m/s]</long_name>
+        <value>100.0</value>
+        <default>10</default>
+        <format>float</format>
+        <description>Swimming speed settle [m/s]</description>
+      </parameter>
+      <parameter>
+        <key>swimming.von.mises.kappa</key>
+        <long_name>Von Mises parameter</long_name>
+        <value>2.0</value>
+        <default>10</default>
+        <format>float</format>
+        <description>Swimming speed settle [m/s]</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.orientation.RheotaxisOrientationAction</value>
+        <default>org.previmer.ichthyop.action.orientation.RheotaxisOrientationAction</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this dataset.</description>
+      </parameter>
+      <parameter>
+        <key>age.min</key>
+        <long_name>Min age (days) when this orientation mode is activated</long_name>
+        <value>2.0</value>
+        <default>0</default>
+        <format>float</format>
+        <description>Min age (days) when this orientation mode is activated</description>
+      </parameter>
+      <parameter>
+        <key>age.max</key>
+        <long_name>Min age (days) when this orientation mode is activated</long_name>
+        <value>3.0</value>
+        <default>10</default>
+        <format>float</format>
+        <description>Min age (days) when this orientation mode is activated</description>
+      </parameter>
+      <parameter hidden="true">
+        <long_name>priority</long_name>
+        <key>priority</key>
+        <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+        <value>high</value>
+        <default>high</default>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
       </parameter>
     </parameters>
   </block>

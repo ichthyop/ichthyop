@@ -11,6 +11,8 @@ output
 .settings
 **/*.swp
 
+*.bak
+
 doc/_build
 doc/**/*ipynb*
 doc/generated
