@@ -1,4 +1,4 @@
-﻿<--- version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <icstructure>
   <long_name>Generic Ichthyop configuration file</long_name>
   <description>The file has few pre-defined parameters.</description>
@@ -3507,14 +3507,6 @@
         <format>float</format>
         <description>Swimming speed settle [m/s]</description>
       </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.action.orientation.RheotaxisOrientationAction</value>
-        <default>org.previmer.ichthyop.action.orientation.RheotaxisOrientationAction</default>
-        <format>class</format>
-        <description>The Java class called by the application to implement this dataset.</description>
-      </parameter>
       <parameter>
         <key>age.min</key>
         <long_name>Min age (days) when this orientation mode is activated</long_name>
@@ -3532,6 +3524,14 @@
         <description>Min age (days) when this orientation mode is activated</description>
       </parameter>
       <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.orientation.RheotaxisOrientationAction</value>
+        <default>org.previmer.ichthyop.action.orientation.RheotaxisOrientationAction</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this dataset.</description>
+      </parameter>
+      <parameter hidden="true">
         <long_name>priority</long_name>
         <key>priority</key>
         <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
@@ -3546,4 +3546,117 @@
       </parameter>
     </parameters>
   </block>
+  
+<block type="action">
+    <key>action.waveDriftFile</key>
+    <tree_path>Transport/WaveDrift</tree_path>
+    <enabled>true</enabled>
+    <description>Description of the wave drift action file.</description>
+    <parameters>
+    
+  <parameter>
+  <long_name>Wave input directory</long_name>
+  <key>input_file</key>
+  <format>path</format>
+  <description>Name of the V component of the stokes drift  variable in the wave file</description>
+  <default>wind_directory</default>
+  <value>wind_directory</value>
+  </parameter>
+
+  <parameter>
+  <long_name>Time variable</long_name>
+  <key>field_time</key>
+  <description>Name of the time  variable in the wave file</description>
+  <default>time</default>
+  <value>time</value>
+  </parameter>
+  
+  <parameter>
+  <long_name>Longitude</long_name>
+  <key>longitude</key>
+  <description>Name of the longitude  variable in the wave file</description>
+  <default>longitude</default>
+  <value>longitude</value>
+  </parameter>
+  
+  <parameter>
+  <long_name>Latitude</long_name>
+  <key>latitude</key>
+  <description>Name of the latitude  variable in the wave file</description>
+  <default>latitude</default>
+  <value>latitude</value>
+  </parameter>
+  
+    <parameter>
+  <long_name>U component of Stokes drift</long_name>
+  <key>stokes_u</key>
+  <description>Name of the U component of the stokes drift  variable in the wave file</description>
+  <default>latitude</default>
+  <value>latitude</value>
+  </parameter>
+  
+  <parameter>
+  <long_name>V component of Stokes drift</long_name>
+  <key>stokes_v</key>
+  <description>Name of the V component of the stokes drift  variable in the wave file</description>
+  <default>latitude</default>
+  <value>latitude</value>
+  </parameter>
+  
+   <parameter>
+  <long_name>U component of wave drift</long_name>
+  <key>wave_u</key>
+  <description>Name of the U component of the wave velocity  variable in the wave file</description>
+  <default>wave_u</default>
+  <value>wave_u</value>
+  </parameter>
+  
+  <parameter>
+  <long_name>V component of wave drift</long_name>
+  <key>wave_v</key>
+  <description>Name of the V component of the wave velocity  variable in the wave file</description>
+  <default>wave_v</default>
+  <value>wave_v</value>
+  </parameter>
+  
+   <parameter>
+  <long_name>Wave period</long_name>
+  <key>wave_period</key>
+  <description>Name of the wave period wave file</description>
+  <default>wave_period</default>
+  <value>wave_period</value>
+  </parameter>
+
+   <parameter>
+  <long_name>Wave factor</long_name>
+  <key>wave_factor</key>
+  <format>float</format>
+  <description>Wave factor</description>
+  <default>1</default>
+  <value>1</value>
+  </parameter>
+
+<parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.WaveDriftFileAction</value>
+        <default>org.previmer.ichthyop.action.WaveDriftFileAction</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this dataset.</description>
+      </parameter>
+      <parameter hidden="true">
+        <long_name>priority</long_name>
+        <key>priority</key>
+        <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+        <value>high</value>
+        <default>high</default>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+    </parameters>
+    </block>
 </icstructure>
