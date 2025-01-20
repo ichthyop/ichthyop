@@ -21,8 +21,9 @@ import org.previmer.ichthyop.io.DebVTracker;
 import org.previmer.ichthyop.io.DebEHTracker;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
-import org.previmer.ichthyop.particle.AcceleratedDebParticleLayer;
+import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
@@ -59,6 +60,12 @@ public class AcceleratedDebGrowthAction extends AbstractAction {
     double T_AL; // K Arrh. temp for lower boundary
     double T_AH; // K Arrh. temp for upper boundary
     double TC_threshold; // TC threshold to kill particles
+
+    private double V_init;
+    private double E_init;
+    private double shape_larvae;
+    private double shape_adults;
+
 
     // Time step
     double dt; // Time step
@@ -102,6 +109,11 @@ public class AcceleratedDebGrowthAction extends AbstractAction {
         T_AH = Double.valueOf(getParameter("T_AH")); // (K); Arrhenius temperature for upper boundary.
         TC_threshold = Double.valueOf(getParameter("TC_threshold"));// TC threshold to kill particles
 
+        E_init = Double.valueOf(getParameter("initial_reserve"));// TC threshold to kill particles
+        V_init = Double.valueOf(getParameter("initial_volume"));// TC threshold to kill particles
+        shape_larvae = Double.valueOf(getParameter("shape_larvae"));// TC threshold to kill particles
+        shape_adults = Double.valueOf(getParameter("shape_adults"));// TC threshold to kill particles
+
         // Time step
         dt = getSimulationManager().getTimeManager().get_dt();
 
@@ -140,7 +152,7 @@ public class AcceleratedDebGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        AcceleratedDebParticleLayer debLayer = (AcceleratedDebParticleLayer) particle.getLayer(AcceleratedDebParticleLayer.class);
+        DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
         double temp = getSimulationManager().getDataset().get(temperature_field,
                 debLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime())
                 .doubleValue();
@@ -152,7 +164,10 @@ public class AcceleratedDebGrowthAction extends AbstractAction {
         debLayer.setV(res_deb[1]);
         debLayer.setE_H(res_deb[4]);
         debLayer.setE_R(res_deb[5]);
-        debLayer.computeLength();
+
+        double length = computeLength(debLayer.getV(), debLayer.getE_H());
+        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
+        lengthLayer.setLength(length);
 
         if (res_deb[2] == 1) {
             particle.kill(ParticleMortality.STARVATION);
@@ -161,6 +176,25 @@ public class AcceleratedDebGrowthAction extends AbstractAction {
         if (res_deb[3] == 1) {
             particle.kill(ParticleMortality.DEAD_HOT);
         }
+    }
+
+    public double computeLength(double V, double E_H) {
+
+        // Shape larvae abj model
+        double shape; // Shape coefficient (-)
+
+        // Maturity at birth (E_Hb) = 0.3339
+        // Maturity at metamorphosis (E_Hj) = 59.66
+        // Shape coefficient for standard length = 0.1879
+        // shape coefficient for standard length of larvae = shape_larvae
+        if (E_H < E_Hb) {
+            shape = shape_larvae;
+        } else if ((E_Hb <= E_H) && (E_H < E_Hj)) {
+            shape = (shape_larvae * (E_Hj - E_H) + shape_adults * (E_H - E_Hb)) / (E_Hj - E_Hb);
+        } else {
+            shape = shape_adults;
+        }
+        return Math.pow(V, 1 / 3.0) / shape;
     }
 
     private double[] grow(double dt, double Et, double Vt, double E_Ht, double E_Rt, double temperature, double food) {
@@ -277,6 +311,15 @@ public class AcceleratedDebGrowthAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-        // TODO: implement the init method
+
+        DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
+        debLayer.setE(E_init);
+        debLayer.setV(V_init);
+        debLayer.setE_H(0);
+        debLayer.setE_R(0);
+
+        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
+        lengthLayer.setLength(computeLength(V_init, 0));
+
     }
 }
