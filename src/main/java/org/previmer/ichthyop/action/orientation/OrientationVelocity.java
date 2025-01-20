@@ -41,7 +41,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     public void loadParameters() throws Exception {
 
         String key = "swimming.speed.csv.enabled";
-        if (getParameter(key) != null && Boolean.valueOf(getParameter(key))) {
+        if (!isNull(key) && Boolean.valueOf(getParameter(key))) {
             velocityMethod = (IParticle particle) -> getVelocityCsv(particle);
             initVelocityCsv();
         } else {
