@@ -47,6 +47,9 @@ package org.previmer.ichthyop.particle;
 /**
  *
  * @author gandres
+ *
+ * Updated by Jorge
+ *
  */
 public class DebParticleLayer extends ParticleLayer {
 
@@ -57,8 +60,8 @@ public class DebParticleLayer extends ParticleLayer {
     private double V; // Structure
     private double E_R; // Reproduction buffer
     private double E_H;  // Cumulated energy invested into dev.
-    private double Lj = Double.NaN;
-    private double Lb = Double.NaN;
+    // private double Lj = Double.NaN;
+    // private double Lb = Double.NaN;
 
     public DebParticleLayer(IParticle particle) {
         super(particle);
@@ -78,7 +81,6 @@ public class DebParticleLayer extends ParticleLayer {
     }
 
     public double getV() {
-
         return V;
     }
 
@@ -102,20 +104,20 @@ public class DebParticleLayer extends ParticleLayer {
         this.E_H = E_H;
     }
 
-    public double getLj() {
-        return this.Lj;
-    }
+    // public double getLj() {
+    //     return this.Lj;
+    // }
 
-    public void setLj(double Lj) {
-        this.Lj = Lj;
-    }
+    // public void setLj(double Lj) {
+    //     this.Lj = Lj;
+    // }
 
-    public double getLb() {
-        return this.Lb;
-    }
+    // public double getLb() {
+    //     return this.Lb;
+    // }
 
-    public void setLb(double Lb) {
-        this.Lb = Lb;
-    }
+    // public void setLb(double Lb) {
+    //     this.Lb = Lb;
+    // }
 
 }
