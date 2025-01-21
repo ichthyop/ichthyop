@@ -3,11 +3,21 @@
 Ichthyop can take into account the effects of waves on the particles trajectories, following the Stokes drift equations of @stokes_2009:
 
 $$
-U_{S} = w \times k \times a^2 \times \exp\left(2 \times k \times z\right)
+U_{S} = w \times k_{wave} \times a^2 \times \exp\left(2 \times k_{wave} \times z\right)
 $$
 
-In Ichthyop, the user provides zonal and meridional wave stokes drift and
-the wave periods. The horizontal displacement of particles is computed as follows:
+where $w \times k \times a^2$ is the Stokes drift velocity, $k_{wave}$ is the wave number and $z$ is the depth.
+
+In Ichthyop, the user provides the zonal and meridional components of the Stokes drift ($U_{stokes}$ and $V_{stokes}$), the zonal and meridional wave velocities ($U_{wave}$ and $V_{wave}$) and
+the wave period ($T_{wave}$).
+
+::: {.callout-important}
+
+Note that all the fields provided by the user are 2D!
+
+:::
+
+First, the value of $k_{wave}$ is computed from the wave velocity and the wave period:
 
 $$
 \|U_{wave}\| = U_{wave}^2 + V_{wave}^2
@@ -21,17 +31,16 @@ $$
 k_{wave} =  \dfrac{2 \pi}{\lambda_{wave}}
 $$
 
+Then, the horizontal displacement due to the Stokes drift is computed as follows:
+
 $$
-\Delta X = F \times U_{cur} \times \Delta t \times \exp\left(2 \times k_{wave} \times z\right)
+\Delta X = F \times U_{stokes} \times \Delta t \times \exp\left(2 \times k_{wave} \times z\right)
 $$
 
 $$
-\Delta Y = F \times V_{cur} \times \Delta t \times \exp\left(2 \times k_{wave} \times z\right)
+\Delta Y = F \times V_{stokes} \times \Delta t \times \exp\left(2 \times k_{wave} \times z\right)
 $$
 
-with  $U_{wave}$ and $V_{wave}$ the zonal and meridional stokes components, $T_{wave}$
-the wave period, $U_{cur}$ and $V_{cur}$ the zonal and meridional ocean current components, $z$
+with  $k_{wave}$
+the wave number as computed above, $U_{stokes}$ and $V_{stokes}$ the zonal and meridional components of the Stokes drift, $z$
 the depth and  $F$ a multiplication factor provided by the user.
-
-
-<!-- TODO Add references for Ichthyop use and implementation -->
