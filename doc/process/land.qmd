@@ -43,4 +43,4 @@ $$
 \Delta_{cor} y = 2 \Delta y_1 - \Delta y
 $$
 
-![Coastal behaviour in bouncing mode.](process/_static/bouncing.svg){#fig-bouncing}
+![Coastal behaviour in bouncing mode.](process/_static/bouncing.jpg){#fig-bouncing}

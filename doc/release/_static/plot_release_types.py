@@ -63,6 +63,7 @@ def is_over_land(x, y):
 
 def savefig(figname):
     plt.savefig(os.path.join(dirout, figname + '.svg'), bbox_inches='tight')
+    plt.savefig(os.path.join(dirout, figname + '.jpg'), bbox_inches='tight')
 
 
 def inpolygon(x, y, x_pol, y_pol):

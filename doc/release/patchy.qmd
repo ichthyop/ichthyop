@@ -9,6 +9,6 @@ Additionnally, there is the possibility to release patches in each release zone.
 If this parameter is set to false, the bounding box around the defined release zones (if any) or the full domain is used to release the patches, as shown
 in @fig-uniform-patchy-release.
 
-![Example of a patchy zone release.](release/_static/release_patchy_zones.svg){#fig-zone-patchy-release}
+![Example of a patchy zone release.](release/_static/release_patchy_zones.jpg){#fig-zone-patchy-release}
 
-![Example of a patchy uniform release.](release/_static/release_patchy_uniform.svg){#fig-uniform-patchy-release}
+![Example of a patchy uniform release.](release/_static/release_patchy_uniform.jpg){#fig-uniform-patchy-release}

@@ -6,4 +6,4 @@ For a 3D simulation, the user also provides the depth and the thickness of the r
 
 An example of a stain release is provided in @fig-stain-release
 
-![Example of a stain release.](release/_static/release_stain.svg){#fig-stain-release}
+![Example of a stain release.](release/_static/release_stain.jpg){#fig-stain-release}

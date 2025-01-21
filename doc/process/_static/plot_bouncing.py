@@ -80,5 +80,5 @@ plt.annotate('$\Delta y_{cor}$', (xxx[ibis][-1] + 0.15, 0.5 * (y1 + y2)),
              ha='center', va='center', color=c4[0].get_color())
 
 
-plt.savefig(os.path.join(outdir, 'bouncing.svg'), bbox_inches='tight')
+plt.savefig(os.path.join(outdir, 'bouncing.jpg'), bbox_inches='tight')
 # -

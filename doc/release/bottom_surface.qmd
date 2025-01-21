@@ -8,4 +8,4 @@ There is no control over the area where the particles are released.
 
 An example of a surface release is shown in @fig-plot-surface-release.
 
-![Example of a surface release.](release/_static/release_surface.svg){#fig-plot-surface-release}
+![Example of a surface release.](release/_static/release_surface.jpg){#fig-plot-surface-release}

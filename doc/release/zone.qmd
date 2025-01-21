@@ -15,4 +15,4 @@ However, if the `user_defined_nparticles` parameter is set equal to `true`, then
 
 An example of zone release is provided below.
 
-![Example of a zone release.](release/_static/release_zones.svg){#fig-zone-release}
+![Example of a zone release.](release/_static/release_zones.jpg){#fig-zone-release}
