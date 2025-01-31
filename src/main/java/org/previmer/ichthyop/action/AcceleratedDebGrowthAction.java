@@ -135,14 +135,15 @@ public class AcceleratedDebGrowthAction extends AbstractAction {
         if (addTracker) {
             getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
         }
+
         addTracker = true;
-        try {
-            addTracker = Boolean.valueOf(getParameter("E_tracker"));
-            addTracker = Boolean.valueOf(getParameter("V_tracker"));
-            addTracker = Boolean.valueOf(getParameter("E_H_tracker"));
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
+        // try {
+        //     addTracker = Boolean.valueOf(getParameter("E_tracker"));
+        //     addTracker = Boolean.valueOf(getParameter("V_tracker"));
+        //     addTracker = Boolean.valueOf(getParameter("E_H_tracker"));
+        // } catch (Exception ex) {
+        //     // do nothing and just add the tracker
+        // }
         if (addTracker) {
             getSimulationManager().getOutputManager().addPredefinedTracker(DebETracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebVTracker.class);
