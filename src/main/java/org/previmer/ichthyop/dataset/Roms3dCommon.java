@@ -633,6 +633,10 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         try {
             time_tp1 = DatasetUtil.timeAtRank(ncIn, strTime, rank);
+            // if we are working on a climatological file, we take the time at the given rank
+            if(this.isClimatology()) {
+                time_tp1 += (timeArrow() * getSimulatedNYears() * 365 * 24 * 60 * 60);
+            }
         } catch (IOException ex) {
             IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
