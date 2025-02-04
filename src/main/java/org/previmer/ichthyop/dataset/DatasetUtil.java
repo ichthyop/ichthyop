@@ -212,6 +212,7 @@ public class DatasetUtil {
     }
 
     /**
+     * Return the index of the next NetCDF file to read. If climatology file, we return 0
      *
      * @param list
      * @param index
@@ -219,11 +220,19 @@ public class DatasetUtil {
      * @return
      * @throws IOException
      */
-    public static int next(List<String> list, int index, int timeArrow) throws IOException {
-        if ((list.size() == 1) || ((index + 1) >= list.size())) {
-            throw new IOException("[Dataset] Unable to find any file following " + list.get(index));
+    public static int next(List<String> list, int index, int timeArrow, boolean is_climato) throws IOException {
+        if (is_climato) {
+            return 0;
+        } else {
+            if ((list.size() == 1) || ((index + 1) >= list.size())) {
+                throw new IOException("[Dataset] Unable to find any file following " + list.get(index));
+            }
+            return index + 1;
         }
-        return index + 1;
+    }
+
+    public static int next(List<String> list, int index, int timeArrow) throws IOException {
+        return next(list, index, timeArrow, false);
     }
 
     public static int index(List<String> list, double time, int timeArrow, String strTime) throws IOException {
