@@ -91,10 +91,13 @@ public class Roms3dDataset extends Roms3dCommon {
         }
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            ncindex = DatasetUtil.next(ncfiles, ncindex, time_arrow);
+            ncindex = DatasetUtil.next(ncfiles, ncindex, time_arrow, this.isClimatology());
             ncIn = DatasetUtil.openFile(ncfiles.get(ncindex), true);
             readTimeLength();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
+            if(this.isClimatology()) {
+                this.incrementSimulatedNYears();
+            }
         }
         setAllFieldsTp1AtTime(rank);
     }
