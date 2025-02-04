@@ -166,6 +166,16 @@ abstract class RomsCommon extends AbstractDataset {
 
         this.setIsClimatology(tempIsClimatology);
 
+        // define the time offset for setting climato time
+        double tempTimeOffset;
+        if(findParameter("climato_offset_days")) {
+            tempTimeOffset = Double.valueOf(getParameter("climato_offset_days"));
+        } else {
+            tempTimeOffset = 0;
+        }
+
+        this.setOffsetDays(tempTimeOffset);
+
     }
 
     public void shrinkGrid() {

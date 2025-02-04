@@ -61,14 +61,19 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     private final String datasetKey;
 
     private boolean isClimatology;
-    private int simulatedNYears;
 
-    public void incrementSimulatedNYears() {
-        simulatedNYears++;
+    // number of offset values to add
+    private int simulatedOffsets = 0;
+
+    // value of time offset (365 if full year climato)
+    private double offsetInDays;
+
+    public void incrementSimulatedOffsets() {
+        simulatedOffsets++;
     }
 
-    public int getSimulatedNYears() {
-        return simulatedNYears;
+    public int getSimulatedOffsets() {
+        return simulatedOffsets;
     }
 
     public boolean isClimatology() {
@@ -77,6 +82,14 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
 
     public void setIsClimatology(boolean isClimato) {
         this.isClimatology = isClimato;
+    }
+
+    public void setOffsetDays(double offset) {
+        this.offsetInDays = offset;
+    }
+
+    public double getOffsetDays() {
+        return this.offsetInDays;
     }
 
     /*
