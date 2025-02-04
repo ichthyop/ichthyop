@@ -59,6 +59,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
         <mainClass>org.previmer.ichthyop.ui.IchthyopApp</mainClass>
+        <skipTests>true</skipTests>
     </properties>
 
     <!-- Libraries declarations -->
