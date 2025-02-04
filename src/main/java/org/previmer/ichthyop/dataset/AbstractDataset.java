@@ -59,6 +59,26 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     private DistanceGetter distGetter;
 
     private final String datasetKey;
+
+    private boolean isClimatology;
+    private int simulatedNYears;
+
+    public void incrementSimulatedNYears() {
+        simulatedNYears++;
+    }
+
+    public int getSimulatedNYears() {
+        return simulatedNYears;
+    }
+
+    public boolean isClimatology() {
+        return isClimatology;
+    }
+
+    public void setIsClimatology(boolean isClimato) {
+        this.isClimatology = isClimato;
+    }
+
     /*
      *
      */

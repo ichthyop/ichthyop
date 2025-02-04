@@ -155,6 +155,17 @@ abstract class RomsCommon extends AbstractDataset {
         strTime = getParameter("field_var_time");
         strPn = getParameter("field_var_pn");
         strPm = getParameter("field_var_pm");
+
+        // set whether we are running climatological file
+        boolean tempIsClimatology;
+        if(findParameter("is_climatology")) {
+            tempIsClimatology = Boolean.valueOf(getParameter("is_climatology"));
+        } else {
+            tempIsClimatology = false;
+        }
+
+        this.setIsClimatology(tempIsClimatology);
+
     }
 
     public void shrinkGrid() {
@@ -767,4 +778,5 @@ abstract class RomsCommon extends AbstractDataset {
     public double yTore(double y) {
         return y;
     }
+
 }
