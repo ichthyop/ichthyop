@@ -140,8 +140,18 @@ public class MigrationAction extends AbstractAction {
 
         variable_name = String.valueOf(getParameter("threshold_variable"));
         variableGetter = new ParticleVariableGetter(variable_name);
-        enable_minimum_threshold = Float.valueOf(getParameter("threshold_min"));
-        enable_maximum_threshold = Float.valueOf(getParameter("threshold_max"));
+
+        if(isNull("threshold_min")) {
+            enable_minimum_threshold = 0;
+        }else {
+            enable_minimum_threshold = Float.valueOf(getParameter("threshold_min"));
+        }
+
+        if (isNull("threshold_max")) {
+            enable_maximum_threshold = Float.MAX_VALUE;
+        } else {
+            enable_maximum_threshold = Float.valueOf(getParameter("threshold_max"));
+        }
 
         // Check existence of daytime depth as an age function, provided in CSV file
         if (!isNull("daytime_depth_file")) {
