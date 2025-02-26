@@ -60,6 +60,7 @@ import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.util.CheckGrowthParam;
+import org.previmer.ichthyop.util.ParticleVariableGetter;
 
 /**
  *
@@ -98,7 +99,8 @@ public class BuoyancyAction extends AbstractAction {
      * Buoyuancy scheme only operates during the egg stage. But when the growth
      * of the particle is not simulated, it operates up to this age limit [day].
      */
-    public static double maximumAge;
+    public double maximum_threshold_enabled;
+    public double minimum_threshold_enabled;
     /**
      * Egg density [g/cm3], a key parameter to calculate the egg buoyancy.
      */
@@ -111,8 +113,10 @@ public class BuoyancyAction extends AbstractAction {
     private String temperature_field;
     private boolean isGrowth;
     private float[] particleDensities;
-    private float[] ages;
+    private float[] thresholds;
     private BuoyancyModel buoyancyModel;
+
+    private ParticleVariableGetter variableGetter;
 
     @Override
     public void loadParameters() throws Exception {
@@ -134,18 +138,24 @@ public class BuoyancyAction extends AbstractAction {
             MOLECULAR_VISCOSITY = Double.valueOf(getParameter(key));
         }
 
-
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
-        isGrowth = CheckGrowthParam.checkParams();
-        if (!isGrowth) {
-            try {
-                maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;
-            } catch (Exception ex) {
-                maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
-                getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
-            }
+
+        String variable_name = getParameter("threshold_variable");
+        variableGetter = new ParticleVariableGetter(variable_name);
+
+        if(isNull("threshold_min")) {
+            minimum_threshold_enabled = 0;
+        } else {
+            minimum_threshold_enabled = Double.valueOf(getParameter("threshold_min"));
         }
+
+        if(isNull("threshold_max")) {
+            maximum_threshold_enabled = Float.MAX_VALUE;
+        } else {
+            maximum_threshold_enabled = Double.valueOf(getParameter("threshold_max"));
+        }
+
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
 
@@ -182,13 +192,13 @@ public class BuoyancyAction extends AbstractAction {
             List<String[]> lines = reader.readAll();
 
             // init arrays
-            ages = new float[lines.size() - 1];
-            particleDensities = new float[ages.length];
+            thresholds = new float[lines.size() - 1];
+            particleDensities = new float[thresholds.length];
 
             // read ages (hours converted to seconds) and densities
-            for (int i = 0; i < ages.length; i++) {
+            for (int i = 0; i < thresholds.length; i++) {
                 String[] line = lines.get(i + 1);
-                ages[i] = Float.valueOf(line[0]) * 3600.f;
+                thresholds[i] = Float.valueOf(line[0]) * 3600.f;
                 particleDensities[i] = Float.valueOf(line[1]);
             }
         } catch (IOException ex) {
@@ -205,7 +215,7 @@ public class BuoyancyAction extends AbstractAction {
             int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
             canApplyBuoyancy = (stage == 0);
         } else {
-            canApplyBuoyancy = particle.getAge() < maximumAge;
+            canApplyBuoyancy = particle.getAge() < maximum_threshold_enabled;
         }
 
         if (canApplyBuoyancy) {
@@ -214,10 +224,10 @@ public class BuoyancyAction extends AbstractAction {
              * determine what is current density for the particle
              */
             if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
-                particleDensity = particleDensities[ages.length - 1];
+                particleDensity = particleDensities[thresholds.length - 1];
                 float age = particle.getAge();
-                for (int i = 0; i < ages.length - 1; i++) {
-                    if (ages[i] <= age && age < ages[i + 1]) {
+                for (int i = 0; i < thresholds.length - 1; i++) {
+                    if (thresholds[i] <= age && age < thresholds[i + 1]) {
                         particleDensity = particleDensities[i];
                         break;
                     }
