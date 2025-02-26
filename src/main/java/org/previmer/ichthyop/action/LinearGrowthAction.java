@@ -50,7 +50,7 @@ import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.StageParticleLayer;
-import org.previmer.ichthyop.stage.LengthStage;
+import org.previmer.ichthyop.stage.AbstractStage;
 import org.previmer.ichthyop.util.Constant;
 
 /**
@@ -72,7 +72,7 @@ public class LinearGrowthAction extends AbstractAction {
     private double ks = 0;
     private String temperature_field;
     private String food_field;
-    private LengthStage lengthStage;
+    private AbstractStage AbstractStage;
 
     @Override
     public void loadParameters() throws Exception {
@@ -81,8 +81,8 @@ public class LinearGrowthAction extends AbstractAction {
         coeff2 = Float.valueOf(getParameter("coeff2"));
         temperature_field = getParameter("temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
-        lengthStage.init();
+        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength());
+        AbstractStage.init();
 
         // barrier.n: modifications for hilaire.
         if(!isNull("half_saturation")) {
@@ -120,7 +120,7 @@ public class LinearGrowthAction extends AbstractAction {
     public void init(IParticle particle
     ) {
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.setLength(lengthStage.getThreshold(0));
+        lengthLayer.setLength(AbstractStage.getThreshold(0));
     }
 
     @Override
@@ -137,7 +137,7 @@ public class LinearGrowthAction extends AbstractAction {
         lengthLayer.incrementLength(grow(temperature, food));
 
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
-        stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
+        stageLayer.setStage(AbstractStage.getStage((float) lengthLayer.getLength()));
     }
 
     private double grow(double temperature, double food) {

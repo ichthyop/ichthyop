@@ -56,7 +56,7 @@ import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.ParticleMortality;
 import org.previmer.ichthyop.particle.StageParticleLayer;
-import org.previmer.ichthyop.stage.LengthStage;
+import org.previmer.ichthyop.stage.AbstractStage;
 
 /**
  *
@@ -82,7 +82,7 @@ public class DebGrowthAction extends AbstractAction {
     private double shape_larvae; // size related conversion params
     private double E_init; // Réserve initiale
     private double Vj; // Structure at mouth opening (yolk_to_feeding)
-    private LengthStage lengthStage;
+    private AbstractStage AbstractStage;
 
     private double dt;
 
@@ -121,8 +121,8 @@ public class DebGrowthAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(food_field, getClass());
 
         // Init the length stage for tracking length stages.
-        lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
-        lengthStage.init();
+        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength());
+        AbstractStage.init();
 
         boolean addTracker = true;
         try {
@@ -181,7 +181,7 @@ public class DebGrowthAction extends AbstractAction {
         debLayer.setE_R(res_deb[2]);
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         lengthLayer.setLength(computeLength(debLayer.getV()));
-        stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
+        stageLayer.setStage(AbstractStage.getStage((float) lengthLayer.getLength()));
 
         if (res_deb[3] == 1) {
             particle.kill(ParticleMortality.STARVATION);

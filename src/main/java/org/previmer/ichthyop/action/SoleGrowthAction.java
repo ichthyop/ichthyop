@@ -51,7 +51,7 @@ import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.StageParticleLayer;
-import org.previmer.ichthyop.stage.LengthStage;
+import org.previmer.ichthyop.stage.AbstractStage;
 import org.previmer.ichthyop.util.Constant;
 
 /**
@@ -62,7 +62,7 @@ public class SoleGrowthAction extends AbstractAction {
 
     private String temperature_field;
     private double dt_day;
-    private LengthStage lengthStage;
+    private AbstractStage AbstractStage;
     private float[] c1, c2;
 
     @Override
@@ -81,13 +81,12 @@ public class SoleGrowthAction extends AbstractAction {
         // Time step expressed in day
         dt_day = (double) getSimulationManager().getTimeManager().get_dt() / Constant.ONE_DAY;
 
-        // Pre-defined stages of the sole larva
-        lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
-        lengthStage.init();
+        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength());
+        AbstractStage.init();
 
         // Coefficients of the growth equation
         // dLength(dt) = c1 * (temperature ^ c2) * dt
-        c1 = new float[lengthStage.getNStage()];
+        c1 = new float[AbstractStage.getNStage()];
         String[] sCoeff = getListParameter("c1");
         if (sCoeff.length != c1.length) {
             throw new IOException("In Sole Growth section, the number of c1 coefficients must be equal to the number of stages.");
@@ -95,7 +94,7 @@ public class SoleGrowthAction extends AbstractAction {
         for (int iStage = 0; iStage < c1.length; iStage++) {
             c1[iStage] = Float.parseFloat(sCoeff[iStage]);
         }
-        c2 = new float[lengthStage.getNStage()];
+        c2 = new float[AbstractStage.getNStage()];
         sCoeff = getListParameter("c2");
         if (sCoeff.length != c2.length) {
             throw new IOException("In Sole Growth section, the number of c2 coefficients must be equal to the number of stages.");
@@ -108,16 +107,16 @@ public class SoleGrowthAction extends AbstractAction {
     @Override
     public void init(IParticle particle) {
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.setLength(lengthStage.getThreshold(0));
+        lengthLayer.setLength(AbstractStage.getThreshold(0));
     }
 
     @Override
     public void execute(IParticle particle) {
         LengthParticleLayer sole = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        sole.incrementLength(grow(lengthStage.getStage(particle), temp));
+        sole.incrementLength(grow(AbstractStage.getStage(particle), temp));
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
-        stageLayer.setStage(lengthStage.getStage((float) sole.getLength()));
+        stageLayer.setStage(AbstractStage.getStage((float) sole.getLength()));
     }
 
     private double grow(int stage, double temperature) {
