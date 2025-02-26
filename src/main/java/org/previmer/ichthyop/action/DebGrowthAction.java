@@ -57,6 +57,7 @@ import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.ParticleMortality;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.stage.AbstractStage;
+import org.previmer.ichthyop.util.ParticleVariableGetter;
 
 /**
  *
@@ -120,8 +121,9 @@ public class DebGrowthAction extends AbstractAction {
         food_field = getParameter("food_field");
         getSimulationManager().getDataset().requireVariable(food_field, getClass());
 
+        ParticleVariableGetter variableGetter = new ParticleVariableGetter("length");
         // Init the length stage for tracking length stages.
-        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength());
+        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), variableGetter);
         AbstractStage.init();
 
         boolean addTracker = true;

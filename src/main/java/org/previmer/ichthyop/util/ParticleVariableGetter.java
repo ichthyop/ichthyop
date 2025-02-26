@@ -1,10 +1,65 @@
 package org.previmer.ichthyop.util;
 
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
 
-@FunctionalInterface
-public interface ParticleVariableGetter {
+public class ParticleVariableGetter {
 
-    public double getVariable(IParticle particle);
+    @FunctionalInterface
+    public interface VariableGetterInterface {
+        public double getVariable(IParticle particle);
+    }
+
+    private final VariableGetterInterface variableGetter;
+
+    public ParticleVariableGetter(String variable_name) {
+        switch (variable_name) {
+            case "length": {
+                variableGetter = (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength();
+                break;
+            }
+            case "age": {
+                variableGetter = (particle) -> particle.getAge();
+                break;
+            }
+            default:
+                variableGetter = (particle) -> particle.getAge();
+                break;
+        }
+    }
+
+    public VariableGetterInterface getVariableGetter() {
+        return variableGetter;
+    }
+
+    public double getValue(IParticle particle) {
+        return variableGetter.getVariable(particle);
+    }
+
+    public enum EnumVariable {
+
+        AGE(0, "age"), LENGTH(1, "length");
+
+        private int code;
+        private String name;
+
+        EnumVariable(int code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
+    }
 
 }

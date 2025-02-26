@@ -64,12 +64,6 @@ public class AbstractStage extends SimulationManagerAccessor {
     private final BlockType blockType;
     private final String blockKey;
 
-    public AbstractStage(BlockType blockType, String blockKey) {
-        this.blockType = blockType;
-        this.blockKey = blockKey;
-        this.variableGetter = (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength();
-    }
-
     public AbstractStage(BlockType blockType, String blockKey, ParticleVariableGetter getter) {
         this.blockType = blockType;
         this.blockKey = blockKey;
@@ -131,7 +125,7 @@ public class AbstractStage extends SimulationManagerAccessor {
     }
 
     public int getStage(IParticle particle) {
-        double value = variableGetter.getVariable(particle); //
+        double value = variableGetter.getValue(particle); //
         return getStage((float) value);
     }
 

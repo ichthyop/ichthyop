@@ -52,6 +52,7 @@ import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.stage.AbstractStage;
 import org.previmer.ichthyop.util.Constant;
+import org.previmer.ichthyop.util.ParticleVariableGetter;
 
 /**
  * Linear growth but with a constrain from a holling II
@@ -81,7 +82,9 @@ public class LinearGrowthAction extends AbstractAction {
         coeff2 = Float.valueOf(getParameter("coeff2"));
         temperature_field = getParameter("temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength());
+
+        ParticleVariableGetter variableGetter = new ParticleVariableGetter("length");
+        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), variableGetter);
         AbstractStage.init();
 
         // barrier.n: modifications for hilaire.

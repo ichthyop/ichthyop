@@ -53,6 +53,7 @@ import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.stage.AbstractStage;
 import org.previmer.ichthyop.util.Constant;
+import org.previmer.ichthyop.util.ParticleVariableGetter;
 
 /**
  *
@@ -81,7 +82,9 @@ public class SoleGrowthAction extends AbstractAction {
         // Time step expressed in day
         dt_day = (double) getSimulationManager().getTimeManager().get_dt() / Constant.ONE_DAY;
 
-        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength());
+        ParticleVariableGetter variableGetter = new ParticleVariableGetter("length");
+
+        AbstractStage = new AbstractStage(BlockType.ACTION, getBlockKey(), variableGetter);
         AbstractStage.init();
 
         // Coefficients of the growth equation

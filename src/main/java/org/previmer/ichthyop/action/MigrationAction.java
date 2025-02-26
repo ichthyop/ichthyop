@@ -59,7 +59,10 @@ import com.opencsv.CSVReaderBuilder;
 
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.StageParticleLayer;
+import org.previmer.ichthyop.util.CheckGrowthParam;
+import org.previmer.ichthyop.util.ParticleVariableGetter;
 
 /**
  *
@@ -114,6 +117,9 @@ public class MigrationAction extends AbstractAction {
      */
     private boolean isGrowth;
 
+    private ParticleVariableGetter variableGetter;
+    private String variable_name;
+
     /**
      * Read parameters from the configuration file.
      *
@@ -122,13 +128,16 @@ public class MigrationAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
+        // Check whether the growth module is enabled
+        isGrowth = CheckGrowthParam.checkParams();
+
         // DVM only in 3D mode
         if (!getSimulationManager().getDataset().is3D()) {
             throw new UnsupportedOperationException("{Migration} Vertical migration cannot operate in 2D simulation. Please deactivate the block or run a 3D simulation.");
         }
 
-        // Check whether the growth module is enabled
-        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        variable_name = String.valueOf(getParameter("threshold_variable"));
+
 
         // Otherwise read migration minimal age
         if (!isGrowth) {
