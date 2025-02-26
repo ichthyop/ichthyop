@@ -15,15 +15,18 @@ public class ParticleVariableGetter {
     public ParticleVariableGetter(String variable_name) {
         switch (variable_name) {
             case "length": {
+                // Return length in cm
                 variableGetter = (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength();
                 break;
             }
             case "age": {
-                variableGetter = (particle) -> particle.getAge();
+                // return age in days
+                variableGetter = (particle) -> particle.getAge() / (24 * 60 * 60);
                 break;
             }
             default:
-                variableGetter = (particle) -> particle.getAge();
+                // return age in days by default
+                variableGetter = (particle) -> particle.getAge() / (24 * 60 * 60);
                 break;
         }
     }
