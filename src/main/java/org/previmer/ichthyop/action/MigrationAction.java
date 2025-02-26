@@ -252,7 +252,7 @@ public class MigrationAction extends AbstractAction {
         // Migration only applies for larva stages (and beyond)
         double value = variableGetter.getValue(particle);
 
-        boolean isSatisfiedCriterion = (value > enable_minimum_threshold) && (value < enable_maximum_threshold);
+        boolean isSatisfiedCriterion = (value >= enable_minimum_threshold) && (value <= enable_maximum_threshold);
 
         if (isSatisfiedCriterion) {
             double depth;
