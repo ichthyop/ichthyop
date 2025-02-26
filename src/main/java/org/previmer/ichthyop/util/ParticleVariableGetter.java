@@ -25,7 +25,7 @@ public class ParticleVariableGetter {
             case "age": {
                 // return age in days
                 variableDescription = EnumVariable.AGE;
-                variableGetter = (particle) -> particle.getAge() / (24 * 60 * 60);
+                variableGetter = (particle) -> particle.getAge() / (24.0 * 60 * 60);
                 break;
             }
 
@@ -39,7 +39,7 @@ public class ParticleVariableGetter {
             default:
                 // return age in days by default
                 variableDescription = EnumVariable.AGE;
-                variableGetter = (particle) -> particle.getAge() / (24 * 60 * 60);
+                variableGetter = (particle) -> particle.getAge() / (24.0 * 60 * 60);
                 break;
         }
     }
