@@ -44,6 +44,7 @@
 
 package org.previmer.ichthyop.util;
 
+import org.apache.commons.lang3.BooleanUtils;
 //import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 
@@ -54,22 +55,43 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
 public class CheckGrowthParam extends SimulationManagerAccessor {
 
     public static boolean checkParams() {
-        boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+
+
+        // Check if classical growth is activated
+        boolean isGrowth;
+        try {
+            isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        } catch (NullPointerException e) {
+            isGrowth = false;
+        }
+
+        // Check if Deb growth is activated
         boolean isDebGrowth;
         try {
             isDebGrowth = getSimulationManager().getActionManager().isEnabled("action.growthdeb");
         } catch (NullPointerException e) {
             isDebGrowth = false;
         }
-        if (isGrowth || isDebGrowth) { // if one or two growth action are on
-            boolean paramOk = (isGrowth ^ isDebGrowth);  // check that only one of the two is true using xor operator
-            if (!paramOk) {
-                throw new IllegalArgumentException("Only one among action.growth and action.growthDeb should be ");
-            }
+
+        // Check if accelerated DEB growth is activated
+        boolean isAcceleratedDebGrowth;
+        try {
+            isAcceleratedDebGrowth = getSimulationManager().getActionManager().isEnabled("action.acceleratedGrowthdeb");
+        } catch (NullPointerException e) {
+            isAcceleratedDebGrowth = false;
         }
-        // Redefines isGrowth, taking into account the possibility to set it using deb.
-        isGrowth = (isGrowth || isDebGrowth);
-        return (isGrowth);
+
+        // Count the total number of activated growth.
+        // 0 = no growth process
+        int total = BooleanUtils.toInteger(isGrowth) + BooleanUtils.toInteger(isDebGrowth) + BooleanUtils.toInteger(isAcceleratedDebGrowth);
+
+        // If more than 1 growth process, raise an error
+        if (total > 1) {
+            throw new IllegalArgumentException("Only one among action.growth and action.growthDeb should be ");
+        }
+
+        return BooleanUtils.toBoolean(total);
+
     }
 
 }
