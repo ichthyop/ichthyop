@@ -59,6 +59,7 @@ import java.util.logging.Logger;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.StageParticleLayer;
+import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**
  *
@@ -136,7 +137,7 @@ public class BuoyancyAction extends AbstractAction {
 
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
-        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        isGrowth = CheckGrowthParam.checkParams();
         if (!isGrowth) {
             try {
                 maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;
