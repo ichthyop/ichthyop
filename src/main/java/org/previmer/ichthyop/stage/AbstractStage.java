@@ -48,45 +48,60 @@ import java.util.logging.Level;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
+import org.previmer.ichthyop.util.ParticleVariableGetter;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractStage extends SimulationManagerAccessor {
+public class AbstractStage extends SimulationManagerAccessor {
 
     private float[] thresholds;
     private String[] tags;
+    private final ParticleVariableGetter variableGetter;
 
     private final BlockType blockType;
     private final String blockKey;
 
-    public abstract int getStage(IParticle particle);
-    public abstract int getStage(float value);
-
-    AbstractStage(BlockType blockType, String blockKey) {
+    public AbstractStage(BlockType blockType, String blockKey) {
         this.blockType = blockType;
         this.blockKey = blockKey;
+        this.variableGetter = (particle) -> ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength();
+    }
+
+    public AbstractStage(BlockType blockType, String blockKey, ParticleVariableGetter getter) {
+        this.blockType = blockType;
+        this.blockKey = blockKey;
+        this.variableGetter = getter;
     }
 
     public void init() {
 
-        // Load the stage tags
-        tags = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_tags");
 
-        // Load the stage thresholds
+        // Load the stage thresholds. Implicitely the tags should not start with 0.
+        // If user provides l1, l2, l3 in parameter,
+        // the classes will be: [0, l1[, [l1, l2[, [l2, l3[, [l3, inf[
+        // hence 4 classes
         String[] sThresholds = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_thresholds");
         thresholds = new float[sThresholds.length];
         for (int i = 0; i < sThresholds.length; i++) {
+            if(thresholds[i] == 0) {
+                getLogger().log(Level.SEVERE, "Stages should not start by 0");
+            }
             thresholds[i] = Float.valueOf(sThresholds[i]);
         }
 
+        // Load the stage tags. In our example, there should be 4 tags (for 4 classes)
+        tags = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_tags");
+
         // Make sure that tags.length == thresholds.length
-        if (tags.length != thresholds.length) {
+        if (tags.length != thresholds.length + 1) {
             getLogger().log(Level.WARNING, "Stages defined in block {0} has {1} tags and {2} thresholds, this is not consistent (we expect n tags and n thresholds). Please fix it.", new Object[]{blockKey, tags.length, thresholds.length});
         }
     }
 
+    // Returns the number of stage, i.e. the number of tags
     public int getNStage() {
         return tags.length;
     }
@@ -102,5 +117,24 @@ public abstract class AbstractStage extends SimulationManagerAccessor {
     float[] getThresholds() {
         return thresholds;
     }
+
+    // Get the stages given the consired value.
+    // We loop over the threshold array (size getNStage() - 1). If the value is above the max threshold,
+    // we return the last stage value
+    public int getStage(float value) {
+        for(int stage = 0; stage < getNStage() - 1; stage++) {
+            if(value < thresholds[stage]) {
+                return stage;
+            }
+        }
+        return getNStage() - 1;
+    }
+
+    public int getStage(IParticle particle) {
+        double value = variableGetter.getVariable(particle); //
+        return getStage((float) value);
+    }
+
+
 
 }
