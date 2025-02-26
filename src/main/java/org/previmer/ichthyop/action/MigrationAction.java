@@ -81,7 +81,7 @@ public class MigrationAction extends AbstractAction {
     /**
      * List of age thresholds for depths at day time.
      */
-    private float[] agesDepthDay;
+    private float[] thresholdsDepthDay;
     /**
      * Current depth at night.
      */
@@ -93,7 +93,7 @@ public class MigrationAction extends AbstractAction {
     /**
      * List of age thresholds for depths at night.
      */
-    private float[] agesDepthNight;
+    private float[] thresholdsDepthNight;
     /**
      * Time of sunrise.
      */
@@ -110,7 +110,9 @@ public class MigrationAction extends AbstractAction {
     /**
      * Particle minimal age for enabling vertical migration.
      */
-    private long minimumAge;
+    private float enable_minimum_threshold;
+    private float enable_maximum_threshold;
+
     /**
      * Whether a growth module is enabled. In that case minimal age is ignored
      * and vertical migration is only enabled beyond egg stage.
@@ -137,12 +139,10 @@ public class MigrationAction extends AbstractAction {
         }
 
         variable_name = String.valueOf(getParameter("threshold_variable"));
+        variableGetter = new ParticleVariableGetter(variable_name);
+        enable_minimum_threshold = Float.valueOf(getParameter("threshold_min"));
+        enable_maximum_threshold = Float.valueOf(getParameter("threshold_max"));
 
-
-        // Otherwise read migration minimal age
-        if (!isGrowth) {
-            minimumAge = (long) (Float.valueOf(getParameter("age_min")) * 24.f * 3600.f);
-        }
         // Check existence of daytime depth as an age function, provided in CSV file
         if (!isNull("daytime_depth_file")) {
             String pathname = IOTools.resolveFile(getParameter("daytime_depth_file"));
@@ -164,13 +164,13 @@ public class MigrationAction extends AbstractAction {
                 }
             }
             // init arrays
-            agesDepthDay = new float[lines.size() - 1];
-            depthsDay = new float[agesDepthDay.length];
+            thresholdsDepthDay = new float[lines.size() - 1];
+            depthsDay = new float[thresholdsDepthDay.length];
             // read ages (days converted to seconds) and depths
-            for (int i = 0; i < agesDepthDay.length; i++) {
+            for (int i = 0; i < thresholdsDepthDay.length; i++) {
                 // First line of the CSV file is assumed to be headers and is discarded
                 String[] line = lines.get(i + 1);
-                agesDepthDay[i] = Float.valueOf(line[0]) * 24.f * 3600.f;
+                thresholdsDepthDay[i] = Float.valueOf(line[0]);
                 depthsDay[i] = Float.valueOf(line[1]);
             }
         } else {
@@ -197,13 +197,13 @@ public class MigrationAction extends AbstractAction {
                 }
             }
             // init arrays
-            agesDepthNight = new float[lines.size() - 1];
-            depthsNight = new float[agesDepthNight.length];
+            thresholdsDepthNight = new float[lines.size() - 1];
+            depthsNight = new float[thresholdsDepthNight.length];
             // read ages (days converted to seconds) and depths
-            for (int i = 0; i < agesDepthNight.length; i++) {
+            for (int i = 0; i < thresholdsDepthNight.length; i++) {
                 // First line of the CSV file is assumed to be headers and is discarded
                 String[] line = lines.get(i + 1);
-                agesDepthNight[i] = Float.valueOf(line[0]) * 24.f * 3600.f;
+                thresholdsDepthNight[i] = Float.valueOf(line[0]);
                 depthsNight[i] = Float.valueOf(line[1]);
             }
         } else {
@@ -240,14 +240,9 @@ public class MigrationAction extends AbstractAction {
     public void execute(IParticle particle) {
 
         // Migration only applies for larva stages (and beyond)
-        boolean isSatisfiedCriterion;
-        if (!isGrowth) {
-            isSatisfiedCriterion = particle.getAge() > minimumAge;
-        } else {
-            // stage == 0 means egg, stage > 0 means larvae
-            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
-            isSatisfiedCriterion = stage > 0;
-        }
+        double value = variableGetter.getValue(particle);
+
+        boolean isSatisfiedCriterion = (value > enable_minimum_threshold) && (value < enable_maximum_threshold);
 
         if (isSatisfiedCriterion) {
             double depth;
@@ -288,15 +283,15 @@ public class MigrationAction extends AbstractAction {
         // get bathy in meter (<0)
         double bottom = this.getBathy(particle);
         double output;
+        double value = variableGetter.getValue(particle);
 
         if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {
             // day time
             if (null != depthsDay) {
-                // Update the depth as function of age
-                depthDay = depthsDay[agesDepthDay.length - 1];
-                float age = particle.getAge();
-                for (int i = 0; i < agesDepthDay.length - 1; i++) {
-                    if (agesDepthDay[i] <= age && age < agesDepthDay[i + 1]) {
+                // Update the depth as function of value
+                depthDay = depthsDay[thresholdsDepthDay.length - 1];
+                for (int i = 0; i < thresholdsDepthDay.length - 1; i++) {
+                    if (thresholdsDepthDay[i] <= value && value < thresholdsDepthDay[i + 1]) {
                         depthDay = depthsDay[i];
                         break;
                     }
@@ -306,11 +301,10 @@ public class MigrationAction extends AbstractAction {
         } else {
             // night time
             if (null != depthsNight) {
-                // Update the depth as function of age
-                depthNight = depthsNight[agesDepthNight.length - 1];
-                float age = particle.getAge();
-                for (int i = 0; i < agesDepthNight.length - 1; i++) {
-                    if (agesDepthDay[i] <= age && age < agesDepthNight[i + 1]) {
+                // Update the depth as function of value
+                depthNight = depthsNight[thresholdsDepthNight.length - 1];
+                for (int i = 0; i < thresholdsDepthNight.length - 1; i++) {
+                    if (thresholdsDepthDay[i] <= value && value < thresholdsDepthNight[i + 1]) {
                         depthNight = depthsNight[i];
                         break;
                     }
