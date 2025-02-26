@@ -115,7 +115,7 @@ public class AbstractStage extends SimulationManagerAccessor {
     // Get the stages given the consired value.
     // We loop over the threshold array (size getNStage() - 1). If the value is above the max threshold,
     // we return the last stage value
-    public int getStage(float value) {
+    private int getStage(float value) {
         for(int stage = 0; stage < getNStage() - 1; stage++) {
             if(value < thresholds[stage]) {
                 return stage;

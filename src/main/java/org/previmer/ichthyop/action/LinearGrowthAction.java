@@ -140,7 +140,7 @@ public class LinearGrowthAction extends AbstractAction {
         lengthLayer.incrementLength(grow(temperature, food));
 
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
-        stageLayer.setStage(AbstractStage.getStage((float) lengthLayer.getLength()));
+        stageLayer.setStage(AbstractStage.getStage(particle));
     }
 
     private double grow(double temperature, double food) {

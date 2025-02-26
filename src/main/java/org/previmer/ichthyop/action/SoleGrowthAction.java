@@ -119,7 +119,7 @@ public class SoleGrowthAction extends AbstractAction {
         double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         sole.incrementLength(grow(AbstractStage.getStage(particle), temp));
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
-        stageLayer.setStage(AbstractStage.getStage((float) sole.getLength()));
+        stageLayer.setStage(AbstractStage.getStage(particle));
     }
 
     private double grow(int stage, double temperature) {

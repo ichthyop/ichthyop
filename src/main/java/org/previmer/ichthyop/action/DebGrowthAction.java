@@ -183,7 +183,7 @@ public class DebGrowthAction extends AbstractAction {
         debLayer.setE_R(res_deb[2]);
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         lengthLayer.setLength(computeLength(debLayer.getV()));
-        stageLayer.setStage(AbstractStage.getStage((float) lengthLayer.getLength()));
+        stageLayer.setStage(AbstractStage.getStage(particle));
 
         if (res_deb[3] == 1) {
             particle.kill(ParticleMortality.STARVATION);
