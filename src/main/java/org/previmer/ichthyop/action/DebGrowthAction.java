@@ -156,7 +156,6 @@ public class DebGrowthAction extends AbstractAction {
             getSimulationManager().getOutputManager().addPredefinedTracker(DebETracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebERTracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebVTracker.class);
-            getSimulationManager().getOutputManager().addPredefinedTracker(DebEHTracker.class);
         }
     }
 

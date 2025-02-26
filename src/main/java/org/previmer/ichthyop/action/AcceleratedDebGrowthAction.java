@@ -19,6 +19,7 @@ package org.previmer.ichthyop.action;
 import org.previmer.ichthyop.io.DebETracker;
 import org.previmer.ichthyop.io.DebVTracker;
 import org.previmer.ichthyop.io.DebEHTracker;
+import org.previmer.ichthyop.io.DebERTracker;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.DebParticleLayer;
@@ -146,6 +147,7 @@ public class AcceleratedDebGrowthAction extends AbstractAction {
         // }
         if (addTracker) {
             getSimulationManager().getOutputManager().addPredefinedTracker(DebETracker.class);
+            getSimulationManager().getOutputManager().addPredefinedTracker(DebERTracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebVTracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebEHTracker.class);
         }
