@@ -111,7 +111,6 @@ public class BuoyancyAction extends AbstractAction {
     private static double waterDensity;
     private String salinity_field;
     private String temperature_field;
-    private boolean isGrowth;
     private float[] particleDensities;
     private float[] thresholds;
     private BuoyancyModel buoyancyModel;
@@ -172,7 +171,7 @@ public class BuoyancyAction extends AbstractAction {
                 throw new IOException("Density file " + pathname + " cannot be read.");
             }
             loadDensities(pathname);
-            buoyancyModel = BuoyancyModel.DENSITY_AS_AGE_FUNCTION;
+            buoyancyModel = BuoyancyModel.DENSITY_AS_THRESHOLD_FUNCTION;
         } else {
             particleDensity = Float.valueOf(getParameter("particle_density"));
             buoyancyModel = BuoyancyModel.CONSTANT_DENSITY;
@@ -209,25 +208,18 @@ public class BuoyancyAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        boolean canApplyBuoyancy;
-        if (isGrowth) {
-            // Egg stage only
-            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
-            canApplyBuoyancy = (stage == 0);
-        } else {
-            canApplyBuoyancy = particle.getAge() < maximum_threshold_enabled;
-        }
+        double value = variableGetter.getValue(particle);
+        boolean canApplyBuoyancy = (value >= minimum_threshold_enabled) && (value <= maximum_threshold_enabled) ;
 
         if (canApplyBuoyancy) {
             /*
              * For case of particle density varying with particle age, we
              * determine what is current density for the particle
              */
-            if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
+            if (buoyancyModel == BuoyancyModel.DENSITY_AS_THRESHOLD_FUNCTION) {
                 particleDensity = particleDensities[thresholds.length - 1];
-                float age = particle.getAge();
                 for (int i = 0; i < thresholds.length - 1; i++) {
-                    if (thresholds[i] <= age && age < thresholds[i + 1]) {
+                    if (thresholds[i] <= value && value < thresholds[i + 1]) {
                         particleDensity = particleDensities[i];
                         break;
                     }
@@ -322,9 +314,8 @@ public class BuoyancyAction extends AbstractAction {
     }
 
     public enum BuoyancyModel {
-
         CONSTANT_DENSITY,
-        DENSITY_AS_AGE_FUNCTION;
+        DENSITY_AS_THRESHOLD_FUNCTION;
     }
     //---------- End of class
 }
