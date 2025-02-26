@@ -52,6 +52,10 @@ public class ParticleVariableGetter {
         return variableGetter.getVariable(particle);
     }
 
+    public String toString() {
+        return variableDescription.toString();
+    }
+
     public enum EnumVariable {
 
         AGE(0, "age", "days"), LENGTH(1, "length", "cm"), STAGE(2, "stage", "");
