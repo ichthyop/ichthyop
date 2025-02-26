@@ -54,11 +54,13 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
  */
 public class CheckGrowthParam extends SimulationManagerAccessor {
 
+    public static boolean isGrowth;
+    public static boolean isDebGrowth;
+    public static boolean isAcceleratedDebGrowth;
+
     public static boolean checkParams() {
 
-
         // Check if classical growth is activated
-        boolean isGrowth;
         try {
             isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         } catch (NullPointerException e) {
@@ -66,7 +68,6 @@ public class CheckGrowthParam extends SimulationManagerAccessor {
         }
 
         // Check if Deb growth is activated
-        boolean isDebGrowth;
         try {
             isDebGrowth = getSimulationManager().getActionManager().isEnabled("action.growthdeb");
         } catch (NullPointerException e) {
@@ -74,7 +75,6 @@ public class CheckGrowthParam extends SimulationManagerAccessor {
         }
 
         // Check if accelerated DEB growth is activated
-        boolean isAcceleratedDebGrowth;
         try {
             isAcceleratedDebGrowth = getSimulationManager().getActionManager().isEnabled("action.acceleratedGrowthdeb");
         } catch (NullPointerException e) {
