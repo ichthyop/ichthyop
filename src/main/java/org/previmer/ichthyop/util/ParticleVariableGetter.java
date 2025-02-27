@@ -2,7 +2,6 @@ package org.previmer.ichthyop.util;
 
 import java.util.logging.Level;
 
-import org.apache.commons.logging.Log;
 import org.previmer.ichthyop.manager.SimulationManager;
 import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.IParticle;
