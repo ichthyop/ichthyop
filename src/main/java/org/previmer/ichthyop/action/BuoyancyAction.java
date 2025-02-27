@@ -150,7 +150,7 @@ public class BuoyancyAction extends AbstractAction {
         }
 
         if(isNull("threshold_max")) {
-            maximum_threshold_enabled = Float.MAX_VALUE;
+            minimum_threshold_enabled = Float.MAX_VALUE;
         } else {
             maximum_threshold_enabled = Double.valueOf(getParameter("threshold_max"));
         }
@@ -197,7 +197,7 @@ public class BuoyancyAction extends AbstractAction {
             // read ages (hours converted to seconds) and densities
             for (int i = 0; i < thresholds.length; i++) {
                 String[] line = lines.get(i + 1);
-                thresholds[i] = Float.valueOf(line[0]) * 3600.f;
+                thresholds[i] = Float.valueOf(line[0]);
                 particleDensities[i] = Float.valueOf(line[1]);
             }
         } catch (IOException ex) {
