@@ -419,7 +419,7 @@ public class FvcomDataset extends AbstractDataset {
     /** We consider that points are always out of edge. */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return (pGrid[0] >= lonMax) || (pGrid[0] <= lonMin) || (pGrid[1] >= latMax) || (pGrid[1] <= latMin);
+        return (pGrid[0] >= lonMax) || (pGrid[0] <= lonMin) || (pGrid[1] >= latMax) || (pGrid[1] <= latMin || pGrid[2] >= nLayer);
     }
 
     @Override
