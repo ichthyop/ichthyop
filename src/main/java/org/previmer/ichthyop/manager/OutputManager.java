@@ -550,7 +550,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
-                    getLogger().log(Level.WARNING, "Error tracking variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    getLogger().log(Level.SEVERE, "Error tracking variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
                     continue;
                 }
                 /* Write the current time step in the NetCDF file */
@@ -559,7 +559,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
-                    getLogger().log(Level.WARNING, "Error writing variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    getLogger().log(Level.SEVERE, "Error writing variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
                 }
             }
         }
