@@ -550,8 +550,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
-                    getLogger().log(Level.SEVERE, "Error tracking variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
-                    continue;
+                    getLogger().log(Level.WARNING, "Error tracking variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    System.exit(1);  // Exit the program with a status code indicating an error
                 }
                 /* Write the current time step in the NetCDF file */
                 try {
@@ -559,7 +559,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
-                    getLogger().log(Level.SEVERE, "Error writing variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    getLogger().log(Level.WARNING, "Error writing variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    System.exit(1);  // Exit the program with a status code indicating an error
                 }
             }
         }
@@ -633,6 +634,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             } catch (Exception ex) {
                 errTrackers.add(tracker);
                 getLogger().log(Level.WARNING, "Error adding tracker " + tracker.getName() + " in NetCDF output file. The variable will not be recorded.", ex);
+                System.exit(1);  // Exit the program with a status code indicating an error
             }
         }
 
