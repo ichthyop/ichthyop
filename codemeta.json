@@ -15,6 +15,18 @@
         }
     ],
     "codeRepository": "https://github.com/ichthyop/ichthyop",
+    "contributor": {
+        "id": "https://orcid.org/0009-0004-3627-4297",
+        "type": "Person",
+        "affiliation": {
+            "type": "Organization",
+            "name": "University of Corsica Pascal Paoli"
+        },
+        "email": "BARRIER_C@univ-corse.fr",
+        "familyName": "Barrier",
+        "givenName": "Celine"
+    },
+    "description": "Ichthyop is a free Java tool designed to study the effects of physical and biological factors on ichthyoplankton dynamics.\n\nIt incorporates the most important processes involved in fish early life: spawning, movement, growth, mortality and recruitment. The tool uses as input time series of velocity, temperature and salinity fields archived from ROMS, MARS, NEMO or SYMPHONIE oceanic models (either files or OpenDAP).",
     "license": "https://spdx.org/licenses/GPL-3.0",
     "name": "Ichthyop",
     "programmingLanguage": "Java",
