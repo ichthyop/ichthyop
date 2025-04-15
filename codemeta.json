@@ -1,0 +1,29 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "type": "SoftwareSourceCode",
+    "author": [
+        {
+            "id": "https://orcid.org/0000-0002-1693-4719",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "MARBEC, University Montpellier, IRD, CNRS, Ifremer, INRAE, Sète, France"
+            },
+            "email": "nicolas.barrier@ird.fr",
+            "familyName": "Barrier",
+            "givenName": "Nicolas"
+        }
+    ],
+    "codeRepository": "https://github.com/ichthyop/ichthyop",
+    "license": "https://spdx.org/licenses/GPL-3.0",
+    "name": "Ichthyop",
+    "programmingLanguage": "Java",
+    "relatedLink": "https://ichthyop.org/",
+    "runtimePlatform": "JVM",
+    "contIntegration": "https://github.com/ichthyop/ichthyop/actions",
+    "codemeta:continuousIntegration": {
+        "id": "https://github.com/ichthyop/ichthyop/actions"
+    },
+    "issueTracker": "https://github.com/ichthyop/ichthyop/issues",
+    "referencePublication": "https://doi.org/10.1016/j.envsoft.2008.02.005"
+}
