@@ -12,20 +12,138 @@
             "email": "nicolas.barrier@ird.fr",
             "familyName": "Barrier",
             "givenName": "Nicolas"
+        },
+        {
+            "id": "https://orcid.org/0000-0002-5686-2764",
+            "type": "Person",
+            "email": "philippe.verley@ird.fr",
+            "familyName": "Verley",
+            "givenName": "Philippe"
+        },
+        {
+            "id": "_:author_3",
+            "type": "Person",
+            "familyName": "Andres",
+            "givenName": "Gwendoline"
+        },
+        {
+            "id": "_:author_4",
+            "type": "Person",
+            "familyName": "Podlejski",
+            "givenName": "Witold"
+        },
+        {
+            "id": "https://orcid.org/0000-0001-5809-2452",
+            "type": "Person",
+            "email": "christophe.lett@ird.fr",
+            "familyName": "Lett",
+            "givenName": "Christophe"
         }
     ],
     "codeRepository": "https://github.com/ichthyop/ichthyop",
-    "contributor": {
-        "id": "https://orcid.org/0009-0004-3627-4297",
-        "type": "Person",
-        "affiliation": {
-            "type": "Organization",
-            "name": "University of Corsica Pascal Paoli"
+    "contributor": [
+        {
+            "id": "https://orcid.org/0009-0004-3627-4297",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "University of Corsica Pascal Paoli"
+            },
+            "email": "BARRIER_C@univ-corse.fr",
+            "familyName": "Barrier",
+            "givenName": "Celine"
         },
-        "email": "BARRIER_C@univ-corse.fr",
-        "familyName": "Barrier",
-        "givenName": "Celine"
-    },
+        {
+            "id": "_:contributor_2",
+            "type": "Person",
+            "familyName": "DUPAIX",
+            "givenName": "Amael"
+        },
+        {
+            "id": "_:contributor_3",
+            "type": "Person",
+            "familyName": "MULLON",
+            "givenName": "Christian"
+        },
+        {
+            "id": "_:contributor_4",
+            "type": "Person",
+            "familyName": "BONHOMMEAU",
+            "givenName": "Sylvain "
+        },
+        {
+            "id": "_:contributor_5",
+            "type": "Person",
+            "familyName": "BLANKE",
+            "givenName": "Bruno"
+        },
+        {
+            "id": "_:contributor_6",
+            "type": "Person",
+            "familyName": "BROCHIER",
+            "givenName": "Timothée"
+        },
+        {
+            "id": "_:contributor_7",
+            "type": "Person",
+            "familyName": "HOURDIN",
+            "givenName": "Christophe "
+        },
+        {
+            "id": "_:contributor_8",
+            "type": "Person",
+            "familyName": "JELASSI",
+            "givenName": "Mariem  "
+        },
+        {
+            "id": "_:contributor_9",
+            "type": "Person",
+            "familyName": "KAPLAN",
+            "givenName": "David  "
+        },
+        {
+            "id": "_:contributor_10",
+            "type": "Person",
+            "familyName": "LECORNU",
+            "givenName": "Fabrice "
+        },
+        {
+            "id": "_:contributor_11",
+            "type": "Person",
+            "familyName": "MULLON",
+            "givenName": "Christian "
+        },
+        {
+            "id": "_:contributor_12",
+            "type": "Person",
+            "familyName": "PARADA",
+            "givenName": "Carolina "
+        },
+        {
+            "id": "_:contributor_13",
+            "type": "Person",
+            "familyName": "PENVEN",
+            "givenName": "Pierrick "
+        },
+        {
+            "id": "_:contributor_14",
+            "type": "Person",
+            "familyName": "POUS",
+            "givenName": "Stephane "
+        },
+        {
+            "id": "_:contributor_15",
+            "type": "Person",
+            "familyName": "PUTMAN",
+            "givenName": "Nathan "
+        },
+        {
+            "id": "_:contributor_16",
+            "type": "Person",
+            "familyName": "CHEVALIER",
+            "givenName": "Cristele "
+        }
+    ],
     "dateModified": "2024-07-10",
     "datePublished": "2009-06-26",
     "description": "Ichthyop is a free Java tool designed to study the effects of physical and biological factors on ichthyoplankton dynamics.\n\nIt incorporates the most important processes involved in fish early life: spawning, movement, growth, mortality and recruitment. The tool uses as input time series of velocity, temperature and salinity fields archived from ROMS, MARS, NEMO or SYMPHONIE oceanic models (either files or OpenDAP).",
