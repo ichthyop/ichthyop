@@ -1,43 +1,46 @@
-cff-version: 1.1.0
-message: "If you use this software, please cite it as below."
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Ichthyop: A Lagrangian tool for modelling ichthyoplankton
+  dynamics
+message: 'If you use this software, please cite it as below.'
+type: software
 authors:
   - family-names: Barrier
     given-names: Nicolas
-    orcid: https://orcid.org/0000-0002-1693-4719
+    orcid: 'https://orcid.org/0000-0002-1693-4719'
   - family-names: Verley
     given-names: Philippe
-    orcid: https://orcid.org/0000-0002-5686-2764
+    orcid: 'https://orcid.org/0000-0002-5686-2764'
   - family-names: Andres
     given-names: Gwendoline
   - family-names: Lett
     given-names: Christophe
-    orcid: https://orcid.org/0000-0001-5809-2452
-preferred-citation:
-  type: article
-  authors:
-  - given-names: Christophe
-    family-names: Lett
-  - given-names: Philippe
-    family-names: Verley
-  - given-names: Christian
-    family-names: Mullon
-  - given-names: Caroline
-    family-names: Parada
-  - given-names: Timothée
-    family-names: Brochier
-  - given-names: Pierrick
-    family-names: Penven
-  - given-names: Bruno
-    family-names: Blanke
-  doi: "10.1016/j.envsoft.2008.02.005"
-  journal: "Environmental Modelling & Software"
-  start: 1210 # First page number
-  end: 1214 # Last page number
-  title: "A Lagrangian tool for modelling ichthyoplankton dynamics"
-  issue: 9
-  volume: 23
-  year: 2008
-title: "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics"
+    orcid: 'https://orcid.org/0000-0001-5809-2452'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.4243813
+    description: Zenodo
+repository-code: 'https://github.com/ichthyop/ichthyop'
+url: 'https://ichthyop.org'
+abstract: >-
+  Ichthyop is a free Java tool designed to study the effects
+  of physical and biological factors on ichthyoplankton
+  dynamics.\n\nIt incorporates the most important processes
+  involved in fish early life: spawning, movement, growth,
+  mortality and recruitment. The tool uses as input time
+  series of velocity, temperature and salinity fields
+  archived from ROMS, MARS, NEMO or SYMPHONIE oceanic models
+  (either files or OpenDAP).
+keywords:
+  - dispersion
+  - larvae
+  - ichthyoplankton
+  - transport
+  - orientation
+  - diffusion
+license: GPL-3.0
 version: 3.3.17
-date-released: 2023-02-28
-doi: 10.5281/zenodo.4243813
+date-released: '2023-02-28'
