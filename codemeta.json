@@ -142,12 +142,32 @@
             "type": "Person",
             "familyName": "CHEVALIER",
             "givenName": "Cristele "
+        },
+        {
+            "id": "_:contributor_17",
+            "type": "Person",
+            "familyName": "Dumas",
+            "givenName": "Franck"
+        },
+        {
+            "id": "_:contributor_18",
+            "type": "Person",
+            "familyName": "Garreau",
+            "givenName": "Pierre"
+        },
+        {
+            "id": "_:contributor_19",
+            "type": "Person",
+            "familyName": "Field",
+            "givenName": "John"
         }
     ],
+    "dateCreated": "2008-09-01",
     "dateModified": "2024-07-10",
     "datePublished": "2009-06-26",
     "description": "Ichthyop is a free Java tool designed to study the effects of physical and biological factors on ichthyoplankton dynamics.\n\nIt incorporates the most important processes involved in fish early life: spawning, movement, growth, mortality and recruitment. The tool uses as input time series of velocity, temperature and salinity fields archived from ROMS, MARS, NEMO or SYMPHONIE oceanic models (either files or OpenDAP).",
     "downloadUrl": "https://github.com/ichthyop/ichthyop/releases/tag/3.3.17.3",
+    "identifier": "https://doi.org/10.5281/zenodo.4243813",
     "license": "https://spdx.org/licenses/GPL-3.0",
     "name": "Ichthyop",
     "programmingLanguage": "Java",
@@ -159,6 +179,7 @@
     "codemeta:continuousIntegration": {
         "id": "https://github.com/ichthyop/ichthyop/actions"
     },
+    "developmentStatus": "active",
     "issueTracker": "https://github.com/ichthyop/ichthyop/issues",
     "referencePublication": "https://doi.org/10.1016/j.envsoft.2008.02.005"
 }
