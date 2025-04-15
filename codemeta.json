@@ -1,5 +1,5 @@
 {
-    "@context": "https://w3id.org/codemeta/3.0",
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
     "type": "SoftwareSourceCode",
     "author": [
         {
@@ -15,33 +15,27 @@
         }
     ],
     "codeRepository": "https://github.com/ichthyop/ichthyop",
-    "contributor": [
-        {
-            "id": "https://orcid.org/0009-0004-3627-4297",
-            "type": "Person",
-            "affiliation": {
-                "type": "Organization",
-                "name": "University of Corsica Pascal Paoli"
-            },
-            "email": "BARRIER_C@univ-corse.fr",
-            "familyName": "Barrier",
-            "givenName": "Celine"
+    "contributor": {
+        "id": "https://orcid.org/0009-0004-3627-4297",
+        "type": "Person",
+        "affiliation": {
+            "type": "Organization",
+            "name": "University of Corsica Pascal Paoli"
         },
-        {
-            "type": "Role",
-            "contributor": "https://orcid.org/0009-0004-3627-4297"
-        }
-    ],
+        "email": "BARRIER_C@univ-corse.fr",
+        "familyName": "Barrier",
+        "givenName": "Celine"
+    },
     "description": "Ichthyop is a free Java tool designed to study the effects of physical and biological factors on ichthyoplankton dynamics.\n\nIt incorporates the most important processes involved in fish early life: spawning, movement, growth, mortality and recruitment. The tool uses as input time series of velocity, temperature and salinity fields archived from ROMS, MARS, NEMO or SYMPHONIE oceanic models (either files or OpenDAP).",
     "license": "https://spdx.org/licenses/GPL-3.0",
     "name": "Ichthyop",
     "programmingLanguage": "Java",
     "relatedLink": "https://ichthyop.org/",
     "runtimePlatform": "JVM",
-    "codemeta:contIntegration": {
+    "contIntegration": "https://github.com/ichthyop/ichthyop/actions",
+    "codemeta:continuousIntegration": {
         "id": "https://github.com/ichthyop/ichthyop/actions"
     },
-    "continuousIntegration": "https://github.com/ichthyop/ichthyop/actions",
     "issueTracker": "https://github.com/ichthyop/ichthyop/issues",
     "referencePublication": "https://doi.org/10.1016/j.envsoft.2008.02.005"
 }
