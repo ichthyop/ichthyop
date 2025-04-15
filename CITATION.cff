@@ -22,7 +22,10 @@ authors:
 identifiers:
   - type: doi
     value: 10.5281/zenodo.4243813
-    description: Zenodo
+    description: Ichthyop DOI
+  - type: url
+    value: 'https://doi.org/10.1016/j.envsoft.2008.02.005'
+    description: Reference paper
 repository-code: 'https://github.com/ichthyop/ichthyop'
 url: 'https://ichthyop.org'
 abstract: >-
