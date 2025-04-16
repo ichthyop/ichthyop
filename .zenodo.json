@@ -29,101 +29,101 @@
     ],
     "contributors": [
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Andres, Gwendoline"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Podlejski, Witold"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Putman, Nathan "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Parada, Carolina "
         },
         {
             "orcid": "https://orcid.org/0009-0004-3627-4297",
             "affiliation": "University of Corsica Pascal Paoli",
-            "role": "Other",
+            "type": "Other",
             "name": "Barrier, Celine"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Travers-Trolet, Morgane "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Imzilen, Taha"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Pecquerie, Laure"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Vasquez, Sebastian"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Flores-Valiente, Jorge"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Dupaix, Amael"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Bonhommeau, Sylvain "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Blanke, Bruno"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Brochier, Timothée"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Hourdin, Christophe "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Jelassi, Mariem  "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Kaplan, David  "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Lecornu, Fabrice "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Penven, Pierrick "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Pous, Stephane "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Chevalier, Cristele "
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Dumas, Franck"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Garreau, Pierre"
         },
         {
-            "role": "Other",
+            "type": "Other",
             "name": "Field, John"
         }
     ],
