@@ -109,7 +109,13 @@ public class SysActionMove extends AbstractSysAction {
                  * The particle will act exactly as a billard ball.
                  */
                 move = particle.getMove();
-                double[] bounce = bounceCostline(particle.getX(), particle.getY(), move[0], move[1]);
+                double z;
+                if(move.length == 2) {
+                    z = getSimulationManager().getDataset().get_nz() - 1;
+                } else {
+                    z = particle.getZ();
+                }
+                double[] bounce = bounceCostline(particle.getX(), particle.getY(), z, move[0], move[1]);
                 particle.increment(new double[]{bounce[0] - move[0], bounce[1] - move[1]});
                 if (!particle.isInWater()) {
                     particle.kill(ParticleMortality.BEACHED);
@@ -120,24 +126,35 @@ public class SysActionMove extends AbstractSysAction {
                  * The particle will stand still instead of going in land.
                  */
                 move = particle.getMove();
-                if (!getSimulationManager().getDataset().isInWater(new double[]{particle.getX() + move[0], particle.getY() + move[1]})) {
-                    particle.increment(new double[]{-1.d * move[0], -1.d * move[1]});
+                if(move.length == 2) {
+                    // if the particle is 2d, check the 2d mask
+                    if (!getSimulationManager().getDataset()
+                            .isInWater(new double[] { particle.getX() + move[0], particle.getY() + move[1] })) {
+                        particle.increment(new double[] { -1.d * move[0], -1.d * move[1] });
+                    }
+                } else {
+                    // if the particle is 3d, check the 3d mask
+                    if (!getSimulationManager().getDataset()
+                            .isInWater(new double[] { particle.getX() + move[0], particle.getY() + move[1], particle.getZ() + move[2] })) {
+                        particle.increment(new double[] { -1.d * move[0], -1.d * move[1] });
+                    }
                 }
                 break;
         }
         particle.applyMove();
     }
 
-    private double[] bounceCostline(double x, double y, double dx, double dy) {
-        return bounceCostline(x, y, dx, dy, 0);
+    private double[] bounceCostline(double x, double y, double z, double dx, double dy) {
+        return bounceCostline(x, y, z, dx, dy, 0);
     }
 
-    private double[] bounceCostline(double x, double y, double dx, double dy, int iter) {
+    private double[] bounceCostline(double x, double y, double z, double dx, double dy, int iter) {
 
         double newdx = dx;
         double newdy = dy;
         iter += 1;
-        if (!getSimulationManager().getDataset().isInWater(new double[]{x + dx, y + dy})) {
+
+        if (!getSimulationManager().getDataset().isInWater(new double[]{x + dx, y + dy, z})) {
             double s = x;
             double ds = dx;
             double signum = 1.d;
@@ -152,7 +169,7 @@ public class SysActionMove extends AbstractSysAction {
                 ds *= 0.5d;
                 s = s + signum * ds;
                 ys = dy / dx * (s - x) + y;
-                signum = (getSimulationManager().getDataset().isInWater(new double[]{s, ys}))
+                signum = (getSimulationManager().getDataset().isInWater(new double[]{s, ys, z}))
                         ? 1.d
                         : -1.d;
                 bounceMeridional = Math.abs(Math.round(s + 0.5d) - (s + 0.5d)) < 1e-8;
@@ -178,9 +195,9 @@ public class SysActionMove extends AbstractSysAction {
                 newdx = dx;
             }
             /* Ensure the new point is in water and repeat the process otherwise */
-            if (!getSimulationManager().getDataset().isInWater(new double[]{x + newdx, y + newdy})) {
+            if (!getSimulationManager().getDataset().isInWater(new double[]{x + newdx, y + newdy, z})) {
                 if (iter < 10) {
-                    return bounceCostline(x, y, newdx, newdy, iter);
+                    return bounceCostline(x, y, z, newdx, newdy, iter);
                 }
             }
         }

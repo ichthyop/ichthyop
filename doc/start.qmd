@@ -5,5 +5,5 @@ In this section, download and install instructions are provided.
 
 {{< include start/download_java.qmd >}}
 {{< include start/download_ich.qmd >}}
+{{< include start/download_input.qmd >}}
 {{< include start/running_ich.qmd >}}
-

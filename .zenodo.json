@@ -3,19 +3,104 @@
     "notes": "If you use this software, please cite it as below.",
     "creators": [
         {
-            "name": "Barrier, Nicolas",
-            "orcid": "0000-0002-1693-4719"
+            "orcid": "https://orcid.org/0000-0002-1693-4719",
+            "affiliation" : "MARBEC, University Montpellier, IRD, CNRS, Ifremer, INRAE, Sète, France",
+            "email": "nicolas.barrier@ird.fr",
+            "name": "Barrier, Nicolas"
         },
         {
+            "orcid": "https://orcid.org/0000-0002-5686-2764",
+            "email": "philippe.verley@ird.fr",
             "name": "Verley, Philippe",
-            "orcid": "0000-0002-5686-2764"
+            "affiliation" : "AMAP, Univ. Montpellier, CIRAD, CNRS, INRAE, IRD, Montpellier, France"
         },
+        {
+            "orcid": "https://orcid.org/0000-0001-5809-2452",
+            "email": "christophe.lett@ird.fr",
+            "name": "Lett, Christophe",
+            "affiliation" : "MARBEC, University Montpellier, IRD, CNRS, Ifremer, INRAE, Sète, France"
+        },
+        {
+            "orcid": "https://orcid.org/0000-0003-3990-9118",
+            "email": "christian.mullon@ird.fr",
+            "name": "Mullon, Christian",
+            "affiliation": "MARBEC, University Montpellier, IRD, CNRS, Ifremer, INRAE, Sète, France"
+        }
+    ],
+    "contributors": [
         {
             "name": "Andres, Gwendoline"
         },
         {
-            "name": "Lett, Christophe",
-            "orcid": "0000-0001-5809-2452"
+            "name": "Podlejski, Witold"
+        },
+        {
+            "name": "Putman, Nathan "
+        },
+        {
+            "name": "Parada, Carolina "
+        },
+        {
+            "orcid": "https://orcid.org/0009-0004-3627-4297",
+            "affiliation": "University of Corsica Pascal Paoli",
+            "name": "Barrier, Celine"
+        },
+        {
+            "name": "Travers-Trolet, Morgane "
+        },
+        {
+            "name": "Imzilen, Taha"
+        },
+        {
+            "name": "Pecquerie, Laure"
+        },
+        {
+            "name": "Vasquez, Sebastian"
+        },
+        {
+            "name": "Flores-Valiente, Jorge"
+        },
+        {
+            "name": "Dupaix, Amael"
+        },
+        {
+            "name": "Bonhommeau, Sylvain "
+        },
+        {
+            "name": "Blanke, Bruno"
+        },
+        {
+            "name": "Brochier, Timothée"
+        },
+        {
+            "name": "Hourdin, Christophe "
+        },
+        {
+            "name": "Jelassi, Mariem  "
+        },
+        {
+            "name": "Kaplan, David  "
+        },
+        {
+            "name": "Lecornu, Fabrice "
+        },
+        {
+            "name": "Penven, Pierrick "
+        },
+        {
+            "name": "Pous, Stephane "
+        },
+        {
+            "name": "Chevalier, Cristele "
+        },
+        {
+            "name": "Dumas, Franck"
+        },
+        {
+            "name": "Garreau, Pierre"
+        },
+        {
+            "name": "Field, John"
         }
     ],
     "communities": [
@@ -24,6 +109,38 @@
         },
         {
             "identifier": "umr-marbec"
+        }
+    ],
+    "access_right": "open",
+    "keywords": [
+        "ichthyop",
+        "biophysical model",
+        "lagrangian model",
+        "individual-based model",
+        "particle tracking",
+        "fish early life",
+        "fish eggs and larvae",
+        "transport",
+        "diffusion",
+        "orientation",
+        "nycthemeral migration"
+    ],
+    "language": "eng",
+    "references": [
+        "C. Lett, P. Verley, C. Mullon, C. Parada, T. Brochier, P. Penven, and B. Blanke, “A lagrangian tool for modelling ichthyoplankton dynamics,” Environmental modelling & software, vol. 23, iss. 9, p. 1210{–}1214, 2008."
+    ],
+    "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://ichthyop.org",
+            "relation": "isSupplementTo",
+            "resource_type": "Website"
+        },
+        {
+            "scheme": "url",
+            "identifier": "https://doi.org/10.1016/j.envsoft.2008.02.005",
+            "relation": "isSupplementTo",
+            "resource_type": "Reference paper"
         }
     ]
 }

@@ -1,0 +1,5 @@
+
+## Downloading hydrodynamical files {#sec-ich-hydro}
+
+To run Ichthyop templates, sample hydrodynamical files are required (`input` folder). They were previously part of the GitHub repository but have
+been migrated to Zenodo. They can be downloaded [here](https://doi.org/10.5281/zenodo.10890690).
