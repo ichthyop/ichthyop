@@ -18,12 +18,42 @@
             "orcid": "0000-0001-5809-2452"
         }
     ],
+    "contributors": [
+        {
+            "name": "Barrier, Celine",
+            "type": "Other",
+            "orcid": "https://orcid.org/0009-0004-3627-4297",
+        }
+    ],
     "communities": [
         {
             "identifier": "ichthyop"
         },
         {
             "identifier": "umr-marbec"
+        }
+    ],
+    "access_right": "open",
+    "keywords": [
+        "dispersion",
+        "larvae",
+        "ichthyoplankton",
+        "transport",
+        "orientation",
+        "diffusion"
+    ],
+    "language": "eng",
+    "license": {
+        "id": "GPL-3.0"
+    },
+    "references": [
+        "C. Lett, P. Verley, C. Mullon, C. Parada, T. Brochier, P. Penven, and B. Blanke, “A lagrangian tool for modelling ichthyoplankton dynamics,” Environmental modelling & software, vol. 23, iss. 9, p. 1210{–}1214, 2008."
+    ],
+    "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://ichthyop.org",
+            "relation": "isSupplementTo"
         }
     ]
 }
