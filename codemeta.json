@@ -220,7 +220,7 @@
         "nycthemeral migration"
     ],
     "license": "https://spdx.org/licenses/GPL-3.0",
-    "name": "Ichthyop",
+    "name": "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics",
     "programmingLanguage": "Java",
     "relatedLink": "https://ichthyop.org/",
     "releaseNotes": "https://github.com/ichthyop/ichthyop/compare/3.3.17.2...3.3.17.3",
