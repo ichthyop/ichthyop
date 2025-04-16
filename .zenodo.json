@@ -126,9 +126,6 @@
         "nycthemeral migration"
     ],
     "language": "eng",
-    "license": {
-        "id": "GPL-3.0"
-    },
     "references": [
         "C. Lett, P. Verley, C. Mullon, C. Parada, T. Brochier, P. Penven, and B. Blanke, “A lagrangian tool for modelling ichthyoplankton dynamics,” Environmental modelling & software, vol. 23, iss. 9, p. 1210{–}1214, 2008."
     ],
