@@ -207,12 +207,17 @@
     "downloadUrl": "https://github.com/ichthyop/ichthyop/releases/tag/3.3.17.3",
     "identifier": "https://doi.org/10.5281/zenodo.4243813",
     "keywords": [
-        "dispersion",
-        "larvae",
-        "ichthyoplankton",
+        "ichthyop",
+        "biophysical model",
+        "lagrangian model",
+        "individual-based model",
+        "particle tracking",
+        "fish early life",
+        "fish eggs and larvae",
         "transport",
+        "diffusion",
         "orientation",
-        "diffusion"
+        "nycthemeral migration"
     ],
     "license": "https://spdx.org/licenses/GPL-3.0",
     "name": "Ichthyop",
