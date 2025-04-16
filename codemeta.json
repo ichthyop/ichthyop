@@ -18,26 +18,34 @@
             "type": "Person",
             "email": "philippe.verley@ird.fr",
             "familyName": "Verley",
-            "givenName": "Philippe"
-        },
-        {
-            "id": "_:author_3",
-            "type": "Person",
-            "familyName": "Andres",
-            "givenName": "Gwendoline"
-        },
-        {
-            "id": "_:author_4",
-            "type": "Person",
-            "familyName": "Podlejski",
-            "givenName": "Witold"
+            "givenName": "Philippe",
+            "affiliation": {
+                "type": "Organization",
+                "name": "AMAP, Univ. Montpellier, CIRAD, CNRS, INRAE, IRD, Montpellier, France"
+            }
         },
         {
             "id": "https://orcid.org/0000-0001-5809-2452",
             "type": "Person",
             "email": "christophe.lett@ird.fr",
             "familyName": "Lett",
-            "givenName": "Christophe"
+            "givenName": "Christophe",
+            "affiliation": {
+                "type": "Organization",
+                "name": "MARBEC, University Montpellier, IRD, CNRS, Ifremer, INRAE, Sète, France"
+            }
+        },
+        {
+            "id": "https://orcid.org/0000-0003-3990-9118",
+            "email": "christian.mullon@ird.fr",
+            "type": "Person",
+            "familyName": "MULLON",
+            "givenName": "Christian",
+            "affiliation": {
+                "type": "Organization",
+                "name": "MARBEC, University Montpellier, IRD, CNRS, Ifremer, INRAE, Sète, France"
+            }
+
         }
     ],
     "codeRepository": "https://github.com/ichthyop/ichthyop",
@@ -54,109 +62,139 @@
             "givenName": "Celine"
         },
         {
-            "id": "_:contributor_2",
+            "id": "timzilien",
+            "type": "Person",
+            "familyName": "Imzilen",
+            "givenName": "Taha"
+        },
+        {
+            "id": "lpecquerie",
+            "type": "Person",
+            "familyName": "Pecquerie",
+            "givenName": "Laure"
+        },
+        {
+            "id": "svasquez",
+            "type": "Person",
+            "familyName": "Vasquez",
+            "givenName": "Sebastian"
+        },
+        {
+            "id": "jflores",
+            "type": "Person",
+            "familyName": "Flores-Valiente",
+            "givenName": "Jorge"
+        },
+        {
+            "id": "gandres",
+            "type": "Person",
+            "familyName": "Andres",
+            "givenName": "Gwendoline"
+        },
+        {
+            "id": "wpodlejski",
+            "type": "Person",
+            "familyName": "Podlejski",
+            "givenName": "Witold"
+        },
+        {
+            "id": "contributor_2",
             "type": "Person",
             "familyName": "DUPAIX",
             "givenName": "Amael"
         },
         {
-            "id": "_:contributor_3",
-            "type": "Person",
-            "familyName": "MULLON",
-            "givenName": "Christian"
-        },
-        {
-            "id": "_:contributor_4",
+            "id": "contributor_4",
             "type": "Person",
             "familyName": "BONHOMMEAU",
             "givenName": "Sylvain "
         },
         {
-            "id": "_:contributor_5",
+            "id": "contributor_5",
             "type": "Person",
             "familyName": "BLANKE",
             "givenName": "Bruno"
         },
         {
-            "id": "_:contributor_6",
+            "id": "contributor_6",
             "type": "Person",
             "familyName": "BROCHIER",
             "givenName": "Timothée"
         },
         {
-            "id": "_:contributor_7",
+            "id": "contributor_7",
             "type": "Person",
             "familyName": "HOURDIN",
             "givenName": "Christophe "
         },
         {
-            "id": "_:contributor_8",
+            "id": "contributor_8",
             "type": "Person",
             "familyName": "JELASSI",
             "givenName": "Mariem  "
         },
         {
-            "id": "_:contributor_9",
+            "id": "contributor_9",
             "type": "Person",
             "familyName": "KAPLAN",
             "givenName": "David  "
         },
         {
-            "id": "_:contributor_10",
+            "id": "contributor_10",
             "type": "Person",
             "familyName": "LECORNU",
             "givenName": "Fabrice "
         },
         {
-            "id": "_:contributor_11",
+            "id": "contributor_11",
             "type": "Person",
             "familyName": "MULLON",
             "givenName": "Christian "
         },
         {
-            "id": "_:contributor_12",
+            "id": "contributor_12",
             "type": "Person",
             "familyName": "PARADA",
             "givenName": "Carolina "
         },
         {
-            "id": "_:contributor_13",
+            "id": "contributor_13",
             "type": "Person",
             "familyName": "PENVEN",
             "givenName": "Pierrick "
         },
         {
-            "id": "_:contributor_14",
+            "id": "contributor_14",
             "type": "Person",
             "familyName": "POUS",
             "givenName": "Stephane "
         },
         {
-            "id": "_:contributor_15",
+            "id": "contributor_15",
             "type": "Person",
             "familyName": "PUTMAN",
             "givenName": "Nathan "
         },
         {
-            "id": "_:contributor_16",
+            "id": "contributor_16",
             "type": "Person",
             "familyName": "CHEVALIER",
             "givenName": "Cristele "
         },
         {
-            "id": "_:contributor_17",
+            "id": "contributor_17",
             "type": "Person",
             "familyName": "Dumas",
             "givenName": "Franck"
         },
         {
-            "id": "_:contributor_18",
+            "id": "contributor_18",
             "type": "Person",
             "familyName": "Garreau",
             "givenName": "Pierre"
         },
         {
-            "id": "_:contributor_19",
+            "id": "contributor_19",
             "type": "Person",
             "familyName": "Field",
             "givenName": "John"
@@ -190,3 +228,4 @@
     "developmentStatus": "active",
     "issueTracker": "https://github.com/ichthyop/ichthyop/issues",
     "referencePublication": "https://doi.org/10.1016/j.envsoft.2008.02.005"
+}
