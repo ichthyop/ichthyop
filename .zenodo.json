@@ -34,49 +34,7 @@
         },
         {
             "type": "Other",
-            "name": "Podlejski, Witold"
-        },
-        {
-            "type": "Other",
-            "name": "Putman, Nathan "
-        },
-        {
-            "type": "Other",
-            "name": "Parada, Carolina "
-        },
-        {
-            "orcid": "https://orcid.org/0009-0004-3627-4297",
-            "affiliation": "University of Corsica Pascal Paoli",
-            "type": "Other",
             "name": "Barrier, Celine"
-        },
-        {
-            "type": "Other",
-            "name": "Travers-Trolet, Morgane "
-        },
-        {
-            "type": "Other",
-            "name": "Imzilen, Taha"
-        },
-        {
-            "type": "Other",
-            "name": "Pecquerie, Laure"
-        },
-        {
-            "type": "Other",
-            "name": "Vasquez, Sebastian"
-        },
-        {
-            "type": "Other",
-            "name": "Flores-Valiente, Jorge"
-        },
-        {
-            "type": "Other",
-            "name": "Dupaix, Amael"
-        },
-        {
-            "type": "Other",
-            "name": "Bonhommeau, Sylvain "
         },
         {
             "type": "Other",
@@ -84,35 +42,15 @@
         },
         {
             "type": "Other",
+            "name": "Bonhommeau, Sylvain "
+        },
+        {
+            "type": "Other",
             "name": "Brochier, Timothée"
         },
         {
             "type": "Other",
-            "name": "Hourdin, Christophe "
-        },
-        {
-            "type": "Other",
-            "name": "Jelassi, Mariem  "
-        },
-        {
-            "type": "Other",
-            "name": "Kaplan, David  "
-        },
-        {
-            "type": "Other",
-            "name": "Lecornu, Fabrice "
-        },
-        {
-            "type": "Other",
-            "name": "Penven, Pierrick "
-        },
-        {
-            "type": "Other",
-            "name": "Pous, Stephane "
-        },
-        {
-            "type": "Other",
-            "name": "Chevalier, Cristele "
+            "name": "Chevalier, Cristele"
         },
         {
             "type": "Other",
@@ -120,11 +58,71 @@
         },
         {
             "type": "Other",
-            "name": "Garreau, Pierre"
+            "name": "Dupaix, Amael"
         },
         {
             "type": "Other",
             "name": "Field, John"
+        },
+        {
+            "type": "Other",
+            "name": "Flores-Valiente, Jorge"
+        },
+        {
+            "type": "Other",
+            "name": "Garreau, Pierre"
+        },
+        {
+            "type": "Other",
+            "name": "Hourdin, Christophe"
+        },
+        {
+            "type": "Other",
+            "name": "Imzilen, Taha"
+        },
+        {
+            "type": "Other",
+            "name": "Jelassi, Mariem"
+        },
+        {
+            "type": "Other",
+            "name": "Kaplan, David"
+        },
+        {
+            "type": "Other",
+            "name": "Lecornu, Fabrice"
+        },
+        {
+            "type": "Other",
+            "name": "Parada, Carolina "
+        },
+        {
+            "type": "Other",
+            "name": "Pecquerie, Laure"
+        },
+        {
+            "type": "Other",
+            "name": "Penven, Pierrick"
+        },
+        {
+            "type": "Other",
+            "name": "Podlejski, Witold"
+        },
+        {
+            "type": "Other",
+            "name": "Pous, Stephane "
+        },
+        {
+            "type": "Other",
+            "name": "Putman, Nathan "
+        },
+        {
+            "type": "Other",
+            "name": "Travers-Trolet, Morgane "
+        },
+        {
+            "type": "Other",
+            "name": "Vasquez, Sebastian"
         }
     ],
     "communities": [

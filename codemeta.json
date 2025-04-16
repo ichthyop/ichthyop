@@ -57,75 +57,10 @@
             "givenName": "Gwendoline"
         },
         {
-            "id": "_:contributor_2",
+            "id": "_:contributor_0",
             "type": "Person",
-            "familyName": "Podlejski",
-            "givenName": "Witold"
-        },
-        {
-            "id": "_:contributor_3",
-            "type": "Person",
-            "familyName": "Putman",
-            "givenName": "Nathan "
-        },
-        {
-            "id": "_:contributor_4",
-            "type": "Person",
-            "familyName": "Parada",
-            "givenName": "Carolina "
-        },
-        {
-            "id": "https://orcid.org/0009-0004-3627-4297",
-            "type": "Person",
-            "affiliation": {
-                "type": "Organization",
-                "name": "University of Corsica Pascal Paoli"
-            },
-            "email": "BARRIER_C@univ-corse.fr",
             "familyName": "Barrier",
             "givenName": "Celine"
-        },
-        {
-            "id": "_:contributor_6",
-            "type": "Person",
-            "familyName": "Travers-Trolet",
-            "givenName": "Morgane "
-        },
-        {
-            "id": "_:contributor_7",
-            "type": "Person",
-            "familyName": "Imzilen",
-            "givenName": "Taha"
-        },
-        {
-            "id": "_:contributor_8",
-            "type": "Person",
-            "familyName": "Pecquerie",
-            "givenName": "Laure"
-        },
-        {
-            "id": "_:contributor_9",
-            "type": "Person",
-            "familyName": "Vasquez",
-            "givenName": "Sebastian"
-        },
-        {
-            "id": "_:contributor_10",
-            "type": "Person",
-            "familyName": "Flores-Valiente",
-            "givenName": "Jorge"
-        },
-        {
-            "id": "_:contributor_11",
-            "type": "Person",
-            "familyName": "Dupaix",
-            "givenName": "Amael"
-        },
-        {
-            "id": "_:contributor_12",
-            "type": "Person",
-            "familyName": "Bonhommeau",
-            "givenName": "Sylvain "
         },
         {
             "id": "_:contributor_13",
@@ -134,16 +69,64 @@
             "givenName": "Bruno"
         },
         {
+            "id": "_:contributor_12",
+            "type": "Person",
+            "familyName": "Bonhommeau",
+            "givenName": "Sylvain "
+        },
+        {
             "id": "_:contributor_14",
             "type": "Person",
             "familyName": "Brochier",
             "givenName": "Timothée"
         },
         {
+            "id": "_:contributor_21",
+            "type": "Person",
+            "familyName": "Chevalier",
+            "givenName": "Cristele "
+        },
+        {
+            "id": "_:contributor_22",
+            "type": "Person",
+            "familyName": "Dumas",
+            "givenName": "Franck"
+        },
+        {
+            "id": "_:contributor_11",
+            "type": "Person",
+            "familyName": "Dupaix",
+            "givenName": "Amael"
+        },
+        {
+            "id": "_:contributor_24",
+            "type": "Person",
+            "familyName": "Field",
+            "givenName": "John"
+        },
+        {
+            "id": "_:contributor_10",
+            "type": "Person",
+            "familyName": "Flores-Valiente",
+            "givenName": "Jorge"
+        },
+        {
+            "id": "_:contributor_23",
+            "type": "Person",
+            "familyName": "Garreau",
+            "givenName": "Pierre"
+        },
+        {
             "id": "_:contributor_15",
             "type": "Person",
             "familyName": "Hourdin",
             "givenName": "Christophe "
+        },
+        {
+            "id": "_:contributor_7",
+            "type": "Person",
+            "familyName": "Imzilen",
+            "givenName": "Taha"
         },
         {
             "id": "_:contributor_16",
@@ -164,10 +147,28 @@
             "givenName": "Fabrice "
         },
         {
+            "id": "_:contributor_4",
+            "type": "Person",
+            "familyName": "Parada",
+            "givenName": "Carolina "
+        },
+        {
+            "id": "_:contributor_8",
+            "type": "Person",
+            "familyName": "Pecquerie",
+            "givenName": "Laure"
+        },
+        {
             "id": "_:contributor_19",
             "type": "Person",
             "familyName": "Penven",
             "givenName": "Pierrick "
+        },
+        {
+            "id": "_:contributor_2",
+            "type": "Person",
+            "familyName": "Podlejski",
+            "givenName": "Witold"
         },
         {
             "id": "_:contributor_20",
@@ -176,28 +177,22 @@
             "givenName": "Stephane "
         },
         {
-            "id": "_:contributor_21",
+            "id": "_:contributor_3",
             "type": "Person",
-            "familyName": "Chevalier",
-            "givenName": "Cristele "
+            "familyName": "Putman",
+            "givenName": "Nathan "
         },
         {
-            "id": "_:contributor_22",
+            "id": "_:contributor_6",
             "type": "Person",
-            "familyName": "Dumas",
-            "givenName": "Franck"
+            "familyName": "Travers-Trolet",
+            "givenName": "Morgane "
         },
         {
-            "id": "_:contributor_23",
+            "id": "_:contributor_9",
             "type": "Person",
-            "familyName": "Garreau",
-            "givenName": "Pierre"
-        },
-        {
-            "id": "_:contributor_24",
-            "type": "Person",
-            "familyName": "Field",
-            "givenName": "John"
+            "familyName": "Vasquez",
+            "givenName": "Sebastian"
         }
     ],
     "dateCreated": "2008-09-01",
