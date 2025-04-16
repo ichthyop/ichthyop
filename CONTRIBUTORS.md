@@ -10,7 +10,7 @@
 - Pecquerie, Laure
 - Vasquez, Sebastian
 - Flores-Valiente, Jorge
-- DUPAIX, Amael
+- Dupaix, Amael
 - Bonhommeau, Sylvain
 - Blanke, Bruno
 - Brochier, Timothée
