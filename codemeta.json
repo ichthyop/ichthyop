@@ -51,6 +51,30 @@
     "codeRepository": "https://github.com/ichthyop/ichthyop",
     "contributor": [
         {
+            "id": "gandres",
+            "type": "Person",
+            "familyName": "Andres",
+            "givenName": "Gwendoline"
+        },
+        {
+            "id": "wpodlejski",
+            "type": "Person",
+            "familyName": "Podlejski",
+            "givenName": "Witold"
+        },
+        {
+            "id": "contributor_15",
+            "type": "Person",
+            "familyName": "Putman",
+            "givenName": "Nathan "
+        },
+        {
+            "id": "contributor_12",
+            "type": "Person",
+            "familyName": "Parada",
+            "givenName": "Carolina "
+        },
+        {
             "id": "https://orcid.org/0009-0004-3627-4297",
             "type": "Person",
             "affiliation": {
@@ -60,6 +84,12 @@
             "email": "BARRIER_C@univ-corse.fr",
             "familyName": "Barrier",
             "givenName": "Celine"
+        },
+        {
+            "id": "mtravers",
+            "type": "Person",
+            "familyName": "Travers-Trolet",
+            "givenName": "Morgane "
         },
         {
             "id": "timzilien",
@@ -86,18 +116,6 @@
             "givenName": "Jorge"
         },
         {
-            "id": "gandres",
-            "type": "Person",
-            "familyName": "Andres",
-            "givenName": "Gwendoline"
-        },
-        {
-            "id": "wpodlejski",
-            "type": "Person",
-            "familyName": "Podlejski",
-            "givenName": "Witold"
-        },
-        {
             "id": "contributor_2",
             "type": "Person",
             "familyName": "DUPAIX",
@@ -106,79 +124,61 @@
         {
             "id": "contributor_4",
             "type": "Person",
-            "familyName": "BONHOMMEAU",
+            "familyName": "Bonhommeau",
             "givenName": "Sylvain "
         },
         {
             "id": "contributor_5",
             "type": "Person",
-            "familyName": "BLANKE",
+            "familyName": "Blanke",
             "givenName": "Bruno"
         },
         {
             "id": "contributor_6",
             "type": "Person",
-            "familyName": "BROCHIER",
+            "familyName": "Brochier",
             "givenName": "Timothée"
         },
         {
             "id": "contributor_7",
             "type": "Person",
-            "familyName": "HOURDIN",
+            "familyName": "Hourdin",
             "givenName": "Christophe "
         },
         {
             "id": "contributor_8",
             "type": "Person",
-            "familyName": "JELASSI",
+            "familyName": "Jelassi",
             "givenName": "Mariem  "
         },
         {
             "id": "contributor_9",
             "type": "Person",
-            "familyName": "KAPLAN",
+            "familyName": "Kaplan",
             "givenName": "David  "
         },
         {
             "id": "contributor_10",
             "type": "Person",
-            "familyName": "LECORNU",
+            "familyName": "Lecornu",
             "givenName": "Fabrice "
-        },
-        {
-            "id": "contributor_11",
-            "type": "Person",
-            "familyName": "MULLON",
-            "givenName": "Christian "
-        },
-        {
-            "id": "contributor_12",
-            "type": "Person",
-            "familyName": "PARADA",
-            "givenName": "Carolina "
         },
         {
             "id": "contributor_13",
             "type": "Person",
-            "familyName": "PENVEN",
+            "familyName": "Penven",
             "givenName": "Pierrick "
         },
         {
             "id": "contributor_14",
             "type": "Person",
-            "familyName": "POUS",
+            "familyName": "Pous",
             "givenName": "Stephane "
-        },
-        {
-            "id": "contributor_15",
-            "type": "Person",
-            "familyName": "PUTMAN",
-            "givenName": "Nathan "
         },
         {
             "id": "contributor_16",
             "type": "Person",
-            "familyName": "CHEVALIER",
+            "familyName": "Chevalier",
             "givenName": "Cristele "
         },
         {
