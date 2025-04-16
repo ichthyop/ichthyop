@@ -136,7 +136,14 @@
         {
             "scheme": "url",
             "identifier": "https://ichthyop.org",
-            "relation": "isSupplementTo"
+            "relation": "isSupplementTo",
+            "resource_type": "Website"
+        },
+        {
+            "scheme": "url",
+            "identifier": "https://doi.org/10.1016/j.envsoft.2008.02.005",
+            "relation": "isSupplementTo",
+            "resource_type": "Reference paper"
         }
     ]
 }
