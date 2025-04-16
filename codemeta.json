@@ -1,5 +1,5 @@
 {
-    "@context": "https://w3id.org/codemeta/3.0",
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
     "type": "SoftwareSourceCode",
     "applicationCategory": "Marine ecology",
     "author": [
@@ -57,49 +57,49 @@
             "givenName": "Gwendoline"
         },
         {
-            "id": "_:contributor_0",
+            "id": "_:contributor_2",
             "type": "Person",
             "familyName": "Barrier",
             "givenName": "Celine"
         },
         {
-            "id": "_:contributor_13",
+            "id": "_:contributor_3",
             "type": "Person",
             "familyName": "Blanke",
             "givenName": "Bruno"
         },
         {
-            "id": "_:contributor_12",
+            "id": "_:contributor_4",
             "type": "Person",
             "familyName": "Bonhommeau",
             "givenName": "Sylvain "
         },
         {
-            "id": "_:contributor_14",
+            "id": "_:contributor_5",
             "type": "Person",
             "familyName": "Brochier",
             "givenName": "Timothée"
         },
         {
-            "id": "_:contributor_21",
+            "id": "_:contributor_6",
             "type": "Person",
             "familyName": "Chevalier",
             "givenName": "Cristele "
         },
         {
-            "id": "_:contributor_22",
+            "id": "_:contributor_7",
             "type": "Person",
             "familyName": "Dumas",
             "givenName": "Franck"
         },
         {
-            "id": "_:contributor_11",
+            "id": "_:contributor_8",
             "type": "Person",
             "familyName": "Dupaix",
             "givenName": "Amael"
         },
         {
-            "id": "_:contributor_24",
+            "id": "_:contributor_9",
             "type": "Person",
             "familyName": "Field",
             "givenName": "John"
@@ -111,49 +111,49 @@
             "givenName": "Jorge"
         },
         {
-            "id": "_:contributor_23",
+            "id": "_:contributor_11",
             "type": "Person",
             "familyName": "Garreau",
             "givenName": "Pierre"
         },
         {
-            "id": "_:contributor_15",
+            "id": "_:contributor_12",
             "type": "Person",
             "familyName": "Hourdin",
             "givenName": "Christophe "
         },
         {
-            "id": "_:contributor_7",
+            "id": "_:contributor_13",
             "type": "Person",
             "familyName": "Imzilen",
             "givenName": "Taha"
         },
         {
-            "id": "_:contributor_16",
+            "id": "_:contributor_14",
             "type": "Person",
             "familyName": "Jelassi",
             "givenName": "Mariem  "
         },
         {
-            "id": "_:contributor_17",
+            "id": "_:contributor_15",
             "type": "Person",
             "familyName": "Kaplan",
             "givenName": "David  "
         },
         {
-            "id": "_:contributor_18",
+            "id": "_:contributor_16",
             "type": "Person",
             "familyName": "Lecornu",
             "givenName": "Fabrice "
         },
         {
-            "id": "_:contributor_4",
+            "id": "_:contributor_17",
             "type": "Person",
             "familyName": "Parada",
             "givenName": "Carolina "
         },
         {
-            "id": "_:contributor_8",
+            "id": "_:contributor_18",
             "type": "Person",
             "familyName": "Pecquerie",
             "givenName": "Laure"
@@ -165,31 +165,31 @@
             "givenName": "Pierrick "
         },
         {
-            "id": "_:contributor_2",
+            "id": "_:contributor_20",
             "type": "Person",
             "familyName": "Podlejski",
             "givenName": "Witold"
         },
         {
-            "id": "_:contributor_20",
+            "id": "_:contributor_21",
             "type": "Person",
             "familyName": "Pous",
             "givenName": "Stephane "
         },
         {
-            "id": "_:contributor_3",
+            "id": "_:contributor_22",
             "type": "Person",
             "familyName": "Putman",
             "givenName": "Nathan "
         },
         {
-            "id": "_:contributor_6",
+            "id": "_:contributor_23",
             "type": "Person",
             "familyName": "Travers-Trolet",
             "givenName": "Morgane "
         },
         {
-            "id": "_:contributor_9",
+            "id": "_:contributor_24",
             "type": "Person",
             "familyName": "Vasquez",
             "givenName": "Sebastian"
@@ -218,13 +218,13 @@
     "name": "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics",
     "programmingLanguage": "Java",
     "relatedLink": "https://ichthyop.org/",
-    "releaseNotes": "https://github.com/ichthyop/ichthyop/compare/3.3.17.3...3.4.0",
+    "schema:releaseNotes": "https://github.com/ichthyop/ichthyop/compare/3.3.17.3...3.4.0",
     "runtimePlatform": "JVM",
     "version": "3.4.0",
-    "codemeta:contIntegration": {
+    "contIntegration": "https://github.com/ichthyop/ichthyop/actions",
+    "codemeta:continuousIntegration": {
         "id": "https://github.com/ichthyop/ichthyop/actions"
     },
-    "continuousIntegration": "https://github.com/ichthyop/ichthyop/actions",
     "developmentStatus": "active",
     "issueTracker": "https://github.com/ichthyop/ichthyop/issues",
     "referencePublication": "https://doi.org/10.1016/j.envsoft.2008.02.005"
