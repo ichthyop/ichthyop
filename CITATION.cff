@@ -2,8 +2,8 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
+version: 3.3.17.3
 date-released: '2023-02-28'
-version: 3.3.17
 title: >-
   Ichthyop: A Lagrangian tool for modelling ichthyoplankton
   dynamics
@@ -13,14 +13,31 @@ authors:
   - family-names: Barrier
     given-names: Nicolas
     orcid: 'https://orcid.org/0000-0002-1693-4719'
+    affiliation: >-
+      MARBEC, University Montpellier, IRD, CNRS, Ifremer,
+      INRAE, Sète, France
+    email: nicolas.barrier@ird.fr
   - family-names: Verley
     given-names: Philippe
     orcid: 'https://orcid.org/0000-0002-5686-2764'
-  - family-names: Andres
-    given-names: Gwendoline
+    affiliation: >-
+      AMAP, Univ. Montpellier, CIRAD, CNRS, INRAE, IRD,
+      Montpellier, France
+    email: philippe.verley@ird.fr
   - family-names: Lett
     given-names: Christophe
     orcid: 'https://orcid.org/0000-0001-5809-2452'
+    affiliation: >-
+      MARBEC, University Montpellier, IRD, CNRS, Ifremer,
+      INRAE, Sète, France
+    email: christophe.lett@ird.fr
+  - given-names: Christian
+    family-names: Mullon
+    orcid: 'https://orcid.org/0000-0003-3990-9118'
+    affiliation: >-
+      MARBEC, University Montpellier, IRD, CNRS, Ifremer,
+      INRAE, Sète, France
+    email: christian.mullon@ird.fr
 identifiers:
   - type: doi
     value: 10.5281/zenodo.4243813
@@ -33,17 +50,22 @@ url: 'https://ichthyop.org'
 abstract: >-
   Ichthyop is a free Java tool designed to study the effects
   of physical and biological factors on ichthyoplankton
-  dynamics.\n\nIt incorporates the most important processes
+  dynamics. It incorporates the most important processes
   involved in fish early life: spawning, movement, growth,
   mortality and recruitment. The tool uses as input time
   series of velocity, temperature and salinity fields
   archived from ROMS, MARS, NEMO or SYMPHONIE oceanic models
   (either files or OpenDAP).
 keywords:
-  - dispersion
-  - larvae
-  - ichthyoplankton
+  - ichthyop
+  - biophysical model
+  - lagrangian model
+  - individual-based model
+  - particle tracking
+  - fish early life
+  - fish eggs and larvae
   - transport
-  - orientation
   - diffusion
+  - orientation
+  - nycthemeral migration
 license: GPL-3.0
