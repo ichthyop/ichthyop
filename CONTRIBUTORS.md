@@ -1,0 +1,26 @@
+# List of people who contributed to Ichthyop
+
+- Andres, Gwendoline
+- Podlejski, Witold
+- Putman, Nathan
+- Parada, Carolina
+- Barrier, Celine
+- Travers-Trolet, Morgane
+- Imzilen, Taha
+- Pecquerie, Laure
+- Vasquez, Sebastian
+- Flores-Valiente, Jorge
+- DUPAIX, Amael
+- Bonhommeau, Sylvain
+- Blanke, Bruno
+- Brochier, Timothée
+- Hourdin, Christophe
+- Jelassi, Mariem
+- Kaplan, David
+- Lecornu, Fabrice
+- Penven, Pierrick
+- Pous, Stephane
+- Chevalier, Cristele
+- Dumas, Franck
+- Garreau, Pierre
+- Field, John
