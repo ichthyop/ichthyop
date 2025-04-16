@@ -1,5 +1,23 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.4.0
+
+### Bug fix
+
+- Correction of a bug in bouncing and standstill processes in case of 3D simulations. The 3D mask is now considered instead of the mask at the surface.
+
+### New features
+
+- **Orientation processes**:
+    - Possibility to define a minimum and maximum age for orientation processes. Allows to combine multiple orientation strategies
+    - Possibility to define current velocities directly from a CSV file
+
+- **Code metadata**:
+    - Adding a `codemeta.json` file with full metadata included.'
+    - Update the `CITATION.cff` file (new authors)
+    - Update the `.zenodo.json` file (new authors)
+    - Adding the `CONTRIBUTORS` and `AUTHORS` files
+
 ## Changes in 3.3.17.3
 
 ### Bug fix

@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-version: 3.3.17.3
+version: 3.4.0
 date-released: '2023-02-28'
 title: >-
   Ichthyop: A Lagrangian tool for modelling ichthyoplankton
