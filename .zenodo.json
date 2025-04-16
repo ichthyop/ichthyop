@@ -139,7 +139,7 @@
         {
             "scheme": "url",
             "identifier": "https://doi.org/10.1016/j.envsoft.2008.02.005",
-            "relation": "isReferenceBy",
+            "relation": "isReferencedBy",
             "resource_type": "publication-article"
         }
     ]
