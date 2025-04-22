@@ -39,7 +39,7 @@ public class ReefOrientationAction extends OrientationVelocity {
 
     @FunctionalInterface
     private interface GetClosestPoint {
-        public double[] getClosestPoint(IParticle particle, int closest_reef_index);
+        public double[] getClosestPoint(double[] xyParticleCoordinates, int closest_reef_index);
     }
 
     private GetReefDistance getReefDistance;
@@ -66,11 +66,10 @@ public class ReefOrientationAction extends OrientationVelocity {
 
         if (mode.equals("barycenter")) {
             getReefDistance = (IParticle particle) -> computeReefDistanceBarycenter(particle);
-            getClosestPoint = (IParticle particle, int k) -> this.findClosestPointPolygonBarycenter(particle, k);
+            getClosestPoint = (double[] xyCoords, int k) -> this.findClosestPointPolygonBarycenter(xyCoords, k);
         } else {
             getReefDistance = (IParticle particle) -> computeReefDistanceEdges(particle);
-            getClosestPoint = (IParticle particle, int k) -> this.findClosestPointPolygonEdges(particle, k);
-
+            getClosestPoint = (double[] xyCoords, int k) -> this.findClosestPointPolygonEdges(xyCoords, k);
         }
 
         // Provides age in days
@@ -208,9 +207,11 @@ public class ReefOrientationAction extends OrientationVelocity {
         int closestReefIndex = this.findSmallestDistance(distance);
         double closestReefDistance = distance[closestReefIndex];
 
+        double[] xyParticleCoordinates = new double[] {particle.getX(), particle.getY()};
+
         // extract the closest point (can be on edge)
         // this is the target point
-        double[] closestPoint = this.getClosestPoint.getClosestPoint(particle, closestReefIndex);
+        double[] closestPoint = this.getClosestPoint.getClosestPoint(xyParticleCoordinates, closestReefIndex);
 
         uorient = 0;
         vorient = 0;
@@ -226,7 +227,7 @@ public class ReefOrientationAction extends OrientationVelocity {
             double xyParticule[] = getSimulationManager().getDataset().latlon2xy(particle.getLat(), particle.getLon());
             double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(),
                     particle.getOldLon());
-            double xyReef[] = {closestPoint[1], closestPoint[0]};
+            double xyReef[] = {closestPoint[0], closestPoint[1]};
 
             thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
             thetaCurrent = Math.atan2(xyOrigin[1] - xyParticule[1], xyOrigin[0] - xyParticule[0]) + Math.PI;
@@ -317,10 +318,11 @@ public class ReefOrientationAction extends OrientationVelocity {
 
         double lonParticle = particle.getLon();
         double latParticle = particle.getLat();
+        double [] xyParticleCoordinates = new double[] {particle.getX(), particle.getY()};
 
         for (int k = 0; k < NReefs; k++) {
 
-            double[] closestPointCoordinates = findClosestPointPolygonEdges(particle, k);
+            double[] closestPointCoordinates = findClosestPointPolygonEdges(xyParticleCoordinates, k);
             double[] closestPointLonLat = getSimulationManager().getDataset().xy2latlon(closestPointCoordinates[0], closestPointCoordinates[1]);
 
             distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
@@ -360,9 +362,7 @@ public class ReefOrientationAction extends OrientationVelocity {
      * Computation if performed based on particle grid coordinates. It returns the x and y grid
      * coordinates for the given point
      */
-    public double[] findClosestPointPolygonEdges(IParticle particle, int k) {
-
-        double point[] = {particle.getX(), particle.getY()};
+    public double[] findClosestPointPolygonEdges(double [] xyCoords, int k) {
 
         double minDistance = Double.MAX_VALUE;
         double[] final_closest = new double[2];
@@ -374,9 +374,9 @@ public class ReefOrientationAction extends OrientationVelocity {
             double[] start = new double[] { xReefs[k][i], yReefs[k][i] };
             double[] end = new double[] { xReefs[k][i + 1], yReefs[k][i + 1] };
 
-            double[] temp_closest = closestPoint(start, end, point);
+            double[] temp_closest = closestPoint(start, end, xyCoords);
 
-            double dist = Math.sqrt(Math.pow(temp_closest[0] - point[0], 2) + Math.pow(temp_closest[1] - point[1], 2));
+            double dist = Math.sqrt(Math.pow(temp_closest[0] - xyCoords[0], 2) + Math.pow(temp_closest[1] - xyCoords[1], 2));
 
             if (dist <= minDistance) {
                 final_closest = temp_closest;
@@ -393,7 +393,7 @@ public class ReefOrientationAction extends OrientationVelocity {
      * Computation if performed based on particle grid coordinates. It returns the x and y grid
      * coordinates for the given point
      */
-    public double[] findClosestPointPolygonBarycenter(IParticle particle, int k) {
+    public double[] findClosestPointPolygonBarycenter(double[] xyCoords, int k) {
 
         double[] final_closest = new double[2];
         final_closest[0] = xBarycenter[k];

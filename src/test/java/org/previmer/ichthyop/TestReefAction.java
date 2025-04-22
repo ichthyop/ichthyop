@@ -51,7 +51,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.previmer.ichthyop.action.orientation.ReefOrientationAction;
 import org.previmer.ichthyop.io.ConfigurationFile;
 import org.previmer.ichthyop.manager.ParameterManager;
-import org.previmer.ichthyop.particle.Particle;
 import org.junit.jupiter.api.BeforeAll;
 
 
@@ -78,6 +77,7 @@ public class TestReefAction {
         ParameterManager.getInstance().setConfigurationFile(file);
         action = new ReefOrientationAction();
         action.addPolygonForTest(lonp, latp);
+
     }
 
     /** Testing the number of maps */
@@ -89,29 +89,26 @@ public class TestReefAction {
 
         double expected[] = new double[] {8, 13};
         point = new double[] {12, 15};
-        Particle particle = new Particle();
-        particle.setX(point[0]);
-        particle.setY(point[1]);
 
-        output = action.findClosestPointPolygonEdges(particle, 0);
+        output = action.findClosestPointPolygonEdges(point, 0);
         assertArrayEquals(expected, output);
 
         expected[0] = -3.5;
         expected[1] = 2.5;
         point = new double[] {-1, 3};
-        output = action.findClosestPointPolygonEdges(particle, 0);
+        output = action.findClosestPointPolygonEdges(point, 0);
         assertArrayEquals(expected, output);
 
         expected[0] = -3.8461538462;
         expected[1] = 4.2307692308;
         point = new double[] {-10, 3};
-        output = action.findClosestPointPolygonEdges(particle, 0);
+        output = action.findClosestPointPolygonEdges(point, 0);
         assertArrayEquals(expected, output, 10);
 
         expected[0] = -3.0;
         expected[1] = 4.0;
         point = new double[] {-10, -3};
-        output = action.findClosestPointPolygonEdges(particle, 0);
+        output = action.findClosestPointPolygonEdges(point, 0);
         assertArrayEquals(expected, output, 10);
 
     }
