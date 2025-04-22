@@ -323,11 +323,10 @@ public class ReefOrientationAction extends OrientationVelocity {
         for (int k = 0; k < NReefs; k++) {
 
             double[] closestPointCoordinates = findClosestPointPolygonEdges(xyParticleCoordinates, k);
-            double[] closestPointLatLon = getSimulationManager().getDataset().xy2latlon(closestPointCoordinates[0],
-                    closestPointCoordinates[1]);
+            double[] closestPointLatLon = getSimulationManager().getDataset().xy2latlon(closestPointCoordinates[0], closestPointCoordinates[1]);
 
             distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
-                    closestPointLatLon[1], closestPointLatLon[0]);
+                    closestPointLatLon[0], closestPointLatLon[1]);
         }
 
         return distance;
