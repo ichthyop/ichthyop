@@ -2,11 +2,8 @@ package org.previmer.ichthyop.action.orientation;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
-import java.awt.geom.Line2D;
-
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
@@ -21,11 +18,14 @@ public class ReefOrientationAction extends OrientationVelocity {
     private double latitudeReefs[][];
     private double xReefs[][];
     private double yReefs[][];
+
     private double longitudeBarycenter[];
     private double latitudeBarycenter[];
     private double xBarycenter[];
     private double yBarycenter[];
+
     private double kappaBarycenter[];
+
     ArrayList<Zone> zones;
     private boolean isInitialized = false;
     private double ageMin;

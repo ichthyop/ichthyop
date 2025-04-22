@@ -1359,7 +1359,17 @@
     <enabled>true</enabled>
     <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
     <parameters>
-      <parameter>
+        <parameter>
+            <key>attraction.mode</key>
+            <long_name>Attraction mode ("edges" or "barycenter")</long_name>
+            <value>edges</value>
+            <default>edges</default>
+            <format>combo</format>
+            <accepted>edges</accepted>
+            <accepted>barycenter</accepted>
+            <description>Attraction mode ("edges" or "barycenter"). If edges, the particle will be attracted by the edges or vertices of the polygons. Else, it will be attracted by the barycenters</description>
+          </parameter>
+        <parameter>
         <key>maximum.distance</key>
         <long_name>Maximum distance [meter]</long_name>
         <value>300000.0</value>
