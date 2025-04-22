@@ -442,4 +442,17 @@ public class ReefOrientationAction extends OrientationVelocity {
         }
         return output;
     }
+
+
+    public void addPolygonForTest(double[] xp, double[] yp) {
+
+        longitudeReefs = new double[1][];
+        latitudeReefs = new double[1][];
+        xReefs = new double[1][];
+        yReefs = new double[1][];
+        xReefs[0] = xp;
+        yReefs[0] = yp;
+
+    }
+
 }
