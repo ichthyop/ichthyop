@@ -532,16 +532,17 @@ public class Mercator_3D extends AbstractDataset {
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (.5d - (double) kk - dz));
-                    CO += co;
                     index.set(k + kk, j + jj, i + ii);
-                    x = (1.d - x_euler) * w_tp0.getDouble(index)
-                            + x_euler * w_tp1.getDouble(index);
-                    dw += 2.d * x * co
-                            / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
-                            - gdepW[Math.min(k + kk + 1, nz)][j + jj][i + ii]);
+                    // Patch for Eliot (issues 122)
+                    // Check whether the value is NaN for the vertical velocity.
+                    // If so, we don't read it.
+                    if (!Double.isNaN(w_tp0.getDouble(index))) {
+                        co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                        CO += co;
+                        x = (1.d - x_euler) * w_tp0.getDouble(index) + x_euler * w_tp1.getDouble(index);
+                        dw += 2.d * x * co / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
+                                - gdepW[Math.min(k + kk + 1, nz)][j + jj][i + ii]);
+                    }
                 }
             }
         }
