@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.4.1
+
+### Bug fix
+
+- Correction of vertical advection computation for Mercator_3D (answer to issue #122). We check that the vertical velocity that is read is not NaN.
+
 ## Changes in 3.4.0
 
 ### Bug fix
