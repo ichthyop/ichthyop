@@ -163,16 +163,16 @@ public class MigrationAction extends AbstractAction {
                 String[] line = lines.get(i + 1);
                 agesDepthDay[i] = Float.valueOf(line[0]) * 24.f * 3600.f;
                 depthsDay[i] = Float.valueOf(line[1]);
-                if(depthsDay[i] > 0) {
-                    depthsDay[i] *= -1;
-                }
+                // if(depthsDay[i] > 0) {
+                //     depthsDay[i] *= -1;
+                // }
             }
         } else {
             // Constant daytime depth if no CSV file is provided
             depthDay = Float.valueOf(getParameter("daytime_depth"));
-            if(depthDay > 0) {
-                depthDay *= -1;
-            }
+            // if(depthDay > 0) {
+            //     depthDay *= -1;
+            // }
         }
         // Check existence of night time depth as an age function, provided in CSV file
         if (!isNull("nighttime_depth_file")) {
@@ -202,16 +202,16 @@ public class MigrationAction extends AbstractAction {
                 String[] line = lines.get(i + 1);
                 agesDepthNight[i] = Float.valueOf(line[0]) * 24.f * 3600.f;
                 depthsNight[i] = Float.valueOf(line[1]);
-                if(depthsNight[i] > 0) {
-                    depthsNight[i] *= -1;
-                }
+                // if(depthsNight[i] > 0) {
+                //     depthsNight[i] *= -1;
+                // }
             }
         } else {
             // Constant night time depth if no CSV file is provided
             depthNight = Float.valueOf(getParameter("nighttime_depth"));
-            if(depthNight > 0) {
-                depthNight *= -1;
-            }
+            // if(depthNight > 0) {
+            //     depthNight *= -1;
+            // }
         }
         // Sunset and sunrise definition
         DateTimeFormatter hourFormat = DateTimeFormatter.ofPattern("HH:mm");
