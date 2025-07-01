@@ -77,9 +77,12 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.io.AbstractInitialStateTracker;
 import org.previmer.ichthyop.io.AbstractTracker;
 import org.previmer.ichthyop.io.DepthTracker;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.io.InitialLatTracker;
+import org.previmer.ichthyop.io.InitialLonTracker;
 import org.previmer.ichthyop.io.LatTracker;
 import org.previmer.ichthyop.io.LonTracker;
 import org.previmer.ichthyop.io.MortalityTracker;
@@ -115,6 +118,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private Dimension latlonDim;
     private boolean clearPredefinedTrackerList = false;
     private boolean clearCustomTrackerList = false;
+    private boolean clearInitialStateTrackerList = false;
     private boolean isDensityEnabled = false;
     private boolean isTrajectoryEnabled = true;
 
@@ -143,6 +147,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
      */
     private List<AbstractTracker> trackers;
     private List<Class<?>> predefinedTrackers;
+    private List<AbstractInitialStateTracker> initialStateTrackers;
+    private List<Class<?>> predefinedInitialStateTrackers;
     private List<String> customTrackers;
     private String basename;
 
@@ -447,6 +453,39 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
     }
 
+    public void addPredefinedInitialStateTracker(Class<?> trackerClass) {
+        if (null == initialStateTrackers) {
+            predefinedInitialStateTrackers = new ArrayList<>();
+        }
+        if (clearInitialStateTrackerList) {
+            predefinedInitialStateTrackers.clear();
+            clearInitialStateTrackerList = false;
+        }
+        if (!predefinedInitialStateTrackers.contains(trackerClass)) {
+            predefinedInitialStateTrackers.add(trackerClass);
+        }
+    }
+
+    private void addInitialStateTrackers() throws Exception {
+        initialStateTrackers = new ArrayList<>();
+        initialStateTrackers.add(new InitialLatTracker());
+        initialStateTrackers.add(new InitialLonTracker());
+        /* Add trackers requested by external actions */
+        if (null != predefinedInitialStateTrackers) {
+            for (Class<?> trackerClass : predefinedInitialStateTrackers) {
+                try {
+                    AbstractInitialStateTracker tracker = (AbstractInitialStateTracker) trackerClass.getDeclaredConstructor().newInstance();
+                    tracker.init();
+                    initialStateTrackers.add(tracker);
+                } catch (Exception ex) {
+                    getLogger().log(Level.SEVERE, "Error adding tracker " + trackerClass.getSimpleName() + " in NetCDF output file. The variable will not be recorded.", ex);
+                }
+            }
+        }
+    }
+
+
+
     private void addPredefinedTrackers() throws Exception {
         trackers = new ArrayList<>();
         trackers.add(new TimeTracker());
@@ -628,9 +667,28 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         /* add user defined trackers */
         addCustomTrackers(getUserTrackers());
 
+        addInitialStateTrackers();
+
         /* Initialize all trackers */
         List<AbstractTracker> errTrackers = new ArrayList<>();
         for (AbstractTracker tracker : trackers) {
+            try {
+                tracker.init();
+                Variable.Builder<?> variable = bNcOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
+                tracker.addRuntimeAttributes();
+                if (tracker.getAttributes() != null) {
+                    for (Attribute attribute : tracker.getAttributes()) {
+                        variable.addAttribute(attribute);
+                    }
+                }
+
+            } catch (Exception ex) {
+                errTrackers.add(tracker);
+                getLogger().log(Level.WARNING, "Error adding tracker " + tracker.getName() + " in NetCDF output file. The variable will not be recorded.", ex);
+            }
+        }
+
+        for (AbstractTracker tracker : initialStateTrackers) {
             try {
                 tracker.init();
                 Variable.Builder<?> variable = bNcOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
@@ -882,6 +940,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     }
 
+    public void write_intial_step() {
+        this.writeInitialStateToNetCDF();
+    }
+
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
@@ -960,5 +1022,37 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             zoneDimension = null;
             dimensions = new HashMap<>();
         }
+    }
+
+    private void writeInitialStateToNetCDF() {
+        getLogger().log(Level.INFO, "Saving variables...");
+        List<AbstractTracker> errTrackers = new ArrayList<>();
+        for (AbstractInitialStateTracker temp_tracker : initialStateTrackers) {
+            AbstractInitialStateTracker tracker = (AbstractInitialStateTracker) temp_tracker;
+            if (tracker.isEnabled()) {
+                /* Retrieve the values of the variable */
+                try {
+                    tracker.track();
+                } catch (Exception ex) {
+                    errTrackers.add(tracker);
+                    getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
+                    getLogger().log(Level.WARNING, "Error tracking variable " + tracker.getName()
+                            + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    continue;
+                }
+                /* Write the current time step in the NetCDF file  */
+                try {
+                    ncOut.write(ncOut.findVariable(tracker.getName()), tracker.getArray());
+                } catch (Exception ex) {
+                    errTrackers.add(tracker);
+                    getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
+                    getLogger().log(Level.WARNING, "Error writing variable " + tracker.getName()
+                            + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                }
+            }
+        }
+
+        /* Remove trackers that caused error */
+        trackers.removeAll(errTrackers);
     }
 }
