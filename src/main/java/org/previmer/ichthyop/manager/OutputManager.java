@@ -79,6 +79,7 @@ import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.io.AbstractInitialStateTracker;
 import org.previmer.ichthyop.io.AbstractTracker;
+import org.previmer.ichthyop.io.AgeTracker;
 import org.previmer.ichthyop.io.DepthTracker;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.InitialLatTracker;
@@ -489,6 +490,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void addPredefinedTrackers() throws Exception {
         trackers = new ArrayList<>();
         trackers.add(new TimeTracker());
+        trackers.add(new AgeTracker());
         trackers.add(new LonTracker());
         trackers.add(new LatTracker());
         trackers.add(new MortalityTracker());
