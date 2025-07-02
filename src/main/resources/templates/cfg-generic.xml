@@ -3110,4 +3110,40 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             </parameter>
         </parameters>
     </block>
+    <block type="action">
+        <key>action.growth.exponential</key>
+        <tree_path>Biology/Growth/Exponential growth</tree_path>
+        <enabled>false</enabled>
+        <description>Block of option for setting up the exponentil growth (Tanner et al, 2017).</description>
+        <parameters>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature name</long_name>
+                <value>votemper</value>
+                <default>thetao</default>
+                <description>Name of temperature field</description>
+            </parameter>
+            <parameter>
+                <key>a</key>
+                <long_name>a parameter</long_name>
+                <value>1</value>
+                <default>1</default>
+                <description>a parameter</description>
+            </parameter>
+            <parameter>
+                <key>b</key>
+                <long_name>b parameter</long_name>
+                <value>1</value>
+                <default>1</default>
+                <description>b parameter</description>
+            </parameter>
+            <parameter>
+                <key>c</key>
+                <long_name>c parameter</long_name>
+                <value>1</value>
+                <default>1</default>
+                <description>c parameter</description>
+            </parameter>
+        </parameters>
+    </block>
 </icstructure>
