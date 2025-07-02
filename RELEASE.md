@@ -1,5 +1,17 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.4.2
+
+### Bug fix
+
+- Release zone output was computed at record frequency, which led sometimes to -1 values. Now it is computed just after release event (Eliot bug)
+- In the `MigrationAction.java`, positive depth values were not converted to negative ones, contrary to what is stated on the console
+
+### New featuress
+
+- Particle age is provided as a standard output
+- Particle initial longitudes and latitudes are provided as a standard output
+
 ## Changes in 3.4.1
 
 ### Bug fix
