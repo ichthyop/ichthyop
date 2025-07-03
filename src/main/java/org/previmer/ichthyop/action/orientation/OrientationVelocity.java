@@ -13,6 +13,7 @@ import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.action.BuoyancyAction;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
 
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -29,6 +30,7 @@ public abstract class OrientationVelocity extends AbstractAction {
 
     private double[] ageCsv; // age array from CSV (seconds)
     private double[] speedCsv; // speed array (m/s);
+    private double velocityPerLengthUnit;
 
     @FunctionalInterface
     public interface InnerOrientationVelocity {
@@ -141,4 +143,12 @@ public abstract class OrientationVelocity extends AbstractAction {
             Logger.getLogger(BuoyancyAction.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    public double getVelocityLength(IParticle particle) {
+
+        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
+        return lengthLayer.getLength() * velocityPerLengthUnit;
+
+    }
+
 }
