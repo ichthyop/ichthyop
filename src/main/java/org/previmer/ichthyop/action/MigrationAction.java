@@ -121,6 +121,13 @@ public class MigrationAction extends AbstractAction {
      */
     private boolean isGrowth;
 
+    @FunctionalInterface
+    public interface InnerMigrationAction{
+        double getDepth(IParticle particle, double time);
+    }
+
+    InnerMigrationAction innerMigrationAction;
+
     /**
      * Read parameters from the configuration file.
      *
@@ -132,6 +139,19 @@ public class MigrationAction extends AbstractAction {
         // DVM only in 3D mode
         if (!getSimulationManager().getDataset().is3D()) {
             throw new UnsupportedOperationException("{Migration} Vertical migration cannot operate in 2D simulation. Please deactivate the block or run a 3D simulation.");
+        }
+
+        boolean useLinearMethod = false;
+        if (!isNull("method")) {
+            if(getParameter("method").equals("linear")) {
+                useLinearMethod = true;
+            }
+        }
+
+        if(useLinearMethod) {
+            innerMigrationAction = (particle, time) -> getDepthLinear(particle, time);
+        } else {
+            innerMigrationAction = (particle, time) -> getDepthDefault(particle, time);
         }
 
         // Check whether the growth module is enabled
@@ -277,7 +297,7 @@ public class MigrationAction extends AbstractAction {
                 depth = (depthDay < bottom) ? particle.getDepth() : depthDay;
             } else {
                 // diel vertical migration
-                depth = getDepth(particle, getSimulationManager().getTimeManager().getTime());
+                depth = innerMigrationAction.getDepth(particle, getSimulationManager().getTimeManager().getTime());
             }
 
             double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
@@ -296,7 +316,65 @@ public class MigrationAction extends AbstractAction {
      * @return the depth (metre) of the particle at current time of the
      * simulation.
      */
-    private double getDepth(IParticle particle, double time) {
+    private double getDepthDefault(IParticle particle, double time) {
+
+        double realHour = (time / (60 * 60)) % 24;
+        int hour = (int) Math.floor(realHour);
+        double minute = (int) ((realHour - hour) * 60) ;
+
+        LocalTime currentTime = LocalTime.of(hour, (int) minute);
+
+        // get bathy in meter (<0)
+        double bottom = this.getBathy(particle);
+        double output;
+
+        if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {
+            // day time
+            if (null != depthsDay) {
+                // Update the depth as function of age
+                depthDay = depthsDay[agesDepthDay.length - 1];
+                float age = particle.getAge();
+                for (int i = 0; i < agesDepthDay.length - 1; i++) {
+                    if (agesDepthDay[i] <= age && age < agesDepthDay[i + 1]) {
+                        depthDay = depthsDay[i];
+                        break;
+                    }
+                }
+            }
+            output = depthDay;
+        } else {
+            // night time
+            if (null != depthsNight) {
+                // Update the depth as function of age
+                depthNight = depthsNight[agesDepthNight.length - 1];
+                float age = particle.getAge();
+                for (int i = 0; i < agesDepthNight.length - 1; i++) {
+                    if (agesDepthDay[i] <= age && age < agesDepthNight[i + 1]) {
+                        depthNight = depthsNight[i];
+                        break;
+                    }
+                }
+            }
+            output = depthNight;
+        }
+
+        output = (output < bottom) ? particle.getDepth() : output;
+
+        return output;
+    }
+
+    /**
+     * Computes the depth of the particle according to the diel vertical
+     * migration behaviour. At daytime the particles stays at a certain depth
+     * (either constant or function of age) and jumps to an other depth (either
+     * constant or function of age) at night.
+     *
+     * @param particle, the migrating particle
+     * @param time a double, the current time (second) of the simulation
+     * @return the depth (metre) of the particle at current time of the
+     * simulation.
+     */
+    private double getDepthLinear(IParticle particle, double time) {
 
         double realHour = (time / (60 * 60)) % 24;
         int hour = (int) Math.floor(realHour);
