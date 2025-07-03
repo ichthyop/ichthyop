@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
@@ -95,10 +96,16 @@ public class MigrationAction extends AbstractAction {
      * Time of sunrise.
      */
     private LocalTime sunrise;
+    private double fullday;
     /**
      * Time of sunset.
      */
     private LocalTime sunset;
+    private double fullnight;
+
+    private double[] interpolated_time;
+
+    double sunset_double, sunrise_double;
 
     /**
      * Whether the depth at day equals the depth at night.
@@ -217,6 +224,15 @@ public class MigrationAction extends AbstractAction {
         DateTimeFormatter hourFormat = DateTimeFormatter.ofPattern("HH:mm");
         sunset = LocalTime.parse(getParameter("sunset"), hourFormat);
         sunrise = LocalTime.parse(getParameter("sunrise"), hourFormat);
+
+        sunset_double = sunset.getHour() + sunset.getMinute() / 60.;
+        sunrise_double = sunrise.getHour() + sunrise.getMinute() / 60.;
+        fullday = 0.5 * (sunset_double + sunrise_double);
+        fullnight = 0.5 * (sunset_double + sunrise_double + 24);
+
+        // get the interpolation factors
+        interpolated_time = new double[] {24 - fullnight, fullday, fullnight};
+
         // Check whether depth at day and depth at night are constant in the
         // case they are not function of age
         isodepth = (null == depthsDay && null == depthsNight) && (depthDay == depthNight);
@@ -292,10 +308,9 @@ public class MigrationAction extends AbstractAction {
         double bottom = this.getBathy(particle);
         double output;
 
-        if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {
-            // day time
-            if (null != depthsDay) {
-                // Update the depth as function of age
+        // Update depth value at day time
+        if (null != depthsDay) {
+                // Update the depth as function of age (if class changes)
                 depthDay = depthsDay[agesDepthDay.length - 1];
                 float age = particle.getAge();
                 for (int i = 0; i < agesDepthDay.length - 1; i++) {
@@ -305,25 +320,39 @@ public class MigrationAction extends AbstractAction {
                     }
                 }
             }
-            output = depthDay;
-        } else {
-            // night time
-            if (null != depthsNight) {
-                // Update the depth as function of age
-                depthNight = depthsNight[agesDepthNight.length - 1];
-                float age = particle.getAge();
-                for (int i = 0; i < agesDepthNight.length - 1; i++) {
-                    if (agesDepthDay[i] <= age && age < agesDepthNight[i + 1]) {
-                        depthNight = depthsNight[i];
-                        break;
-                    }
+        output = depthDay;
+
+        // Update depth value at night time (if class changes)
+        if (null != depthsNight) {
+            // Update the depth as function of age
+            depthNight = depthsNight[agesDepthNight.length - 1];
+            float age = particle.getAge();
+            for (int i = 0; i < agesDepthNight.length - 1; i++) {
+                if (agesDepthDay[i] <= age && age < agesDepthNight[i + 1]) {
+                    depthNight = depthsNight[i];
+                    break;
                 }
             }
-            output = depthNight;
         }
+        output = depthNight;
+
+        double[] interpolated_depths = new double[] {depthNight, depthDay, depthNight};
 
         output = (output < bottom) ? particle.getDepth() : output;
 
-        return output;
+        int i;
+        for (i = 0; i < 3; i++) {
+            if (realHour < interpolated_time[i + 1]) {
+                break;
+            }
+        }
+
+        double depth = interpolated_depths[i]
+                + (realHour - interpolated_time[i]) * (interpolated_depths[i + 1] - interpolated_depths[i])
+                        / (interpolated_time[i + 1] - interpolated_time[i]);
+        depth = (depth < bottom) ? particle.getDepth() : depth;
+
+        return depth;
+
     }
 }
