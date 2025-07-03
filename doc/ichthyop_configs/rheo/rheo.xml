@@ -1360,6 +1360,14 @@
     <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
     <parameters>
       <parameter>
+       <key>can.swim.against.current</key>
+       <long_name>True if particle can swim against current</long_name>
+       <value>false</value>
+       <default>false</default>
+       <format>boolean</format>
+       <description>True if particle can swim against the current</description>
+      </parameter>        
+      <parameter>
         <key>swimming.speed.hatch</key>
         <long_name>Swimming speed hatch [m/s]</long_name>
         <value>1.0</value>
