@@ -11,6 +11,7 @@
 
 - Particle age is provided as a standard output
 - Particle initial longitudes and latitudes are provided as a standard output
+- In MigrationAction, the depth of the particle is linearly interpolated between sunrise and sunset. And the daytime depth is reached at the maximum of the day, and conversely for the night time depth
 
 ## Changes in 3.4.1
 
