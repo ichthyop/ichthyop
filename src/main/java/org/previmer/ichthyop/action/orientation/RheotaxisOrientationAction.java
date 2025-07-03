@@ -14,6 +14,8 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
 
     private VonMisesRandom vonMises;
     private double secs_in_day = 86400;
+    private boolean canSwimAgainstCurrent = false;
+
 
     double dt;
     private double PLD;
@@ -23,6 +25,10 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
         super.loadParameters();
         vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
         double secs_in_day = 86400;
+
+        if (getParameter("can.swim.against.current") != null) {
+            canSwimAgainstCurrent = Boolean.getBoolean(getParameter("can.swim.against.current"));
+        }
 
         // Provides age in days
         if (getParameter("age.min") != null) {
@@ -84,7 +90,7 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
         // Larvae cannot swim against the current. Therefore,
         // if the swimming speed is greater that the current, we
         // set the swimming speed as equal to the current
-        swimmingSpeed = Math.min(swimmingSpeed, uv);
+        swimmingSpeed = canSwimAgainstCurrent ? swimmingSpeed : Math.min(swimmingSpeed, uv);
 
         double uorient = swimmingSpeed * Math.cos(theta);
         double vorient = swimmingSpeed * Math.sin(theta);
