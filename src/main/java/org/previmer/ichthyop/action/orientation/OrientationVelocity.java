@@ -14,6 +14,7 @@ import org.previmer.ichthyop.action.BuoyancyAction;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
+import org.previmer.ichthyop.util.CheckGrowthParam;
 
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -24,13 +25,13 @@ public abstract class OrientationVelocity extends AbstractAction {
 
     private double secs_in_day = 86400;
 
-    private double swimmingSpeedHatch; // cm
-    private double swimmingSpeedSettle; // cm
+    private double swimmingSpeedHatch; // cm / s
+    private double swimmingSpeedSettle; // cm / s
     private double PLD; // days
 
     private double[] ageCsv; // age array from CSV (seconds)
     private double[] speedCsv; // speed array (m/s);
-    private double velocityPerLengthUnit;
+    private double velocityPerLengthUnit;  // cm/s
 
     @FunctionalInterface
     public interface InnerOrientationVelocity {
@@ -42,25 +43,50 @@ public abstract class OrientationVelocity extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        String key = "swimming.speed.csv.enabled";
-        if (getParameter(key) != null && Boolean.valueOf(getParameter(key))) {
-            velocityMethod = (IParticle particle) -> getVelocityCsv(particle);
-            initVelocityCsv();
-        } else {
+        String method = "age";
+        String key = "swimming.speed.mode";
+        if(!isNull(key)) {
+            method = getParameter(key);
+        }
 
-            // values in cm/s
-            swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
-            swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
+        // Allows for backward compatibility
+        key = "swimming.speed.csv.enabled";
+        if (!isNull(key) && Boolean.valueOf(getParameter(key))) {
+            getLogger().warning("swimming.speed.csv.enabled has been se to true. Velocity will be read from csv");
+            method = "csv";
+        }
 
-            if (swimmingSpeedHatch > swimmingSpeedSettle) {
-                getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
-                double temp = swimmingSpeedHatch;
-                swimmingSpeedHatch = swimmingSpeedSettle;
-                swimmingSpeedSettle = temp;
-            }
+        boolean isGrowth = CheckGrowthParam.checkParams();  // check if growth or debgrowth is true (xor)
+        if (!isGrowth && method.equals("length")) {
+            throw new IllegalArgumentException("Velocity cannot be based on particle length since no growth model not activated.");
+        }
 
-            velocityMethod = (IParticle particle) -> getVelocityPLD(particle);
+        switch (method) {
+            case "csv":
+                velocityMethod = (IParticle particle) -> getVelocityCsv(particle);
+                initVelocityCsv();
+            case "age":
 
+                // values in cm/s
+                swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
+                swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
+
+                if (swimmingSpeedHatch > swimmingSpeedSettle) {
+                    getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
+                    double temp = swimmingSpeedHatch;
+                    swimmingSpeedHatch = swimmingSpeedSettle;
+                    swimmingSpeedSettle = temp;
+                }
+
+                velocityMethod = (IParticle particle) -> getVelocityPLD(particle);
+                break;
+
+            case "length":
+                velocityPerLengthUnit = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
+                velocityMethod = (IParticle particle) -> getVelocityLength(particle);
+                break;
+            default:
+                break;
         }
 
     }
