@@ -14,6 +14,7 @@
 - In MigrationAction, the depth of the particle is linearly interpolated between sunrise and sunset. And the daytime depth is reached at the maximum of the day, and conversely for the night time depth
 - For `RheotaxisOrientationAction`, possibility to control whether particles can swim against the current or not with the `can.swim.against.current` parameter. **Default if false.**
 - In `MigrationAction`, possibility to use a smoothed transition (linear between day and night depths) instead of sharp displacements. Controlled by the `method` parameter. Default is `standard`, i.e the original behaviour.
+- Adding possibility to use length for orientation velocity calculation (#123)
 
 ## Changes in 3.4.1
 
