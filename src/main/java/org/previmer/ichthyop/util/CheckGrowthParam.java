@@ -68,8 +68,16 @@ public class CheckGrowthParam extends SimulationManagerAccessor {
         } catch (NullPointerException e) {
             isDebGrowth = false;
         }
-        if (isGrowth || isDebGrowth) { // if one or two growth action are on
-            boolean paramOk = (isGrowth ^ isDebGrowth);  // check that only one of the two is true using xor operator
+
+        boolean isExponentialGrowth;
+        try {
+            isExponentialGrowth = getSimulationManager().getActionManager().isEnabled("action.growth.exponential");
+        } catch (NullPointerException e) {
+            isExponentialGrowth = false;
+        }
+
+        if (isGrowth || isDebGrowth || isExponentialGrowth) { // if one or two growth action are on
+            boolean paramOk = (isGrowth ^ isDebGrowth ^ isExponentialGrowth);  // check that only one of the two is true using xor operator
             if (!paramOk) {
                 throw new IllegalArgumentException("Only one among action.growth and action.growthDeb should be ");
             }
