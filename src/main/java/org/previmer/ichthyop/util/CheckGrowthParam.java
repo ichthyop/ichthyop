@@ -54,7 +54,14 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
 public class CheckGrowthParam extends SimulationManagerAccessor {
 
     public static boolean checkParams() {
-        boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+
+        boolean isGrowth;
+        try {
+            isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        } catch (NullPointerException e) {
+            isGrowth = false;
+        }
+
         boolean isDebGrowth;
         try {
             isDebGrowth = getSimulationManager().getActionManager().isEnabled("action.growthdeb");
