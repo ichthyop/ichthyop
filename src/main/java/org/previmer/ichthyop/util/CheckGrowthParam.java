@@ -83,7 +83,7 @@ public class CheckGrowthParam extends SimulationManagerAccessor {
             }
         }
         // Redefines isGrowth, taking into account the possibility to set it using deb.
-        isGrowth = (isGrowth || isDebGrowth);
+        isGrowth = (isGrowth || isDebGrowth || isExponentialGrowth);
         return (isGrowth);
     }
 
