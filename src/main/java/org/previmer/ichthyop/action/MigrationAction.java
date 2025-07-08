@@ -61,6 +61,7 @@ import com.opencsv.CSVReaderBuilder;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.StageParticleLayer;
+import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**
  *
@@ -155,12 +156,13 @@ public class MigrationAction extends AbstractAction {
         }
 
         // Check whether the growth module is enabled
-        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        isGrowth = CheckGrowthParam.checkParams();
 
         // Otherwise read migration minimal age
         if (!isGrowth) {
             minimumAge = (long) (Float.valueOf(getParameter("age_min")) * 24.f * 3600.f);
         }
+
         // Check existence of daytime depth as an age function, provided in CSV file
         if (!isNull("daytime_depth_file")) {
             String pathname = IOTools.resolveFile(getParameter("daytime_depth_file"));
