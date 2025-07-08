@@ -136,7 +136,7 @@ public class BuoyancyAction extends AbstractAction {
 
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
-        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        isGrowth = CheckGrowthParam.checkParams()
         if (!isGrowth) {
             try {
                 maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;

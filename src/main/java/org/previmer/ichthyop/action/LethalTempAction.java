@@ -75,7 +75,7 @@ public class LethalTempAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        FLAG_GROWTH = getSimulationManager().getActionManager().isEnabled("action.growth");
+        FLAG_GROWTH = CheckGrowthParam.checkParams()
         temperature_field = getParameter("temperature_field");
         if (!FLAG_GROWTH) {
             /*
