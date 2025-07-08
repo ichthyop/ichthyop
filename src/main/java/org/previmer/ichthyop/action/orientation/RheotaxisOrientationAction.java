@@ -1,8 +1,5 @@
 package org.previmer.ichthyop.action.orientation;
 
-import java.util.logging.Level;
-
-import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
