@@ -44,12 +44,12 @@
 
 package org.previmer.ichthyop.action;
 
-import java.io.IOException;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
+import org.previmer.ichthyop.particle.ParticleMortality;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.stage.LengthStage;
 import org.previmer.ichthyop.util.Constant;
@@ -68,6 +68,7 @@ public class ExponentialGrowthAction extends AbstractAction {
     private double dt_day;
     private LengthStage lengthStage;
     private float a, b, c;
+    private float max_length;
 
     @Override
     public void loadParameters() throws Exception {
@@ -92,6 +93,7 @@ public class ExponentialGrowthAction extends AbstractAction {
         a = Float.valueOf(getParameter("a"));
         b = Float.valueOf(getParameter("b"));
         c = Float.valueOf(getParameter("c"));
+        max_length = Float.valueOf(getParameter("max_length"));
 
     }
 
@@ -108,6 +110,11 @@ public class ExponentialGrowthAction extends AbstractAction {
         sole.incrementLength(grow(temp));
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         stageLayer.setStage(lengthStage.getStage((float) sole.getLength()));
+
+        if(sole.getLength() > max_length) {
+            particle.kill(ParticleMortality.LARGE);
+        }
+
     }
 
     private double grow(double temperature) {
