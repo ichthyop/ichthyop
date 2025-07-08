@@ -27,7 +27,7 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
         double secs_in_day = 86400;
 
         if (getParameter("can.swim.against.current") != null) {
-            canSwimAgainstCurrent = Boolean.getBoolean(getParameter("can.swim.against.current"));
+            canSwimAgainstCurrent = Boolean.valueOf(getParameter("can.swim.against.current"));
         }
 
         // Provides age in days
