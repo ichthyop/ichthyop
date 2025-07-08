@@ -60,6 +60,7 @@ import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 import org.previmer.ichthyop.particle.StageParticleLayer;
+import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**
  *
@@ -75,7 +76,7 @@ public class LethalTempAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        FLAG_GROWTH = CheckGrowthParam.checkParams()
+        FLAG_GROWTH = CheckGrowthParam.checkParams();
         temperature_field = getParameter("temperature_field");
         if (!FLAG_GROWTH) {
             /*

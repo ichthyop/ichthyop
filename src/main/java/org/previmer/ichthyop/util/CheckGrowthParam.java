@@ -55,9 +55,10 @@ public class CheckGrowthParam extends SimulationManagerAccessor {
 
     public static boolean checkParams() {
 
+        // TODO: optimize that to make it more robust, even for new growth modules added
         boolean isGrowth;
         try {
-            isGrowth = CheckGrowthParam.checkParams()
+            isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         } catch (NullPointerException e) {
             isGrowth = false;
         }
