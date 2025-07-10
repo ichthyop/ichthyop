@@ -90,7 +90,7 @@ public class ExponentialGrowthAction extends AbstractAction {
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
 
-        a = Float.valueOf(getParameter("a"));
+        a = lengthStage.getThreshold(0);
         b = Float.valueOf(getParameter("b"));
         c = Float.valueOf(getParameter("c"));
         max_length = Float.valueOf(getParameter("max_length"));
@@ -107,7 +107,7 @@ public class ExponentialGrowthAction extends AbstractAction {
     public void execute(IParticle particle) {
         LengthParticleLayer sole = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        sole.incrementLength(grow(temp));
+        sole.incrementLength(grow(temp, sole.getLength()));
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         stageLayer.setStage(lengthStage.getStage((float) sole.getLength()));
 
@@ -117,8 +117,8 @@ public class ExponentialGrowthAction extends AbstractAction {
 
     }
 
-    private double grow(double temperature) {
-        return a * Math.exp(b * Math.pow(temperature, c) * dt_day);
+    private double grow(double temperature, double length) {
+        return b * Math.pow(temperature, c) * length * dt_day;
     }
 
 }
