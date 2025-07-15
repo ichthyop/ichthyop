@@ -703,4 +703,10 @@ public class OscarDataset extends AbstractDataset {
         return y;
     }
 
+    @Override
+    public double getBottomDepth(double[] pGrid) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBottomDepth'");
+    }
+
 }

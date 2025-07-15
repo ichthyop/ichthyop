@@ -90,4 +90,10 @@ public class Roms3dOpendapDataset extends Roms3dCommon {
         setAllFieldsTp1AtTime(rank);
     }
 
+    @Override
+    public double getBottomDepth(double[] pGrid) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBottomDepth'");
+    }
+
 }

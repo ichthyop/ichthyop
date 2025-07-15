@@ -1031,4 +1031,10 @@ public class Mercator2dDataset extends AbstractDataset {
     public double yTore(double y) {
         return y;
     }
+
+    @Override
+    public double getBottomDepth(double[] pGrid) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBottomDepth'");
+    }
 }
