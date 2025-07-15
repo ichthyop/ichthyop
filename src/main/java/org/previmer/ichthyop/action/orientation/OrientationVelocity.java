@@ -29,9 +29,15 @@ public abstract class OrientationVelocity extends AbstractAction {
     private double swimmingSpeedSettle; // cm / s
     private double PLD; // days
 
-    private double[] ageCsv; // age array from CSV (seconds)
+    private double[] classCsv; // age array from CSV (seconds)
     private double[] speedCsv; // speed array (m/s);
     private double velocityPerLengthUnit;  // cm/s
+    private boolean useCsv = false;
+    private String method = "age";
+
+    private interface GetValue {
+        double getValue(IParticle particle);
+    }
 
     @FunctionalInterface
     public interface InnerOrientationVelocity {
@@ -43,7 +49,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        String method = "age";
+
         String key = "swimming.speed.mode";
         if(!isNull(key)) {
             method = getParameter(key);
@@ -51,9 +57,8 @@ public abstract class OrientationVelocity extends AbstractAction {
 
         // Allows for backward compatibility
         key = "swimming.speed.csv.enabled";
-        if (!isNull(key) && Boolean.valueOf(getParameter(key))) {
-            getLogger().warning("swimming.speed.csv.enabled has been se to true. Velocity will be read from csv");
-            method = "csv";
+        if (!isNull(key)) {
+            useCsv = Boolean.valueOf(getParameter(key));
         }
 
         boolean isGrowth = CheckGrowthParam.checkParams();  // check if growth or debgrowth is true (xor)
@@ -62,28 +67,34 @@ public abstract class OrientationVelocity extends AbstractAction {
         }
 
         switch (method) {
-            case "csv":
-                velocityMethod = (IParticle particle) -> getVelocityCsv(particle);
-                initVelocityCsv();
             case "age":
 
-                // values in cm/s
-                swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
-                swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
+                if(useCsv) {
+                    velocityMethod = (IParticle particle) -> getVelocityCsv(particle, temp -> (temp.getAge() / secs_in_day));
+                    initVelocityCsv();
+                } else {
+                    // values in cm/s
+                    swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
+                    swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
 
-                if (swimmingSpeedHatch > swimmingSpeedSettle) {
-                    getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
-                    double temp = swimmingSpeedHatch;
-                    swimmingSpeedHatch = swimmingSpeedSettle;
-                    swimmingSpeedSettle = temp;
+                    if (swimmingSpeedHatch > swimmingSpeedSettle) {
+                        getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
+                        double temp = swimmingSpeedHatch;
+                        swimmingSpeedHatch = swimmingSpeedSettle;
+                        swimmingSpeedSettle = temp;
+                    }
+                    velocityMethod = (IParticle particle) -> getVelocityPLD(particle);
                 }
-
-                velocityMethod = (IParticle particle) -> getVelocityPLD(particle);
                 break;
 
             case "length":
-                velocityPerLengthUnit = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
-                velocityMethod = (IParticle particle) -> getVelocityLength(particle);
+                if (useCsv) {
+                    velocityMethod = (IParticle particle) -> getVelocityCsv(particle, temp -> this.getLength(temp));
+                    initVelocityCsv();
+                } else {
+                    velocityPerLengthUnit = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
+                    velocityMethod = (IParticle particle) -> getVelocityLength(particle);
+                }
                 break;
             default:
                 break;
@@ -120,11 +131,11 @@ public abstract class OrientationVelocity extends AbstractAction {
         return swimmingSpeed;
     }
 
-    public double getVelocityCsv(IParticle particle) {
+    public double getVelocityCsv(IParticle particle, GetValue getValue) {
 
-        double age = particle.getAge(); // seconds
-        for (int i = 0; i < ageCsv.length - 1; i++) {
-            if ((age >= ageCsv[i]) && (age < ageCsv[i + 1])) {
+        double age = getValue.getValue(particle); // seconds
+        for (int i = 0; i < classCsv.length - 1; i++) {
+            if ((age >= classCsv[i]) && (age < classCsv[i + 1])) {
                 return speedCsv[i]; // value already in m/s
             }
         }
@@ -156,13 +167,13 @@ public abstract class OrientationVelocity extends AbstractAction {
             List<String[]> lines = reader.readAll();
 
             // init arrays
-            ageCsv = new double[lines.size() - 1];
-            speedCsv = new double[ageCsv.length];
+            classCsv = new double[lines.size() - 1];
+            speedCsv = new double[classCsv.length];
 
             // read ageCsv (days converted to seconds) and
-            for (int i = 0; i < ageCsv.length; i++) {
+            for (int i = 0; i < classCsv.length; i++) {
                 String[] line = lines.get(i + 1);
-                ageCsv[i] = Double.valueOf(line[0]) * secs_in_day; // age in seconds
+                classCsv[i] = Double.valueOf(line[0]); // age in days or length in cm
                 speedCsv[i] = Double.valueOf(line[1]) / 100; // values in m/s
             }
         } catch (IOException ex) {
@@ -171,10 +182,12 @@ public abstract class OrientationVelocity extends AbstractAction {
     }
 
     public double getVelocityLength(IParticle particle) {
+        return  this.getLength(particle) * velocityPerLengthUnit;
+    }
 
+    public double getLength(IParticle particle) {
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        return lengthLayer.getLength() * velocityPerLengthUnit;
-
+        return lengthLayer.getLength();
     }
 
 }
