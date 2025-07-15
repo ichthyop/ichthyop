@@ -230,11 +230,15 @@ public class RequiredVariable {
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int ii = 0; ii < n; ii++) {
+                    double temp = array.getFloat(array.getIndex().set(kk, jj, ii));
+                    if(Double.isNaN(temp)) {
+                        continue;
+                    }
                     double co = Math.abs((1.d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    value += array.getFloat(array.getIndex().set(kk, jj, ii)) * co;
+                    value += temp * co;
                 }
             }
         }
