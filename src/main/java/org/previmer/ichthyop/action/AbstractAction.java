@@ -67,7 +67,7 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
     abstract public void execute(IParticle particle);
 
     abstract public void init(IParticle particle);
-    private String activation_variable;
+    private String activation_variable = "age";
     private double activationClassMin;
     private double activationClassMax;
     private interface GetValue {
