@@ -113,6 +113,12 @@ public class Particle extends GridPoint implements IParticle {
         return age;
     }
 
+    @Override
+    public double getLength() {
+        LengthParticleLayer particleLayer = (LengthParticleLayer) this.getLayer(ParticleLayer.class);
+        return particleLayer.getLength();
+    }
+
     public void incrementAge() {
         age += Math.abs(getSimulationManager().getTimeManager().get_dt());
     }

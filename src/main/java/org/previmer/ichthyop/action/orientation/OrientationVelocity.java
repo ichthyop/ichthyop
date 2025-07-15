@@ -70,7 +70,7 @@ public abstract class OrientationVelocity extends AbstractAction {
             case "age":
 
                 if(useCsv) {
-                    velocityMethod = (IParticle particle) -> getVelocityCsv(particle, temp -> (temp.getAge() / secs_in_day));
+                    velocityMethod = (IParticle particle) -> getVelocityCsv(particle, particle_temp -> (particle_temp.getAge() / secs_in_day));
                     initVelocityCsv();
                 } else {
                     // values in cm/s
@@ -89,7 +89,7 @@ public abstract class OrientationVelocity extends AbstractAction {
 
             case "length":
                 if (useCsv) {
-                    velocityMethod = (IParticle particle) -> getVelocityCsv(particle, temp -> this.getLength(temp));
+                    velocityMethod = (IParticle particle) -> getVelocityCsv(particle, particle_temp -> particle_temp.getLength());
                     initVelocityCsv();
                 } else {
                     velocityPerLengthUnit = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
@@ -182,12 +182,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     }
 
     public double getVelocityLength(IParticle particle) {
-        return  this.getLength(particle) * velocityPerLengthUnit;
-    }
-
-    public double getLength(IParticle particle) {
-        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        return lengthLayer.getLength();
+        return  particle.getLength() * velocityPerLengthUnit;
     }
 
 }
