@@ -265,17 +265,6 @@ public class MigrationAction extends AbstractAction {
         // Nothing to do
     }
 
-    private double getBathy(IParticle particle) {
-
-        int i = (int) Math.floor(particle.getX());
-        int j = (int) Math.floor(particle.getY());
-        double bottom = -Math.abs(getSimulationManager().getDataset().getBathy(i, j));
-        if (Double.isNaN(bottom)) {
-            bottom = 0;
-        }
-        return bottom;
-
-    }
 
     @Override
     public void execute(IParticle particle) {
@@ -295,7 +284,8 @@ public class MigrationAction extends AbstractAction {
             if (isodepth) {
                 // constant depth
                 // adding a constraint in case of constant depth.
-                double bottom = this.getBathy(particle);
+                double bottom = getSimulationManager().getDataset().getBottomDepth(new double[] {particle.getX(), particle.getY()});
+                bottom = -Math.abs(bottom);
                 depth = (depthDay < bottom) ? particle.getDepth() : depthDay;
             } else {
                 // diel vertical migration
@@ -327,7 +317,8 @@ public class MigrationAction extends AbstractAction {
         LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)
-        double bottom = this.getBathy(particle);
+        double bottom = getSimulationManager().getDataset().getBottomDepth(new double[] {particle.getX(), particle.getY()});
+        bottom = -Math.abs(bottom);
         double output;
 
         if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {
@@ -385,7 +376,8 @@ public class MigrationAction extends AbstractAction {
         LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)
-        double bottom = this.getBathy(particle);
+        double bottom = getSimulationManager().getDataset().getBottomDepth(new double[] {particle.getX(), particle.getY()});
+        bottom = -Math.abs(bottom);
         double output;
 
         // Update depth value at day time
