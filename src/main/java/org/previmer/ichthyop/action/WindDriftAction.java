@@ -45,6 +45,8 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.util.CheckGrowthParam;
+import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.manager.TimeManager;
 
 public class WindDriftAction extends AbstractAction {
@@ -70,6 +72,16 @@ public class WindDriftAction extends AbstractAction {
      */
     static double convention;
 
+    private String method;
+    private double classMin;
+    private double classMax;
+
+    private interface GetValue {
+        public double getValue(IParticle particle);
+    }
+
+    private GetValue getValue;
+
     @Override
     public void loadParameters() throws Exception {
         wind_factor = Double.valueOf(getParameter("wind_factor"));
@@ -81,6 +93,40 @@ public class WindDriftAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(strUW, getClass());
         getSimulationManager().getDataset().requireVariable(strVW, getClass());
         convention = "wind to".equals(getParameter("wind_convention")) ? 1 : -1;
+
+        if (!isNull("method")) {
+            method = getParameter("method");
+        }
+
+        boolean isGrowth = CheckGrowthParam.checkParams();
+
+        if (method.equals("length")) {
+            if (isGrowth) {
+                getValue = particle -> (particle.getLength());
+            } else {
+                throw new IllegalArgumentException(
+                        "Wind drift action cannot be based on particle length since no growth model not activated.");
+            }
+        } else {
+            if (method.equals("age")) {
+                // get age in days
+                getValue = particle -> (particle.getAge() / (Constant.ONE_DAY));
+            }
+        }
+
+        if (!isNull("minimum_class_value")) {
+            classMin = Double.valueOf(getParameter("minimum_class_value"));
+        } else {
+            classMin = 0;
+        }
+
+        if (!isNull("maximum_class_value")) {
+            classMax = Double.valueOf(getParameter("maximum_class_value"));
+        } else {
+            classMax = Double.MAX_VALUE;
+        }
+
+
     }
 
     @Override
@@ -91,12 +137,17 @@ public class WindDriftAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        double[] mvt = getDLonLat(particle.getGridCoordinates(), -particle.getDepth(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt());
-        double newLon = particle.getLon() + mvt[0];
-        double newLat = particle.getLat() + mvt[1];
-        double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
-        double[] windincr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
-        particle.increment(windincr);
+        if ((getValue.getValue(particle) >= classMin) && (getValue.getValue(particle) <= classMax)) {
+
+            double[] mvt = getDLonLat(particle.getGridCoordinates(), -particle.getDepth(),
+                    getSimulationManager().getTimeManager().getTime(),
+                    getSimulationManager().getTimeManager().get_dt());
+            double newLon = particle.getLon() + mvt[0];
+            double newLat = particle.getLat() + mvt[1];
+            double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
+            double[] windincr = new double[] { newPos[0] - particle.getX(), newPos[1] - particle.getY() };
+            particle.increment(windincr);
+        }
 
     }
 
