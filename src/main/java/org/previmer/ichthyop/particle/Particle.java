@@ -115,7 +115,7 @@ public class Particle extends GridPoint implements IParticle {
 
     @Override
     public double getLength() {
-        LengthParticleLayer particleLayer = (LengthParticleLayer) this.getLayer(ParticleLayer.class);
+        LengthParticleLayer particleLayer = (LengthParticleLayer) this.getLayer(LengthParticleLayer.class);
         return particleLayer.getLength();
     }
 
