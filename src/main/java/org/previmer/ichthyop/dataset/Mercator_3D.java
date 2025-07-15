@@ -1235,8 +1235,8 @@ public class Mercator_3D extends AbstractDataset {
         }
         depth = Math.abs(depth);
 
-        int i = (int) Math.floor(x);
-        int j = (int) Math.floor(y);
+        int i = (int) Math.round(x);
+        int j = (int) Math.round(y);
 
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
@@ -1292,8 +1292,8 @@ public class Mercator_3D extends AbstractDataset {
         int k = (int) Math.round(kz);
         dz = z - k;
 
-        int i = (int) Math.floor(x);
-        int j = (int) Math.floor(y);
+        int i = (int) Math.round(x);
+        int j = (int) Math.round(y);
 
         if (dz < 0) { // >= ?
             depth = gdepT[k][j][i]
