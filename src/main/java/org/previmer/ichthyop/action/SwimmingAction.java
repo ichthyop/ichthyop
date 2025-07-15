@@ -53,8 +53,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.util.CheckGrowthParam;
+import org.previmer.ichthyop.util.Constant;
 
 /**
  * This class simulates active swimming, given the swimming velocity as an age
@@ -74,9 +79,15 @@ public class SwimmingAction extends AbstractAction {
     // speed in m/s
     private float[] speeds;
     // ages in seconds
-    private float[] ages;
+    private float[] classes;
     private double dt;
     private boolean constant;
+
+    private interface GetValue {
+        public double getValue(IParticle particle);
+    }
+
+    GetValue getValue;
 
     @Override
     public void loadParameters() throws Exception {
@@ -91,20 +102,40 @@ public class SwimmingAction extends AbstractAction {
         if (!f.canRead()) {
             throw new IOException("Swimming velocity file " + pathname + " cannot be read.");
         }
+
+        String method = "age";
+        if(!isNull("method")) {
+            method = getParameter(method);
+        }
+
+        if(method.equals("age")) {
+            getValue = particle -> (particle.getAge() / Constant.ONE_DAY);
+        } else if (method.equals("length")) {
+            boolean isGrowth = CheckGrowthParam.checkParams();
+            if(isGrowth) {
+                getValue = particle -> (particle.getLength());
+            } else {
+                throw new IllegalArgumentException("Swimming action cannot depend on length since no growth action is on");
+            }
+        } else {
+            getLogger().log(Level.WARNING, "Wrong method provided. SwimmingAction based on Age");
+            getValue = particle -> (particle.getAge() / Constant.ONE_DAY);
+        }
+
         Locale.setDefault(Locale.US);
         // open velocities csv file
         CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
         List<String[]> lines = reader.readAll();
         // init arrays
-        ages = new float[lines.size() - 1];
-        speeds = new float[ages.length];
+        classes = new float[lines.size() - 1];
+        speeds = new float[classes.length];
         // read ages (days converted to seconds) and velocities
-        for (int i = 0; i < ages.length; i++) {
+        for (int i = 0; i < classes.length; i++) {
             String[] line = lines.get(i + 1);
             if (line.length < 2 || line[0].isEmpty()) {
                 continue;
             }
-            ages[i] = Float.valueOf(line[0]) * 3600.f * 24.f;
+            classes[i] = Float.valueOf(line[0]);
             speeds[i] = Float.valueOf(line[1]);
         }
 
@@ -147,13 +178,13 @@ public class SwimmingAction extends AbstractAction {
      * @return the swimming velocity of the particle in m.s-1
      */
     private float getSpeed(IParticle particle) {
-        float age = particle.getAge();
-        for (int i = 0; i < ages.length - 1; i++) {
-            if (ages[i] <= age && age < ages[i + 1]) {
+        double value = getValue.getValue(particle);
+        for (int i = 0; i < classes.length - 1; i++) {
+            if (classes[i] <= value && value < classes[i + 1]) {
                 return speeds[i];
             }
         }
-        return speeds[ages.length - 1];
+        return speeds[classes.length - 1];
     }
 
     /**
