@@ -54,6 +54,8 @@ package org.previmer.ichthyop.util;
 
 import java.util.Random;
 
+import org.previmer.ichthyop.manager.ParameterManager;
+
 /**
  * Construct a Von Mises circular random variable with circular (also intrinsic
  * mean) equal to mu and concentration parameter equal to kappa
@@ -63,7 +65,7 @@ import java.util.Random;
  */
 public class VonMisesRandom {
 
-    private final Random U = new Random();
+    private final Random U;
     protected double mu, kappa;
     private double tau, rho, r;
 
@@ -71,6 +73,13 @@ public class VonMisesRandom {
 
         if (kappa <= 0.0) {
             throw new IllegalArgumentException();
+        }
+
+        boolean isFixedSeed = ParameterManager.getInstance().getConfigurationFile().isFixedSeed();
+        if (isFixedSeed) {
+            U = new Random(0);
+        } else {
+            U = new Random();
         }
 
         this.mu = mu;
