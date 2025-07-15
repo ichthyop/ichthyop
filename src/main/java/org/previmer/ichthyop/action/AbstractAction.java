@@ -50,6 +50,8 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.manager.ParameterManager;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.util.CheckGrowthParam;
+import org.previmer.ichthyop.util.Constant;
 
 /**
  *
@@ -65,6 +67,14 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
     abstract public void execute(IParticle particle);
 
     abstract public void init(IParticle particle);
+    private String activation_variable;
+    private double activationClassMin;
+    private double activationClassMax;
+    private interface GetValue {
+        public double getValue(IParticle particle);
+    }
+
+    private GetValue getValue;
 
     public AbstractAction() {
         actionKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
@@ -74,6 +84,39 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
         } else {
             randomGenerator = new Random();
         }
+
+        if (!isNull("activation_variable")) {
+            activation_variable = getParameter("activation_variable");
+        }
+
+        boolean isGrowth = CheckGrowthParam.checkParams();
+
+        if (activation_variable.equals("length")) {
+            if (isGrowth) {
+                getValue = particle -> (particle.getLength());
+            } else {
+                throw new IllegalArgumentException(
+                        "Wind drift action cannot be based on particle length since no growth model not activated.");
+            }
+        } else {
+            if (activation_variable.equals("age")) {
+                // get age in days
+                getValue = particle -> (particle.getAge() / (Constant.ONE_DAY));
+            }
+        }
+
+        if (!isNull("activation_minimum_class_value")) {
+            activationClassMin = Double.valueOf(getParameter("activation_minimum_class_value"));
+        } else {
+            activationClassMin = 0;
+        }
+
+        if (!isNull("activation_maximum_class_value")) {
+            activationClassMax = Double.valueOf(getParameter("activation_maximum_class_value"));
+        } else {
+            activationClassMax = Double.MAX_VALUE;
+        }
+
     }
 
     public double getRandomDraft() {
@@ -123,6 +166,10 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
 
     public boolean isEnabled() {
         return getSimulationManager().getActionManager().isEnabled(actionKey);
+    }
+
+    public boolean isActive(IParticle particle) {
+        return (getValue.getValue(particle) >= activationClassMin) && (getValue.getValue(particle) <= activationClassMax);
     }
 
 }

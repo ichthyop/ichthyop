@@ -94,39 +94,6 @@ public class WindDriftAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(strVW, getClass());
         convention = "wind to".equals(getParameter("wind_convention")) ? 1 : -1;
 
-        if (!isNull("method")) {
-            method = getParameter("method");
-        }
-
-        boolean isGrowth = CheckGrowthParam.checkParams();
-
-        if (method.equals("length")) {
-            if (isGrowth) {
-                getValue = particle -> (particle.getLength());
-            } else {
-                throw new IllegalArgumentException(
-                        "Wind drift action cannot be based on particle length since no growth model not activated.");
-            }
-        } else {
-            if (method.equals("age")) {
-                // get age in days
-                getValue = particle -> (particle.getAge() / (Constant.ONE_DAY));
-            }
-        }
-
-        if (!isNull("minimum_class_value")) {
-            classMin = Double.valueOf(getParameter("minimum_class_value"));
-        } else {
-            classMin = 0;
-        }
-
-        if (!isNull("maximum_class_value")) {
-            classMax = Double.valueOf(getParameter("maximum_class_value"));
-        } else {
-            classMax = Double.MAX_VALUE;
-        }
-
-
     }
 
     @Override
@@ -136,9 +103,7 @@ public class WindDriftAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-
-        if ((getValue.getValue(particle) >= classMin) && (getValue.getValue(particle) <= classMax)) {
-
+        if ((this.isActive(particle))) {
             double[] mvt = getDLonLat(particle.getGridCoordinates(), -particle.getDepth(),
                     getSimulationManager().getTimeManager().getTime(),
                     getSimulationManager().getTimeManager().get_dt());
@@ -148,7 +113,6 @@ public class WindDriftAction extends AbstractAction {
             double[] windincr = new double[] { newPos[0] - particle.getX(), newPos[1] - particle.getY() };
             particle.increment(windincr);
         }
-
     }
 
     private double[] getDLonLat(double[] pgrid, double depth, double time, double dt) {
