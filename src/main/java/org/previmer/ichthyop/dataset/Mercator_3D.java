@@ -85,15 +85,15 @@ public class Mercator_3D extends AbstractDataset {
     /**
      * Longitude at rho point.
      */
-    private float[] longitude;
+    private float longitude[];
     /**
      * Latitude at rho point.
      */
-    private float[] latitude;
+    private float latitude[] ;
     /**
      * Mask: water = 1, cost = 0
      */
-    private int[][][] maskRho;//, masku, maskv;
+    private int maskRho[][][];//, masku, maskv;
     /**
      * Zonal component of the velocity field at current time
      */
@@ -121,11 +121,11 @@ public class Mercator_3D extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    private double[][][] gdepT;
+    private double gdepT[][][];
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    private double[][][] gdepW;
+    private double gdepW[][][];
     /**
      * Geographical boundary of the domain
      */
@@ -173,8 +173,8 @@ public class Mercator_3D extends AbstractDataset {
     /**
      *
      */
-    private double[][][] e3t, e3u, e3v;
-    private double[][] e1t, e2t, e1v, e2u;
+    private double e3t[][][], e3u[][][], e3v[][][];
+    private double e1t[][], e2t[][], e1v[][], e2u[][];
     private String stre1t, stre2t, stre3t;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
@@ -1882,6 +1882,7 @@ public class Mercator_3D extends AbstractDataset {
 
     @Override
     public double getBottomDepth(double[] pGrid) {
-        return getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        double bathy = getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return bathy;
     }
 }
