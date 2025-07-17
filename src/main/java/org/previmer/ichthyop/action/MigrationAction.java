@@ -112,15 +112,6 @@ public class MigrationAction extends AbstractAction {
      * Whether the depth at day equals the depth at night.
      */
     private boolean isodepth;
-    /**
-     * Particle minimal age for enabling vertical migration.
-     */
-    private long minimumAge;
-    /**
-     * Whether a growth module is enabled. In that case minimal age is ignored
-     * and vertical migration is only enabled beyond egg stage.
-     */
-    private boolean isGrowth;
 
     @FunctionalInterface
     public interface InnerMigrationAction{
@@ -153,14 +144,6 @@ public class MigrationAction extends AbstractAction {
             innerMigrationAction = (particle, time) -> getDepthLinear(particle, time);
         } else {
             innerMigrationAction = (particle, time) -> getDepthDefault(particle, time);
-        }
-
-        // Check whether the growth module is enabled
-        isGrowth = CheckGrowthParam.checkParams();
-
-        // Otherwise read migration minimal age
-        if (!isGrowth) {
-            minimumAge = (long) (Float.valueOf(getParameter("age_min")) * 24.f * 3600.f);
         }
 
         // Check existence of daytime depth as an age function, provided in CSV file
@@ -269,22 +252,13 @@ public class MigrationAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        // Migration only applies for larva stages (and beyond)
-        boolean isSatisfiedCriterion;
-        if (!isGrowth) {
-            isSatisfiedCriterion = particle.getAge() > minimumAge;
-        } else {
-            // stage == 0 means egg, stage > 0 means larvae
-            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
-            isSatisfiedCriterion = stage > 0;
-        }
-
-        if (isSatisfiedCriterion) {
+        if (this.isActive(particle)) {
             double depth;
             if (isodepth) {
                 // constant depth
                 // adding a constraint in case of constant depth.
-                double bottom = getSimulationManager().getDataset().getBottomDepth(new double[] {particle.getX(), particle.getY()});
+                double bottom = getSimulationManager().getDataset()
+                        .getBottomDepth(new double[] { particle.getX(), particle.getY() });
                 bottom = -Math.abs(bottom);
                 depth = (depthDay < bottom) ? particle.getDepth() : depthDay;
             } else {
@@ -292,8 +266,9 @@ public class MigrationAction extends AbstractAction {
                 depth = innerMigrationAction.getDepth(particle, getSimulationManager().getTimeManager().getTime());
             }
 
-            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
-            particle.increment(new double[]{0.d, 0.d, dz}, false, true);
+            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth)
+                    - particle.getZ();
+            particle.increment(new double[] { 0.d, 0.d, dz }, false, true);
         }
     }
 
