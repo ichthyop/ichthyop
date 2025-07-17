@@ -1,8 +1,5 @@
 package org.previmer.ichthyop.action.orientation;
 
-import java.util.logging.Level;
-
-import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
@@ -12,11 +9,8 @@ public class CardinalOrientationAction extends OrientationVelocity {
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private double dt;
     private double vonMisesKappa;
-    private double ageMin;
-    private double ageMax;
 
     private VonMisesRandom vonMises;
-    private double secs_in_day = 86400;
 
     @Override
     public void loadParameters() throws Exception {
@@ -26,22 +20,6 @@ public class CardinalOrientationAction extends OrientationVelocity {
         thetaCard = Math.toRadians(Double.valueOf(getParameter("swimming.cardinal.heading")));
         vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
 
-        // Provides age in days
-        if (getParameter("age.min") != null) {
-            ageMin = Double.valueOf(getParameter("age.min"));
-        } else {
-            ageMin = 0;
-        }
-
-        if (getParameter("age.max") != null) {
-            ageMax = Double.valueOf(getParameter("age.max"));
-        } else {
-            ageMax = Double.MAX_VALUE;
-        }
-
-        ageMin *= secs_in_day;
-        ageMax *= secs_in_day;
-
         vonMises = new VonMisesRandom(0, vonMisesKappa);
         dt = getSimulationManager().getTimeManager().get_dt();
 
@@ -50,7 +28,7 @@ public class CardinalOrientationAction extends OrientationVelocity {
     @Override
     public void execute(IParticle particle) {
 
-        if(particle.getAge() < ageMin || particle.getAge() >= ageMax) {
+        if(!this.isActive(particle)) {
             return;
         }
 

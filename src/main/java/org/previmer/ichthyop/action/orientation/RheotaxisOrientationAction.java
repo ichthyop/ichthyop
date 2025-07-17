@@ -7,7 +7,6 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
 
     private double vonMisesKappa;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    private double ageMin, ageMax;
 
     private VonMisesRandom vonMises;
     private double secs_in_day = 86400;
@@ -21,34 +20,17 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
     public void loadParameters() throws Exception {
         super.loadParameters();
         vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
-        double secs_in_day = 86400;
 
         if (getParameter("can.swim.against.current") != null) {
             canSwimAgainstCurrent = Boolean.valueOf(getParameter("can.swim.against.current"));
         }
-
-        // Provides age in days
-        if (getParameter("age.min") != null) {
-            ageMin = Double.valueOf(getParameter("age.min"));
-        } else {
-            ageMin = 0;
-        }
-
-        if (getParameter("age.max") != null) {
-            ageMax = Double.valueOf(getParameter("age.max"));
-        } else {
-            ageMax = Double.MAX_VALUE;
-        }
-
-        ageMin *= secs_in_day;
-        ageMax *= secs_in_day;
 
     }
 
     @Override
     public void execute(IParticle particle) {
 
-        if(particle.getAge() < ageMin || particle.getAge() >= ageMax) {
+        if(!this.isActive(particle)) {
             return;
         }
 
