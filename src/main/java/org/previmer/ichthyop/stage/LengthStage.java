@@ -66,15 +66,12 @@ public class LengthStage extends AbstractStage {
 
     @Override
     public int getStage(float length) {
-        int stage = 0;
-        for (float threshold : getThresholds()) {
-            if (length >= threshold) {
-                stage++;
-            } else {
-                break;
+        for (int istage = 0; istage < getNStage() - 1; istage++) {
+            if (length < getThreshold(istage)) {
+                return istage;
             }
         }
-        return Math.max(0, stage-1);
+        return getNStage() - 1;
     }
 
 }
