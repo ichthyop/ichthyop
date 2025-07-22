@@ -134,6 +134,7 @@ public class RecruitmentStainAction extends AbstractAction {
         if (!rParticle.isRecruited()) {
             if (satisfyRecruitmentCriterion(particle) && isParticleInsideStain(particle)) {
                 rParticle.setRecruited(0, true);
+                particle.lock();
             }
         }
     }
