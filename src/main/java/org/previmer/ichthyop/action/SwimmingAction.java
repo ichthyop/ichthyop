@@ -82,15 +82,24 @@ public class SwimmingAction extends AbstractAction {
     private float[] classes;
     private double dt;
     private boolean constant;
+    private double velocityBodyLength;
 
     private interface GetValue {
         public double getValue(IParticle particle);
     }
 
+    private interface GetVelocity {
+        public double getVelocity(IParticle particle);
+    }
+
     GetValue getValue;
+    GetVelocity getVelocity;
 
     @Override
     public void loadParameters() throws Exception {
+
+        boolean useCsv = true;
+        getVelocity = this::getSpeedCsv;
 
         // Read swimming velocity file
         String velocity_file = getParameter("velocity_file");
@@ -103,9 +112,15 @@ public class SwimmingAction extends AbstractAction {
             throw new IOException("Swimming velocity file " + pathname + " cannot be read.");
         }
 
+        // Use csv is true by default
+        // but this can be overwritten
+        if(!isNull("swimming.speed.csv.enabled")) {
+            useCsv = Boolean.valueOf(getParameter("swimming.speed.csv.enabled"));
+        }
+
         String method = "age";
-        if(!isNull("method")) {
-            method = getParameter(method);
+        if(!isNull("swimming.speed.mode")) {
+            method = getParameter("swimming.speed.mode");
         }
 
         if(method.equals("age")) {
@@ -113,7 +128,12 @@ public class SwimmingAction extends AbstractAction {
         } else if (method.equals("length")) {
             boolean isGrowth = CheckGrowthParam.checkParams();
             if(isGrowth) {
-                getValue = particle -> (particle.getLength());
+                if (useCsv){
+                    getValue = particle -> (particle.getLength());
+                } else {
+                    getVelocity = this::getSpeedLength;
+                    velocityBodyLength = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
+                }
             } else {
                 throw new IllegalArgumentException("Swimming action cannot depend on length since no growth action is on");
             }
@@ -150,7 +170,7 @@ public class SwimmingAction extends AbstractAction {
     public void execute(IParticle particle) {
 
         // Find the swimming velocity for this particle
-        double speed = getSpeed(particle) * (constant ? 1.d : 2.d*this.getRandomDraft());
+        double speed = getVelocity.getVelocity(particle) * (constant ? 1.d : 2.d*this.getRandomDraft());
         // Random x component of the swimming velocity
         double u = randomDir() * this.getRandomDraft() * speed;
         // y component such as sqrt(x2 + y2) = speed
@@ -177,7 +197,7 @@ public class SwimmingAction extends AbstractAction {
      * @param particle
      * @return the swimming velocity of the particle in m.s-1
      */
-    private float getSpeed(IParticle particle) {
+    private float getSpeedCsv(IParticle particle) {
         double value = getValue.getValue(particle);
         for (int i = 0; i < classes.length - 1; i++) {
             if (classes[i] <= value && value < classes[i + 1]) {
@@ -185,6 +205,10 @@ public class SwimmingAction extends AbstractAction {
             }
         }
         return speeds[classes.length - 1];
+    }
+
+    private float getSpeedLength(IParticle particle) {
+        return (float) (particle.getLength() * velocityBodyLength);
     }
 
     /**
