@@ -142,21 +142,24 @@ public class SwimmingAction extends AbstractAction {
             getValue = particle -> (particle.getAge() / Constant.ONE_DAY);
         }
 
-        Locale.setDefault(Locale.US);
-        // open velocities csv file
-        CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
-        List<String[]> lines = reader.readAll();
-        // init arrays
-        classes = new float[lines.size() - 1];
-        speeds = new float[classes.length];
-        // read ages (days converted to seconds) and velocities
-        for (int i = 0; i < classes.length; i++) {
-            String[] line = lines.get(i + 1);
-            if (line.length < 2 || line[0].isEmpty()) {
-                continue;
+        if (useCsv) {
+            Locale.setDefault(Locale.US);
+            // open velocities csv file
+            CSVReader reader = new CSVReaderBuilder(new FileReader(pathname))
+                    .withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
+            List<String[]> lines = reader.readAll();
+            // init arrays
+            classes = new float[lines.size() - 1];
+            speeds = new float[classes.length];
+            // read ages (days converted to seconds) and velocities
+            for (int i = 0; i < classes.length; i++) {
+                String[] line = lines.get(i + 1);
+                if (line.length < 2 || line[0].isEmpty()) {
+                    continue;
+                }
+                classes[i] = Float.valueOf(line[0]);
+                speeds[i] = Float.valueOf(line[1]);
             }
-            classes[i] = Float.valueOf(line[0]);
-            speeds[i] = Float.valueOf(line[1]);
         }
 
         // Simulation time step
