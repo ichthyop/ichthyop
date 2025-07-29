@@ -199,38 +199,35 @@ public class BuoyancyAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        boolean canApplyBuoyancy;
-        if (isGrowth) {
-            // Egg stage only
-            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
-            canApplyBuoyancy = (stage == 0);
-        } else {
-            canApplyBuoyancy = particle.getAge() < maximumAge;
+        if (!this.isActive(particle)) {
+            return;
         }
 
-        if (canApplyBuoyancy) {
-            /*
-             * For case of particle density varying with particle age, we
-             * determine what is current density for the particle
-             */
-            if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
-                particleDensity = particleDensities[ages.length - 1];
-                float age = particle.getAge();
-                for (int i = 0; i < ages.length - 1; i++) {
-                    if (ages[i] <= age && age < ages[i + 1]) {
-                        particleDensity = particleDensities[i];
-                        break;
-                    }
+        /*
+         * For case of particle density varying with particle age, we determine what is
+         * current density for the particle
+         */
+        if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
+            particleDensity = particleDensities[ages.length - 1];
+            float age = particle.getAge();
+            for (int i = 0; i < ages.length - 1; i++) {
+                if (ages[i] <= age && age < ages[i + 1]) {
+                    particleDensity = particleDensities[i];
+                    break;
                 }
             }
-            //System.out.println("My age is " + (particle.getAge() / 3600.f) + " density: " + particleDensity);
-            double time = getSimulationManager().getTimeManager().getTime();
-            double dt = getSimulationManager().getTimeManager().get_dt();
-            double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
-            double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
-            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
-            particle.increment(new double[]{0.d, 0.d, dz});
         }
+        // System.out.println("My age is " + (particle.getAge() / 3600.f) + " density: "
+        // + particleDensity);
+        double time = getSimulationManager().getTimeManager().getTime();
+        double dt = getSimulationManager().getTimeManager().get_dt();
+        double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time)
+                .doubleValue();
+        double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time)
+                .doubleValue();
+        double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(),
+                particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
+        particle.increment(new double[] { 0.d, 0.d, dz });
     }
 
     /**

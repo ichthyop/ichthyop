@@ -381,6 +381,11 @@ public class WindDriftFileAction extends WindDriftAction {
 
     @Override
     public void execute(IParticle particle) {
+
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         if (time_current != getSimulationManager().getTimeManager().getTime()) {
             try {
                 nextStepTriggered();

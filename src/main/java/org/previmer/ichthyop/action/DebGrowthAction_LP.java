@@ -214,6 +214,10 @@ public class DebGrowthAction_LP extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         // Recover the temperature and food fields.
         double temp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double food = getSimulationManager().getDataset().get(food_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();

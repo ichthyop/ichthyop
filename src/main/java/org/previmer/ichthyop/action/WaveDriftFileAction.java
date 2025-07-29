@@ -316,7 +316,7 @@ public class WaveDriftFileAction extends AbstractAction {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
         int fileRank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
-        
+
         open(getFile(fileRank));
         readTimeLength();
         rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
@@ -403,6 +403,11 @@ public class WaveDriftFileAction extends AbstractAction {
     }
 
     public void execute(IParticle particle) {
+
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         if (time_current != getSimulationManager().getTimeManager().getTime()) {
             try {
                 nextStepTriggered();
@@ -458,9 +463,9 @@ public class WaveDriftFileAction extends AbstractAction {
     double skipSeconds(double time) {
         return 100.d * Math.floor(time / 100.d);
     }
-    
+
     int timeArrow() {
         return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 :-1;
     }
-    
+
 }

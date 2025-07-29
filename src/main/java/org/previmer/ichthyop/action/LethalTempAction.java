@@ -160,6 +160,10 @@ public class LethalTempAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         if (FLAG_GROWTH) {
             checkTpGrowingParticle(particle);
         } else {

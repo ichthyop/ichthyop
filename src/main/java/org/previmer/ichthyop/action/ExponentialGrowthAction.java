@@ -106,6 +106,10 @@ public class ExponentialGrowthAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         LengthParticleLayer sole = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         sole.incrementLength(grow(temp, sole.getLength()));

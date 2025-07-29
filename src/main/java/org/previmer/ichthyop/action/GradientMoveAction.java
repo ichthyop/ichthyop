@@ -82,6 +82,10 @@ public class GradientMoveAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         int i = (int) Math.round(particle.getX());
         int j = (int) Math.round(particle.getY());
         int k = (int) Math.round(particle.getZ());

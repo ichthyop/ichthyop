@@ -172,6 +172,10 @@ public class SwimmingAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        if(!this.isActive(particle)) {
+            return;
+        }
+
         // Find the swimming velocity for this particle
         double speed = getVelocity.getVelocity(particle) * (constant ? 1.d : 2.d*this.getRandomDraft());
         // Random x component of the swimming velocity
