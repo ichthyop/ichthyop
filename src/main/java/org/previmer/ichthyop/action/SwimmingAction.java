@@ -101,17 +101,6 @@ public class SwimmingAction extends AbstractAction {
         boolean useCsv = true;
         getVelocity = this::getSpeedCsv;
 
-        // Read swimming velocity file
-        String velocity_file = getParameter("velocity_file");
-        String pathname = IOTools.resolveFile(velocity_file);
-        File f = new File(pathname);
-        if (!f.isFile()) {
-            throw new FileNotFoundException("Swimming velocity file " + pathname + " not found.");
-        }
-        if (!f.canRead()) {
-            throw new IOException("Swimming velocity file " + pathname + " cannot be read.");
-        }
-
         // Use csv is true by default
         // but this can be overwritten
         if(!isNull("swimming.speed.csv.enabled")) {
@@ -143,6 +132,18 @@ public class SwimmingAction extends AbstractAction {
         }
 
         if (useCsv) {
+
+            // Read swimming velocity file
+            String velocity_file = getParameter("velocity_file");
+            String pathname = IOTools.resolveFile(velocity_file);
+            File f = new File(pathname);
+            if (!f.isFile()) {
+                throw new FileNotFoundException("Swimming velocity file " + pathname + " not found.");
+            }
+            if (!f.canRead()) {
+                throw new IOException("Swimming velocity file " + pathname + " cannot be read.");
+            }
+
             Locale.setDefault(Locale.US);
             // open velocities csv file
             CSVReader reader = new CSVReaderBuilder(new FileReader(pathname))
