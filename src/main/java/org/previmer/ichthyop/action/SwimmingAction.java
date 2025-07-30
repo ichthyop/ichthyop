@@ -159,7 +159,7 @@ public class SwimmingAction extends AbstractAction {
                     continue;
                 }
                 classes[i] = Float.valueOf(line[0]);
-                speeds[i] = Float.valueOf(line[1]);
+                speeds[i] = Float.valueOf(line[1]) / 100;
             }
         }
 
