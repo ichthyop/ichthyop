@@ -31,7 +31,7 @@ public abstract class OrientationVelocity extends AbstractAction {
 
     private double[] classCsv; // age array from CSV (seconds)
     private double[] speedCsv; // speed array (m/s);
-    private double velocityPerLengthUnit;  // cm/s
+    private double velocityPerLengthUnit;  // m/s
     private boolean useCsv = false;
     private String method = "age";
 
@@ -92,6 +92,7 @@ public abstract class OrientationVelocity extends AbstractAction {
                     velocityMethod = (IParticle particle) -> getVelocityCsv(particle, particle_temp -> particle_temp.getLength());
                     initVelocityCsv();
                 } else {
+                    // Conversion of velocity in m/s
                     velocityPerLengthUnit = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
                     velocityMethod = (IParticle particle) -> getVelocityLength(particle);
                 }
@@ -136,7 +137,7 @@ public abstract class OrientationVelocity extends AbstractAction {
         double age = getValue.getValue(particle); // seconds
         for (int i = 0; i < classCsv.length - 1; i++) {
             if ((age >= classCsv[i]) && (age < classCsv[i + 1])) {
-                return speedCsv[i]; // value already in m/s
+                return speedCsv[i]; // value already converted in m/s in the loadVelocitiesCsv function
             }
         }
 
@@ -154,11 +155,11 @@ public abstract class OrientationVelocity extends AbstractAction {
             if (!f.canRead()) {
                 throw new IOException("Density file " + pathname + " cannot be read.");
             }
-            loadDensities(pathname);
+            loadVelocitiesCsv(pathname);
         }
     }
 
-    private void loadDensities(String csvFile) throws CsvException {
+    private void loadVelocitiesCsv(String csvFile) throws CsvException {
         Locale.setDefault(Locale.US);
         try {
             // open densities csv file
@@ -182,7 +183,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     }
 
     public double getVelocityLength(IParticle particle) {
-        return  particle.getLength() * velocityPerLengthUnit;
+        return  particle.getLength() * velocityPerLengthUnit;  // values already in m /s (loadParameters function)
     }
 
 }
