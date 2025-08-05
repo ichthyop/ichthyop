@@ -382,10 +382,6 @@ public class WindDriftFileAction extends WindDriftAction {
     @Override
     public void execute(IParticle particle) {
 
-        if (!this.isActive(particle)) {
-            return;
-        }
-
         if (time_current != getSimulationManager().getTimeManager().getTime()) {
             try {
                 nextStepTriggered();
@@ -396,6 +392,10 @@ public class WindDriftFileAction extends WindDriftAction {
 
         U_variable.nextStep(uw_tp1, time_tp1, dt_wind);
         V_variable.nextStep(vw_tp1, time_tp1, dt_wind);
+
+        if (!this.isActive(particle)) {
+            return;
+        }
 
         double[] mvt = getDLonLat(particle.getGridCoordinates(), -particle.getDepth(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt());
         double newLon = particle.getLon() + mvt[0];
