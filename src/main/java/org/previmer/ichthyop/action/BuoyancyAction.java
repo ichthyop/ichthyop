@@ -133,7 +133,6 @@ public class BuoyancyAction extends AbstractAction {
             MOLECULAR_VISCOSITY = Double.valueOf(getParameter(key));
         }
 
-
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
@@ -266,7 +265,7 @@ public class BuoyancyAction extends AbstractAction {
          */
         waterDensity = waterDensity(sal, tp);
 
-        double wpart =  g * MEAN_MAJOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * LOGN * (waterDensity - particleDensity) / 100.0f;
+        double wpart =  g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * LOGN * (waterDensity - particleDensity) / 100.0f;
         return wpart * dt;
 
     }
