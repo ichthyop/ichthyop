@@ -1,14 +1,14 @@
 ## Buoyancy
 
-The buoyancy module allow to vertically displace a particle, depending on it's density and on the sea water density, following @parada2003modelling.
+The buoyancy module allow to vertically displace a particle, depending on it's density and on the sea water density, following equation 1 of @parada2003modelling.
 
 The buoyancy-induced vertical velocity of the particle is given by:
 
 $$
-W_{buoy} =  \dfrac{1}{24} \times g \times  a \times  b  \times \dfrac{\rho_{water} - \rho_{part}}{\rho_{water}} \mu^{-1} \log\left(2 \dfrac{a}{b} + 0.5\right);
+W_{buoy} =  \dfrac{1}{24} \times g \times  L_{minor}^2   \times \dfrac{\rho_{water} - \rho_{part}}{\rho_{water}} \mu^{-1} \log\left(\dfrac{2 L_{major}}{L_{minor}} + \dfrac{1}{2}\right);
 $$
 
-with $a$ and $b$ the semi-major axis and semi-minor axis of an ellipse (`mean_major_axis` and `mean_minor_axis` parameters), $\mu$ the molecular viscosity (`molecular_viscosity` parameter), $\rho_{water}$ the water density, $\rho_{part}$ the particle density and $g$ the gravitational acceleration ($cm.s^{-2}$).
+with $L_{major}$ and $L_{minor}$ the semi-major axis and semi-minor axis of an ellipse (`mean_major_axis` and `mean_minor_axis` parameters), $\mu$ the molecular viscosity (`molecular_viscosity` parameter), $\rho_{water}$ the water density, $\rho_{part}$ the particle density and $g$ the gravitational acceleration ($cm.s^{-2}$).
 
 If the particle density varies with age, it can be provided in a CSV file (`density_file` parameter), formatted as follows:
 
