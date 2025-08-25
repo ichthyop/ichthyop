@@ -65,6 +65,111 @@ import com.opencsv.exceptions.CsvException;
  * Implementation of microplastics buoyancy action.
  *
  * Based on \cite JALONROJAS2019256
+ *
+ * Needs the following parameters:
+ * \code{.xml}
+ *  <block type="action">
+    <key>action.plastic.buoyancy</key>
+    <description>Action for plastic movements</description>
+    <tree_path>Advanced/Transport/Plastic Buoyancy</tree_path>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter>
+        <key>plastic.shape</key>
+        <long_name>Shape of the plastic form</long_name>
+        <value>sphere</value>
+        <default>sphere</default>
+        <format>combo</format>
+        <accepted>sphere</accepted>
+        <accepted>cylinder</accepted>
+        <description>Shape of the plastic</description>
+      </parameter>
+      <parameter>
+        <key>sphere.radius</key>
+        <long_name>Radius of the sphere (cm)</long_name>
+        <value>1</value>
+        <default>1</default>
+        <format>float</format>
+        <description>Radius of the sphere</description>
+      </parameter>
+      <parameter>
+        <key>cylinder.radius</key>
+        <long_name>Radius of the cylinder (cm)</long_name>
+        <value>1</value>
+        <default>1</default>
+        <format>float</format>
+        <description>Radius of the cylinder</description>
+      </parameter>
+      <parameter>
+        <key>cylinder.length</key>
+        <long_name>length of the cylinder (cm)</long_name>
+        <value>1</value>
+        <default>1</default>
+        <format>float</format>
+        <description>length of the cylinder</description>
+      </parameter>
+      <parameter>
+        <key>kinematic.viscosity</key>
+        <long_name>Kinematic viscosity (m^2/s)</long_name>
+        <value>1e-3</value>
+        <default>1e-3</default>
+        <format>float</format>
+        <description>Kinematic viscosity</description>
+      </parameter>
+      <parameter>
+        <key>salinity_field</key>
+        <long_name>Name of the salinity variable</long_name>
+        <value>so</value>
+        <default>true</default>
+        <description>Determine whether vertical advection is enabled. For 2D simulations, this parameter is ignored.</description>
+      </parameter>
+      <parameter>
+        <key>temperature_field</key>
+        <long_name>Name of the salinity variable</long_name>
+        <value>so</value>
+        <default>true</default>
+        <description>Determine whether vertical advection is enabled. For 2D simulations, this parameter is ignored.</description>
+      </parameter>
+      <parameter>
+        <key>density_file</key>
+        <long_name>Name of the density file. Densities are in g/cm3</long_name>
+        <value>density.csv</value>
+        <default>density.csv</default>
+        <description>Density file</description>
+      </parameter>
+      <parameter>
+        <key>particle_density</key>
+        <long_name>Particle density in g/cm3</long_name>
+        <value>1</value>
+        <default>1</default>
+        <description>Particle density</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.PlasticBuoyancyAction</value>
+        <default>org.previmer.ichthyop.action.PlasticBuoyancyAction</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this action.</description>
+      </parameter>
+      <parameter hidden="true">
+        <long_name>priority</long_name>
+        <key>priority</key>
+        <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+        <value>high</value>
+        <default>high</default>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+    </parameters>
+  </block>
+ *
+ *
+ * \endcode}
  */
 public class PlasticBuoyancyAction extends AbstractAction {
 
@@ -126,6 +231,7 @@ public class PlasticBuoyancyAction extends AbstractAction {
             shape = "sphere";
         }
 
+        key = "kinematic.viscosity";
         kinematic_viscosity = Double.valueOf(getParameter(key));
 
         if(shape.equals("sphere")) {
