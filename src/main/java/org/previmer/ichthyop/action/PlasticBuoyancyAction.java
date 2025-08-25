@@ -173,10 +173,22 @@ import com.opencsv.exceptions.CsvException;
  */
 public class PlasticBuoyancyAction extends AbstractAction {
 
-    /** Length of the particle if cylinder (cm) */
+    /** Length of the particle if cylinder (cm).
+     *
+     * \addindex "param:cylinder.length"
+     * Parameter `cylinder.length`
+     */
     private double length;
 
-    /** Radius of the particle is sphere or cylinder (cm) */
+    /** Radius of the particle is sphere or cylinder (cm).
+     *
+     *  \addindex "param:sphere.radius"
+     *  \addindex "param:cylinder.radius"
+     *
+     * Parameter `sphere.radius` or `cylinder.radius` depending
+     * on the value of #shape
+     *
+    */
     private double radius;
 
     /** Kinematic viscosity (\f$m^2.s^{-1})\f$ */
@@ -213,6 +225,10 @@ public class PlasticBuoyancyAction extends AbstractAction {
     private float[] ages;
     private float[] particleDensities;
     private BuoyancyModel buoyancyModel;
+
+    /**
+     * Shape of the particle. Either `sphere` or `cylinder`
+     */
     private String shape;
 
     private interface SpeedInterface {
@@ -416,8 +432,8 @@ public class PlasticBuoyancyAction extends AbstractAction {
      *
      * \cite ZHIYAO200837
      *
-     * @param waterDensity
-     * @return
+     * @param waterDensity Water density (g/m3)
+     * @return Vertical sinking velocity (m/s)
      */
     private double getSpeedSphere(double waterDensity) {
         double dg = g * (particleDensity / waterDensity - 1);
@@ -427,13 +443,17 @@ public class PlasticBuoyancyAction extends AbstractAction {
     }
 
     /**
+     * @brief Computes sinking speed of a sphere
+     *
      * \cite KHATMULLINA2017871
-    */
+     *
+     * @param waterDensity Water density (g/m3)
+     * @return Vertical sinking velocity (m/s)
+     */
     private double getSpeedCylinder(double waterDensity) {
         double gprime = g * (particleDensity / waterDensity) / waterDensity;
         double ws = Math.PI / (2 * kinematic_viscosity) * gprime * (2 * radius) / (55.238 * length + 12.691);
         return -ws;
     }
-
 
 }

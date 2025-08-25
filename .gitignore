@@ -40,3 +40,7 @@ tools/doxygen/new_header.aux
 tools/doxygen/new_header.fdb_latexmk
 tools/doxygen/new_header.log
 tools/doxygen/new_header.fls
+tools/doxygen/doxysearch.db/termlist.glass
+tools/doxygen/doxysearch.db/postlist.glass
+tools/doxygen/doxysearch.db/iamglass
+tools/doxygen/doxysearch.db/flintlock
