@@ -33,3 +33,5 @@ doc/index.tex
 
 **/.DS_Store
 .VSCodeCounter
+tools/doxygen/html
+tools/doxygen/latex
