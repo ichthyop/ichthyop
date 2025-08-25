@@ -44,10 +44,6 @@
 
 package org.previmer.ichthyop.action;
 
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import com.opencsv.exceptions.CsvException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -56,9 +52,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.particle.StageParticleLayer;
+
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
 
 /**
  * Implementation of microplastics buoyancy action.
@@ -128,11 +129,11 @@ public class PlasticBuoyancyAction extends AbstractAction {
         kinematic_viscosity = Double.valueOf(getParameter(key));
 
         if(shape.equals("sphere")) {
-            radius = Double.valueOf(getParameter("sphere.radius"))  / 100;
+            radius = Double.valueOf(getParameter("sphere.radius"))  / 100;  // convert radius in m
             speedInterface = (waterDensity -> getSpeedSphere(waterDensity));
         } else {
-            radius = Double.valueOf(getParameter("cylinder.radius")) / 100;
-            length = Double.valueOf(getParameter("cylinder.length")) / 100;
+            radius = Double.valueOf(getParameter("cylinder.radius")) / 100; // convert radius in m
+            length = Double.valueOf(getParameter("cylinder.length")) / 100; // convert length in m
             speedInterface = (waterDensity -> getSpeedCylinder(waterDensity));
         }
 
@@ -252,7 +253,6 @@ public class PlasticBuoyancyAction extends AbstractAction {
          return (buoyancyMeters * dt_sec); //meter
          */
         waterDensity = waterDensity(sal, tp);
-
         double wpart = speedInterface.getSpeed(waterDensity);
         return wpart * dt;
 
@@ -317,7 +317,7 @@ public class PlasticBuoyancyAction extends AbstractAction {
         double dg = g * (particleDensity / waterDensity - 1);
         double dstar = Math.pow(dg / Math.pow(kinematic_viscosity, 2), 1.0/3.0) * 2 * radius;
         double ws = kinematic_viscosity / (2 * radius) * Math.pow(dstar, 3) * Math.pow(38.1 + 0.93 * Math.pow(dstar, 12.0/7.0), -7.0/8.0);
-        return ws;
+        return -ws;
     }
 
     /**
@@ -326,7 +326,7 @@ public class PlasticBuoyancyAction extends AbstractAction {
     private double getSpeedCylinder(double waterDensity) {
         double gprime = g * (particleDensity / waterDensity) / waterDensity;
         double ws = Math.PI / (2 * kinematic_viscosity) * gprime * (2 * radius) / (55.238 * length + 12.691);
-        return ws;
+        return -ws;
     }
 
 
