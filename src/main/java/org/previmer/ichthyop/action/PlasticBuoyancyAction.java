@@ -306,6 +306,8 @@ public class PlasticBuoyancyAction extends AbstractAction {
 
 
     /**
+     * @brief Computes sinking speed of a cylinder
+     *
      * https://www.sciencedirect.com/science/article/pii/S167423701530017X
      *
      * @param waterDensity

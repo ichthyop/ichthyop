@@ -35,3 +35,4 @@ doc/index.tex
 .VSCodeCounter
 tools/doxygen/html
 tools/doxygen/latex
+tools/doxygen/searchdata.xml
