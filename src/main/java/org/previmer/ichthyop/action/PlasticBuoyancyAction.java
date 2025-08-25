@@ -63,7 +63,7 @@ import org.previmer.ichthyop.particle.StageParticleLayer;
 /**
  * Implementation of microplastics buoyancy action.
  *
- * Based on https://www.sciencedirect.com/science/article/pii/S0025326X19301523?via%3Dihub#bb0225
+ * Based on \cite JALONROJAS2019256
  */
 public class PlasticBuoyancyAction extends AbstractAction {
 
@@ -306,9 +306,9 @@ public class PlasticBuoyancyAction extends AbstractAction {
 
 
     /**
-     * @brief Computes sinking speed of a cylinder
+     * @brief Computes sinking speed of a sphere
      *
-     * https://www.sciencedirect.com/science/article/pii/S167423701530017X
+     * \cite ZHIYAO200837
      *
      * @param waterDensity
      * @return
@@ -321,7 +321,7 @@ public class PlasticBuoyancyAction extends AbstractAction {
     }
 
     /**
-     * https://www.sciencedirect.com/science/article/pii/S0025326X16309201
+     * \cite KHATMULLINA2017871
     */
     private double getSpeedCylinder(double waterDensity) {
         double gprime = g * (particleDensity / waterDensity) / waterDensity;

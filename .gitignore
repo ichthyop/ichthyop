@@ -36,3 +36,7 @@ doc/index.tex
 tools/doxygen/html
 tools/doxygen/latex
 tools/doxygen/searchdata.xml
+tools/doxygen/new_header.aux
+tools/doxygen/new_header.fdb_latexmk
+tools/doxygen/new_header.log
+tools/doxygen/new_header.fls
