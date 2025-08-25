@@ -126,7 +126,7 @@ import com.opencsv.exceptions.CsvException;
       <parameter>
         <key>temperature_field</key>
         <long_name>Name of the salinity variable</long_name>
-        <value>so</value>
+        <value>thetao</value>
         <default>true</default>
         <description>Determine whether vertical advection is enabled. For 2D simulations, this parameter is ignored.</description>
       </parameter>
