@@ -46,6 +46,7 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -335,7 +336,8 @@ public class FvcomDataset extends AbstractDataset {
         double output_0 = dist * output_0_kz + (1 - dist) * output_0_kzp1;
         double output_1 = dist * output_1_kz + (1 - dist) * output_1_kzp1;
 
-        return ((1.d - x_euler) * output_0 + x_euler * output_1);
+        double speed = ((1.d - x_euler) * output_0 + x_euler * output_1);
+        return speed;
 
     }
 
@@ -476,7 +478,8 @@ public class FvcomDataset extends AbstractDataset {
     public void init() throws Exception {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        open(indexFile = DatasetUtil.index(files, t0, timeArrow(), strTime));
+        indexFile = DatasetUtil.index(files, t0, timeArrow(), strTime);
+        open(indexFile);
         setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow()));
         time_tp1 = t0;
     }
@@ -619,7 +622,8 @@ public class FvcomDataset extends AbstractDataset {
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(indexFile = DatasetUtil.next(files, indexFile, time_arrow));
+            indexFile = DatasetUtil.next(files, indexFile, time_arrow);
+            open(indexFile);
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
 
@@ -707,6 +711,10 @@ public class FvcomDataset extends AbstractDataset {
         files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
         if (!skipSorting()) {
             DatasetUtil.sort(files, strTime, timeArrow());
+        } else {
+            if(timeArrow < 0) {
+                Collections.sort(files, Collections.reverseOrder());
+            }
         }
         ncIn = DatasetUtil.openFile(files.get(0), true);
         readTimeLength();
