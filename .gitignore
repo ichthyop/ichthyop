@@ -1,6 +1,6 @@
 dist
 target
-nbactions.xml 
+nbactions.xml
 nbproject
 manifest.mf
 **html
@@ -11,6 +11,7 @@ output
 .project
 .settings
 **/*.swp
+input
 
 doc/_build
 doc/**/*ipynb*
@@ -20,3 +21,9 @@ doc/**/_static/*svg
 doc/**/_static/*pdf
 
 doc/_static/javadoc
+doc/developer/manager_initialization_files/figure-latex/mermaid-figure-1.png
+**/.DS_Store
+doc/developer/.jupyter_cache/__version__.txt
+doc/developer/particle_files/figure-latex/mermaid-figure-1.png
+doc/developer/tracker_files/figure-latex/mermaid-figure-1.png
+doc/developer/.jupyter_cache/global.db
