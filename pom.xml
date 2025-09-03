@@ -125,7 +125,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
         <plugins>
 
-         <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.3.1</version>
