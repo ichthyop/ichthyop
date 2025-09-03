@@ -216,7 +216,7 @@ public class SwimmingAction extends AbstractAction {
     }
 
     private float getSpeedLength(IParticle particle) {
-        return (float) (particle.getLength() / 100 * velocityBodyLength);
+        return (float) (particle.getLength() * velocityBodyLength);
     }
 
     /**

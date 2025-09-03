@@ -68,7 +68,6 @@ public abstract class OrientationVelocity extends AbstractAction {
 
         switch (method) {
             case "age":
-
                 if(useCsv) {
                     velocityMethod = (IParticle particle) -> getVelocityCsv(particle, particle_temp -> (particle_temp.getAge() / secs_in_day));
                     initVelocityCsv();
@@ -183,7 +182,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     }
 
     public double getVelocityLength(IParticle particle) {
-        return  particle.getLength() / 100 * velocityPerLengthUnit;  // values already in m /s (loadParameters function)
+        return  particle.getLength() * velocityPerLengthUnit;  // values already in m /s (loadParameters function)
     }
 
 }
