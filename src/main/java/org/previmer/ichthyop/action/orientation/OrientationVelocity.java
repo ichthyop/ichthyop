@@ -49,7 +49,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-
+        // Check the speed computation mode (age or length)
         String key = "swimming.speed.mode";
         if(!isNull(key)) {
             method = getParameter(key);
@@ -91,7 +91,8 @@ public abstract class OrientationVelocity extends AbstractAction {
                     velocityMethod = (IParticle particle) -> getVelocityCsv(particle, particle_temp -> particle_temp.getLength());
                     initVelocityCsv();
                 } else {
-                    // Conversion of velocity in m/s
+                    // Body length speed is divided by 100, since length is provided in cm. Avoids dividing by 100
+                    // for each particle
                     velocityPerLengthUnit = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
                     velocityMethod = (IParticle particle) -> getVelocityLength(particle);
                 }

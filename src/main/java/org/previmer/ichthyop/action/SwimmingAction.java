@@ -121,6 +121,8 @@ public class SwimmingAction extends AbstractAction {
                     getValue = particle -> (particle.getLength());
                 } else {
                     getVelocity = this::getSpeedLength;
+                    // velocityBodyLength is divided by 100 since length is provided in cm/s. Avoids
+                    // dividing length by 100 at each time step
                     velocityBodyLength = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
                 }
             } else {
