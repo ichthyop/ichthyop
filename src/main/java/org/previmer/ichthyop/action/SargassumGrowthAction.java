@@ -255,17 +255,36 @@ public class SargassumGrowthAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        // Recover environmental variables for Maria
+        SargassumParticleLayer sargassumLayer = (SargassumParticleLayer) particle.getLayer(SargassumParticleLayer.class);
+        double T = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setT_env(T);
+
+        double I = getSimulationManager().getDataset().get(I_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setI_env(I);
+
+        double S = getSimulationManager().getDataset().get(S_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setS_env(S);
+
+        double V = getSimulationManager().getDataset().get(V_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double U = getSimulationManager().getDataset().get(U_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double W = Math.sqrt(U * U + V * V);
+        sargassumLayer.setW_env(W);
+
+        double N_concentration = getSimulationManager().getDataset().get(NH4_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        N_concentration += getSimulationManager().getDataset().get(NO3_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setN_env(N_concentration);
+
         if(true) {
             return;
         }
 
-        SargassumParticleLayer sargassumLayer = (SargassumParticleLayer) particle.getLayer(SargassumParticleLayer.class);
-
         /** Limitation due to temperature */
-        double T = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double Tref = T <= Topt ? Tmin : Tmax;
         double temp_limitation = Math.exp(-2. * Math.pow((T - Topt)/(Tref - T),2));
-        sargassumLayer.setT_env(T);
+
+        double P_concentration = getSimulationManager().getDataset().get(PO4_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        sargassumLayer.setP_env(P_concentration);
 
         /** Limitation due to nitrogen and phosphor content */
         quotaN = sargassumLayer.getQuotaN();
@@ -275,21 +294,13 @@ public class SargassumGrowthAction extends AbstractAction {
         double nutrient_limitation = Math.min(Math.min(nitrogen_limitation,phosphor_limitation),1.);
 
         /** Limitation due to solar irradiance */
-        double I = getSimulationManager().getDataset().get(I_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double solar_limitation = Math.max(0., (I - ICut) / IOpt * Math.exp(1 - (I - ICut) / IOpt));
-        sargassumLayer.setI_env(I);
 
         /** Limitation due to salinity */
-        double S = getSimulationManager().getDataset().get(S_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double salinity_limitation = Math.min(1., Math.max(0., alphaS * S + betaS));
-        sargassumLayer.setS_env(S);
 
         /** Mortality factor due to wind */
-        double V = getSimulationManager().getDataset().get(V_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        double U = getSimulationManager().getDataset().get(U_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        double W = Math.sqrt(U * U + V * V);
         double alphaWind = 1 - 1 / (1 + Math.exp(1.5 * (W - 5)));
-        sargassumLayer.setW_env(W);
 
         /** C uptake and loss */
         double C = sargassumLayer.getC();
@@ -297,16 +308,12 @@ public class SargassumGrowthAction extends AbstractAction {
         double lossC = C * C * mortality * C / (C + half_mortality) * (1 + alphaWind * 3);
 
         /** N and P uptakes and losses */
-        double N_concentration = getSimulationManager().getDataset().get(NH4_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        N_concentration += getSimulationManager().getDataset().get(NO3_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        sargassumLayer.setN_env(N_concentration);
         double uptakeN = uptakeVelocityN * C * N_concentration / (saturationN + N_concentration) * (maxQuotaN - quotaN) / (maxQuotaN - minQuotaN);
         double lossN = lossC * quotaN;
 
-        double P_concentration = getSimulationManager().getDataset().get(PO4_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        sargassumLayer.setP_env(P_concentration);
         double uptakeP = uptakeVelocityP * C * P_concentration / (saturationP + P_concentration) * (maxQuotaP - quotaP) / (maxQuotaP - minQuotaP);
         double lossP = lossC * quotaP;
+
         double dt = (double)getSimulationManager().getTimeManager().get_dt()/ (24 * 3600);
         sargassumLayer.setC(C + (uptakeC - lossC) * dt);
         sargassumLayer.setN(sargassumLayer.getN() + (uptakeN - lossN) * dt);
