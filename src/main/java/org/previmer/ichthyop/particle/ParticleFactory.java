@@ -46,6 +46,7 @@ package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.dataset.DelftDataset;
+import org.previmer.ichthyop.dataset.FvcomDataset;
 
 /**
  *
@@ -121,6 +122,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
         particle.setDepth(depth);
         /* bugfixing 2011/06/28
          * setDepth but z unset and then calling isInWater ==> crash FIXME still a problem
+         * setDepth but z unset and then calling isInWater ==> crash
          * phv 2011/09/25: wondering wether the make2D should not occur before
          * the geo2grid, to be checked...
          */
@@ -132,7 +134,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
             return null;
         }
 
-        if (!(getSimulationManager().getDataset() instanceof DelftDataset)) {
+        if (!(getSimulationManager().getDataset() instanceof DelftDataset)) && (!(getSimulationManager().getDataset() instanceof FvcomDataset)) {
             if (!Double.isNaN(depth)) {
                 if (getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0) > depth
                         || depth > 0) {

@@ -15,9 +15,9 @@
             "name": "Launch IchthyopApp",
             "request": "launch",
             "mainClass": "org.previmer.ichthyop.ui.IchthyopApp",
-            "projectName": "ichthyop"//,
-           // "cwd": "c:\\Users\\enge514\\OneDrive - PNNL\\Documents\\ICHTHYOP" //,
-           // "args": "cfg-fvcom-lily.xml"
+            "projectName": "ichthyop",
+            "cwd": "/home/barrier/Work/ichthyop/issues/66",
+            "args": "cfg-fvcom-lily.xml"
         }
     ]
 }

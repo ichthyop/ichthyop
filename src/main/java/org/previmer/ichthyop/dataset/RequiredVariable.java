@@ -69,6 +69,7 @@ public class RequiredVariable {
     private List<Class<?>> requiredByList;
 
     private DelftDataset delft;
+    private FvcomDataset fvcom;
 
     private interface Getter {
         public Number get(double[] pGrid, double time);
@@ -82,6 +83,10 @@ public class RequiredVariable {
         if(this.dataset instanceof DelftDataset) {
             delft = (DelftDataset) this.dataset;
             getter = (pGrid, time) -> getDELFT(pGrid, time);
+        }
+        else if(this.dataset instanceof FvcomDataset) {
+            fvcom = (FvcomDataset) this.dataset;
+            getter = (pGrid, time) -> getFVCOM(pGrid, time);
         } else {
             getter = (pGrid, time) -> getStandard(pGrid, time);
         }
@@ -179,6 +184,31 @@ public class RequiredVariable {
             // if the depth of the particle is between two T layers, we recover the value
             // at the T layer which is below
             output_kzp1 = (d2 * d3 * tracer_edge[edges[0]][kz+1] + d1 * d3 * tracer_edge[edges[1]][kz+1] + d1 * d2 * tracer_edge[edges[2]][kz+1])/(d2*d3+d1*d3+d1*d2);
+        }
+    public Number getFVCOM(double[] pGrid, double time) {
+
+         // getting the value at the T-cell to which the particle belongs
+         double z = pGrid[2];
+         int kz = (int) Math.floor(z);
+         double dist = 1;
+
+        double[][] tracer_0 = fvcom.getTracer0(name);
+        double[][] dT_dX = fvcom.getDtDx(name);
+        double[][] dT_dY = fvcom.getDtDy(name);
+
+        int iTriangle = fvcom.findTriangle(pGrid);
+        double xB = fvcom.getXBarycenter(iTriangle);
+        double yB = fvcom.getYBarycenter(iTriangle);
+        double dX = pGrid[0] - xB;
+        double dY = pGrid[1] - yB;
+
+        double output_kz = tracer_0[kz][iTriangle] + dT_dX[kz][iTriangle] * dX + dT_dY[kz][iTriangle] * dY;
+        double output_kzp1 = 0;
+
+        if (z >= 0.5 || z <= fvcom.getNLayer() + 0.5) {
+            // if the depth of the particle is between two T layers, we recover the value
+            // at the T layer which is below
+            output_kzp1 = tracer_0[kz + 1][iTriangle] + dT_dX[kz + 1][iTriangle] * dX + dT_dY[kz + 1][iTriangle] * dY;
             dist = kz + 0.5 - z;
         }
 
