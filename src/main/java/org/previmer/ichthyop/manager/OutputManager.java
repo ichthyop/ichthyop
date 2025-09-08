@@ -72,6 +72,8 @@ import java.util.List;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
+import org.previmer.ichthyop.dataset.DelftDataset;
+import org.previmer.ichthyop.dataset.DelftDataset;
 import org.previmer.ichthyop.dataset.FvcomDataset;
 import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.event.NextStepListener;
@@ -560,6 +562,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
                     getLogger().log(Level.WARNING, "Error writing variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    System.exit(0);
                 }
             }
         }
@@ -645,7 +648,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         IDataset dataset = getSimulationManager().getDataset();
 
         // if no fvcom output, write zone in file
-        if(!(dataset instanceof FvcomDataset)) {
+        if((!(dataset instanceof DelftDataset)) & (!(dataset instanceof FvcomDataset))) {
             addRegion();
         }
 
@@ -802,7 +805,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         // zones requires that dataset has been initialized first.
         // if FvcomDataset, no writting of Zones in Netcdf
         IDataset dataset = getSimulationManager().getDataset();
-        if (!(dataset instanceof FvcomDataset)) {
+        if ((!(dataset instanceof DelftDataset)) && ((!(dataset instanceof FvcomDataset))) {
             addZones();
         }
 

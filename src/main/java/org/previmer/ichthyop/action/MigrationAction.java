@@ -263,7 +263,7 @@ public class MigrationAction extends AbstractAction {
         LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)
-        double bottom = getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0);
+        double bottom = getSimulationManager().getDataset().getBathyPos(particle.getX(), particle.getY());
         double output;
 
         if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {

@@ -57,8 +57,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <!-- Project properties -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <mainClass>org.previmer.ichthyop.ui.IchthyopApp</mainClass>
         <skipTests>true</skipTests>
     </properties>
@@ -135,7 +135,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     <propertiesEncoding>UTF-8</propertiesEncoding>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>

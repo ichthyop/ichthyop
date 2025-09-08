@@ -50,6 +50,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.manager.SimulationManager;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -67,6 +68,7 @@ public class RequiredVariable {
     private boolean isUnlimited;
     private List<Class<?>> requiredByList;
 
+    private DelftDataset delft;
     private FvcomDataset fvcom;
 
     private interface Getter {
@@ -78,7 +80,11 @@ public class RequiredVariable {
     public RequiredVariable(String name, Class<?> requiredBy) {
         this.name = name;
         this.dataset = SimulationManager.getInstance().getDataset();
-        if(this.dataset instanceof FvcomDataset) {
+        if(this.dataset instanceof DelftDataset) {
+            delft = (DelftDataset) this.dataset;
+            getter = (pGrid, time) -> getDELFT(pGrid, time);
+        }
+        else if(this.dataset instanceof FvcomDataset) {
             fvcom = (FvcomDataset) this.dataset;
             getter = (pGrid, time) -> getFVCOM(pGrid, time);
         } else {
@@ -147,6 +153,38 @@ public class RequiredVariable {
         this.array_tp1 = array_tp1;
     }
 
+    public Number getDELFT(double[] pGrid, double time) {
+
+        // getting the value at the T-cell to which the particle belongs
+        double z = pGrid[2];
+        // getting the value at the T-cell to which the particle belongs
+        int kz = (int) Math.max(0, Math.floor(z - 0.5));
+        double dist = 1;
+
+        double[][] tracer_edge = delft.getTracerEdge0(name);
+
+        int iTriangle = delft.findTriangle(pGrid);
+        if (iTriangle < 0) {
+            return 0;
+        }
+
+        //Find edges of the triangle
+        int[] edges = delft.findEdge(iTriangle);
+
+        //Compute distance from the point to each of the edges
+        double d1 = delft.calc_distance(pGrid,edges[0]);
+        double d2 = delft.calc_distance(pGrid,edges[1]);
+        double d3 = delft.calc_distance(pGrid,edges[2]);
+
+        //Weighted average from edge
+        double output_kz = (d2 * d3 * tracer_edge[edges[0]][kz] + d1 * d3 * tracer_edge[edges[1]][kz] + d1 * d2 * tracer_edge[edges[2]][kz])/(d2*d3+d1*d3+d1*d2);
+        double output_kzp1 = 0;
+
+        if (z >= 0.5 && z <= delft.getNLayer() - 1 + 0.5) {
+            // if the depth of the particle is between two T layers, we recover the value
+            // at the T layer which is below
+            output_kzp1 = (d2 * d3 * tracer_edge[edges[0]][kz+1] + d1 * d3 * tracer_edge[edges[1]][kz+1] + d1 * d2 * tracer_edge[edges[2]][kz+1])/(d2*d3+d1*d3+d1*d2);
+        }
     public Number getFVCOM(double[] pGrid, double time) {
 
          // getting the value at the T-cell to which the particle belongs
