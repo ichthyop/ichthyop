@@ -134,7 +134,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
             return null;
         }
 
-        if (!(getSimulationManager().getDataset() instanceof DelftDataset)) && (!(getSimulationManager().getDataset() instanceof FvcomDataset)) {
+        if ((!(getSimulationManager().getDataset() instanceof DelftDataset)) && (!(getSimulationManager().getDataset() instanceof FvcomDataset))) {
             if (!Double.isNaN(depth)) {
                 if (getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0) > depth
                         || depth > 0) {

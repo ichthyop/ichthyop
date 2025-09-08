@@ -44,49 +44,45 @@
 
 package org.previmer.ichthyop.manager;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
+
 import java.awt.geom.Point2D;
 import java.io.File;
-import org.previmer.ichthyop.event.InitializeEvent;
-import org.previmer.ichthyop.event.LastStepEvent;
-import org.previmer.ichthyop.event.NextStepEvent;
-import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.event.SetupEvent;
-import org.previmer.ichthyop.io.BlockType;
-import org.previmer.ichthyop.io.XBlock;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import java.util.logging.Level;
-import ucar.nc2.Variable;
-import ucar.nc2.write.Nc4Chunking;
-import ucar.nc2.write.Nc4ChunkingStrategy;
-import ucar.nc2.write.NetcdfFileFormat;
-import ucar.nc2.write.NetcdfFormatWriter;
-
-import org.previmer.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.dataset.DelftDataset;
 import org.previmer.ichthyop.dataset.DelftDataset;
 import org.previmer.ichthyop.dataset.FvcomDataset;
 import org.previmer.ichthyop.dataset.IDataset;
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.LastStepEvent;
+import org.previmer.ichthyop.event.LastStepListener;
+import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.AbstractTracker;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.io.CustomTracker;
+import org.previmer.ichthyop.io.DensityTracker;
 import org.previmer.ichthyop.io.DepthTracker;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.LatTracker;
 import org.previmer.ichthyop.io.LonTracker;
 import org.previmer.ichthyop.io.MortalityTracker;
 import org.previmer.ichthyop.io.TimeTracker;
-import org.previmer.ichthyop.io.CustomTracker;
-import org.previmer.ichthyop.io.DensityTracker;
+import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
+
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
@@ -94,6 +90,11 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
+import ucar.nc2.write.NetcdfFileFormat;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
  *
@@ -805,7 +806,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         // zones requires that dataset has been initialized first.
         // if FvcomDataset, no writting of Zones in Netcdf
         IDataset dataset = getSimulationManager().getDataset();
-        if ((!(dataset instanceof DelftDataset)) && ((!(dataset instanceof FvcomDataset))) {
+        if ((!(dataset instanceof DelftDataset)) && (!(dataset instanceof FvcomDataset))) {
             addZones();
         }
 
