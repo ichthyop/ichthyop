@@ -73,11 +73,7 @@ A particle in Ichthyop only knows about its environment what is provided by the 
 
 Here is the 2D scheme of cells (i, j) bottom left, (i+1, j) bottom right, (i, j+1) top left and (i+1, j+1) top right.
 
-:::{figure} _static/spatial_interpolation.png
-:align: center
-
-Particle current location at {samp}`X(x, y, z)`
-:::
+![Particle current location at `X(x, y, z)`](_static/spatial_interpolation.png){fig-align="center"}
 
 Let's see how the interpolation works for both zonal and meridional velocities. The question we ask is what is the value of U and V at particle location?
 
@@ -87,9 +83,9 @@ Let's call t, the current time of the simulation, and t0 and t1 the values of th
 
 We first interpolate the model velocity field at t0:
 
-:::{figure} _static/spatial_interpolation_u(1).png
-:align: center
-:::
+![](_static/spatial_interpolation_u(1).png){fig-align="center"}
+
+
 
 This large expression can be narrowed down to:
 
@@ -129,9 +125,8 @@ V(t0, x, y, z) = SUM( U(t0, i, j+jj-1, k+kk) * |(1-dx) * (0.5-jj-dy) * (1-kk-dz)
 
 In order to determine whether a particle is close to the coastline, Ichthyop proceeds in two steps: it first determines in which quater of the cell the grid point is located. Then it checks wether or not the three adjacent cells to this quater are in water.
 
-:::{figure} _static/spatial_interpolation_coast.png
-:align: center
-:::
+![](_static/spatial_interpolation_coast.png){fig-align="center"}
+
 
 X1 will be considered as "close to coast" if any of cells (i,j+1) (i-1,j) (i-1,j+1) is on land.
 
