@@ -8,12 +8,17 @@ These three implementations involve the computation of a swimming velocity and d
 three methods, but the directions depend on the method considered.
 
 ```{python}
-#| echo: false
-#| output: false
+#| echo: true
+#| output: true
 
 import os
 from glob import glob
 import subprocess
+
+pom_file = os.path.join('..', 'pom.xml')
+
+command = ['mvn', 'package', '-f', pom_file, '-DskipTests=true']
+subprocess.run(command, capture_output=False, text=False, stdout=subprocess.DEVNULL)
 
 conflist = glob(os.path.join('ichthyop_configs', '*'))
 conflist.sort()

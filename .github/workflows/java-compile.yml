@@ -47,6 +47,9 @@ jobs:
       - name: Install C dependencies
         run: sudo apt install -yq libnetcdf-dev
 
+      - name: Download java files
+        run: echo wget
+
       - name: Compile Java code
         run:  |
             mvn build-helper:remove-project-artifact
