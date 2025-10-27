@@ -82,15 +82,26 @@ public class ReefOrientationAction extends OrientationVelocity {
 
     }
 
+    /**
+     * @brief Initializes the target zones.
+     */
     private void initializeTargets() {
 
         nZones = zones.size();
+
+        // Longitude/latitude points of each zones
         longitudeReefs = new double[nZones][];
         latitudeReefs = new double[nZones][];
+
+        // X and Y coordinates of each zone
         xReefs = new double[nZones][];
         yReefs = new double[nZones][];
+
+        // Longitude/latitude of each barycenter
         longitudeBarycenter = new double[nZones];
         latitudeBarycenter = new double[nZones];
+
+        // X and Y coordinates of each barycenter
         xBarycenter = new double[nZones];
         yBarycenter = new double[nZones];
         kappaBarycenter = new double[nZones];
@@ -115,9 +126,10 @@ public class ReefOrientationAction extends OrientationVelocity {
                 getLogger().log(Level.SEVERE, message);
             }
 
+            // Initializes the coordinates of the polygons
             longitudeReefs[iZone] = new double[nPol + 1];
             latitudeReefs[iZone] = new double[nPol + 1];
-            xReefs[iZone] = new double[nPol + 1];
+            xReefs[iZone] = new double[nPol + 1];  // indexes range from 0 to nPol
             yReefs[iZone] = new double[nPol + 1];
 
             // if polygon has 4 points, we set the first 4 points
@@ -180,24 +192,27 @@ public class ReefOrientationAction extends OrientationVelocity {
 
     public double[] getDlonDlat(IParticle particle) {
 
-        double uorient, vorient;
+        double uorient = 0;
+        double vorient = 0;
 
+        // Computes the distance to all the target zones (either barycenter or edge point)
         double[] distance = this.getReefDistance.getDistance(particle);
 
         // computes the index of the closest reef
         int closestReefIndex = this.findSmallestDistance(distance);
+
+        // extract the computes the distance of the closest reef.
         double closestReefDistance = distance[closestReefIndex];
 
-        double[] xyParticleCoordinates = new double[] { particle.getX(), particle.getY() };
-
-        // extract the closest point (can be on edge)
-        // this is the target point
-        double[] closestPoint = this.getClosestPoint.getClosestPoint(xyParticleCoordinates, closestReefIndex);
-
-        uorient = 0;
-        vorient = 0;
-
         if (closestReefDistance <= maximumDistance) {
+
+            // if the distance from closest point is below the detection distance, compute orientation
+
+            // computes the xy coordinate of the particle
+            double[] xyParticleCoordinates = new double[] { particle.getX(), particle.getY() };
+
+            // extract the XY coordinates of the target point
+            double[] closestPoint = this.getClosestPoint.getClosestPoint(xyParticleCoordinates, closestReefIndex);
 
             double thetaPref, thetaCurrent;
 
@@ -205,12 +220,19 @@ public class ReefOrientationAction extends OrientationVelocity {
 
             double Kappa_reef = kappaBarycenter[closestReefIndex];
 
+            // extracts the xy coordinates of the actual position
             double xyParticule[] = getSimulationManager().getDataset().latlon2xy(particle.getLat(), particle.getLon());
+
+            // extracts the coordinates of the previous position (to have the trajectory)
             double xyOrigin[] = getSimulationManager().getDataset().latlon2xy(particle.getOldLat(),
                     particle.getOldLon());
+
             double xyReef[] = { closestPoint[0], closestPoint[1] };
 
+            // computes the destination angle
             thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
+
+            // computes the actual trajectory angle
             thetaCurrent = Math.atan2(xyOrigin[1] - xyParticule[1], xyOrigin[0] - xyParticule[0]) + Math.PI;
 
             double mu = d * (thetaPref - thetaCurrent);
@@ -277,9 +299,13 @@ public class ReefOrientationAction extends OrientationVelocity {
 
         for (int k = 0; k < NReefs; k++) {
 
+            // Find the closest point on the polygon (either on the edge or at a corner)
             double[] closestPointCoordinates = findClosestPointPolygonEdges(xyParticleCoordinates, k);
+
+            // extracts the lon/lat of the closest point
             double[] closestPointLatLon = getSimulationManager().getDataset().xy2latlon(closestPointCoordinates[0], closestPointCoordinates[1]);
 
+            // extract the distance, in km, from the closest point.
             distance[k] = getSimulationManager().getDataset().getDistGetter().getDistance(latParticle, lonParticle,
                     closestPointLatLon[0], closestPointLatLon[1]);
         }
