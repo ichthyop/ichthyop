@@ -127,6 +127,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <testResource>
               <directory>src/test/resources</directory>
             </testResource>
+            <testResource>
+              <directory>src/main/resources/</directory>
+            </testResource>
         </testResources>
 
         <plugins>
