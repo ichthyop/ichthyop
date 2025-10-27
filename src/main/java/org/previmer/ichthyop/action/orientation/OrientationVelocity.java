@@ -32,7 +32,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     private double[] classCsv; // age array from CSV (seconds)
     private double[] speedCsv; // speed array (m/s);
     private double velocityPerLengthUnit;  // m/s
-    private boolean useCsv = false;
+    private boolean useCsv = true;
     private String method = "age";
 
     private interface GetValue {
