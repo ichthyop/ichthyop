@@ -1,6 +1,6 @@
 # ICHTHYOP Release notes
 
-## Changes in 3.4.2
+## Changes in 3.5.0
 
 ### Bug fix
 
