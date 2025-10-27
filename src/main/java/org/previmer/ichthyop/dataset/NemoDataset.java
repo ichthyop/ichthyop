@@ -85,15 +85,15 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Longitude at rho point.
      */
-    private float[][] lonRho;
+    private float lonRho[][];
     /**
      * Latitude at rho point.
      */
-    private float[][] latRho;
+    private float latRho[][];
     /**
      * Mask: water = 1, cost = 0
      */
-    private int[][][] maskRho;//, masku, maskv;
+    private int maskRho[][][];//, masku, maskv;
     /**
      * Zonal component of the velocity field at current time
      */
@@ -121,12 +121,12 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    private double[][][] gdepT;
+    private double gdepT[][][];
     /**
      * Depth at w point. The free surface elevation is disregarded. For index k,
      * gdepW[k] is the depth of the W point below the center of the cell.
      */
-    private double[][][] gdepW;
+    private double gdepW[][][];
     /**
      * Geographical boundary of the domain
      */
@@ -174,8 +174,8 @@ public class NemoDataset extends AbstractDataset {
     /**
      *
      */
-    private double[][][] e3t, e3u, e3v;
-    private double[][] e1t, e2t, e1v, e2u;
+    private double e3t[][][], e3u[][][], e3v[][][];
+    private double e1t[][], e2t[][], e1v[][], e2u[][];
     private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     private String str_gdepT, str_gdepW;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
@@ -1960,6 +1960,9 @@ public class NemoDataset extends AbstractDataset {
     @Override
     public double getBottomDepth(double[] pGrid) {
         double bathy = getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        if(Double.isNaN(bathy)) {
+            bathy = 0;
+        }
         return bathy;
     }
 }
