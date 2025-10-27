@@ -156,10 +156,10 @@ public class TestGetBottomDepth {
         double pGrid[];
         double bathy;
 
-        int i = 15;
-        int j = 10;
-        double pGrid[] = new double[] {i, j};
-        double bathy = dataset.getBottomDepth(pGrid);
+        i = 15;
+        j = 10;
+        pGrid = new double[] {i, j};
+        bathy = dataset.getBottomDepth(pGrid);
         assertEquals(4490.5747, bathy, 2);
 
         i = 0;
