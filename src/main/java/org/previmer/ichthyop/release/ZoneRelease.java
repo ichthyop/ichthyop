@@ -76,7 +76,8 @@ public class ZoneRelease extends AbstractRelease {
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
                 : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
-        getSimulationManager().getOutputManager().addPredefinedTracker(ReleaseZoneTracker.class);
+        getSimulationManager().getOutputManager().addPredefinedInitialStateTracker(ReleaseZoneTracker.class);
+
     }
 
     /**

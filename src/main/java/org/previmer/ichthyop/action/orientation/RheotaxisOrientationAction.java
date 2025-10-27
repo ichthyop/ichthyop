@@ -1,8 +1,5 @@
 package org.previmer.ichthyop.action.orientation;
 
-import java.util.logging.Level;
-
-import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
@@ -10,42 +7,27 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
 
     private double vonMisesKappa;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    private double ageMin, ageMax;
 
     private VonMisesRandom vonMises;
-    private double secs_in_day = 86400;
+    private boolean canSwimAgainstCurrent = false;
 
     double dt;
-    private double PLD;
 
     @Override
     public void loadParameters() throws Exception {
         super.loadParameters();
         vonMisesKappa = Double.valueOf(getParameter("swimming.von.mises.kappa"));
-        double secs_in_day = 86400;
 
-        // Provides age in days
-        if (getParameter("age.min") != null) {
-            ageMin = Double.valueOf(getParameter("age.min"));
-        } else {
-            ageMin = 0;
+        if (getParameter("can.swim.against.current") != null) {
+            canSwimAgainstCurrent = Boolean.valueOf(getParameter("can.swim.against.current"));
         }
-
-        if (getParameter("age.max") != null) {
-            ageMax = Double.valueOf(getParameter("age.max"));
-        } else {
-            ageMax = Double.MAX_VALUE;
-        }
-
-        ageMin *= secs_in_day;
-        ageMax *= secs_in_day;
 
     }
 
     @Override
     public void execute(IParticle particle) {
 
-        if(particle.getAge() < ageMin || particle.getAge() >= ageMax) {
+        if(!this.isActive(particle)) {
             return;
         }
 
@@ -84,7 +66,7 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
         // Larvae cannot swim against the current. Therefore,
         // if the swimming speed is greater that the current, we
         // set the swimming speed as equal to the current
-        swimmingSpeed = Math.min(swimmingSpeed, uv);
+        swimmingSpeed = canSwimAgainstCurrent ? swimmingSpeed : Math.min(swimmingSpeed, uv);
 
         double uorient = swimmingSpeed * Math.cos(theta);
         double vorient = swimmingSpeed * Math.sin(theta);
@@ -106,9 +88,6 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
 
         vonMises = new VonMisesRandom(0, vonMisesKappa);
         dt = getSimulationManager().getTimeManager().get_dt();
-
-        double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
-        PLD = timeMax / (secs_in_day);
 
     }
 

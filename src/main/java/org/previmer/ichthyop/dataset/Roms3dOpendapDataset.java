@@ -89,5 +89,4 @@ public class Roms3dOpendapDataset extends Roms3dCommon {
         }
         setAllFieldsTp1AtTime(rank);
     }
-
 }

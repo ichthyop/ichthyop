@@ -1052,4 +1052,10 @@ public class Regular2DProjected extends AbstractDataset {
         return true;
     }
 
+    @Override
+    public double getBottomDepth(double[] pGrid) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBottomDepth'");
+    }
+
 }

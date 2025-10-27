@@ -54,21 +54,37 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
 public class CheckGrowthParam extends SimulationManagerAccessor {
 
     public static boolean checkParams() {
-        boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+
+        // TODO: optimize that to make it more robust, even for new growth modules added
+        boolean isGrowth;
+        try {
+            isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        } catch (NullPointerException e) {
+            isGrowth = false;
+        }
+
         boolean isDebGrowth;
         try {
             isDebGrowth = getSimulationManager().getActionManager().isEnabled("action.growthdeb");
         } catch (NullPointerException e) {
             isDebGrowth = false;
         }
-        if (isGrowth || isDebGrowth) { // if one or two growth action are on
-            boolean paramOk = (isGrowth ^ isDebGrowth);  // check that only one of the two is true using xor operator
+
+        boolean isExponentialGrowth;
+        try {
+            isExponentialGrowth = getSimulationManager().getActionManager().isEnabled("action.growth.exponential");
+        } catch (NullPointerException e) {
+            isExponentialGrowth = false;
+        }
+
+        if (isGrowth || isDebGrowth || isExponentialGrowth) { // if one or two growth action are on
+            boolean paramOk = (isGrowth ^ isDebGrowth ^ isExponentialGrowth);  // check that only one of the two is true using xor operator
             if (!paramOk) {
                 throw new IllegalArgumentException("Only one among action.growth and action.growthDeb should be ");
             }
         }
         // Redefines isGrowth, taking into account the possibility to set it using deb.
-        isGrowth = (isGrowth || isDebGrowth);
+        isGrowth = (isGrowth || isDebGrowth || isExponentialGrowth);
         return (isGrowth);
     }
 

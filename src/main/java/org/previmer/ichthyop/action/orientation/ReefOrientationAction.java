@@ -2,6 +2,7 @@ package org.previmer.ichthyop.action.orientation;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
+
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.particle.IParticle;
@@ -24,13 +25,12 @@ public class ReefOrientationAction extends OrientationVelocity {
     private double xBarycenter[];
     private double yBarycenter[];
 
+    private String mode;
+
     private double kappaBarycenter[];
 
     ArrayList<Zone> zones;
     private boolean isInitialized = false;
-    private double ageMin;
-    private double ageMax;
-    private String mode;
 
     @FunctionalInterface
     private interface GetReefDistance {
@@ -50,8 +50,6 @@ public class ReefOrientationAction extends OrientationVelocity {
     @Override
     public void loadParameters() throws Exception {
 
-        double secs_in_day = 86400;
-
         super.loadParameters();
 
         maximumDistance = Double.valueOf(getParameter("maximum.distance"));
@@ -70,22 +68,6 @@ public class ReefOrientationAction extends OrientationVelocity {
             getReefDistance = (IParticle particle) -> computeReefDistanceEdges(particle);
             getClosestPoint = (double[] xyCoords, int k) -> this.findClosestPointPolygonEdges(xyCoords, k);
         }
-
-        // Provides age in days
-        if (!isNull("age.min")) {
-            ageMin = Double.valueOf(getParameter("age.min"));
-        } else {
-            ageMin = 0;
-        }
-
-        if (!isNull("age.max")) {
-            ageMax = Double.valueOf(getParameter("age.max"));
-        } else {
-            ageMax = Double.MAX_VALUE;
-        }
-
-        ageMin *= secs_in_day;
-        ageMax *= secs_in_day;
 
         // Load the target areas, i.e. the zones in which the target areas will be
         // defined:
@@ -183,7 +165,7 @@ public class ReefOrientationAction extends OrientationVelocity {
     @Override
     public void execute(IParticle particle) {
 
-        if (particle.getAge() < ageMin || particle.getAge() >= ageMax) {
+        if(!this.isActive(particle)) {
             return;
         }
 
@@ -258,33 +240,6 @@ public class ReefOrientationAction extends OrientationVelocity {
         return new double[] { dLon, dLat };
 
     }
-
-    /**
-     * Haversine formula to compute angles from lat and lon. Cf.
-     * https://www.movable-type.co.uk/scripts/latlong.html Cf.
-     * https://copyprogramming.com/howto/javascript-find-degree-between-two-geo-coordinates-javascript
-     *
-     * TODO Check formula (inversion of X and Y)
-     *
-     * @param lonstart
-     * @param latstart
-     * @param lonend
-     * @param latend
-     * @return
-     */
-    // private double haverSine(double lonstart, double latstart, double lonend,
-    // double latend) {
-
-    // double rlonstart = Math.toRadians(lonstart);
-    // double rlatstart = Math.toRadians(latstart);
-    // double rlonend = Math.toRadians(lonend);
-    // double rlatend = Math.toRadians(latend);
-    // double Y = Math.sin(rlonend - rlonstart) * Math.cos(rlatend);
-    // double X = Math.cos(rlatstart) * Math.sin(rlatend)
-    // - Math.sin(rlatstart) * Math.cos(rlatend) * Math.cos(rlonend - rlonstart);
-    // return Math.atan2(Y, X);
-
-    // }
 
     @Override
     public void init(IParticle particle) {

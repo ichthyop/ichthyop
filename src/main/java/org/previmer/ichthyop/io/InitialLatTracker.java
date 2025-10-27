@@ -42,48 +42,30 @@
  *
  */
 
-package org.previmer.ichthyop.action;
+package org.previmer.ichthyop.io;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import org.previmer.ichthyop.particle.IParticle;
 
 /**
  *
  * @author pverley
  */
-public class SnoozeAction extends AbstractAction {
+public class InitialLatTracker extends InitialFloatTracker {
 
-    private LocalTime snooze, wakeup;
+@Override
+    public void track() {
 
-    public void loadParameters() throws Exception {
-        //SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
-        DateTimeFormatter hourFormat = DateTimeFormatter.ofPattern("HH:mm");
-        snooze = LocalTime.parse(getParameter("start_snooze"), hourFormat);
-        wakeup = LocalTime.parse(getParameter("stop_snooze"), hourFormat);
-    }
-
-    @Override
-    public void init(IParticle particle) {
-        // Nothing to do
-    }
-
-    public void execute(IParticle particle) {
-
-         if (!this.isActive(particle)) {
-            return;
+        int nNow = getSimulationManager().getSimulation().getPopulation().size();
+        // Only write release zone when particle is released
+        for (int i = this.getNop(); i < nNow; i++) {
+            IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
+            getArray().setFloat(getIndex().set(particle.getIndex()), (float) particle.getLat());
         }
+        this.setNop(nNow);
 
-        double time = getSimulationManager().getTimeManager().getTime();  // seconds since 1900-01-01
-        double realHour = (time / (60 * 60)) % 24;  // time / (60 * 60) = time in hours
-        int hour = (int) Math.floor(realHour);
-        double minute = (int) ((realHour - hour) * 60) ;
-        LocalTime currentTime = LocalTime.of(hour, (int) minute);  // current time.
-
-        if ((currentTime.compareTo(snooze) >= 0)  && (currentTime.compareTo(wakeup) < 0)) {
-            particle.increment(new double[]{0, 0, 0}, true, true);
-        } else {
-            // do nothing;
+        // Disable variable when all particles have been released
+        if (this.getNop() == getNParticle()) {
+            disable();
         }
     }
 }

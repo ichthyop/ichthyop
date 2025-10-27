@@ -898,4 +898,9 @@ abstract public class Roms3dCommon extends RomsCommon {
         return variable.read(origin, shape).reduce();
     }
 
+    @Override
+    public double getBottomDepth(double[] pGrid) {
+      return getDepth(pGrid[0], pGrid[1], 0);
+    }
+
 }

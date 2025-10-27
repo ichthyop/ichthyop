@@ -44,26 +44,31 @@
 
 package org.previmer.ichthyop.action;
 
-import java.io.IOException;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
+import org.previmer.ichthyop.particle.ParticleMortality;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.stage.LengthStage;
 import org.previmer.ichthyop.util.Constant;
 
 /**
  *
- * @author pverley
+ * Based on Tanner et al. (2017)
+ *
+ * Issues #115 by E.Ruiz
+ *
+ * @author Nicolas Barrier
  */
-public class SoleGrowthAction extends AbstractAction {
+public class ExponentialGrowthAction extends AbstractAction {
 
     private String temperature_field;
     private double dt_day;
     private LengthStage lengthStage;
-    private float[] c1, c2;
+    private float b, c;
+    private float max_length;
 
     @Override
     public void loadParameters() throws Exception {
@@ -85,24 +90,10 @@ public class SoleGrowthAction extends AbstractAction {
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
 
-        // Coefficients of the growth equation
-        // dLength(dt) = c1 * (temperature ^ c2) * dt
-        c1 = new float[lengthStage.getNStage()];
-        String[] sCoeff = getListParameter("c1");
-        if (sCoeff.length != c1.length) {
-            throw new IOException("In Sole Growth section, the number of c1 coefficients must be equal to the number of stages.");
-        }
-        for (int iStage = 0; iStage < c1.length; iStage++) {
-            c1[iStage] = Float.parseFloat(sCoeff[iStage]);
-        }
-        c2 = new float[lengthStage.getNStage()];
-        sCoeff = getListParameter("c2");
-        if (sCoeff.length != c2.length) {
-            throw new IOException("In Sole Growth section, the number of c2 coefficients must be equal to the number of stages.");
-        }
-        for (int iStage = 0; iStage < c2.length; iStage++) {
-            c2[iStage] = Float.parseFloat(sCoeff[iStage]);
-        }
+        b = Float.valueOf(getParameter("b"));
+        c = Float.valueOf(getParameter("c"));
+        max_length = Float.valueOf(getParameter("max_length"));
+
     }
 
     @Override
@@ -120,13 +111,18 @@ public class SoleGrowthAction extends AbstractAction {
 
         LengthParticleLayer sole = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        sole.incrementLength(grow(lengthStage.getStage(particle), temp));
+        sole.incrementLength(grow(temp, sole.getLength()));
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         stageLayer.setStage(lengthStage.getStage((float) sole.getLength()));
+
+        if(sole.getLength() > max_length) {
+            particle.kill(ParticleMortality.LARGE);
+        }
+
     }
 
-    private double grow(int stage, double temperature) {
-        return c1[stage] * Math.pow(temperature, c2[stage]) * dt_day;
+    private double grow(double temperature, double length) {
+        return b * Math.pow(temperature, c) * length * dt_day;
     }
 
 }

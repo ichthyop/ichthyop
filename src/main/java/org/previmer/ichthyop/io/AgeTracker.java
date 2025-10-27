@@ -42,48 +42,20 @@
  *
  */
 
-package org.previmer.ichthyop.action;
+package org.previmer.ichthyop.io;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.util.Constant;
 
 /**
  *
  * @author pverley
  */
-public class SnoozeAction extends AbstractAction {
-
-    private LocalTime snooze, wakeup;
-
-    public void loadParameters() throws Exception {
-        //SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
-        DateTimeFormatter hourFormat = DateTimeFormatter.ofPattern("HH:mm");
-        snooze = LocalTime.parse(getParameter("start_snooze"), hourFormat);
-        wakeup = LocalTime.parse(getParameter("stop_snooze"), hourFormat);
-    }
+public class AgeTracker extends FloatTracker {
 
     @Override
-    public void init(IParticle particle) {
-        // Nothing to do
-    }
-
-    public void execute(IParticle particle) {
-
-         if (!this.isActive(particle)) {
-            return;
-        }
-
-        double time = getSimulationManager().getTimeManager().getTime();  // seconds since 1900-01-01
-        double realHour = (time / (60 * 60)) % 24;  // time / (60 * 60) = time in hours
-        int hour = (int) Math.floor(realHour);
-        double minute = (int) ((realHour - hour) * 60) ;
-        LocalTime currentTime = LocalTime.of(hour, (int) minute);  // current time.
-
-        if ((currentTime.compareTo(snooze) >= 0)  && (currentTime.compareTo(wakeup) < 0)) {
-            particle.increment(new double[]{0, 0, 0}, true, true);
-        } else {
-            // do nothing;
-        }
+    float getValue(IParticle particle) {
+        float age = (float) (particle.getAge() / Constant.ONE_DAY);
+        return age;
     }
 }

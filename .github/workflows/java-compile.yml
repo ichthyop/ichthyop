@@ -4,7 +4,11 @@ name: java-build
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
-on: [push]
+on:
+    push:
+        branches:
+            - "develop"
+            - "main"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -23,7 +27,7 @@ jobs:
         with:
           java-version: 17
           distribution: oracle
-      
+
       - name: Cache Maven dependencies
         id: maven-dep
         uses: actions/cache@v3
@@ -32,18 +36,18 @@ jobs:
         with:
             path: ~/.m2/repository
             key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.jar') }}
-            restore-keys: | 
+            restore-keys: |
                 ${{ runner.os }}-build-${{ env.cache-name }}-
                 ${{ runner.os }}-build-
                 ${{ runner.os }}-
 
       - name: Update apt
-        run: sudo apt install 
+        run: sudo apt install
 
       - name: Install C dependencies
         run: sudo apt install -yq libnetcdf-dev
 
       - name: Compile Java code
-        run:  | 
+        run:  |
             mvn build-helper:remove-project-artifact
             mvn -B package -DskipTests=false

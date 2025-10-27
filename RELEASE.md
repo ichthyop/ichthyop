@@ -1,5 +1,27 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.4.2
+
+### Bug fix
+
+- Release zone output was computed at record frequency, which led sometimes to -1 values. Now it is computed just after release event (Eliot bug)
+- In the `MigrationAction.java`, positive depth values were not converted to negative ones, contrary to what is stated on the console
+
+### New features
+
+- Particle age is provided as a standard output
+- Particle initial longitudes and latitudes are provided as a standard output
+- In MigrationAction, the depth of the particle is linearly interpolated between sunrise and sunset. And the daytime depth is reached at the maximum of the day, and conversely for the night time depth
+- For `RheotaxisOrientationAction`, possibility to control whether particles can swim against the current or not with the `can.swim.against.current` parameter. **Default if false.**
+- In `MigrationAction`, possibility to use a smoothed transition (linear between day and night depths) instead of sharp displacements. Controlled by the `method` parameter. Default is `standard`, i.e the original behaviour.
+- Adding possibility to use length for orientation velocity calculation (#123)
+
+## Changes in 3.4.1
+
+### Bug fix
+
+- Correction of vertical advection computation for Mercator_3D (answer to issue #122). We check that the vertical velocity that is read is not NaN.
+
 ## Changes in 3.4.0
 
 ### Bug fix

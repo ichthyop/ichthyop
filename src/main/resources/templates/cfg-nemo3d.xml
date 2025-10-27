@@ -274,7 +274,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>field_var_mask</key>
                 <long_name>Land/ocean mask at T points</long_name>
-                <value>fmask</value>
+                <value>tmask</value>
                 <default>fmask</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
@@ -457,6 +457,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <accepted>Forward Euler</accepted>
                 <accepted>Runge Kutta 4</accepted>
                 <description>Use a Forward Euler scheme or a Runge-Kutta 4th order scheme.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Activation variable for process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Use a Forward Euler scheme or a Runge-Kutta 4th order scheme.</description>s
             </parameter>
             <parameter hidden="true">
                 <key>horizontal</key>

@@ -123,6 +123,10 @@ public class RecruitmentStainAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         //@todo
         // catch cast exception
         RecruitableParticleLayer rParticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
@@ -134,6 +138,7 @@ public class RecruitmentStainAction extends AbstractAction {
         if (!rParticle.isRecruited()) {
             if (satisfyRecruitmentCriterion(particle) && isParticleInsideStain(particle)) {
                 rParticle.setRecruited(0, true);
+                particle.lock();
             }
         }
     }

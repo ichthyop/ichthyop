@@ -66,6 +66,11 @@ public class BitAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
+
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         ((BitParticleLayer) particle.getLayer(BitParticleLayer.class)).setBit((int) Math.round(this.getRandomDraft()));
     }
 

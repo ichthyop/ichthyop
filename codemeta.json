@@ -199,7 +199,7 @@
     "dateModified": "2024-07-10",
     "datePublished": "2008-09-01",
     "description": "Ichthyop is a free Java tool designed to study the effects of physical and biological factors on ichthyoplankton dynamics. It incorporates the most important processes involved in fish early life: spawning, movement, growth, mortality and recruitment. The tool uses as input time series of velocity, temperature and salinity fields archived from ROMS, MARS, NEMO or SYMPHONIE oceanic models (either files or OpenDAP).",
-    "downloadUrl": "https://github.com/ichthyop/ichthyop/releases/tag/3.4.0",
+    "downloadUrl": "https://github.com/ichthyop/ichthyop/releases/tag/3.4.1",
     "identifier": "https://doi.org/10.5281/zenodo.4243813",
     "keywords": [
         "ichthyop",
@@ -218,9 +218,9 @@
     "name": "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics",
     "programmingLanguage": "Java",
     "relatedLink": "https://ichthyop.org/",
-    "schema:releaseNotes": "https://github.com/ichthyop/ichthyop/compare/3.3.17.3...3.4.0",
+    "schema:releaseNotes": "https://github.com/ichthyop/ichthyop/compare/3.4.0...3.4.1",
     "runtimePlatform": "JVM",
-    "version": "3.4.0",
+    "version": "3.4.1",
     "contIntegration": "https://github.com/ichthyop/ichthyop/actions",
     "codemeta:continuousIntegration": {
         "id": "https://github.com/ichthyop/ichthyop/actions"

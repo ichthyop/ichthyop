@@ -85,15 +85,15 @@ public class Mercator_3D extends AbstractDataset {
     /**
      * Longitude at rho point.
      */
-    private float[] longitude;
+    private float longitude[];
     /**
      * Latitude at rho point.
      */
-    private float[] latitude;
+    private float latitude[] ;
     /**
      * Mask: water = 1, cost = 0
      */
-    private int[][][] maskRho;//, masku, maskv;
+    private int maskRho[][][];//, masku, maskv;
     /**
      * Zonal component of the velocity field at current time
      */
@@ -121,11 +121,11 @@ public class Mercator_3D extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    private double[][][] gdepT;
+    private double gdepT[][][];
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    private double[][][] gdepW;
+    private double gdepW[][][];
     /**
      * Geographical boundary of the domain
      */
@@ -173,8 +173,8 @@ public class Mercator_3D extends AbstractDataset {
     /**
      *
      */
-    private double[][][] e3t, e3u, e3v;
-    private double[][] e1t, e2t, e1v, e2u;
+    private double e3t[][][], e3u[][][], e3v[][][];
+    private double e1t[][], e2t[][], e1v[][], e2u[][];
     private String stre1t, stre2t, stre3t;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
@@ -532,16 +532,17 @@ public class Mercator_3D extends AbstractDataset {
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (.5d - (double) kk - dz));
-                    CO += co;
                     index.set(k + kk, j + jj, i + ii);
-                    x = (1.d - x_euler) * w_tp0.getDouble(index)
-                            + x_euler * w_tp1.getDouble(index);
-                    dw += 2.d * x * co
-                            / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
-                            - gdepW[Math.min(k + kk + 1, nz)][j + jj][i + ii]);
+                    // Patch for Eliot (issues 122)
+                    // Check whether the value is NaN for the vertical velocity.
+                    // If so, we don't read it.
+                    if (!Double.isNaN(w_tp0.getDouble(index))) {
+                        co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                        CO += co;
+                        x = (1.d - x_euler) * w_tp0.getDouble(index) + x_euler * w_tp1.getDouble(index);
+                        dw += 2.d * x * co / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
+                                - gdepW[Math.min(k + kk + 1, nz)][j + jj][i + ii]);
+                    }
                 }
             }
         }
@@ -1234,8 +1235,8 @@ public class Mercator_3D extends AbstractDataset {
         }
         depth = Math.abs(depth);
 
-        int i = (int) Math.floor(x);
-        int j = (int) Math.floor(y);
+        int i = (int) Math.round(x);
+        int j = (int) Math.round(y);
 
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
@@ -1291,8 +1292,8 @@ public class Mercator_3D extends AbstractDataset {
         int k = (int) Math.round(kz);
         dz = z - k;
 
-        int i = (int) Math.floor(x);
-        int j = (int) Math.floor(y);
+        int i = (int) Math.round(x);
+        int j = (int) Math.round(y);
 
         if (dz < 0) { // >= ?
             depth = gdepT[k][j][i]
@@ -1877,5 +1878,11 @@ public class Mercator_3D extends AbstractDataset {
     @Override
     public double yTore(double y) {
         return y;
+    }
+
+    @Override
+    public double getBottomDepth(double[] pGrid) {
+        double bathy = getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return bathy;
     }
 }

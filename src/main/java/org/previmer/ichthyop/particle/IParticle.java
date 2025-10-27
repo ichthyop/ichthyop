@@ -134,6 +134,8 @@ public interface IParticle {
      */
     public long getAge();
 
+    public abstract double getLength();
+
     /**
      * Kills the particle and specify the cause of the death. Sets
      * <code>living</code> status to <code>false</code>. And sets longitude,

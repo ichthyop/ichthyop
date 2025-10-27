@@ -58,7 +58,8 @@ public enum ParticleMortality {
     STARVATION(5),
     DEAD_HOT(6),
     DEAD_FRESH(7),
-    DEAD_SALINE(8);
+    DEAD_SALINE(8),
+    LARGE(9);
 
     private int code = 0;
 

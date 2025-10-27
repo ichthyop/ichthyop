@@ -42,48 +42,55 @@
  *
  */
 
-package org.previmer.ichthyop.action;
+package org.previmer.ichthyop.io;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.ZoneParticleLayer;
+
+import java.util.Iterator;
+import ucar.ma2.Array;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.DataType;
 
 /**
  *
  * @author pverley
  */
-public class SnoozeAction extends AbstractAction {
+public abstract class InitialFloatTracker extends AbstractInitialStateTracker {
 
-    private LocalTime snooze, wakeup;
+    private int nPopTm1;
 
-    public void loadParameters() throws Exception {
-        //SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
-        DateTimeFormatter hourFormat = DateTimeFormatter.ofPattern("HH:mm");
-        snooze = LocalTime.parse(getParameter("start_snooze"), hourFormat);
-        wakeup = LocalTime.parse(getParameter("stop_snooze"), hourFormat);
+    InitialFloatTracker() {
+        super(DataType.FLOAT);
+        nPopTm1 = 0;
     }
 
     @Override
-    public void init(IParticle particle) {
-        // Nothing to do
+    void setDimensions() {
+        addDrifterDimension();
     }
 
-    public void execute(IParticle particle) {
-
-         if (!this.isActive(particle)) {
-            return;
-        }
-
-        double time = getSimulationManager().getTimeManager().getTime();  // seconds since 1900-01-01
-        double realHour = (time / (60 * 60)) % 24;  // time / (60 * 60) = time in hours
-        int hour = (int) Math.floor(realHour);
-        double minute = (int) ((realHour - hour) * 60) ;
-        LocalTime currentTime = LocalTime.of(hour, (int) minute);  // current time.
-
-        if ((currentTime.compareTo(snooze) >= 0)  && (currentTime.compareTo(wakeup) < 0)) {
-            particle.increment(new double[]{0, 0, 0}, true, true);
-        } else {
-            // do nothing;
-        }
+    public void setNop(int value) {
+        nPopTm1 = value;
     }
+
+    public int getNop() {
+        return nPopTm1;
+    }
+
+    @Override
+    Array createArray() {
+        ArrayFloat.D1 array = new ArrayFloat.D1(getNParticle());
+        for (int i = 0; i < getNParticle(); i++) {
+            array.set(i, Float.NaN);
+        }
+        return array;
+    }
+
+    @Override
+    public void addRuntimeAttributes() {
+        // no runtime attribute
+    }
+
 }

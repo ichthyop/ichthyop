@@ -11,7 +11,7 @@ resources:
   - developer/grid/_static
 
 book:
-  title: "Ichthyop User Guide (3.4.0)"
+  title: "Ichthyop User Guide (3.4)"
   author:
     - name: "Nicolas Barrier"
       orcid: 0000-0002-1693-4719

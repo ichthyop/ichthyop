@@ -46,9 +46,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import javax.xml.bind.helpers.ValidationEventImpl;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.previmer.ichthyop.action.orientation.ReefOrientationAction;
+import org.previmer.ichthyop.io.ConfigurationFile;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
 /** Test of the Von Mises distributions. Expected values are extracted from Python, using:
@@ -61,11 +63,17 @@ import org.previmer.ichthyop.util.VonMisesRandom;
 
 public class TestVmDistribution {
 
-
+    private ConfigurationFile cfgFile;
     private double PREC = 1e-3;
+
+    @BeforeAll
+    public void prepareData() throws Exception {
+        cfgFile = new ConfigurationFile(Template.getTemplateFile("cfg-generic.xml"));
+    }
 
     private double[] getValues(double mu, double kappa) {
 
+        cfgFile = new ConfigurationFile(Template.getTemplateFile("cfg-generic.xml"));
         VonMisesRandom vm = new VonMisesRandom(0, kappa);
         int N = 100000000;
         double[] values = new double[N];

@@ -725,4 +725,10 @@ abstract class Mars3dCommon extends MarsCommon {
 
         return variable.read(origin, shape).reduce();
     }
+
+    @Override
+    public double getBottomDepth(double[] pGrid) {
+        return getDepth(pGrid[0], pGrid[1], 0);
+    }
+
 }
