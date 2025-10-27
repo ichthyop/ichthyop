@@ -13,7 +13,6 @@ import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.action.BuoyancyAction;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.util.CheckGrowthParam;
 
 import com.opencsv.CSVParserBuilder;

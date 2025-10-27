@@ -67,7 +67,7 @@ public class ExponentialGrowthAction extends AbstractAction {
     private String temperature_field;
     private double dt_day;
     private LengthStage lengthStage;
-    private float a, b, c;
+    private float b, c;
     private float max_length;
 
     @Override
@@ -90,7 +90,6 @@ public class ExponentialGrowthAction extends AbstractAction {
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
 
-        a = lengthStage.getThreshold(0);
         b = Float.valueOf(getParameter("b"));
         c = Float.valueOf(getParameter("c"));
         max_length = Float.valueOf(getParameter("max_length"));

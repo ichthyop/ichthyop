@@ -2,11 +2,9 @@ package org.previmer.ichthyop.action.orientation;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
-import java.awt.geom.Line2D;
 
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
@@ -31,8 +29,6 @@ public class ReefOrientationAction extends OrientationVelocity {
 
     @Override
     public void loadParameters() throws Exception {
-
-        double secs_in_day = 86400;
 
         super.loadParameters();
 

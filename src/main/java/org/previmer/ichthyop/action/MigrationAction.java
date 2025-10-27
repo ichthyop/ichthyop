@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
@@ -60,8 +59,6 @@ import com.opencsv.CSVReaderBuilder;
 
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.particle.StageParticleLayer;
-import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**
  *
@@ -347,8 +344,6 @@ public class MigrationAction extends AbstractAction {
         double realHour = (time / (60 * 60)) % 24;
         int hour = (int) Math.floor(realHour);
         double minute = (int) ((realHour - hour) * 60) ;
-
-        LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)
         double bottom = getSimulationManager().getDataset().getBottomDepth(new double[] {particle.getX(), particle.getY()});

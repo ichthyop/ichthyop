@@ -58,7 +58,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**

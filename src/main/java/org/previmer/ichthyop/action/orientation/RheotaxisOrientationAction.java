@@ -9,12 +9,9 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
     private VonMisesRandom vonMises;
-    private double secs_in_day = 86400;
     private boolean canSwimAgainstCurrent = false;
 
-
     double dt;
-    private double PLD;
 
     @Override
     public void loadParameters() throws Exception {
@@ -91,9 +88,6 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
 
         vonMises = new VonMisesRandom(0, vonMisesKappa);
         dt = getSimulationManager().getTimeManager().get_dt();
-
-        double timeMax = getSimulationManager().getTimeManager().getSimulationDuration();
-        PLD = timeMax / (secs_in_day);
 
     }
 

@@ -45,8 +45,6 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.util.CheckGrowthParam;
-import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.manager.TimeManager;
 
 public class WindDriftAction extends AbstractAction {
@@ -71,16 +69,6 @@ public class WindDriftAction extends AbstractAction {
      * Wind convention used
      */
     static double convention;
-
-    private String method;
-    private double classMin;
-    private double classMax;
-
-    private interface GetValue {
-        public double getValue(IParticle particle);
-    }
-
-    private GetValue getValue;
 
     @Override
     public void loadParameters() throws Exception {
