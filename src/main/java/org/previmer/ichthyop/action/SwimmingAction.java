@@ -53,8 +53,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.util.CheckGrowthParam;
+import org.previmer.ichthyop.util.Constant;
 
 /**
  * This class simulates active swimming, given the swimming velocity as an age
@@ -74,38 +78,90 @@ public class SwimmingAction extends AbstractAction {
     // speed in m/s
     private float[] speeds;
     // ages in seconds
-    private float[] ages;
+    private float[] classes;
     private double dt;
     private boolean constant;
+    private double velocityBodyLength;
+
+    private interface GetValue {
+        public double getValue(IParticle particle);
+    }
+
+    private interface GetVelocity {
+        public double getVelocity(IParticle particle);
+    }
+
+    GetValue getValue;
+    GetVelocity getVelocity;
 
     @Override
     public void loadParameters() throws Exception {
 
-        // Read swimming velocity file
-        String velocity_file = getParameter("velocity_file");
-        String pathname = IOTools.resolveFile(velocity_file);
-        File f = new File(pathname);
-        if (!f.isFile()) {
-            throw new FileNotFoundException("Swimming velocity file " + pathname + " not found.");
+        boolean useCsv = true;
+        getVelocity = this::getSpeedCsv;
+
+        // Use csv is true by default
+        // but this can be overwritten
+        if(!isNull("swimming.speed.csv.enabled")) {
+            useCsv = Boolean.valueOf(getParameter("swimming.speed.csv.enabled"));
         }
-        if (!f.canRead()) {
-            throw new IOException("Swimming velocity file " + pathname + " cannot be read.");
+
+        String method = "age";
+        if(!isNull("swimming.speed.mode")) {
+            method = getParameter("swimming.speed.mode");
         }
-        Locale.setDefault(Locale.US);
-        // open velocities csv file
-        CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
-        List<String[]> lines = reader.readAll();
-        // init arrays
-        ages = new float[lines.size() - 1];
-        speeds = new float[ages.length];
-        // read ages (days converted to seconds) and velocities
-        for (int i = 0; i < ages.length; i++) {
-            String[] line = lines.get(i + 1);
-            if (line.length < 2 || line[0].isEmpty()) {
-                continue;
+
+        if(method.equals("age")) {
+            getValue = particle -> (particle.getAge() / Constant.ONE_DAY);
+        } else if (method.equals("length")) {
+            boolean isGrowth = CheckGrowthParam.checkParams();
+            if(isGrowth) {
+                if (useCsv){
+                    getValue = particle -> (particle.getLength());
+                } else {
+                    getVelocity = this::getSpeedLength;
+                    // velocityBodyLength is divided by 100 since length is provided in cm/s. Avoids
+                    // dividing length by 100 at each time step
+                    velocityBodyLength = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
+                }
+            } else {
+                throw new IllegalArgumentException("Swimming action cannot depend on length since no growth action is on");
             }
-            ages[i] = Float.valueOf(line[0]) * 3600.f * 24.f;
-            speeds[i] = Float.valueOf(line[1]);
+        } else {
+            getLogger().log(Level.WARNING, "Wrong method provided. SwimmingAction based on Age");
+            getValue = particle -> (particle.getAge() / Constant.ONE_DAY);
+        }
+
+        if (useCsv) {
+
+            // Read swimming velocity file
+            String velocity_file = getParameter("velocity_file");
+            String pathname = IOTools.resolveFile(velocity_file);
+            File f = new File(pathname);
+            if (!f.isFile()) {
+                throw new FileNotFoundException("Swimming velocity file " + pathname + " not found.");
+            }
+            if (!f.canRead()) {
+                throw new IOException("Swimming velocity file " + pathname + " cannot be read.");
+            }
+
+            Locale.setDefault(Locale.US);
+            // open velocities csv file
+            CSVReader reader = new CSVReaderBuilder(new FileReader(pathname))
+                    .withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
+            List<String[]> lines = reader.readAll();
+            // init arrays
+            classes = new float[lines.size() - 1];
+            speeds = new float[classes.length];
+            // read ages (days converted to seconds) and velocities
+            for (int i = 0; i < classes.length; i++) {
+                String[] line = lines.get(i + 1);
+                if (line.length < 2 || line[0].isEmpty()) {
+                    continue;
+                }
+                classes[i] = Float.valueOf(line[0]);
+                speeds[i] = Float.valueOf(line[1]) / 100;
+            }
         }
 
         // Simulation time step
@@ -118,8 +174,12 @@ public class SwimmingAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        if(!this.isActive(particle)) {
+            return;
+        }
+
         // Find the swimming velocity for this particle
-        double speed = getSpeed(particle) * (constant ? 1.d : 2.d*this.getRandomDraft());
+        double speed = getVelocity.getVelocity(particle) * (constant ? 1.d : 2.d*this.getRandomDraft());
         // Random x component of the swimming velocity
         double u = randomDir() * this.getRandomDraft() * speed;
         // y component such as sqrt(x2 + y2) = speed
@@ -146,14 +206,18 @@ public class SwimmingAction extends AbstractAction {
      * @param particle
      * @return the swimming velocity of the particle in m.s-1
      */
-    private float getSpeed(IParticle particle) {
-        float age = particle.getAge();
-        for (int i = 0; i < ages.length - 1; i++) {
-            if (ages[i] <= age && age < ages[i + 1]) {
+    private float getSpeedCsv(IParticle particle) {
+        double value = getValue.getValue(particle);
+        for (int i = 0; i < classes.length - 1; i++) {
+            if (classes[i] <= value && value < classes[i + 1]) {
                 return speeds[i];
             }
         }
-        return speeds[ages.length - 1];
+        return speeds[classes.length - 1];
+    }
+
+    private float getSpeedLength(IParticle particle) {
+        return (float) (particle.getLength() * velocityBodyLength);
     }
 
     /**

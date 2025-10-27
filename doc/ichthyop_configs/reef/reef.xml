@@ -1360,6 +1360,35 @@
     <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
     <parameters>
       <parameter>
+        <key>attraction.mode</key>
+        <long_name>Attraction mode ("edges" or "barycenter")</long_name>
+        <value>edges</value>
+        <default>edges</default>
+        <format>combo</format>
+        <accepted>edges</accepted>
+        <accepted>barycenter</accepted>
+        <description>Attraction mode ("edges" or "barycenter"). If edges, the particle will be attracted by the edges or vertices of the polygons. Else, it will be attracted by the barycenters</description>
+      </parameter>
+      <parameter>
+        <key>swimming.speed.mode</key>
+        <long_name>Mode of velocity calculation. </long_name>
+        <value>age</value>
+        <default>age</default>
+        <format>combo</format>
+        <accepted>age</accepted>
+        <accepted>length</accepted>
+        <accepted>csv</accepted>
+        <description>Age, CSV (based on age) or Length (if growth process is on)</description>
+      </parameter>
+      <parameter>
+        <key>swimming.body.length.speed</key>
+        <long_name>Velocity in bodylength / s (cm/s) </long_name>
+        <value>1</value>
+        <default>1</default>
+        <format>float</format>
+        <description>Age, CSV (based on age) or Lenght (if growth process is on)</description>
+      </parameter>
+        <parameter>
         <key>maximum.distance</key>
         <long_name>Maximum distance [meter]</long_name>
         <value>300000.0</value>
@@ -1370,7 +1399,7 @@
       <parameter>
         <key>swimming.speed.hatch</key>
         <long_name>Swimming speed hatch [m/s]</long_name>
-        <value>1.0</value>
+        <value>20.0</value>
         <default>1</default>
         <format>float</format>
         <description>Swimming speed hatch [m/s]</description>

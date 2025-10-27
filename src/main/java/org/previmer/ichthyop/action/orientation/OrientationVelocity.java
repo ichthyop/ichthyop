@@ -13,6 +13,7 @@ import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.action.BuoyancyAction;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.util.CheckGrowthParam;
 
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -23,12 +24,19 @@ public abstract class OrientationVelocity extends AbstractAction {
 
     private double secs_in_day = 86400;
 
-    private double swimmingSpeedHatch; // cm
-    private double swimmingSpeedSettle; // cm
+    private double swimmingSpeedHatch; // cm / s
+    private double swimmingSpeedSettle; // cm / s
     private double PLD; // days
 
-    private double[] ageCsv; // age array from CSV (seconds)
+    private double[] classCsv; // age array from CSV (seconds)
     private double[] speedCsv; // speed array (m/s);
+    private double velocityPerLengthUnit;  // m/s
+    private boolean useCsv = true;
+    private String method = "age";
+
+    private interface GetValue {
+        double getValue(IParticle particle);
+    }
 
     @FunctionalInterface
     public interface InnerOrientationVelocity {
@@ -40,25 +48,56 @@ public abstract class OrientationVelocity extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        String key = "swimming.speed.csv.enabled";
-        if (!isNull(key) && Boolean.valueOf(getParameter(key))) {
-            velocityMethod = (IParticle particle) -> getVelocityCsv(particle);
-            initVelocityCsv();
-        } else {
+        // Check the speed computation mode (age or length)
+        String key = "swimming.speed.mode";
+        if(!isNull(key)) {
+            method = getParameter(key);
+        }
 
-            // values in cm/s
-            swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
-            swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
+        // Allows for backward compatibility
+        key = "swimming.speed.csv.enabled";
+        if (!isNull(key)) {
+            useCsv = Boolean.valueOf(getParameter(key));
+        }
 
-            if (swimmingSpeedHatch > swimmingSpeedSettle) {
-                getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
-                double temp = swimmingSpeedHatch;
-                swimmingSpeedHatch = swimmingSpeedSettle;
-                swimmingSpeedSettle = temp;
-            }
+        boolean isGrowth = CheckGrowthParam.checkParams();  // check if growth or debgrowth is true (xor)
+        if (!isGrowth && method.equals("length")) {
+            throw new IllegalArgumentException("Velocity cannot be based on particle length since no growth model not activated.");
+        }
 
-            velocityMethod = (IParticle particle) -> getVelocityPLD(particle);
+        switch (method) {
+            case "age":
+                if(useCsv) {
+                    velocityMethod = (IParticle particle) -> getVelocityCsv(particle, particle_temp -> (particle_temp.getAge() / secs_in_day));
+                    initVelocityCsv();
+                } else {
+                    // values in cm/s
+                    swimmingSpeedHatch = Double.valueOf(getParameter("swimming.speed.hatch"));
+                    swimmingSpeedSettle = Double.valueOf(getParameter("swimming.speed.settle"));
 
+                    if (swimmingSpeedHatch > swimmingSpeedSettle) {
+                        getLogger().log(Level.WARNING, "Hatch and Settle velocity have been swapped");
+                        double temp = swimmingSpeedHatch;
+                        swimmingSpeedHatch = swimmingSpeedSettle;
+                        swimmingSpeedSettle = temp;
+                    }
+                    velocityMethod = (IParticle particle) -> getVelocityPLD(particle);
+                }
+                break;
+
+            case "length":
+                if (useCsv) {
+                    velocityMethod = (IParticle particle) -> getVelocityCsv(particle, particle_temp -> particle_temp.getLength());
+                    initVelocityCsv();
+                } else {
+                    // Body length speed is divided by 100, since length is provided in cm. Avoids dividing by 100
+                    // for each particle
+                    velocityPerLengthUnit = Double.valueOf(getParameter("swimming.body.length.speed")) / 100;
+                    velocityMethod = (IParticle particle) -> getVelocityLength(particle);
+                }
+                break;
+            default:
+                break;
         }
 
     }
@@ -92,12 +131,12 @@ public abstract class OrientationVelocity extends AbstractAction {
         return swimmingSpeed;
     }
 
-    public double getVelocityCsv(IParticle particle) {
+    public double getVelocityCsv(IParticle particle, GetValue getValue) {
 
-        double age = particle.getAge(); // seconds
-        for (int i = 0; i < ageCsv.length - 1; i++) {
-            if ((age >= ageCsv[i]) && (age < ageCsv[i + 1])) {
-                return speedCsv[i]; // value already in m/s
+        double age = getValue.getValue(particle); // seconds
+        for (int i = 0; i < classCsv.length - 1; i++) {
+            if ((age >= classCsv[i]) && (age < classCsv[i + 1])) {
+                return speedCsv[i]; // value already converted in m/s in the loadVelocitiesCsv function
             }
         }
 
@@ -115,11 +154,11 @@ public abstract class OrientationVelocity extends AbstractAction {
             if (!f.canRead()) {
                 throw new IOException("Density file " + pathname + " cannot be read.");
             }
-            loadDensities(pathname);
+            loadVelocitiesCsv(pathname);
         }
     }
 
-    private void loadDensities(String csvFile) throws CsvException {
+    private void loadVelocitiesCsv(String csvFile) throws CsvException {
         Locale.setDefault(Locale.US);
         try {
             // open densities csv file
@@ -128,17 +167,22 @@ public abstract class OrientationVelocity extends AbstractAction {
             List<String[]> lines = reader.readAll();
 
             // init arrays
-            ageCsv = new double[lines.size() - 1];
-            speedCsv = new double[ageCsv.length];
+            classCsv = new double[lines.size() - 1];
+            speedCsv = new double[classCsv.length];
 
             // read ageCsv (days converted to seconds) and
-            for (int i = 0; i < ageCsv.length; i++) {
+            for (int i = 0; i < classCsv.length; i++) {
                 String[] line = lines.get(i + 1);
-                ageCsv[i] = Double.valueOf(line[0]) * secs_in_day; // age in seconds
+                classCsv[i] = Double.valueOf(line[0]); // age in days or length in cm
                 speedCsv[i] = Double.valueOf(line[1]) / 100; // values in m/s
             }
         } catch (IOException ex) {
             Logger.getLogger(BuoyancyAction.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    public double getVelocityLength(IParticle particle) {
+        return  particle.getLength() * velocityPerLengthUnit;  // values already in m /s (loadParameters function)
+    }
+
 }

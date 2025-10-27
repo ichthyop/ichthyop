@@ -76,6 +76,8 @@ public interface IDataset extends NextStepListener {
 
     double get_dWz(double[] pGrid, double time);
 
+    double getBottomDepth(double[] pGrid);
+
     public boolean isInWater(double[] pGrid);
 
     public boolean isInWater(int i, int j);

@@ -44,11 +44,13 @@ package org.previmer.ichthyop;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.xml.bind.helpers.ValidationEventImpl;
+import java.io.File;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.previmer.ichthyop.action.orientation.ReefOrientationAction;
+import org.previmer.ichthyop.io.ConfigurationFile;
+import org.previmer.ichthyop.manager.ParameterManager;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
 /** Test of the Von Mises distributions. Expected values are extracted from Python, using:
@@ -61,8 +63,15 @@ import org.previmer.ichthyop.util.VonMisesRandom;
 
 public class TestVmDistribution {
 
-
+    private ConfigurationFile cfgFile;
     private double PREC = 1e-3;
+
+    @BeforeAll
+    public void prepareData() throws Exception {
+        String configurationFile = this.getClass().getClassLoader().getResource("templates/cfg-generic.xml").getPath();
+        File file = new File(configurationFile);
+        ParameterManager.getInstance().setConfigurationFile(file);
+    }
 
     private double[] getValues(double mu, double kappa) {
 

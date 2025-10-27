@@ -1,5 +1,48 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.5.0
+
+### Bug fix
+
+- Release zone output was computed at record frequency, which led sometimes to -1 values. Now it is computed just after release event (Eliot bug)
+- In the `MigrationAction.java`, positive depth values were not converted to negative ones, contrary to what is stated on the console
+
+### New features
+
+- Particle age is provided as a standard output
+- Particle initial longitudes and latitudes are provided as a standard output
+- In `MigrationAction`, the depth of the particle can be linearly interpolated between sunrise and sunset. And the daytime depth is reached at the maximum of the day, and conversely for the night time depth
+- For `RheotaxisOrientationAction`, possibility to control whether particles can swim against the current or not with the `can.swim.against.current` parameter. **Default if false.**
+- Adding possibility to use speed in bodylength/seconds for orientation velocity calculation (#123).
+- In `ReefOrientationAction`, possibility to use either polygon edges or barycenters to computed distances to reefs (Celine's request)
+- Rafting process has been implemented (#114): the particle moves at the surface when reaching a certain age.
+- Exponential growth has been implemented (#115)
+- For each processes, user now can control whether it is active or not, depending on either age or length (if growth is activated).
+
+## Changes in 3.4.1
+
+### Bug fix
+
+- Correction of vertical advection computation for Mercator_3D (answer to issue #122). We check that the vertical velocity that is read is not NaN.
+
+## Changes in 3.4.0
+
+### Bug fix
+
+- Correction of a bug in bouncing and standstill processes in case of 3D simulations. The 3D mask is now considered instead of the mask at the surface.
+
+### New features
+
+- **Orientation processes**:
+    - Possibility to define a minimum and maximum age for orientation processes. Allows to combine multiple orientation strategies
+    - Possibility to define current velocities directly from a CSV file
+
+- **Code metadata**:
+    - Adding a `codemeta.json` file with full metadata included.'
+    - Update the `CITATION.cff` file (new authors)
+    - Update the `.zenodo.json` file (new authors)
+    - Adding the `CONTRIBUTORS` and `AUTHORS` files
+
 ## Changes in 3.3.17.3
 
 ### Bug fix

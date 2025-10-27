@@ -1249,4 +1249,10 @@ public class NoveltisDataset extends AbstractDataset {
     public double yTore(double y) {
         return y;
     }
+
+    @Override
+    public double getBottomDepth(double[] pGrid) {
+        double bathy = getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return bathy;
+    }
 }

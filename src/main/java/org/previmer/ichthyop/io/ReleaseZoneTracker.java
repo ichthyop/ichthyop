@@ -58,7 +58,7 @@ import ucar.nc2.Attribute;
  *
  * @author pverley
  */
-public class ReleaseZoneTracker extends AbstractTracker {
+public class ReleaseZoneTracker extends AbstractInitialStateTracker {
 
     private int nPopTm1;
 

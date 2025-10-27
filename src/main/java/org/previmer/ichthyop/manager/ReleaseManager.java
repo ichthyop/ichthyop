@@ -133,6 +133,10 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     @Override
     public void releaseTriggered(ReleaseEvent event) throws Exception {
         int nbReleased = releaseProcess.release(event);
+
+        // Add here the saving of initial states.
+        getSimulationManager().getOutputManager().write_intial_step();
+
         StringBuilder sb = new StringBuilder();
         sb.append("Release event (");
         sb.append(getClass().getSimpleName());

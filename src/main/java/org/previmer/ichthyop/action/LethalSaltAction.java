@@ -149,6 +149,11 @@ public class LethalSaltAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
+
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         checkTp(particle);
     }
 

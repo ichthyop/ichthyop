@@ -69,6 +69,11 @@ public class SnoozeAction extends AbstractAction {
     }
 
     public void execute(IParticle particle) {
+
+         if (!this.isActive(particle)) {
+            return;
+        }
+
         double time = getSimulationManager().getTimeManager().getTime();  // seconds since 1900-01-01
         double realHour = (time / (60 * 60)) % 24;  // time / (60 * 60) = time in hours
         int hour = (int) Math.floor(realHour);
