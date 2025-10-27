@@ -1959,7 +1959,7 @@ public class NemoDataset extends AbstractDataset {
 
     @Override
     public double getBottomDepth(double[] pGrid) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBottomDepth'");
+        double bathy = getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return bathy;
     }
 }

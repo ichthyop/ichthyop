@@ -297,11 +297,4 @@ public class Roms3dDataset extends Roms3dCommon {
         System.exit(0);
 
     }  // end of method
-
-    @Override
-    public double getBottomDepth(double[] pGrid) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBottomDepth'");
-    }
-
 }

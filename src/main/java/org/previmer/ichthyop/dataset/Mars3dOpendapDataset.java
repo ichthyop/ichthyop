@@ -88,10 +88,4 @@ public class Mars3dOpendapDataset extends Mars3dCommon {
         }
         setAllFieldsTp1AtTime(rank);
     }
-
-    @Override
-    public double getBottomDepth(double[] pGrid) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBottomDepth'");
-    }
 }
