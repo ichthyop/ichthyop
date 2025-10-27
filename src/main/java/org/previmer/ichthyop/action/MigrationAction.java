@@ -342,8 +342,6 @@ public class MigrationAction extends AbstractAction {
     private double getDepthLinear(IParticle particle, double time) {
 
         double realHour = (time / (60 * 60)) % 24;
-        int hour = (int) Math.floor(realHour);
-        double minute = (int) ((realHour - hour) * 60) ;
 
         // get bathy in meter (<0)
         double bottom = getSimulationManager().getDataset().getBottomDepth(new double[] {particle.getX(), particle.getY()});
