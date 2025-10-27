@@ -95,8 +95,8 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
             if (isGrowth) {
                 getValue = particle -> (particle.getLength());
             } else {
-                throw new IllegalArgumentException(
-                        "Wind drift action cannot be based on particle length since no growth model not activated.");
+                String errorMessage = String.format("%s action cannot be based on particle length since no growth model not activated.",  this.getClass().getCanonicalName());
+                throw new IllegalArgumentException(errorMessage);
             }
         } else {
             if (activation_variable.equals("age")) {
