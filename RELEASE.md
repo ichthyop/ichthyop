@@ -11,10 +11,13 @@
 
 - Particle age is provided as a standard output
 - Particle initial longitudes and latitudes are provided as a standard output
-- In MigrationAction, the depth of the particle is linearly interpolated between sunrise and sunset. And the daytime depth is reached at the maximum of the day, and conversely for the night time depth
+- In `MigrationAction`, the depth of the particle can be linearly interpolated between sunrise and sunset. And the daytime depth is reached at the maximum of the day, and conversely for the night time depth
 - For `RheotaxisOrientationAction`, possibility to control whether particles can swim against the current or not with the `can.swim.against.current` parameter. **Default if false.**
-- In `MigrationAction`, possibility to use a smoothed transition (linear between day and night depths) instead of sharp displacements. Controlled by the `method` parameter. Default is `standard`, i.e the original behaviour.
-- Adding possibility to use length for orientation velocity calculation (#123)
+- Adding possibility to use speed in bodylength/seconds for orientation velocity calculation (#123).
+- In `ReefOrientationAction`, possibility to use either polygon edges or barycenters to computed distances to reefs (Celine's request)
+- Rafting process has been implemented (#114): the particle moves at the surface when reaching a certain age.
+- Exponential growth has been implemented (#115)
+- For each processes, user now can control whether it is active or not, depending on either age or length (if growth is activated).
 
 ## Changes in 3.4.1
 
