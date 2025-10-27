@@ -459,6 +459,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <description>Use a Forward Euler scheme or a Runge-Kutta 4th order scheme.</description>
             </parameter>
             <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Activation variable for process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Use a Forward Euler scheme or a Runge-Kutta 4th order scheme.</description>s
+            </parameter>
+            <parameter hidden="true">
                 <key>horizontal</key>
                 <long_name>Horizontal advection</long_name>
                 <value>true</value>

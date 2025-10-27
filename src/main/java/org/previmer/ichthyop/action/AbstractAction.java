@@ -45,6 +45,7 @@
 package org.previmer.ichthyop.action;
 
 import java.util.Random;
+import java.util.logging.Level;
 
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.io.BlockType;
@@ -96,6 +97,7 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
                 getValue = particle -> (particle.getLength());
             } else {
                 String errorMessage = String.format("%s action cannot be based on particle length since no growth model not activated.",  this.getClass().getCanonicalName());
+                getLogger().log(Level.SEVERE, errorMessage);
                 throw new IllegalArgumentException(errorMessage);
             }
         } else {
