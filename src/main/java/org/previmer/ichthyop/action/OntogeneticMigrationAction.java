@@ -226,6 +226,10 @@ public class OntogeneticMigrationAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
+        if(!this.isActive(particle)) {
+            return;
+        }
+
         // Find the corresponding time step in the matrix of probability
         int iTime = 0;
         double currentTime = getSimulationManager().getTimeManager().getTime();

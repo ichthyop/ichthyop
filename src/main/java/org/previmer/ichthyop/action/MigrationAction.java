@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
@@ -60,7 +59,6 @@ import com.opencsv.CSVReaderBuilder;
 
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.particle.StageParticleLayer;
 
 /**
  *
@@ -111,15 +109,6 @@ public class MigrationAction extends AbstractAction {
      * Whether the depth at day equals the depth at night.
      */
     private boolean isodepth;
-    /**
-     * Particle minimal age for enabling vertical migration.
-     */
-    private long minimumAge;
-    /**
-     * Whether a growth module is enabled. In that case minimal age is ignored
-     * and vertical migration is only enabled beyond egg stage.
-     */
-    private boolean isGrowth;
 
     @FunctionalInterface
     public interface InnerMigrationAction{
@@ -154,13 +143,6 @@ public class MigrationAction extends AbstractAction {
             innerMigrationAction = (particle, time) -> getDepthDefault(particle, time);
         }
 
-        // Check whether the growth module is enabled
-        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
-
-        // Otherwise read migration minimal age
-        if (!isGrowth) {
-            minimumAge = (long) (Float.valueOf(getParameter("age_min")) * 24.f * 3600.f);
-        }
         // Check existence of daytime depth as an age function, provided in CSV file
         if (!isNull("daytime_depth_file")) {
             String pathname = IOTools.resolveFile(getParameter("daytime_depth_file"));
@@ -263,45 +245,27 @@ public class MigrationAction extends AbstractAction {
         // Nothing to do
     }
 
-    private double getBathy(IParticle particle) {
-
-        int i = (int) Math.floor(particle.getX());
-        int j = (int) Math.floor(particle.getY());
-        double bottom = -Math.abs(getSimulationManager().getDataset().getBathy(i, j));
-        if (Double.isNaN(bottom)) {
-            bottom = 0;
-        }
-        return bottom;
-
-    }
 
     @Override
     public void execute(IParticle particle) {
 
-        // Migration only applies for larva stages (and beyond)
-        boolean isSatisfiedCriterion;
-        if (!isGrowth) {
-            isSatisfiedCriterion = particle.getAge() > minimumAge;
-        } else {
-            // stage == 0 means egg, stage > 0 means larvae
-            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
-            isSatisfiedCriterion = stage > 0;
-        }
-
-        if (isSatisfiedCriterion) {
+        if (this.isActive(particle)) {
             double depth;
             if (isodepth) {
                 // constant depth
                 // adding a constraint in case of constant depth.
-                double bottom = this.getBathy(particle);
+                double bottom = getSimulationManager().getDataset()
+                        .getBottomDepth(new double[] { particle.getX(), particle.getY() });
+                bottom = -Math.abs(bottom);
                 depth = (depthDay < bottom) ? particle.getDepth() : depthDay;
             } else {
                 // diel vertical migration
                 depth = innerMigrationAction.getDepth(particle, getSimulationManager().getTimeManager().getTime());
             }
 
-            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
-            particle.increment(new double[]{0.d, 0.d, dz}, false, true);
+            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth)
+                    - particle.getZ();
+            particle.increment(new double[] { 0.d, 0.d, dz }, false, true);
         }
     }
 
@@ -325,7 +289,8 @@ public class MigrationAction extends AbstractAction {
         LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)
-        double bottom = this.getBathy(particle);
+        double bottom = getSimulationManager().getDataset().getBottomDepth(new double[] {particle.getX(), particle.getY()});
+        bottom = -Math.abs(bottom);
         double output;
 
         if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {
@@ -377,13 +342,10 @@ public class MigrationAction extends AbstractAction {
     private double getDepthLinear(IParticle particle, double time) {
 
         double realHour = (time / (60 * 60)) % 24;
-        int hour = (int) Math.floor(realHour);
-        double minute = (int) ((realHour - hour) * 60) ;
-
-        LocalTime currentTime = LocalTime.of(hour, (int) minute);
 
         // get bathy in meter (<0)
-        double bottom = this.getBathy(particle);
+        double bottom = getSimulationManager().getDataset().getBottomDepth(new double[] {particle.getX(), particle.getY()});
+        bottom = -Math.abs(bottom);
         double output;
 
         // Update depth value at day time

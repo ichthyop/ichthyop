@@ -34,7 +34,7 @@ public class WaveDriftFileAction extends AbstractAction {
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strUW, strVW, strTime;
+    static String strUStockes, strVStockes, strTime;
     /**
      * Name of the Dimension in NetCDF file
      */
@@ -88,27 +88,27 @@ public class WaveDriftFileAction extends AbstractAction {
     /**
      * Zonal component of the stokes drift field at current time
      */
-    static Array uw_tp0;
+    static Array u_stockes_array_tp0;
     /**
      * Zonal component of the stokes drift field at time t + dt
      */
-    static Array uw_tp1;
+    static Array u_stockes_array_tp1;
     /**
      * Meridional component of the stokes drift field at current time
      */
-    static Array vw_tp0;
+    static Array v_stockes_array_tp0;
     /**
      * Meridional component of the stokes drift field at time t + dt
      */
-    static Array vw_tp1;
+    static Array v_stockes_array_tp1;
     /**
      * U stokes drift variable
      */
-    RequiredExternalVariable U_variable;
+    RequiredExternalVariable U_stockes_variable;
     /**
      * V stokes drift variable
      */
-    RequiredExternalVariable V_variable;
+    RequiredExternalVariable V_stockes_variable;
     /**
      * Wave period
      */
@@ -142,18 +142,41 @@ public class WaveDriftFileAction extends AbstractAction {
      */
     static Array wave_period_tp1;
 
+    boolean constant_over_depth = true;
+
+    double depth_max = Double.MAX_VALUE;
+
     public void loadParameters() throws Exception {
 
         strTime = getParameter("field_time");
         time_current = getSimulationManager().getTimeManager().getTime();
         openLocation(getParameter("input_path"));
 
+        if (!isNull(getParameter("wave_constant_over_depth"))) {
+            constant_over_depth = Boolean.valueOf(getParameter("wave_constant_over_depth"));
+        }
+
         wave_factor = Double.valueOf(getParameter("wave_factor"));
-        str_wave_period = getParameter("wave_period");
-        str_wave_speed_u = getParameter("wave_u");
-        str_wave_speed_v = getParameter("wave_v");
-        strUW = getParameter("stokes_u");
-        strVW = getParameter("stokes_v");
+
+        if (!constant_over_depth) {
+            str_wave_period = getParameter("wave_period");
+            str_wave_speed_u = getParameter("wave_u");
+            str_wave_speed_v = getParameter("wave_v");
+            wave_period = new RequiredExternalVariable(latRho, lonRho, wave_period_tp0, wave_period_tp1,
+                    getSimulationManager().getDataset());
+            wave_speed_u = new RequiredExternalVariable(latRho, lonRho, wave_speed_u_tp0, wave_speed_u_tp1,
+                    getSimulationManager().getDataset());
+            wave_speed_v = new RequiredExternalVariable(latRho, lonRho, wave_speed_v_tp0, wave_speed_v_tp1,
+                    getSimulationManager().getDataset());
+        }
+
+        if (!isNull("depth_max")) {
+            depth_max = Double.valueOf(getParameter("depth_max"));
+            depth_max = Math.abs(depth_max);
+        }
+
+        strUStockes = getParameter("stokes_u");
+        strVStockes = getParameter("stokes_v");
         strLon = getParameter("longitude");
         strLat = getParameter("latitude");
         getDimNC();
@@ -161,13 +184,9 @@ public class WaveDriftFileAction extends AbstractAction {
         setAllFieldsTp1AtTime(rank);
         readLonLat();
 
-        U_variable = new RequiredExternalVariable(latRho, lonRho, uw_tp0, uw_tp1, getSimulationManager().getDataset());
-        V_variable = new RequiredExternalVariable(latRho, lonRho, vw_tp0, vw_tp1, getSimulationManager().getDataset());
-        wave_period = new RequiredExternalVariable(latRho, lonRho, wave_period_tp0, wave_period_tp1,
+        U_stockes_variable = new RequiredExternalVariable(latRho, lonRho, u_stockes_array_tp0, u_stockes_array_tp1,
                 getSimulationManager().getDataset());
-        wave_speed_u = new RequiredExternalVariable(latRho, lonRho, wave_speed_u_tp0, wave_speed_u_tp1,
-                getSimulationManager().getDataset());
-        wave_speed_v = new RequiredExternalVariable(latRho, lonRho, wave_speed_v_tp0, wave_speed_v_tp1,
+        V_stockes_variable = new RequiredExternalVariable(latRho, lonRho, v_stockes_array_tp0, v_stockes_array_tp1,
                 getSimulationManager().getDataset());
 
     }
@@ -295,11 +314,14 @@ public class WaveDriftFileAction extends AbstractAction {
             return;
         }
 
-        uw_tp0 = uw_tp1;
-        vw_tp0 = vw_tp1;
-        wave_period_tp0 = wave_period_tp1;
-        wave_speed_u_tp0 = wave_speed_u_tp1;
-        wave_speed_v_tp0 = wave_speed_v_tp1;
+        u_stockes_array_tp0 = u_stockes_array_tp1;
+        v_stockes_array_tp0 = v_stockes_array_tp1;
+
+        if (!constant_over_depth) {
+            wave_period_tp0 = wave_period_tp1;
+            wave_speed_u_tp0 = wave_speed_u_tp1;
+            wave_speed_v_tp0 = wave_speed_v_tp1;
+        }
 
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
@@ -316,7 +338,7 @@ public class WaveDriftFileAction extends AbstractAction {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
         int fileRank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
-        
+
         open(getFile(fileRank));
         readTimeLength();
         rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
@@ -384,11 +406,14 @@ public class WaveDriftFileAction extends AbstractAction {
 
         double time_tp0 = time_tp1;
 
-        uw_tp1 = readVariable(strUW);
-        vw_tp1 = readVariable(strVW);
-        wave_period_tp1 = readVariable(str_wave_period);
-        wave_speed_u_tp1 = readVariable(str_wave_speed_u);
-        wave_speed_v_tp1 = readVariable(str_wave_speed_v);
+        u_stockes_array_tp1 = readVariable(strUStockes);
+        v_stockes_array_tp1 = readVariable(strVStockes);
+
+        if (!constant_over_depth) {
+            wave_period_tp1 = readVariable(str_wave_period);
+            wave_speed_u_tp1 = readVariable(str_wave_speed_u);
+            wave_speed_v_tp1 = readVariable(str_wave_speed_v);
+        }
 
         try {
             time_tp1 = DatasetUtil.getDate(ncIn.getLocation(), strTime, rank);
@@ -403,6 +428,7 @@ public class WaveDriftFileAction extends AbstractAction {
     }
 
     public void execute(IParticle particle) {
+
         if (time_current != getSimulationManager().getTimeManager().getTime()) {
             try {
                 nextStepTriggered();
@@ -411,11 +437,23 @@ public class WaveDriftFileAction extends AbstractAction {
             }
         }
 
-        U_variable.nextStep(uw_tp1, time_tp1, dt_wave);
-        V_variable.nextStep(vw_tp1, time_tp1, dt_wave);
-        wave_period.nextStep(wave_period_tp1, time_tp1, dt_wave);
-        wave_speed_u.nextStep(wave_speed_u_tp1, time_tp1, dt_wave);
-        wave_speed_v.nextStep(wave_speed_v_tp1, time_tp1, dt_wave);
+        U_stockes_variable.nextStep(u_stockes_array_tp1, time_tp1, dt_wave);
+        V_stockes_variable.nextStep(v_stockes_array_tp1, time_tp1, dt_wave);
+
+        if (!constant_over_depth) {
+            wave_period.nextStep(wave_period_tp1, time_tp1, dt_wave);
+            wave_speed_u.nextStep(wave_speed_u_tp1, time_tp1, dt_wave);
+            wave_speed_v.nextStep(wave_speed_v_tp1, time_tp1, dt_wave);
+        }
+
+        // If the particle is below the maximum depth, do not apply the action
+        if (Math.abs(particle.getDepth()) > depth_max) {
+            return;
+        }
+
+        if (!this.isActive(particle)) {
+            return;
+        }
 
         double[] mvt = getDLonLat(particle.getGridCoordinates(), particle.getDepth(),
                 getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt());
@@ -432,22 +470,37 @@ public class WaveDriftFileAction extends AbstractAction {
         double dx, dy;
         double[] latlon = getSimulationManager().getDataset().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
-        double wave_speed = Math.pow(
-                Math.pow(wave_speed_u.getVariable(pgrid, time), 2) + Math.pow(wave_speed_v.getVariable(pgrid, time), 2),
-                0.5);
-        double wave_length = wave_speed * wave_period.getVariable(pgrid, time);
-        double wave_number = 2 * Math.PI / wave_length;
-        dx = dt * U_variable.getVariable(pgrid, time) / one_deg_lon_meter;
-        dy = dt * V_variable.getVariable(pgrid, time) / ONE_DEG_LATITUDE_IN_METER;
-        dWi[0] = wave_factor * dx * Math.exp(2 * wave_number * depth);
-        dWi[1] = wave_factor * dy * Math.exp(2 * wave_number * depth);
 
-        /*
-         * double tmp; for(double i=0;i<10;i++){
-         * System.out.println(" wave number length speed : " + wave_number + " " +
-         * wave_length + " " + wave_speed); tmp = Math.exp(-2.0*wave_number*i);
-         * System.out.println(" prof atténuation : " + i + " " + tmp ); }
-         */
+        double uStokes = U_stockes_variable.getVariable(pgrid, time);
+        double vStokes = V_stockes_variable.getVariable(pgrid, time);
+
+        if (Double.isNaN(vStokes)) {
+            // System.out.println("------------------ vStokes is NaN at time " + time + " for particle at " + pgrid[0] + ", " + pgrid[1]);
+            vStokes = 0.d;
+        }
+        if (Double.isNaN(uStokes)) {
+            // System.out.println("------------------ uStokes is NaN at time " + time + " for particle at " + pgrid[0] + ", " + pgrid[1]);
+            uStokes = 0.d;
+        }
+
+        // computes the wave drift using the 2D fields
+        dx = wave_factor * dt * uStokes / one_deg_lon_meter;
+        dy = wave_factor * dt * vStokes / ONE_DEG_LATITUDE_IN_METER;
+
+        if (!constant_over_depth) {
+
+            // If 3D, computes the influence of the depth
+            double wave_speed = Math.pow(Math.pow(wave_speed_u.getVariable(pgrid, time), 2)
+                    + Math.pow(wave_speed_v.getVariable(pgrid, time), 2), 0.5);
+            double wave_length = wave_speed * wave_period.getVariable(pgrid, time);
+            double wave_number = 2 * Math.PI / wave_length;
+            dWi[0] = dx * Math.exp(2 * wave_number * depth);
+            dWi[1] = dy * Math.exp(2 * wave_number * depth);
+        } else {
+            dWi[0] = dx;
+            dWi[1] = dy;
+        }
+
         return dWi;
     }
 
@@ -458,9 +511,10 @@ public class WaveDriftFileAction extends AbstractAction {
     double skipSeconds(double time) {
         return 100.d * Math.floor(time / 100.d);
     }
-    
+
     int timeArrow() {
-        return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 :-1;
+        return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow")
+                .equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
     }
-    
+
 }

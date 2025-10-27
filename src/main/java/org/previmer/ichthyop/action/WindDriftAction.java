@@ -81,6 +81,7 @@ public class WindDriftAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(strUW, getClass());
         getSimulationManager().getDataset().requireVariable(strVW, getClass());
         convention = "wind to".equals(getParameter("wind_convention")) ? 1 : -1;
+
     }
 
     @Override
@@ -90,14 +91,16 @@ public class WindDriftAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-
-        double[] mvt = getDLonLat(particle.getGridCoordinates(), -particle.getDepth(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt());
-        double newLon = particle.getLon() + mvt[0];
-        double newLat = particle.getLat() + mvt[1];
-        double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
-        double[] windincr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
-        particle.increment(windincr);
-
+        if ((this.isActive(particle))) {
+            double[] mvt = getDLonLat(particle.getGridCoordinates(), -particle.getDepth(),
+                    getSimulationManager().getTimeManager().getTime(),
+                    getSimulationManager().getTimeManager().get_dt());
+            double newLon = particle.getLon() + mvt[0];
+            double newLat = particle.getLat() + mvt[1];
+            double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
+            double[] windincr = new double[] { newPos[0] - particle.getX(), newPos[1] - particle.getY() };
+            particle.increment(windincr);
+        }
     }
 
     private double[] getDLonLat(double[] pgrid, double depth, double time, double dt) {

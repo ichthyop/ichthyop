@@ -171,6 +171,11 @@ public class DebGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
+
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         double temp = getSimulationManager().getDataset().get(temperature_field, debLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();

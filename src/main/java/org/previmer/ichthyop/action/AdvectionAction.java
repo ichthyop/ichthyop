@@ -101,6 +101,11 @@ public class AdvectionAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
+
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         if (isForward) {
             advectForward(particle, getSimulationManager().getTimeManager().getTime());
         } else {

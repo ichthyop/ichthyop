@@ -95,6 +95,10 @@ public class WindAction extends AbstractAction {
 
     public void execute(IParticle particle) {
 
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         /* for 3D simulation, ckeck whether the particle is close surface */
         if (particle.getZ() >= 0) {
             double dz = Math.abs(particle.getZ() - (getSimulationManager().getDataset().get_nz() - 1));

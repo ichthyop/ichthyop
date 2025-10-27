@@ -44,12 +44,12 @@
 
 package org.previmer.ichthyop.action;
 
-import java.io.IOException;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
+import org.previmer.ichthyop.particle.ParticleMortality;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.stage.LengthStage;
 import org.previmer.ichthyop.util.Constant;
@@ -67,7 +67,8 @@ public class ExponentialGrowthAction extends AbstractAction {
     private String temperature_field;
     private double dt_day;
     private LengthStage lengthStage;
-    private float a, b, c;
+    private float b, c;
+    private float max_length;
 
     @Override
     public void loadParameters() throws Exception {
@@ -89,9 +90,9 @@ public class ExponentialGrowthAction extends AbstractAction {
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
 
-        a = Float.valueOf(getParameter("a"));
         b = Float.valueOf(getParameter("b"));
         c = Float.valueOf(getParameter("c"));
+        max_length = Float.valueOf(getParameter("max_length"));
 
     }
 
@@ -103,15 +104,25 @@ public class ExponentialGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
+
+        if (!this.isActive(particle)) {
+            return;
+        }
+
         LengthParticleLayer sole = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        sole.incrementLength(grow(temp));
+        sole.incrementLength(grow(temp, sole.getLength()));
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         stageLayer.setStage(lengthStage.getStage((float) sole.getLength()));
+
+        if(sole.getLength() > max_length) {
+            particle.kill(ParticleMortality.LARGE);
+        }
+
     }
 
-    private double grow(double temperature) {
-        return a * Math.exp(b * Math.pow(temperature, c) * dt_day);
+    private double grow(double temperature, double length) {
+        return b * Math.pow(temperature, c) * length * dt_day;
     }
 
 }
