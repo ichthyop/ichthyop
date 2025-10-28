@@ -3839,38 +3839,114 @@
             </parameter>
         </parameters>
     </block>
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ReefOrientation.java -->
     <block type="action">
         <key>action.orientation.reef</key>
         <tree_path>Transport/Orientation/Reef</tree_path>
         <enabled>true</enabled>
-        <description>Block of options for defining some recruitment criterions and recruitment
-            zones, in order to study, for instance, the recruitment success of a particular
-            geographic area. First time you enable the recruitment process, do not forget to create
-            a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
+        <description>Block of options for defining reef orientation process.</description>
         <parameters>
-            <parameter>
-                <key>maximum.distance</key>
-                <long_name>Maximum distance [meter]</long_name>
-                <value>300000.0</value>
-                <default>20.0</default>
-                <format>float</format>
-                <description>Maximum distance</description>
+            <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
             </parameter>
+            <parameter hidden="true">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
+            <parameter>
+                <key>swimming.speed.mode</key>
+                <long_name>Variable used to compute orientation velocity</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to compute orientation velocity. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter>
+                <key>swimming.speed.csv.enabled</key>
+                <long_name>Wheter velocity is read from a CSV</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>True if the orientation velocity should be read from a CSV file or not.
+                    This method can be used when age or length is used</description>
+            </parameter>
+
             <parameter>
                 <key>swimming.speed.hatch</key>
                 <long_name>Swimming speed hatch [cm/s]</long_name>
                 <value>1.0</value>
                 <default>1</default>
                 <format>float</format>
-                <description>Swimming speed hatch [cm/s]</description>
+                <description>Swimming speed hatch [cm/s]. Only used when age is used for speed
+                    calculation and CSV are not used</description>
             </parameter>
+
             <parameter>
                 <key>swimming.speed.settle</key>
                 <long_name>Swimming speed settle [cm/s]</long_name>
-                <value>50.0</value>
-                <default>10</default>
+                <value>100.0</value>
+                <default>1000</default>
                 <format>float</format>
-                <description>Swimming speed settle [cm/s]</description>
+                <description>Swimming speed settle [cm/s]. Only used when age is used for speed
+                    calculation and CSV are not used</description>
+            </parameter>
+
+            <parameter>
+                <key>swimming.body.length.speed</key>
+                <long_name>Velocity in body length/seconds</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description>Swimming speed in body length/seconds. Only used when length is used
+                    for speed calculation and CSV are not used</description>
+            </parameter>
+
+            <parameter>
+                <key>maximum.distance</key>
+                <long_name>Detection distance [meter]</long_name>
+                <value>300000.0</value>
+                <default>20.0</default>
+                <format>float</format>
+                <description>Detection distance. If the closest target are is beyond this</description>
+            </parameter>
+
+            <parameter>
+                <key>attraction.mode</key>
+                <long_name>Attraction mode</long_name>
+                <value>barycenter</value>
+                <default>barycenter</default>
+                <format>combo</format>
+                <accepted>edges</accepted>
+                <accepted>barycenter</accepted>
+                <description>Defines whether the particle will detect the target edges or
+                    barycenters</description>
             </parameter>
             <parameter>
                 <key>zone_file</key>
@@ -3881,9 +3957,10 @@
                 <template>target-zone-indian.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative
                     pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.).
-                    The application only loads release zones from the file and ignores the other
+                    The application only loads target zones from the file and ignores the other
                     types of zone (recruitment zone for instance).</description>
             </parameter>
+
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
