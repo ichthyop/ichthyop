@@ -74,7 +74,7 @@ public class ReefOrientationAction extends OrientationVelocity {
         getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.TARGET);
         zones = getSimulationManager().getZoneManager().getZones(TypeZone.TARGET);
         if (zones == null || zones.size() == 0) {
-            String message = String.format("No target zones defined in %s", getParameter("target_file"));
+            String message = String.format("No target zones defined in %s", getParameter("zone_file"));
             getLogger().log(Level.SEVERE, message);
         }
 
