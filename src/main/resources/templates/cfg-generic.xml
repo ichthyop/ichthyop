@@ -3839,8 +3839,7 @@
             </parameter>
         </parameters>
     </block>
-    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ReefOrientation.java -->
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ ReefOrientation.java -->
     <block type="action">
         <key>action.orientation.reef</key>
         <tree_path>Transport/Orientation/Reef</tree_path>
@@ -4118,30 +4117,92 @@
             </parameter>
         </parameters>
     </block>
+
+
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ RheotaxisOrientation.java -->
     <block type="action">
         <key>action.orientation.rheotaxis</key>
         <tree_path>Transport/Orientation/Rheotaxis</tree_path>
         <enabled>true</enabled>
-        <description>Block of options for defining some recruitment criterions and recruitment
-            zones, in order to study, for instance, the recruitment success of a particular
-            geographic area. First time you enable the recruitment process, do not forget to create
-            a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
+        <description>Block of options for defining Rheotaxis orientation process</description>
         <parameters>
+
+            <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
+            <parameter>
+                <key>swimming.speed.mode</key>
+                <long_name>Variable used to compute orientation velocity</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to compute orientation velocity. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+            <parameter>
+                <key>swimming.speed.csv.enabled</key>
+                <long_name>Wheter velocity is read from a CSV</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>True if the orientation velocity should be read from a CSV file or not.
+                    This method can be used when age or length is used</description>
+            </parameter>
             <parameter>
                 <key>swimming.speed.hatch</key>
-                <long_name>Swimming speed hatch [m/s]</long_name>
+                <long_name>Swimming speed hatch [cm/s]</long_name>
                 <value>1.0</value>
                 <default>1</default>
                 <format>float</format>
-                <description>Swimming speed hatch [m/s]</description>
+                <description>Swimming speed hatch [cm/s]. Only used when age is used for speed
+                    calculation and CSV are not used</description>
             </parameter>
+
             <parameter>
                 <key>swimming.speed.settle</key>
-                <long_name>Swimming speed settle [m/s]</long_name>
+                <long_name>Swimming speed settle [cm/s]</long_name>
                 <value>100.0</value>
-                <default>10</default>
+                <default>1000</default>
                 <format>float</format>
-                <description>Swimming speed settle [m/s]</description>
+                <description>Swimming speed settle [cm/s]. Only used when age is used for speed
+                    calculation and CSV are not used</description>
+            </parameter>
+            <parameter>
+                <key>swimming.body.length.speed</key>
+                <long_name>Velocity in body length/seconds</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description>Swimming speed in body length/seconds. Only used when length is used
+                    for speed calculation and CSV are not used</description>
             </parameter>
             <parameter>
                 <key>swimming.von.mises.kappa</key>
@@ -4149,23 +4210,16 @@
                 <value>2.0</value>
                 <default>10</default>
                 <format>float</format>
-                <description>Swimming speed settle [m/s]</description>
+                <description>Kappa parameter of the Von Mises distribution for direction. Small
+                    values indicate a higher range of possible directions</description>
             </parameter>
             <parameter>
-                <key>age.min</key>
-                <long_name>Min age (days) when this orientation mode is activated</long_name>
-                <value>2.0</value>
-                <default>0</default>
-                <format>float</format>
-                <description>Min age (days) when this orientation mode is activated</description>
-            </parameter>
-            <parameter>
-                <key>age.max</key>
-                <long_name>Min age (days) when this orientation mode is activated</long_name>
-                <value>3.0</value>
-                <default>10</default>
-                <format>float</format>
-                <description>Min age (days) when this orientation mode is activated</description>
+                <key>can.swim.against.current</key>
+                <long_name>Swim against current</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>True if the particle can swim agains the current</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
