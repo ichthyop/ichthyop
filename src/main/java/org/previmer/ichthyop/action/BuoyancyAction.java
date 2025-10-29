@@ -58,7 +58,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**
  *
@@ -108,7 +107,6 @@ public class BuoyancyAction extends AbstractAction {
     private static double waterDensity;
     private String salinity_field;
     private String temperature_field;
-    private boolean isGrowth;
     private float[] particleDensities;
     private float[] ages;
     private BuoyancyModel buoyancyModel;
