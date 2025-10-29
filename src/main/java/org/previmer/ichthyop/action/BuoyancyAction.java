@@ -133,18 +133,9 @@ public class BuoyancyAction extends AbstractAction {
             MOLECULAR_VISCOSITY = Double.valueOf(getParameter(key));
         }
 
-
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
-        isGrowth = CheckGrowthParam.checkParams();
-        if (!isGrowth) {
-            try {
-                maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;
-            } catch (Exception ex) {
-                maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
-                getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
-            }
-        }
+
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
 

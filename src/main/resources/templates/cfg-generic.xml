@@ -3099,6 +3099,7 @@
         </parameters>
     </block>
 
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ BuoyancyAction.java -->
     <block type="action">
         <key>action.buoyancy</key>
         <description>Block of options that control the buoyancy process. This block can be enabled
@@ -3109,6 +3110,38 @@
         <enabled>false</enabled>
 
         <parameters>
+
+            <parameter hidden="false">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
 
             <parameter type="serial">
                 <key>particle_density</key>
@@ -3138,14 +3171,30 @@
             </parameter>
 
             <parameter>
-                <key>age_max</key>
-                <long_name>Maximum age [day]</long_name>
-                <value>3.0</value>
+                <key>mean_major_axis</key>
+                <value>0.14</value>
+                <default>0.14</default>
+                <long_name>Mean major axis</long_name>
+                <description>Mean major axis of the particle (cm)</description>
                 <format>float</format>
-                <default>3.0</default>
-                <description>Maximum age [day] for adding buoyancy effect to the particle. If the
-                    growth process is activated (see Biology/Growth), this parameter is ignored by
-                    the application and the buoyancy only operates during the egg stage.</description>
+            </parameter>
+
+            <parameter>
+                <key>mean_minor_axis</key>
+                <value>0.05</value>
+                <default>0.05</default>
+                <long_name>Mean minor axis</long_name>
+                <description>Mean minor axis of the particle (cm)</description>
+                <format>float</format>
+            </parameter>
+
+            <parameter>
+                <key>molecular_viscosity</key>
+                <value>0.01</value>
+                <default>0.01</default>
+                <long_name>Molecular viscosity</long_name>
+                <description>Molecular viscosity (g/cm/s). The value is prescibed and not dynamically computed.</description>
+                <format>float</format>
             </parameter>
 
             <parameter>
