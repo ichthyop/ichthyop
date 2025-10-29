@@ -64,3 +64,5 @@ format:
 
   pdf:
     fontfamily: libertinus
+    keep-tex: true
+    pdf-engine: pdflatex

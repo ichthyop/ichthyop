@@ -50,7 +50,8 @@ $$ {#eq-deb-repfonct}
 
 with $F$ the food vector and $K$ the half-saturation constant.
 
-Assimilation rates $\{ \dot{p_{Am}} \}$, energy conductance $\dot{\gamma} = \dfrac{\{ \dot{p_{Am}}\}}{[E_m]} $, volume specific somatic maintenance ($[\dot{p_M} ]$) and maturity maintenances rates ($k_J$) are corrected by the $c_T$ factor.
+Assimilation rates $\{\dot{p_{Am}}\}$, energy conductance $\dot{\gamma}=\dfrac{\{ \dot{p_{Am}}\}}{[E_m]}$,
+volume specific somatic maintenance ($[\dot{p_M}]$) and maturity maintenances rates ($k_J$) are corrected by the $c_T$ factor.
 
 If the accelerated DEB model is used, thr metabolic rate acceleration is computed as follows
 
@@ -63,14 +64,14 @@ s_M =
 \end{cases}
 $$ {#eq-deb-sm}
 
-with $L_b$ the length of the particle when $E_H > E_Hb$ (i.e the length at birth) and $L_j$ the length of the particlet when $E_H > E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate and the energy conductance.
+with $L_b$ the length of the particle when $E_H > E_Hb$ (i.e the length at birth) and $L_j$ the length of the particlet when $E_H > E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate $\{\dot{p_{Am}}\}$ and the energy conductance $\dot{\gamma}$.
 
 Consequently, the assimilation (in $J.day^{-1}$) is computed as follows:
 
 $$
 \dot{p_A} = \begin{cases}
 0 & (E_{H} < E_{Hb}) \\
-\{ \dot{p_{Am}}\} \times s_M \times c_T \times f \times {V}^{2/3}  & (E_{H} \ge E_{Hb}) \\
+\times c_T \times s_M \{ \dot{p_{Am}}\}  \times f \times {V}^{2/3}  & (E_{H} \ge E_{Hb}) \\
 \end{cases}
 $$ {#eq-deb-pA}
 
@@ -85,14 +86,14 @@ The mobilized energy is given by:
 
 $$
 \dot{p_C} =
-\dfrac{\dfrac{E}{V} \times \left([E_G] \times \dot{\gamma} \times V^{2/3} + \dot{p_M}\right)}
+\dfrac{\dfrac{E}{V} \times \left([E_G] \times \times c_T \times s_M \dot{\gamma} \times V^{2/3} + \dot{p_M}\right)}
 {\kappa \dfrac{E}{V} + [E_G]}
 $$ {#eq-deb-pC}
 
 Maturity maintenance is given by
 
 $$
-\dot{p_J} = k_J \times c_T \times E_H
+\dot{p_J} = c_T \times k_J \times  E_H
 $$ {#eq-deb-pJ}
 
 Energy that is sent to structural growth is given by:
@@ -141,8 +142,8 @@ Finally, starvation mortality is determined whether one of the following conditi
 $$
 M_{starv} =
 \begin{cases}
-\kappa \dot{p_C} & < & \dot{p_M}\\
-(1 - \kappa) {\dot{p_C}} < p_J
+\kappa \dot{p_C}  <  \dot{p_M}\\
+(1 - \kappa) \dot{p_C}  <  p_J
 \end{cases}
 $$ {#eq-deb-starv}
 
