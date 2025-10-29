@@ -41,3 +41,13 @@ c_T = \exp \left( \dfrac{T_A}{T_1} - \dfrac{T_A}{T} \right)
 }
 \right]
 $$
+
+If the particle is not feeding ($E_H \lt $E_{Hb}$), then the particle does not feed. Else, the functional response is computed as:
+
+$$
+f = \dfrac{F}{F + K}
+$$
+
+with $F$ the food vector and $K$ the half-saturation constant.
+
+Assimilation rates $\{ \dot{p_{Am}}s \}$, energy conductance $\dot{\gamma}$, volume specific somatic maintenance ($\[\dot{p_M} \]$) and maturity maintenances rates ($k_J$) are corrected by the $c_T$ factor.

@@ -3100,16 +3100,6 @@
             </parameter>
 
             <parameter hidden="false">
-                <key></key>
-                <long_name></long_name>
-                <value></value>
-                <default></default>
-                <format></format>
-                <description></description>
-            </parameter>
-
-
-            <parameter hidden="false">
                 <key>assimilation rate</key>
                 <long_name>Assimilation rate (J/cm2/day)</long_name>
                 <value>325</value>
@@ -3211,6 +3201,33 @@
                 <default>0.5</default>
                 <format>float</format>
                 <description>Half saturation constant of functional response</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>maturity_thres_birth</key>
+                <long_name>Maturity threshold for birth (J)</long_name>
+                <value></value>
+                <default></default>
+                <format>float</format>
+                <description>Maturity threshold for birth (J)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>maturity_thres_metamorphosis</key>
+                <long_name>Maturity threshold for metamorphosis (J)</long_name>
+                <value></value>
+                <default></default>
+                <format></format>
+                <long_name>Maturity threshold for metamorphosis (J)</long_name>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>maturity_thres_puberty</key>
+                <long_name>Maturity threshold for puberty (J)</long_name>
+                <value></value>
+                <default></default>
+                <format></format>
+                <long_name>Maturity threshold for puberty (J)</long_name>
             </parameter>
 
             <parameter>
