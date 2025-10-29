@@ -361,11 +361,30 @@ public class DebGrowthAction_LP extends AbstractAction {
         return starvation;
     }
 
+    /**
+     * @brief Computes Ahrrenius temperature
+     *
+     *  \f[
+     * T_{ahr} = \exp
+     * \left(
+     * \frac{T_A}{T_{ref}} - \frac{T_A}{T}
+     * \right)
+     *  \f]
+     *
+     * @param T_kelvin
+     * @return
+     */
     private double computeTcorr(double T_kelvin) {
         double Tcorr = Math.exp(TA / T1 - TA / (T_kelvin));
         return Tcorr;
     }
 
+    /**
+     * Computes Ahrrenius temperature based on equation 5 of \cite FLORESVALIENTE2023103034
+     *
+     * @param T_kelvin
+     * @return
+     */
     private double computeTcorrLp(double T_kelvin) {
         double c1 = this.computeTcorr(T_kelvin);
         double num = 1 + Math.exp((T_AL / T1) - (T_AL / T_L)) + Math.exp((T_AH / T_H) - (T_AH / T1));

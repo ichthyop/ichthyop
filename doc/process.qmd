@@ -18,3 +18,4 @@ Parameters associated with these processes must be included in `action` blocks. 
 {{< include process/wave.qmd >}}
 {{< include process/land.qmd >}}
 {{< include process/orientation.qmd >}}
+{{< include process/deb.qmd >}}

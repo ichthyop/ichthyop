@@ -1,0 +1,43 @@
+## DEB growth
+
+The DEB equations are based on @FLORESVALIENTE2023103034
+
+Influene of temperature is given by equation 5 of @FLORESVALIENTE2023103034:
+
+$$
+c_T = \exp \left( \dfrac{T_A}{T_1} - \dfrac{T_A}{T} \right)
+\left[
+\dfrac{
+1 +
+\exp
+\left(
+\dfrac{T_{AL}}{T_1}
+-
+\dfrac{T_{AL}}{T_L}
+\right)
++
+\exp
+\left(
+\dfrac{T_{AH}}{T_H}
+-
+\dfrac{T_{AH}}{T_1}
+\right)
+}
+{
+1 +
+\exp
+\left(
+\dfrac{T_{AL}}{T}
+-
+\dfrac{T_{AL}}{T_L}
+\right)
++
+\exp
+\left(
+\dfrac{T_{AH}}{T_H}
+-
+\dfrac{T_{AH}}{T}
+\right)
+}
+\right]
+$$
