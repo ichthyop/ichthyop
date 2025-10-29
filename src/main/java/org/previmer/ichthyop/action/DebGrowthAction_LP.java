@@ -322,12 +322,12 @@ public class DebGrowthAction_LP extends AbstractAction {
         double flow_p_J = k_JT * E_H;        // maturity maintenance
 
         // Corresponds to (kappa_pc - pm)
-        double flow_p_G = Math.max(0.0, Kappa * flow_p_C - flow_p_M) / this.E_G;     // energy directed to structural growth
+        double flow_p_G = Math.max(0.0, Kappa * flow_p_C - flow_p_M);     // energy directed to structural growth
         double flow_p_R = (1 - Kappa) * flow_p_C - flow_p_J;
 
         //// STATE VARIABLES - Differential equations ////////////////////////////////////////
         double dEdt = flow_p_A - flow_p_C;   // Reserves, J ; dE = pA - pC;
-        double dVdt = flow_p_G;           // Structure, cm^3 ; dV = (kap * pC - p_M)/EG;
+        double dVdt = flow_p_G / this.E_G;           // Structure, cm^3 ; dV = (kap * pC - p_M)/EG;
 
         double dHdt;
         double dRdt;
@@ -346,11 +346,6 @@ public class DebGrowthAction_LP extends AbstractAction {
         debLayer.setE_H(E_H + dHdt * dt);
         debLayer.setE_R(E_R + dRdt * dt);
 
-        // compute weight
-        //double dV = 1;
-        //W_dw[j] = V * dV  + (E+E_R)/mu_E;
-        //Compute DRY weight (g, dw) * 4.1 = Wet weight
-        // starvation test
         boolean starvation;
         if ((Kappa * flow_p_C < flow_p_M) || ((1 - Kappa) * flow_p_C < flow_p_J)) {
             starvation = true;

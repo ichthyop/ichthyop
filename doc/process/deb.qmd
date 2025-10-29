@@ -42,7 +42,7 @@ c_T = \exp \left( \dfrac{T_A}{T_1} - \dfrac{T_A}{T} \right)
 \right]
 $$
 
-If the particle is not feeding ($E_H \lt $E_{Hb}$), then the particle does not feed. Else, the functional response is computed as:
+If the particle is not feeding ($E_H \lt E_{Hb}$), then the particle does not feed. Else, the functional response is computed as:
 
 $$
 f = \dfrac{F}{F + K}
@@ -50,4 +50,116 @@ $$
 
 with $F$ the food vector and $K$ the half-saturation constant.
 
-Assimilation rates $\{ \dot{p_{Am}}s \}$, energy conductance $\dot{\gamma}$, volume specific somatic maintenance ($\[\dot{p_M} \]$) and maturity maintenances rates ($k_J$) are corrected by the $c_T$ factor.
+Assimilation rates $\{ \dot{p_{Am}}s \}$, energy conductance $\dot{\gamma}$, volume specific somatic maintenance ($[\dot{p_M} ]$) and maturity maintenances rates ($k_J$) are corrected by the $c_T$ factor.
+
+If the accelerated DEB model is used, thr metabolic rate acceleration is computed as follows
+
+$$
+s_M =
+\begin{cases}
+ 1 & (E < E_{HB})\\
+ \dfrac{V^{1/3}}{L_b} & (E_{HB} \le E_H \lt E_{Hj}) \\
+ \dfrac{L_j}{L_b} & (E_{H} \gt E_{Hj})
+\end{cases}
+$$
+
+with $L_b$ the length of the particle when $E_H \gt E_Hb$ (i.e the length at birth) and $L_j$ the length of the particlet when $E_H \gt E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate and the energy conductance.
+
+Consequently, the assimilation (in $J.day^{-1}$) is computed as follows:
+
+$$
+\dot{p_A} = \begin{cases}
+0 & (E_{H} \lt E_{Hb}) \\
+\{ \dot{p_{Am}}\} \times s_M \times c_T \times f \times {V}^{2/3}  & (E_{H} \ge E_{Hb}) \\
+\end{cases}
+$$
+
+
+Energy loss to maintenance is given by
+
+$$
+\dot{p_M} = [ \dot{p_M} ] \times c_T \times V
+$$
+
+The mobilized energy is given by:
+
+$$
+\dot{p_C} =
+\dfrac{\frac{E}{V} \times \left([E_G] \times \dot{\gamma} \times V^{2/3} - \dot{p_M}\right)}
+{\kappa \frac{E}{V} + [E_G]}
+$$
+
+Maturity maintenance is given by
+
+$$
+\dot{p_J} = k_J \times c_T \times E_H
+$$
+
+Energy that is sent to structural growth is given by:
+
+$$
+\dot{p_G} = \kappa \dot{p_C} - \dot{p_M}
+$$
+
+Energy that goes to reproduction is given by:
+
+$$
+\dot{p_R} = (1 - \kappa) \dot{p_C} - \dot{p_J}
+$$
+
+Finally, the increment of reserve $E$ and structural volume $V$ is given by:
+
+$$
+\dfrac{dE}{dt} = \dot{p_A} - \dot{p_C}
+$$
+
+$$
+\dfrac{dV}{dt} = \dfrac{\dot{p_G}}{{[E_G]}}
+$$
+
+The increment of the energy invested into development and reproduction depends on the value of $E_H$. If $$:
+
+$$
+\dfrac{dH}{dt} =
+\begin{cases}
+\dot{p_R} & E_H \lt E_{Hp}\\
+0 &  E_H \ge E_{Hp}
+\end{cases}
+$$
+
+$$
+\dfrac{dR}{dt} =
+\begin{cases}
+0 & E_H \lt E_{Hp}\\
+\dot{p_R} &  E_H \ge E_{Hp}
+\end{cases}
+$$
+
+
+Finally, starvation mortality is determined whether one of the following conditions are matched:
+
+$$
+M_{starv} =
+\begin{cases}
+\kappa \dot{p_C} & \lt & \dot{p_M}\\
+(1 - \kappa) {\dot{p_C}} \lt p_J
+\end{cases}
+$$
+
+Finally, all the states variables are then incremented:
+
+$$
+E(t + \Delta t) = E(t) + \dfrac{dE}{dt}\Delta t
+$$
+
+$$
+V(t + \Delta t) = V(t) + \dfrac{dV}{dt}\Delta t
+$$
+
+$$
+E_H(t + \Delta t) = E_H(t) + \dfrac{dE_H}{dt}\Delta t
+$$
+
+$$
+E_R(t + \Delta t) = E_R(t) + \dfrac{dE_R}{dt}\Delta t
+$$
