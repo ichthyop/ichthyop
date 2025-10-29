@@ -64,5 +64,5 @@ format:
 
   pdf:
     fontfamily: libertinus
-    keep-tex: true
-    pdf-engine: pdflatex
+    keep-tex: false
+    pdf-engine: xelatex
