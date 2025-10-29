@@ -4300,8 +4300,8 @@
             </parameter>
         </parameters>
     </block>
-    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ ReefOrientation.java -->
 
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ ReefOrientation.java -->
     <block type="action">
         <key>action.orientation.reef</key>
         <tree_path>Transport/Orientation/Reef</tree_path>
@@ -4455,8 +4455,8 @@
             </parameter>
         </parameters>
     </block>
-    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ CardinalOrientation.java -->
 
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ CardinalOrientation.java -->
     <block type="action">
         <key>action.orientation.cardinal</key>
         <tree_path>Transport/Orientation/Cardinal</tree_path>
@@ -4588,8 +4588,8 @@
             </parameter>
         </parameters>
     </block>
-    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ RheotaxisOrientation.java -->
 
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ RheotaxisOrientation.java -->
     <block type="action">
         <key>action.orientation.rheotaxis</key>
         <tree_path>Transport/Orientation/Rheotaxis</tree_path>
@@ -4729,6 +4729,7 @@
         </parameters>
     </block>
 
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ WaveDriftFile.java -->
     <block type="action">
         <key>action.waveDriftFile</key>
         <tree_path>Transport/WaveDrift</tree_path>
@@ -4737,6 +4738,38 @@
 
         <parameters>
 
+            <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
+
             <parameter>
                 <long_name>Wave input directory</long_name>
                 <key>input_file</key>
@@ -4744,6 +4777,24 @@
                 <description>Name of the V component of the stokes drift variable in the wave file</description>
                 <default>wind_directory</default>
                 <value>wind_directory</value>
+            </parameter>
+
+            <parameter>
+                <key>wave_constant_over_depth</key>
+                <format>boolean</format>
+                <description>Is Stokes drift constant over depth?</description>
+                <long_name>Is Stokes drift constant over depth?</long_name>
+                <default>true</default>
+                <value>true</value>
+            </parameter>
+
+            <parameter>
+                <long_name>Wave factor</long_name>
+                <key>wave_factor</key>
+                <format>float</format>
+                <description>Wave factor. Fields read from the NetCDF file will be multiplied by this wave factor.</description>
+                <default>1</default>
+                <value>1</value>
             </parameter>
 
             <parameter>
@@ -4787,36 +4838,35 @@
             </parameter>
 
             <parameter>
-                <long_name>U component of wave velocity</long_name>
+                <key>depth_max</key>
+                <long_name>Maximum depth</long_name>
+                <default>100</default>
+                <value>100</value>
+                <description>Maximum at which the Stokes drift process is applied.</description>
+            </parameter>
+
+            <parameter>
+                <long_name>Name U component of wave velocity variable</long_name>
                 <key>wave_u</key>
-                <description>Name of the U component of the wave velocity variable in the wave file</description>
+                <description>Name of the U component of the wave velocity variable in the wave file. Only used if Stokes drift is not constant over depth</description>
                 <default>wave_u</default>
                 <value>wave_u</value>
             </parameter>
 
             <parameter>
-                <long_name>V component of wave velocity</long_name>
+                <long_name>Name of V component of wave velocity variable</long_name>
                 <key>wave_v</key>
-                <description>Name of the V component of the wave velocity variable in the wave file</description>
+                <description>Name of the V component of the wave velocity variable in the wave file. Only used if Stokes drift is not constant over depth</description>
                 <default>wave_v</default>
                 <value>wave_v</value>
             </parameter>
 
             <parameter>
-                <long_name>Wave period</long_name>
+                <long_name>Wave period variable</long_name>
                 <key>wave_period</key>
-                <description>Name of the wave period wave file</description>
+                <description>Name of the wave period wave variable. Only used if Stokes drift is not constant over depth</description>
                 <default>wave_period</default>
                 <value>wave_period</value>
-            </parameter>
-
-            <parameter>
-                <long_name>Wave factor</long_name>
-                <key>wave_factor</key>
-                <format>float</format>
-                <description>Wave factor</description>
-                <default>1</default>
-                <value>1</value>
             </parameter>
 
             <parameter hidden="true">
