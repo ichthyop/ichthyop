@@ -42,7 +42,7 @@ c_T = \exp \left( \dfrac{T_A}{T_1} - \dfrac{T_A}{T} \right)
 \right]
 $$ {#eq-deb-temp}
 
-If the particle is not feeding ($E_H \lt E_{Hb}$), then the particle does not feed. Else, the functional response is computed as:
+If the particle is not feeding ($E_H < E_{Hb}$), then the particle does not feed. Else, the functional response is computed as:
 
 $$
 f = \dfrac{F}{F + K}
@@ -58,18 +58,18 @@ $$
 s_M =
 \begin{cases}
  1 & (E < E_{HB})\\
- \dfrac{V^{1/3}}{L_b} & (E_{HB} \le E_H \lt E_{Hj}) \\
- \dfrac{L_j}{L_b} & (E_{H} \gt E_{Hj})
+ \dfrac{V^{1/3}}{L_b} & (E_{HB} \le E_H < E_{Hj}) \\
+ \dfrac{L_j}{L_b} & (E_{H} > E_{Hj})
 \end{cases}
 $$ {#eq-deb-sm}
 
-with $L_b$ the length of the particle when $E_H \gt E_Hb$ (i.e the length at birth) and $L_j$ the length of the particlet when $E_H \gt E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate and the energy conductance.
+with $L_b$ the length of the particle when $E_H > E_Hb$ (i.e the length at birth) and $L_j$ the length of the particlet when $E_H > E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate and the energy conductance.
 
 Consequently, the assimilation (in $J.day^{-1}$) is computed as follows:
 
 $$
 \dot{p_A} = \begin{cases}
-0 & (E_{H} \lt E_{Hb}) \\
+0 & (E_{H} < E_{Hb}) \\
 \{ \dot{p_{Am}}\} \times s_M \times c_T \times f \times {V}^{2/3}  & (E_{H} \ge E_{Hb}) \\
 \end{cases}
 $$ {#eq-deb-pA}
@@ -122,7 +122,7 @@ The increment of the energy invested into development and reproduction depends o
 $$
 \dfrac{dH}{dt} =
 \begin{cases}
-\dot{p_R} & E_H \lt E_{Hp}\\
+\dot{p_R} & E_H < E_{Hp}\\
 0 &  E_H \ge E_{Hp}
 \end{cases}
 $$ {#eq-deb-dHdt}
@@ -130,7 +130,7 @@ $$ {#eq-deb-dHdt}
 $$
 \dfrac{dR}{dt} =
 \begin{cases}
-0 & E_H \lt E_{Hp}\\
+0 & E_H < E_{Hp}\\
 \dot{p_R} &  E_H \ge E_{Hp}
 \end{cases}
 $$ {#eq-deb-dRdt}
@@ -141,8 +141,8 @@ Finally, starvation mortality is determined whether one of the following conditi
 $$
 M_{starv} =
 \begin{cases}
-\kappa \dot{p_C} & \lt & \dot{p_M}\\
-(1 - \kappa) {\dot{p_C}} \lt p_J
+\kappa \dot{p_C} & < & \dot{p_M}\\
+(1 - \kappa) {\dot{p_C}} < p_J
 \end{cases}
 $$ {#eq-deb-starv}
 
