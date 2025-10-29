@@ -2903,6 +2903,7 @@
         </parameters>
     </block>
 
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++ AdvectionAction.java -->
     <block type="action">
         <key>action.advection</key>
         <description>Options that control the advection process.</description>
@@ -2910,6 +2911,38 @@
         <enabled>true</enabled>
 
         <parameters>
+
+            <parameter hidden="false">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
 
             <parameter>
                 <key>scheme</key>
@@ -2966,6 +2999,274 @@
                 <accepted>high</accepted>
                 <accepted>highest</accepted>
             </parameter>
+        </parameters>
+    </block>
+
+    <!-- ++++++++++++++++++++++++ DebGrowthAction.java -->
+    <block type="action">
+        <key>action.growthDeb</key>
+        <description>Block of options that control the growth process based on the DEB theory</description>
+        <tree_path>Growth/DEB</tree_path>
+        <enabled>false</enabled>
+
+        <parameters>
+
+            <parameter hidden="false">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>accelerated.deb.enabled</key>
+                <long_name>Use accelerated DEB</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>True if the accelerated DEB should be used.</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>arrhenius</key>
+                <long_name>Arrhenius temp (K)</long_name>
+                <value>9800</value>
+                <default>9800</default>
+                <format>float</format>
+                <description>Arrhenius temp (K). Cf. Pecquerie et al. 2009</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>lower_thermal_range</key>
+                <long_name>Lower thermal range (K)</long_name>
+                <value>283</value>
+                <default>283</default>
+                <format>float</format>
+                <description>Lower thermal range (K)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>upper_thermal_range</key>
+                <long_name>Upper thermal range (K)</long_name>
+                <value>303</value>
+                <default>303</default>
+                <format>float</format>
+                <description>Upper thermal range (K)</description>
+            </parameter>
+
+
+            <parameter hidden="false">
+                <key>arrhenius_lower_thermal_range</key>
+                <long_name>Arrhenius lower thermal range (K)</long_name>
+                <value>9500</value>
+                <default>9500</default>
+                <format>float</format>
+                <description>Arrhenius lower thermal range (K)</description>
+            </parameter>
+
+
+            <parameter hidden="false">
+                <key>arrhenius_upper_thermal_range</key>
+                <long_name>Arrhenius upper thermal range</long_name>
+                <value>10100</value>
+                <default>10100</default>
+                <format>float</format>
+                <description>Arrhenius upper thermal range</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key></key>
+                <long_name></long_name>
+                <value></value>
+                <default></default>
+                <format></format>
+                <description></description>
+            </parameter>
+
+
+            <parameter hidden="false">
+                <key>assimilation rate</key>
+                <long_name>Assimilation rate (J/cm2/day)</long_name>
+                <value>325</value>
+                <default>325</default>
+                <format>float</format>
+                <description>Assimilation rate (J/cm2/day)</description>
+            </parameter>
+
+
+            <parameter hidden="false">
+                <key>energy_conductance</key>
+                <long_name>Energy conductance (cm/day)</long_name>
+                <value></value>
+                <default></default>
+                <format>float</format>
+                <description>Energy conductance (cm/day)</description>
+            </parameter>
+
+
+            <parameter hidden="false">
+                <key>fraction_mobilized_somma</key>
+                <long_name>Deb Kappa parameter</long_name>
+                <value></value>
+                <default></default>
+                <format>float</format>
+                <description>Deb Kappa parameter</description>
+            </parameter>
+
+
+            <parameter hidden="false">
+                <key>volume_specific_somatic_maintenance</key>
+                <long_name>Volume specific maintenance rate (J/cm3/day)</long_name>
+                <value></value>
+                <default></default>
+                <format>float</format>
+                <description>Volume specific maintenance rate (J/cm3/day)</description>
+            </parameter>
+
+
+            <parameter hidden="false">
+                <key>maturity_maintenance_rate</key>
+                <long_name>Maturity maintenance rate (J/cm3)</long_name>
+                <value></value>
+                <default></default>
+                <format>float</format>
+                <description>Maturity maintenance rate (J/cm3)</description>
+            </parameter>
+
+
+            <parameter hidden="false">
+                <key>cost_growth</key>
+                <long_name>Cost for growth (J/cm3)</long_name>
+                <value></value>
+                <default></default>
+                <format>float</format>
+                <description>Cost for growth (J/cm3)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>ref_temp</key>
+                <long_name>Reference temperature (K)</long_name>
+                <value>293.15</value>
+                <default>293.15</default>
+                <format>float</format>
+                <description>Reference temperature (K)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>initial_length</key>
+                <long_name>Initial length (cm)</long_name>
+                <value></value>
+                <default></default>
+                <format>float</format>
+                <description>Initial length (cm)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>shape</key>
+                <long_name>Shape parameter</long_name>
+                <value>0.152</value>
+                <default>0.152</default>
+                <format>float</format>
+                <description>Shape parameter</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>initial_reserve</key>
+                <long_name>Initial energy in reserve (J)</long_name>
+                <value></value>
+                <default></default>
+                <format>float</format>
+                <description>Initial energy in reserve (J)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>half_saturation_constant</key>
+                <long_name>Half saturation constant</long_name>
+                <value>0.5</value>
+                <default>0.5</default>
+                <format>float</format>
+                <description>Half saturation constant of functional response</description>
+            </parameter>
+
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the
+                    hydrodynamic dataset.</description>
+            </parameter>
+
+             <parameter>
+                <key>food_field</key>
+                <long_name>Food variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the food variable (case sensitive) in the
+                    hydrodynamic dataset.</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>deb_tracker</key>
+                <long_name>Save DEB trackers</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>True if the DEB trackers must be saved for each particle</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.DebGrowthAction_LP</value>
+                <default>org.previmer.ichthyop.action.DebGrowthAction_LP</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <long_name>priority</long_name>
+                <key>priority</key>
+                <description>Level of priority of the action (comparatively to other actions). Each
+                    time step, a high priority action will be called by the application before than
+                    a low priority action. Actions with same level of priority will be called
+                    without any specific order.</description>
+                <value>high</value>
+                <default>high</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+
+
         </parameters>
     </block>
 
@@ -3193,7 +3494,8 @@
                 <value>0.01</value>
                 <default>0.01</default>
                 <long_name>Molecular viscosity</long_name>
-                <description>Molecular viscosity (g/cm/s). The value is prescibed and not dynamically computed.</description>
+                <description>Molecular viscosity (g/cm/s). The value is prescibed and not
+                    dynamically computed.</description>
                 <format>float</format>
             </parameter>
 
@@ -4841,7 +5143,8 @@
                 <long_name>Wave factor</long_name>
                 <key>wave_factor</key>
                 <format>float</format>
-                <description>Wave factor. Fields read from the NetCDF file will be multiplied by this wave factor.</description>
+                <description>Wave factor. Fields read from the NetCDF file will be multiplied by
+                    this wave factor.</description>
                 <default>1</default>
                 <value>1</value>
             </parameter>
@@ -4897,7 +5200,8 @@
             <parameter>
                 <long_name>Name U component of wave velocity variable</long_name>
                 <key>wave_u</key>
-                <description>Name of the U component of the wave velocity variable in the wave file. Only used if Stokes drift is not constant over depth</description>
+                <description>Name of the U component of the wave velocity variable in the wave file.
+                    Only used if Stokes drift is not constant over depth</description>
                 <default>wave_u</default>
                 <value>wave_u</value>
             </parameter>
@@ -4905,7 +5209,8 @@
             <parameter>
                 <long_name>Name of V component of wave velocity variable</long_name>
                 <key>wave_v</key>
-                <description>Name of the V component of the wave velocity variable in the wave file. Only used if Stokes drift is not constant over depth</description>
+                <description>Name of the V component of the wave velocity variable in the wave file.
+                    Only used if Stokes drift is not constant over depth</description>
                 <default>wave_v</default>
                 <value>wave_v</value>
             </parameter>
@@ -4913,7 +5218,8 @@
             <parameter>
                 <long_name>Wave period variable</long_name>
                 <key>wave_period</key>
-                <description>Name of the wave period wave variable. Only used if Stokes drift is not constant over depth</description>
+                <description>Name of the wave period wave variable. Only used if Stokes drift is not
+                    constant over depth</description>
                 <default>wave_period</default>
                 <value>wave_period</value>
             </parameter>
