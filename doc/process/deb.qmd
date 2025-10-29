@@ -71,7 +71,7 @@ Consequently, the assimilation (in $J.day^{-1}$) is computed as follows:
 $$
 \dot{p_A} = \begin{cases}
 0 & (E_{H} < E_{Hb}) \\
-\times c_T \times s_M \{ \dot{p_{Am}}\}  \times f \times {V}^{2/3}  & (E_{H} \ge E_{Hb}) \\
+ c_T \times s_M \times \{ \dot{p_{Am}}\}  \times f \times {V}^{2/3}  & (E_{H} \ge E_{Hb}) \\
 \end{cases}
 $$ {#eq-deb-pA}
 
@@ -86,7 +86,7 @@ The mobilized energy is given by:
 
 $$
 \dot{p_C} =
-\dfrac{\dfrac{E}{V} \times \left([E_G] \times \times c_T \times s_M \dot{\gamma} \times V^{2/3} + \dot{p_M}\right)}
+\dfrac{\dfrac{E}{V} \times \left([E_G]  \times c_T \times s_M \times \dot{\gamma} \times V^{2/3} + \dot{p_M}\right)}
 {\kappa \dfrac{E}{V} + [E_G]}
 $$ {#eq-deb-pC}
 
