@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <icstructure>
   <version date="2017/03/23">3.3</version>
-  <long_name>MARS 3D Ichthyop configuration file</long_name>
-  <description>Predefined parameters for MARS dataset from NetCDF files.</description>
+  <long_name>FVCOM test file</long_name>
+  <description>Predefined parameters for FVCOM dataset from NetCDF files.</description>
   <block type="dataset">
     <key>dataset.fvcom</key>
     <tree_path>Main/FVCOM</tree_path>
@@ -11,7 +11,7 @@
       <parameter>
         <key>input_path</key>
         <long_name>Input path</long_name>
-        <value>src/test/resources/fvcom</value>
+        <value>src\test\resources\fvcom\</value>
         <default>input</default>
         <format>path</format>
         <description>Folder containing the MARS NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
@@ -19,7 +19,7 @@
       <parameter>
         <key>file_filter</key>
         <long_name>File filter</long_name>
-        <value>comp_ssm_00002.nc</value>
+        <value>comp_ssm_0002.nc</value>
         <default>*.nc</default>
         <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
       </parameter>
@@ -178,6 +178,20 @@
         <default>h</default>
         <description>Name of the bathy NetCDF variable in the hydrodynamic dataset.</description>
       </parameter>
+      <parameter>
+        <key>field_var_bathy_triangle</key>
+        <long_name>Bathy triangle variable</long_name>
+        <value>h_center</value>
+        <default>h_center</default>
+        <description>Name of the bathy NetCDF variable in the hydrodynamic dataset in the center of the triangle.</description>
+      </parameter>
+      <parameter>
+        <key>temperature_field</key>
+        <long_name>Temperature</long_name>
+        <value>temp</value>
+        <default>temp</default>
+        <description>Name of the bathy NetCDF variable in the hydrodynamic dataset in the center of the triangle.</description>
+      </parameter>
       <parameter hidden="true">
         <key>class_name</key>
         <long_name>Java Class file</long_name>
@@ -196,7 +210,7 @@
       <parameter type="serial">
         <key>initial_time</key>
         <long_name>Beginning of simulation</long_name>
-        <value>year 2000 month 01 day 02 at 01:00</value>
+        <value>year 2017 month 01 day 02 at 09:00</value>
         <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
         <format>date</format>
       </parameter>
@@ -273,14 +287,14 @@
       <parameter>
         <key>file_prefix</key>
         <long_name>Prefix of the NetCDF output file</long_name>
-        <value>mars3d</value>
+        <value>fvcom</value>
         <default>my-simulation</default>
         <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc, with YYYYMMDDHHmm the current time when running the simulation.</description>
       </parameter>
       <parameter>
         <key>output_path</key>
         <long_name>Output path</long_name>
-        <value>output</value>
+        <value>src\test\resources\fvcom\</value>
         <format>path</format>
         <default>output</default>
         <description>Select the folder where the simulation NetCDF output file should be saved. For instance, relative paths 'output' or 'output/' or './output' or './output/' are supported and equivalent. They will be interpretated as /path_from_where_you_run_ichthyop/ouput/ If ouput folder does not exist, application will attempt to create it.</description>
@@ -739,7 +753,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Zone file</long_name>
-        <value>/home/barrier/Work/ichthyop/lysel/fvcom/fvcom_zones.xml</value>
+        <value>src\test\resources\fvcom\one_zone.xml</value>
         <default>cfg/my_zones.xml</default>
         <format>zonefile</format>
         <template>zone-iroise.xml</template>
