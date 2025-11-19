@@ -1,8 +1,8 @@
 ## DEB growth
 
-The DEB equations are based on @FLORESVALIENTE2023103034
+The DEB equations are based on Kooijman (2010) and can be found in @FLORESVALIENTE2023103034
 
-Influene of temperature is given by equation 5 of @FLORESVALIENTE2023103034:
+Influence of temperature is given by equation 5 of @FLORESVALIENTE2023103034:
 
 $$
 c_T = \exp \left( \dfrac{T_A}{T_1} - \dfrac{T_A}{T} \right)
@@ -42,7 +42,7 @@ c_T = \exp \left( \dfrac{T_A}{T_1} - \dfrac{T_A}{T} \right)
 \right]
 $$ {#eq-deb-temp}
 
-If the particle is not feeding ($E_H < E_{Hb}$), then the particle does not feed. Else, the functional response is computed as:
+If the particle is an embryo ($E_H < E_{Hb}$), then it does not feed. Please note that, according to this definition, a larva that hatched but does not feed is considered an embryo in DEB theory. Else, the scaled functional response $f$ is computed as:
 
 $$
 f = \dfrac{F}{F + K}
@@ -50,28 +50,27 @@ $$ {#eq-deb-repfonct}
 
 with $F$ the food vector and $K$ the half-saturation constant.
 
-Assimilation rates $\{\dot{p_{Am}}\}$, energy conductance $\dot{\gamma}=\dfrac{\{ \dot{p_{Am}}\}}{[E_m]}$,
-volume specific somatic maintenance ($[\dot{p_M}]$) and maturity maintenances rates ($k_J$) are corrected by the $c_T$ factor.
+Assimilation rates $\{\dot{p_{Am}}\}$, energy conductance $\dot{v}, volume specific somatic maintenance ($[\dot{p}_M]$) and maturity maintenances rates ($\dot{k}_J$) are corrected by the $c_T$ factor.
 
-If the accelerated DEB model is used, thr metabolic rate acceleration is computed as follows
+If the accelerated DEB model is used (see e.g. Kooijman et al. (2011) and Kooijman (2014) for more details), the acceleration factor is computed as follows
 
 $$
 s_M =
 \begin{cases}
- 1 & (E < E_{HB})\\
- \dfrac{V^{1/3}}{L_b} & (E_{HB} \le E_H < E_{Hj}) \\
+ 1 & (E < E_{Hb})\\
+ \dfrac{V^{1/3}}{L_b} & (E_{Hb} \le E_H < E_{Hj}) \\
  \dfrac{L_j}{L_b} & (E_{H} > E_{Hj})
 \end{cases}
 $$ {#eq-deb-sm}
 
-with $L_b$ the length of the particle when $E_H > E_Hb$ (i.e the length at birth) and $L_j$ the length of the particlet when $E_H > E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate $\{\dot{p_{Am}}\}$ and the energy conductance $\dot{\gamma}$.
+with $L_b$ the structural length of the particle when $E_H = E_Hb$ (i.e the length at birth, i.e. first feeding) and $L_j$ the structural length of the particle when $E_H = E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate $\{\dot{p_{Am}}\}$ and the energy conductance $\dot{\v}$. (NICOLAS: s'agit il de la longueur structurelle $L = V^{1/3}}$ ou de la longueur mesurée $L_w = L / \delta_M$). Please note that $L_b$ and $L_j$ are here considered as parameters but they should be in fact calculated prior any Ichthyop runs at (e.g. at $f = 1$) as they depend on the other parameters. If you are considering testing different parameter sets, $L_b$ and $L_j$ should be modified accordingly (e.g. using the DEBtool function get_tj.m).  
 
-Consequently, the assimilation (in $J.day^{-1}$) is computed as follows:
+Consequently, the assimilation (in J.d$^{-1}$) is computed as follows:
 
 $$
-\dot{p_A} = \begin{cases}
+\dot{p}_A = \begin{cases}
 0 & (E_{H} < E_{Hb}) \\
- c_T \times s_M \times \{ \dot{p_{Am}}\}  \times f \times {V}^{2/3}  & (E_{H} \ge E_{Hb}) \\
+ c_T s_M f \{ \dot{p}_{Am}\}  V^{2/3}  & (E_{H} \ge E_{Hb}) \\
 \end{cases}
 $$ {#eq-deb-pA}
 
@@ -79,60 +78,60 @@ $$ {#eq-deb-pA}
 Energy loss to maintenance is given by
 
 $$
-\dot{p_M} = [ \dot{p_M} ] \times c_T \times V
+\dot{p}_M = c_T [ \dot{p}_M ]  V
 $$ {#eq-deb-pM}
 
 The mobilized energy is given by:
 
 $$
-\dot{p_C} =
-\dfrac{\dfrac{E}{V} \times \left([E_G]  \times c_T \times s_M \times \dot{\gamma} \times V^{2/3} + \dot{p_M}\right)}
+\dot{p_C} = c_T 
+\dfrac{\dfrac{E}{V} \left([E_G]  s_M \dot{v} V^{2/3} + \dot{p}_M\right)}
 {\kappa \dfrac{E}{V} + [E_G]}
 $$ {#eq-deb-pC}
 
 Maturity maintenance is given by
 
 $$
-\dot{p_J} = c_T \times k_J \times  E_H
+\dot{p}_J = c_T \dot{k}_J E_H
 $$ {#eq-deb-pJ}
 
 Energy that is sent to structural growth is given by:
 
 $$
-\dot{p_G} = \kappa \dot{p_C} - \dot{p_M}
+\dot{p}_G = \kappa \dot{p}_C - \dot{p}_M
 $$ {#eq-deb-pG}
 
-Energy that goes to reproduction is given by:
+Energy that goes to development (as embryo and juvenile) or to reproduction (as adults) is given by:
 
 $$
-\dot{p_R} = (1 - \kappa) \dot{p_C} - \dot{p_J}
+\dot{p}_R = (1 - \kappa) \dot{p}_C - \dot{p}_J
 $$ {#eq-deb-pR}
 
 Finally, the increment of reserve $E$ and structural volume $V$ is given by:
 
 $$
-\dfrac{dE}{dt} = \dot{p_A} - \dot{p_C}
+\dfrac{dE}{dt} = \dot{p}_A - \dot{p}_C
 $$ {#eq-deb-dEdt}
 
 $$
-\dfrac{dV}{dt} = \dfrac{\dot{p_G}}{{[E_G]}}
+\dfrac{dV}{dt} = \dfrac{\dot{p}_G}{{[E_G]}}
 $$  {#eq-deb-dVdt}
 
-The increment of the energy invested into development and reproduction depends on the value of $E_H$. If $$:
+The increment of the energy invested into development or reproduction depends on the value of $E_H$. 
 
 $$
-\dfrac{dH}{dt} =
+\dfrac{dE_H}{dt} =
 \begin{cases}
-\dot{p_R} & E_H < E_{Hp}\\
-0 &  E_H \ge E_{Hp}
+\dot{p}_R & E_H < E_{Hp}\\
+0 &  \text{otherwise}
 \end{cases}
 $$ {#eq-deb-dHdt}
 
 $$
-\dfrac{dR}{dt} =
+\dfrac{dE_R}{dt} =
 \begin{cases}
 0 & E_H < E_{Hp}\\
-\dot{p_R} &  E_H \ge E_{Hp}
+\dot{p}_R &  \text{otherwise}
 \end{cases}
 $$ {#eq-deb-dRdt}
 
@@ -142,8 +141,8 @@ Finally, starvation mortality is determined whether one of the following conditi
 $$
 M_{starv} =
 \begin{cases}
-\kappa \dot{p_C}  <  \dot{p_M}\\
-(1 - \kappa) \dot{p_C}  <  p_J
+\kappa \dot{p}_C  <  \dot{p}_M\\
+(1 - \kappa) \dot{p}_C  <  \dot{p}_J
 \end{cases}
 $$ {#eq-deb-starv}
 
@@ -164,3 +163,49 @@ $$ {#eq-deb-incr-h}
 $$
 E_R(t + \Delta t) = E_R(t) + \dfrac{dE_R}{dt}\Delta t
 $$ {#eq-deb-incr-r}
+
+Additional references 
+
+  Kooijman, S. A. L. M. (2010). Dynamic Energy Budget theory for metabolic organisation. Cambridge Univ. Press, Cambridge. doi: 10.1098/rstb.2010.
+  Kooijman, S. A. L. M. (2014). Metabolic acceleration in animal ontogeny: An evolutionary perspective. Journal of Sea Research, 94(Supplement C), 128–137. https://doi.org/10.1016/j.seares.2014.06.005
+  Kooijman, S. A. L. M., Pecquerie, L., Augustine, S., & Jusup, M. (2011). Scenarios for acceleration in fish development and the role of metamorphosis. J. Sea Res., 66, 419–423. https://doi.org/10.1016/j.seares.2011.04.016
+
+
+@book{kooijman_dynamic_2010,
+	title = {Dynamic {Energy} {Budget} theory for metabolic organisation},
+	isbn = {978-0-521-13191-9},
+	url = {doi: 10.1098/rstb.2010.},
+	publisher = {Cambridge Univ. Press, Cambridge},
+	author = {Kooijman, S.A.L.M.},
+	year = {2010},
+}
+
+@article{kooijman_scenarios_2011,
+	title = {Scenarios for acceleration in fish development and the role of metamorphosis.},
+	volume = {66},
+	doi = {https://doi.org/10.1016/j.seares.2011.04.016},
+	journal = {J. Sea Res.},
+	author = {Kooijman, S. A. L. M. and Pecquerie, L. and Augustine, S. and Jusup, M.},
+	year = {2011},
+	pages = {419--423},
+}
+
+@article{kooijman_metabolic_2014,
+	series = {Dynamic {Energy} {Budget} theory: applications in marine sciences and fishery biology},
+	title = {Metabolic acceleration in animal ontogeny: {An} evolutionary perspective},
+	volume = {94},
+	issn = {1385-1101},
+	shorttitle = {Metabolic acceleration in animal ontogeny},
+	url = {http://www.sciencedirect.com/science/article/pii/S1385110114001105},
+	doi = {10.1016/j.seares.2014.06.005},
+	number = {Supplement C},
+	urldate = {2017-11-21},
+	journal = {Journal of Sea Research},
+	author = {Kooijman, S. A. L. M.},
+	month = nov,
+	year = {2014},
+	keywords = {Acceleration, Dispersal, Maturation, Parental care, add\_my\_pet},
+	pages = {128--137},
+}
+
+
