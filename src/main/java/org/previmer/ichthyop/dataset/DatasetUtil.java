@@ -586,13 +586,13 @@ public class DatasetUtil {
         if(endIndex != -1) {
             String subUnits = units.substring(beginIndex, endIndex).trim();
             subUnits = subUnits.replace("t", " ");
-            dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            dateFormatter = DateTimeFormatter.ofPattern("yyyy-M-d HH:mm");
             dateUnit = LocalDateTime.parse(subUnits, dateFormatter);
         } else {
             endIndex = units.length();
             String subUnits = units.substring(beginIndex, endIndex).trim();
             subUnits = subUnits.replace("t", " ");
-            dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            dateFormatter = DateTimeFormatter.ofPattern("yyyy-M-d");
             LocalDate dateDay = LocalDate.parse(subUnits, dateFormatter);
             dateUnit = dateDay.atStartOfDay();
         }
