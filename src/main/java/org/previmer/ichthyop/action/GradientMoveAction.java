@@ -60,18 +60,30 @@ public class GradientMoveAction extends AbstractAction {
     private String varName;
     private String direction;
     private int stride;
+    int sign;
 
     @Override
     public void loadParameters() throws Exception {
 
         varName = getParameter("variable");
-        speed = Double.valueOf(getParameter("speed"));
-        direction = getParameter("direction");
+
+        // speed provided in cm/s, converted into m/s by dividing by 100
+        speed = Double.valueOf(getParameter("speed")) / 100;
         stride = 1;
 
         getSimulationManager().getDataset().requireVariable(varName, getClass());
         getSimulationManager().getOutputManager().addCustomTracker(varName);
         dt = getSimulationManager().getTimeManager().get_dt();
+
+        direction = "+";
+        String key = "direction";
+
+        if(!isNull(key)) {
+            direction = getParameter(key);
+        }
+
+        sign = direction.equals("\\+") ? 1 : -1;
+
     }
 
     @Override
@@ -86,19 +98,23 @@ public class GradientMoveAction extends AbstractAction {
             return;
         }
 
+        double time = getSimulationManager().getTimeManager().getTime();
+
         int i = (int) Math.round(particle.getX());
         int j = (int) Math.round(particle.getY());
         int k = (int) Math.round(particle.getZ());
+
+        // Get the cell of the current particle and the value of the variable at the given location
         Cell cell = new Cell(i, j, k);
+        double val1 = getValue(cell, time);
 
         List<Cell> cells = getNeighborCells(cell);
-        double time = getSimulationManager().getTimeManager().getTime();
-        double val1 = getValue(cell, time);
         double dval = 0.d;
         Cell attractiveCell = null;
-        int sign = direction.equals("\\+")
-                ? 1
-                : -1;
+
+        // Loop over the neighbouring cells and extract
+        // the one for which the gradient is the highest.
+        // the target cell is stored in a temporary variable
         for (Cell ncell : cells) {
             double val2 = getValue(ncell, time);
             double dvaltmp = sign * (val1 - val2) / cell.distance(ncell);
@@ -120,6 +136,16 @@ public class GradientMoveAction extends AbstractAction {
         return getSimulationManager().getDataset().get(varName, new double[]{cell.i, cell.j, cell.k}, time).doubleValue();
     }
 
+    /**
+     * Get the list of neighbouring cells.
+     *
+     * Returns the list of cells on a 3x3 box centered around the argument cell
+     * The argument cell is removed and the cells are then shuffled
+     *
+     *
+     * @param cell Cell from which to extract the neighbours
+     * @return The list of neighbouring cells
+     */
     private List<Cell> getNeighborCells(Cell cell) {
 
         int im1 = Math.max(cell.i - stride, 0);
@@ -137,7 +163,9 @@ public class GradientMoveAction extends AbstractAction {
             }
         }
         neighbors.remove(cell);
-        Collections.shuffle(neighbors);
+
+        // nbarrier: don't understand why shuffle the neighbours
+        // Collections.shuffle(neighbors);
         return neighbors;
     }
 
@@ -151,6 +179,12 @@ public class GradientMoveAction extends AbstractAction {
             this.k = k;
         }
 
+        /**
+         * Computes the distance between the current cell (this) and another cell
+         *
+         * @param cell Other cell
+         * @return The distance (in m?)
+         */
         double distance(Cell cell) {
             double[] pos1 = getSimulationManager().getDataset().xy2latlon(i, j);
             double[] pos2 = getSimulationManager().getDataset().xy2latlon(cell.i, cell.j);
@@ -161,9 +195,10 @@ public class GradientMoveAction extends AbstractAction {
         double[] direction(Cell cell) {
             double distance = distance(cell);
             if (distance > 0) {
+                // WARNING: potential bugfix by nbarrier. To be tested
                 double dx = (cell.i - i) / distance;
                 double dy = (cell.j - j) / distance;
-                return new double[]{-dx, -dy};
+                return new double[]{dx, dy};
             } else {
                 return new double[]{0.d, 0.d};
             }
