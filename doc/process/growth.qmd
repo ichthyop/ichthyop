@@ -35,10 +35,10 @@ If the {samp}`SoleGrowthAction.java` class is selected, the growth model used in
 used. It relies on the growth equation from @fonds1979laboratory and given by:
 
 $$
-\Delta L = C_1 \times T^{C_2} \times \Delta t
+\Delta L = C1 \times T^{C2} \times \Delta t
 $$
 
-with $L$ the length, $T$ the temperature and $\Delta t$ the time step in days, and $C_1$ and $C_2$ are parameters (`c1` and `c2` respectively).
+with $L$ the length, $T$ the temperature and $\Delta t$ the time step in days, and $C1$ and $C2$ are parameters (`c1` and `c2` respectively).
 
 The temperature field is provided by the `temperature_field` parameter.
 

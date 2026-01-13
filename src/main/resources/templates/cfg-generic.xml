@@ -4640,6 +4640,154 @@
     </block>
 
     <block type="action">
+        <key>action.growth.sole</key>
+        <tree_path>Biology/Growth/Sole Growth</tree_path>
+        <enabled>false</enabled>
+        <description>
+            Block of options for setting up the sole growth model. Based on the equations
+            of Tanner et al. (2017)
+        </description>
+
+        <parameters>
+
+             <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
+
+            <parameter>
+                <key>c1</key>
+                <long_name>c1 coefficients of the sole growth module</long_name>
+                <value>"0.02","0.02","0.02"</value>
+                <default>"0.02","0.02","0.02"</default>
+                <format>list</format>
+                <description>c1 coefficient of the sole growth module. <b>For SoleGrowth, one value per stage must be provided</b></description>
+            </parameter>
+
+             <parameter>
+                <key>c2</key>
+                <long_name>c2 coefficient of the sole growth module</long_name>
+                <value>"0.02","0.02","0.02"</value>
+                <default>"0.02","0.02","0.02"</default>
+                <format>list</format>
+                <description>c coefficient of the sole growth module. <b>For SoleGrowth, one value per stage must be provided</b></description>
+            </parameter>
+
+            <parameter>
+                <key>initial_length</key>
+                <long_name>Initial length of the particle (in cm)</long_name>
+                <value>0.1</value>
+                <default>0.1</default>
+                <format>float</format>
+                <description>Initial length that a particle (in cm)</description>
+            </parameter>
+
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the
+                    hydrodynamic dataset.</description>
+            </parameter>
+
+            <parameter>
+                <key>stage_tags</key>
+                <long_name>Tags of the stages</long_name>
+                <value>"egg" "yolk-sac larva" "feeding larva"</value>
+                <default>"egg" "yolk-sac larva" "feeding larva"</default>
+                <format>list</format>
+                <description>Names of each physiological stage of the larva life history. No matter
+                    what you set, Ichthyop assumes that the first stage corresponds to egg stage.</description>
+            </parameter>
+
+            <parameter>
+                <key>stage_thresholds</key>
+                <long_name>Length in [cm] at which the stages change</long_name>
+                <value>"0.28" "0.45"</value>
+                <default>"0.28" "0.45"</default>
+                <format>list</format>
+                <description>Initial length for each physiological stage of the larva life history,
+                    in cm. Ichthyop assumes that the first length provided corresponds to
+                    the egg length.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>length_tracker</key>
+                <long_name>Track particle length</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "length" variable in the NetCDF output
+                    file.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>stage_tracker</key>
+                <long_name>Track particle biological stage</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "stage" variable in the NetCDF output
+                    file.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.SoleGrowthAction</value>
+                <default>org.previmer.ichthyop.action.SoleGrowthAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>low</value>
+                <default>low</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each
+                    time step, a high priority action will be called by the application before than
+                    a low priority action. Actions with same level of priority will be called
+                    without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+
+    <block type="action">
         <key>action.recruitment.zone</key>
         <tree_path>Biology/Recruitment/In zones</tree_path>
         <enabled>false</enabled>
