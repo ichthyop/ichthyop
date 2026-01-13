@@ -34,6 +34,7 @@ public abstract class OrientationVelocity extends AbstractAction {
     private boolean useCsv = true;
     private String method = "age";
 
+    @FunctionalInterface
     private interface GetValue {
         double getValue(IParticle particle);
     }
