@@ -17,7 +17,7 @@
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
  * mortality and recruitment. The tool uses as input time series of velocity,
- * temperature and salinity fields archived from oceanic models such as NEMO,
+ * temperature and temperature fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
  * statistical software.
@@ -59,70 +59,84 @@ import java.util.logging.Logger;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
-import org.previmer.ichthyop.particle.StageParticleLayer;
 import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**
  *
- * @author pverley
+ * @author nbarrier
  */
 public class LethalTempAction extends AbstractAction {
 
-    private float[] coldLethalTp, hotLethalTp;
-    private float[] ages;
-    private boolean FLAG_GROWTH, FLAG_LETHAL_TEMP_FUNCTION;
+    private float[] coldLethalTemp, warmLethalTemp;
+    private float[] classes;
     private String temperature_field;
+    private boolean use_temperature_file = false;
+    private double cold_lethal_temperature, warm_lethal_temperature;
+    private double secs_in_day = 86400;
+
+    @FunctionalInterface
+    private interface GetValueInterface {
+        double getValue(IParticle particle);
+    }
+    private GetValueInterface getValueInterface;
+
+    @FunctionalInterface
+    private interface KillInterface {
+        void kill(IParticle particle);
+    }
+    private KillInterface killInterface;
 
     @Override
     public void loadParameters() throws Exception {
 
-        FLAG_GROWTH = CheckGrowthParam.checkParams();
         temperature_field = getParameter("temperature_field");
-        if (!FLAG_GROWTH) {
-            /*
-             * Check whether there is a lethal temperature CSV file
-             */
-            String lethal_temp_file;
-            try {
-                lethal_temp_file = getParameter("lethal_temp_file");
-            } catch (Exception ex) {
-                lethal_temp_file = null;
-            }
-            if (null != lethal_temp_file && !lethal_temp_file.isEmpty()) {
-                String pathname = IOTools.resolveFile(lethal_temp_file);
-                File f = new File(pathname);
-                if (!f.isFile()) {
-                    throw new FileNotFoundException("Lethal temperature file " + pathname + " not found.");
-                }
-                if (!f.canRead()) {
-                    throw new IOException("Lethal temperature file " + pathname + " cannot be read.");
-                }
-                loadLethalTemperatures(pathname);
-                FLAG_LETHAL_TEMP_FUNCTION = true;
-            } else {
-                /*
-                 * If not just load constant lethal temperature egg
-                 */
-                ages = new float[1];
-                coldLethalTp = new float[]{Float.valueOf(getParameter("cold_lethal_temperature_egg"))};
-                hotLethalTp = new float[]{Float.valueOf(getParameter("hot_lethal_temperature_egg"))};
-                FLAG_LETHAL_TEMP_FUNCTION = false;
-            }
-        } else {
-            coldLethalTp = new float[]{
-                Float.valueOf(getParameter("cold_lethal_temperature_egg")),
-                Float.valueOf(getParameter("cold_lethal_temperature_larva"))};
-            hotLethalTp = new float[]{
-                Float.valueOf(getParameter("hot_lethal_temperature_egg")),
-                Float.valueOf(getParameter("hot_lethal_temperature_larva"))};
-        }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        boolean addTracker = true;
-        try {
-            addTracker = Boolean.valueOf(getParameter("temp_tracker"));
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
+
+        String key = "temperature.file.enabled";
+        if(!isNull(key) && (Boolean.valueOf(getParameter(key)))) {
+            use_temperature_file = true;
         }
+
+        if(use_temperature_file) {
+            String lethal_temp_file = getParameter("lethal_temperature_file");
+            String pathname = IOTools.resolveFile(lethal_temp_file);
+            File f = new File(pathname);
+            if (!f.isFile()) {
+                throw new FileNotFoundException("Lethal temperature file " + pathname + " not found.");
+            }
+            if (!f.canRead()) {
+                throw new IOException("Lethal temperature file " + pathname + " cannot be read.");
+            }
+            loadLethaltemperature(pathname);
+
+            String temperature_class = getParameter("temperature.class").toLowerCase();
+
+            boolean isGrowth = CheckGrowthParam.checkParams();  // check if growth or debgrowth is true (xor)
+            if (!isGrowth && temperature_class.equals("length")) {
+                throw new IllegalArgumentException("Velocity cannot be based on particle length since no growth model not activated.");
+            }
+
+            if(temperature_class.equals("age")) {
+                getValueInterface = (particle) -> (particle.getAge() / secs_in_day); // age of the particle in days
+            } else {
+                getValueInterface = (particle) -> (particle.getLength()); // lengh in cm
+            }
+
+            killInterface = (particle) -> killFiletemperature(particle);
+
+        } else {
+            cold_lethal_temperature =  Float.valueOf(getParameter("cold_lethal_temperature"));
+            warm_lethal_temperature =  Float.valueOf(getParameter("warm_lethal_temperature"));
+            killInterface = (particle) -> killConstanttemperature(particle);
+        }
+
+
+        boolean addTracker = true;
+        key = "temperature_tracker";
+        if(!isNull(key)) {
+            addTracker = Boolean.valueOf(getParameter(key));
+        }
+
         if (addTracker) {
             getSimulationManager().getOutputManager().addCustomTracker(temperature_field);
         }
@@ -133,7 +147,7 @@ public class LethalTempAction extends AbstractAction {
         // Nothing to do
     }
 
-    private void loadLethalTemperatures(String csvFile) throws CsvException {
+    private void loadLethaltemperature(String csvFile) throws CsvException {
         Locale.setDefault(Locale.US);
         try {
             // open densities csv file
@@ -141,16 +155,16 @@ public class LethalTempAction extends AbstractAction {
             List<String[]> lines = reader.readAll();
 
             // init arrays
-            ages = new float[lines.size() - 1];
-            coldLethalTp = new float[ages.length];
-            hotLethalTp = new float[ages.length];
+            classes = new float[lines.size() - 1];
+            coldLethalTemp = new float[classes.length];
+            warmLethalTemp = new float[classes.length];
 
             // read ages (hours converted to seconds) and densities
-            for (int i = 0; i < ages.length; i++) {
+            for (int i = 0; i < classes.length; i++) {
                 String[] line = lines.get(i + 1);
-                ages[i] = Float.valueOf(line[0]) * 3600.f;
-                coldLethalTp[i] = Float.valueOf(line[1]);
-                hotLethalTp[i] = Float.valueOf(line[2]);
+                classes[i] = Float.valueOf(line[0]);
+                coldLethalTemp[i] = Float.valueOf(line[1]);
+                warmLethalTemp[i] = Float.valueOf(line[2]);
             }
         } catch (IOException ex) {
             Logger.getLogger(BuoyancyAction.class.getName()).log(Level.SEVERE, null, ex);
@@ -164,45 +178,48 @@ public class LethalTempAction extends AbstractAction {
             return;
         }
 
-        if (FLAG_GROWTH) {
-            checkTpGrowingParticle(particle);
-        } else {
-            checkTp(particle);
+        killInterface.kill(particle);
+    }
+
+    /**
+     * Method for killing the particle when constant lethal salinities are provided.
+     *
+     */
+    private void killConstanttemperature(IParticle particle) {
+
+        double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+
+        // System.out.println("I am " + (particle.getAge() / 3600) + " hours old, lethal
+        // tp cold: " + freshLethalSal[iAge] + " & hot: " + salineLethalSal[iAge]);
+        if (temperature <= cold_lethal_temperature) {
+            particle.kill(ParticleMortality.DEAD_COLD);
+        } else if (temperature >= warm_lethal_temperature) {
+            particle.kill(ParticleMortality.DEAD_HOT);
         }
 
     }
 
-    private void checkTp(IParticle particle) {
+    private void killFiletemperature(IParticle particle) {
+
         double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        int iAge = ages.length - 1;
-        if (FLAG_LETHAL_TEMP_FUNCTION) {
-            float age = particle.getAge();
-            for (int i = 0; i < ages.length - 1; i++) {
-                if (ages[i] <= age && age < ages[i + 1]) {
+        double particleValue = getValueInterface.getValue(particle);
+
+        int iAge = 0;
+        if (particleValue < classes[0]) {
+            iAge = 0;
+        } else {
+            iAge = classes.length - 1;
+            for (int i = 0; i < classes.length - 1; i++) {
+                if (classes[i] <= particleValue && particleValue < classes[i + 1]) {
                     iAge = i;
                     break;
                 }
             }
-
         }
-        //System.out.println("I am " + (particle.getAge() / 3600) + " hours old, lethal tp cold: " + coldLethalTp[iAge] + " & hot: " + hotLethalTp[iAge]);
-        if (temperature <= coldLethalTp[iAge]) {
-            particle.kill(ParticleMortality.DEAD_COLD);
-        } else if (temperature >= hotLethalTp[iAge]) {
-            particle.kill(ParticleMortality.DEAD_HOT);
-        }
-    }
 
-    private void checkTpGrowingParticle(IParticle particle) {
-
-        double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
-        // stage == 0 means egg, stage > 0 means larvae
-        boolean frozen = ((stage == 0) && (temperature <= coldLethalTp[0])) || ((stage != 0) && (temperature <= coldLethalTp[1]));
-        boolean heated = ((stage == 0) && (temperature >= hotLethalTp[0])) || ((stage != 0) && (temperature >= hotLethalTp[1]));
-        if (frozen) {
+        if (temperature <= coldLethalTemp[iAge]) {
             particle.kill(ParticleMortality.DEAD_COLD);
-        } else if (heated) {
+        } else if (temperature >= warmLethalTemp[iAge]) {
             particle.kill(ParticleMortality.DEAD_HOT);
         }
     }
