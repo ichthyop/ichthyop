@@ -4305,7 +4305,7 @@
 
     <block type="action">
         <key>action.growth</key>
-        <tree_path>Biology/Growth</tree_path>
+        <tree_path>Biology/Growth/Linear Growth</tree_path>
         <enabled>false</enabled>
         <description>Block of options for setting up the growth model. It simulates the growth in
             length of particles as a function of water temperature. Length increases linearly with
@@ -4400,6 +4400,131 @@
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.LinearGrowthAction</value>
                 <default>org.previmer.ichthyop.action.LinearGrowthAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>low</value>
+                <default>low</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each
+                    time step, a high priority action will be called by the application before than
+                    a low priority action. Actions with same level of priority will be called
+                    without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+
+    <block type="action">
+        <key>action.growth.exponential</key>
+        <tree_path>Biology/Growth/Exponential Growth</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options for setting up the exponential growth model. It simulates the growth in
+            length of particles as a function of water temperature. Length increases exponentially with
+            time, at a growth rate that is a linear function of temperature: length(t + dt) =
+            length(t) + (growth_coeff1 + growth_coeff2 * max(temp, threshold_temp)) * dt</description>
+
+        <parameters>
+
+            <parameter>
+                <key>b</key>
+                <long_name>b coefficient of the exponential growth module</long_name>
+                <value>0.02</value>
+                <default>0.02</default>
+                <format>float</format>
+                <description>b coefficient of the exponential growth module</description>
+            </parameter>
+
+             <parameter>
+                <key>c</key>
+                <long_name>c coefficient of the exponential growth module</long_name>
+                <value>0.02</value>
+                <default>0.02</default>
+                <format>float</format>
+                <description>c coefficient of the exponential growth module</description>
+            </parameter>
+
+            <parameter>
+                <key>max_length</key>
+                <long_name>Maximum length that a particle cannot exceed (in cm)</long_name>
+                <value>20</value>
+                <default>20</default>
+                <format>float</format>
+                <description>Maximum length that a particle cannot exceed (in cm)</description>
+            </parameter>
+
+            <parameter>
+                <key>initial_length</key>
+                <long_name>Initial length of the particle (in cm)</long_name>
+                <value>0.1</value>
+                <default>0.1</default>
+                <format>float</format>
+                <description>Initial length that a particle (in cm)</description>
+            </parameter>
+
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the
+                    hydrodynamic dataset.</description>
+            </parameter>
+
+            <parameter>
+                <key>stage_tags</key>
+                <long_name>Tags of the stages</long_name>
+                <value>"egg" "yolk-sac larva" "feeding larva"</value>
+                <default>"egg" "yolk-sac larva" "feeding larva"</default>
+                <format>list</format>
+                <description>Names of each physiological stage of the larva life history. No matter
+                    what you set, Ichthyop assumes that the first stage corresponds to egg stage.</description>
+            </parameter>
+
+            <parameter>
+                <key>stage_thresholds</key>
+                <long_name>Length in [cm] at which the stages change</long_name>
+                <value>"0.28" "0.45"</value>
+                <default>"0.28" "0.45"</default>
+                <format>list</format>
+                <description>Initial length for each physiological stage of the larva life history,
+                    in cm. Ichthyop assumes that the first length provided corresponds to
+                    the egg length.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>length_tracker</key>
+                <long_name>Track particle length</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "length" variable in the NetCDF output
+                    file.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>stage_tracker</key>
+                <long_name>Track particle biological stage</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "stage" variable in the NetCDF output
+                    file.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.ExponentialGrowthAction</value>
+                <default>org.previmer.ichthyop.action.ExponentialGrowthAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>

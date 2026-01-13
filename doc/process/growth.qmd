@@ -20,9 +20,6 @@ a half-saturation constant (`half_saturation` parameter). If the latter is not d
 
 The name of the food and temperature variables are provided by the `food_field` and `temperature_field` parameters.
 
-<!-- TODO Add the description of the DEB module -->
-
-
 ### Sole growth
 
 If the {samp}`SoleGrowthAction.java` class is selected, the growth model used in @TANNER201778 is
@@ -35,3 +32,21 @@ $$
 with $L$ the length, $T$ the temperature and $\Delta t$ the time step in days, and $C_1$ and $C_2$ are parameters (`c1` and `c2` respectively).
 
 The temperature field is provided by the `temperature_field` parameter.
+
+### Exponential growth
+
+If the `ExponentialGrowthAction.java` class is selected, the growth model used is exponential.
+
+We assume that the length is given by the following equation:
+
+$$
+L(t) = L_0 \times \exp{\left(b T^c t\right)}
+$$
+
+with $L_0$ the initial length (in cm), $b$ the growth rate and $c$ the temperature dependence of the growth rate.
+
+Taking the derivative of this expression, we obtain the increase in length as a function of time:
+
+$$
+\Delta L = L \times b \times T^{c} \times \Delta t
+$$
