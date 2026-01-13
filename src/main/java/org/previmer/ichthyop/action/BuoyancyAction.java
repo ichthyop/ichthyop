@@ -210,7 +210,7 @@ public class BuoyancyAction extends AbstractAction {
             // read ages (hours converted to seconds) and densities
             for (int i = 0; i < classes.length; i++) {
                 String[] line = lines.get(i + 1);
-                classes[i] = Float.valueOf(line[0]) * 3600.f;
+                classes[i] = Float.valueOf(line[0]);
                 particleDensities[i] = Float.valueOf(line[1]);
             }
         } catch (IOException ex) {
@@ -226,14 +226,14 @@ public class BuoyancyAction extends AbstractAction {
             particleDensity = particleDensities[0];
         } else {
 
+            // if particle class exceeds upper bound, then force the density to the upper
+            // value
+            particleDensity = particleDensities[classes.length - 1];
             for (int i = 0; i < classes.length - 1; i++) {
                 if (classes[i] <= particle_class && particle_class < classes[i + 1]) {
                     particleDensity = particleDensities[i];
                     break;
                 }
-                // if particle class exceeds upper bound, then force the density to the upper
-                // value
-                particleDensity = particleDensities[classes.length - 1];
             }
         }
 
