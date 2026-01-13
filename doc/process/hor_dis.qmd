@@ -33,3 +33,5 @@ By putting the rightmost $\Delta t$ within the square root, and by putting the $
 $$
 \Delta X = \delta \times  \sqrt{2 {\Delta t}} \times  \epsilon^{1/6} \times l^{2/3}
 $$
+
+The value of $l$ is computing by averaging the mesh size along the $X$ and $Y$ dimensions.
