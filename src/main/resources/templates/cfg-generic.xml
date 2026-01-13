@@ -4788,6 +4788,107 @@
     </block>
 
     <block type="action">
+        <key>action.gradient</key>
+        <tree_path>Movements/Gradient movement</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options for the gradient move process.</description>
+
+        <parameters>
+
+            <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
+
+            <parameter>
+                <key>variable</key>
+                <long_name>Name of the NetCDF variable used to compute gradient oriented movements</long_name>
+                <value>thetao</value>
+                <default>thetao</default>
+                <description>Name of the NetCDF variable used to compute gradient oriented movements</description>
+            </parameter>
+
+            <parameter>
+                <key>speed</key>
+                <long_name>Particle maximum speed (cm/s)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description>Particle maximum speed (cm/s)</description>
+            </parameter>
+
+            <parameter>
+                <key>direction</key>
+                <long_name>Direction of the particle.</long_name>
+                <value>+</value>
+                <default>+</default>
+                <format>combo</format>
+                <accepted>+</accepted>
+                <accepted>-</accepted>
+                <description>
+                    If +, then the particle will follow the highest gradient.
+                    <b>Should be the default, since the interpretation with - is not straightforward</b>
+                </description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.GradientMoveAction</value>
+                <default>org.previmer.ichthyop.action.GradientMoveAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>highest</value>
+                <default>highest</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each
+                    time step, a high priority action will be called by the application before than
+                    a low priority action. Actions with same level of priority will be called
+                    without any specific order.</description>
+            </parameter>
+        </parameters>
+
+    </block>
+
+
+    <block type="action">
         <key>action.recruitment.zone</key>
         <tree_path>Biology/Recruitment/In zones</tree_path>
         <enabled>false</enabled>
