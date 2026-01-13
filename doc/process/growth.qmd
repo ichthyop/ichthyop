@@ -7,18 +7,27 @@ There is 2 different implementations of the growth module. They can be selected 
 
 ### Linear growth
 
-To use the linear growth method described in @LETT20081210, choose the `LinearGrowthAction.java` class.
+To use the linear growth method described in @LETT20081210, choose the `LinearGrowthAction.java` class. Length depends on temperature but may
+also depend on the available food if the `growth.food.enabled` parameter is set to True.
 
-Length increment is provided as follows:
+If food dependence is enabled, length increment is provided as follows:
 
 $$
-\Delta L = C_1 + C_2 \times \dfrac{F}{F + K_S} \times max(T, T_{thres}) \times \Delta t
+\Delta L = C1 + C2 \times \dfrac{F}{F + K_S} \times max(T, T_{thres}) \times \Delta t
 $$
 
-where $\Delta t$ is the time-step (in days), $C_1$ and $C_2$ are parameters (`coeff1` and `coeff2`), $T_{thres}$ is a temperature threshold (`threshold_temp` parameter), $F$ is the food quantity and $K_S$ is
-a half-saturation constant (`half_saturation` parameter). If the latter is not defined or equals 0, $Q$ is assumed to be $1$.
+where $\Delta t$ is the time-step (in days), $C1$ and $C2$ are parameters (`coeff1` and `coeff2`), $T_{thres}$ is a temperature threshold (`threshold_temp` parameter), $F$ is the food quantity (read from the hydrodynamical dataset),  and $K_S$ is
+a half-saturation constant (`half_saturation` parameter) and $T$ is the temperature.
+
+If food dependence is disabled, then increment is provided as follows:
+
+$$
+\Delta L = C1 + C2 \times max(T, T_{thres}) \times \Delta t
+$$
 
 The name of the food and temperature variables are provided by the `food_field` and `temperature_field` parameters.
+
+The initial length of the particle is provided by the `initial_length` parameter.
 
 ### Sole growth
 
@@ -50,3 +59,5 @@ Taking the derivative of this expression, we obtain the increase in length as a 
 $$
 \Delta L = L \times b \times T^{c} \times \Delta t
 $$
+
+The initial length of the particle is provided by the `initial_length` parameter.

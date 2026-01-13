@@ -4314,9 +4314,41 @@
 
         <parameters>
 
+             <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
+
             <parameter>
                 <key>coeff1</key>
-                <long_name>Growth coefficient 1</long_name>
+                <long_name>Growth coefficient 1 (C1)</long_name>
                 <value>0.02</value>
                 <default>0.02</default>
                 <format>float</format>
@@ -4326,7 +4358,7 @@
 
             <parameter>
                 <key>coeff2</key>
-                <long_name>Growth coefficient 2</long_name>
+                <long_name>Growth coefficient 2 (C2)    </long_name>
                 <value>0.03</value>
                 <default>0.03</default>
                 <format>float</format>
@@ -4355,6 +4387,33 @@
             </parameter>
 
             <parameter>
+                <key>initial_length</key>
+                <long_name>Initial length of the particle (in cm)</long_name>
+                <value>0.0025</value>
+                <default>0.0025</default>
+                <format>float</format>
+                <description>Initial length of the particle (in cm)</description>
+            </parameter>
+
+             <parameter>
+                <key>growth.food.enabled</key>
+                <long_name>True if the growth module should take into account food effect</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>True if the growth module should take into account food effect. If True, a food field should be provided</description>
+            </parameter>
+
+              <parameter>
+                <key>food_field</key>
+                <long_name>Food variable name</long_name>
+                <value>ZOO</value>
+                <default>ZOO</default>
+                <description>The name of the food variable (case sensitive) in the
+                    hydrodynamic dataset.</description>
+             </parameter>
+
+            <parameter>
                 <key>stage_tags</key>
                 <long_name>Tags of the stages</long_name>
                 <value>"egg" "yolk-sac larva" "feeding larva"</value>
@@ -4366,9 +4425,9 @@
 
             <parameter>
                 <key>stage_thresholds</key>
-                <long_name>Initial length of the stages [millimeter]</long_name>
-                <value>"0.025" "2.8" "4.5"</value>
-                <default>"0.025" "2.8" "4.5"</default>
+                <long_name>Length at which the particle change stage [cm]</long_name>
+                <value>"0.28" "0.45"</value>
+                <default>"0.28" "0.45"</default>
                 <format>list</format>
                 <description>Initial length for each physiological stage of the larva life history,
                     in millimeter. Ichthyop assumes that the first length provided corresponds to
@@ -4433,6 +4492,38 @@
             length(t) + (growth_coeff1 + growth_coeff2 * max(temp, threshold_temp)) * dt</description>
 
         <parameters>
+
+             <parameter hidden="true">
+                <key>activation_variable</key>
+                <long_name>Variable used to activate/deactivate process</long_name>
+                <value>age</value>
+                <default>age</default>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <description>Variable used to activate/deactivate a process. Can be age (in days) or
+                    length (in cm)</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_minimum_class_value</key>
+                <long_name>Activation age (days) or length(cm)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description>Activation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is activated</description>
+            </parameter>
+
+            <parameter hidden="true">
+                <key>activation_maximum_class_value</key>
+                <long_name>Dectivation age (days) or length(cm)</long_name>
+                <value>1e30</value>
+                <default>1e30</default>
+                <format>float</format>
+                <description>Dectivation age (days) or length(cm). If the age or length of the
+                    particle is greater, then the process is deactivated</description>
+            </parameter>
 
             <parameter>
                 <key>b</key>
