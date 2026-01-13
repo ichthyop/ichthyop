@@ -68,7 +68,9 @@ public class ExponentialGrowthAction extends AbstractAction {
     private double dt_day;
     private LengthStage lengthStage;
     private float b, c;
-    private float max_length;
+
+    /** Maximum and initial length (in cm) */
+    private float max_length, initial_length;
 
     @Override
     public void loadParameters() throws Exception {
@@ -78,10 +80,17 @@ public class ExponentialGrowthAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
 
         // Add the length tracker
-        getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
+        String key;
+        key = "length_tracker";
+        if (!isNull(key) && Boolean.getBoolean(getParameter(key))) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
+        }
 
-        // Add the stage tracker
-        getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
+        key = "stage_tracker";
+        if (!isNull(key) && Boolean.getBoolean(getParameter(key))) {
+            // Add the stage tracker
+            getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
+        }
 
         // Time step expressed in day
         dt_day = (double) getSimulationManager().getTimeManager().get_dt() / Constant.ONE_DAY;
@@ -93,13 +102,15 @@ public class ExponentialGrowthAction extends AbstractAction {
         b = Float.valueOf(getParameter("b"));
         c = Float.valueOf(getParameter("c"));
         max_length = Float.valueOf(getParameter("max_length"));
+        initial_length = Float.valueOf(getParameter("initial_length"));
+
 
     }
 
     @Override
     public void init(IParticle particle) {
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.setLength(lengthStage.getThreshold(0));
+        lengthLayer.setLength(initial_length);
     }
 
     @Override
