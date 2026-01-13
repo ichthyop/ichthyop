@@ -137,10 +137,16 @@ public class BuoyancyAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
 
+        // Adding an easy way to switch from density file to constant density
+        boolean use_file  = false;
+        if(!isNull("density.method")) {
+            use_file = getParameter("density.method").toLowerCase().equals("file");
+        }
+
         /*
          * Check whether there is a density CSV file
          */
-        if (!isNull("density_file")) {
+        if (use_file) {
             String pathname = IOTools.resolveFile(getParameter("density_file"));
             File f = new File(pathname);
             if (!f.isFile()) {
