@@ -2,55 +2,24 @@
 
 In Ichthyop, there is the possibility to define a range of temperature and salinity beyond which the particle is killed.
 
-### Lethal temperature
+The same set of parameters are used in both cases, with the `temperature` and `salinity` prefix.
+There are two ways to define lethal temperatures and salinities:
 
-The functionning og the lethal temperature module depends on whether the growth module is enabled or not.
+- Using constant lethal temperatures or salinities (if `temperature.file.enabled` or `salinity.file.enabled` is set to false)
+- Using a CSV file containing lethal temperatures or salinities as a function of the particle class.
 
-#### Growth disabled
+If constant lethal temperatures or salinities are provided, the cold and warm lethal temperatures
+are provided with the `cold_lethal_temperature`, `warm_lethal_temperature`, `fresh_lethal_salinity`, `saline_lethal_salinity`,  .
 
-lethal temperature can either be provided in a CSV file (`lethal_temp_file` parameter), which provides the lower and upper temperature values that can be supported by the particle as a function of age (in hours). The file must have the following format:
+If a CSV file is used, the lethal temperatures and salinities are provided in a CSV (`lethal_temperature_file` and `lethal_salinity_file` parameters) which is formatted as follows:
 
 ```bash
-Time(hour);Cold temperature (C);Warm temperature (C)
+Age(days);Cold temperature (C);Warm temperature (C)
 0;14;22
-48;13;22
-96;12;22
+2;13;22
+6;12;22
 ```
 
-In this case, three age classes will be considered: $[0, 48[$, $[48, 96[$ and $[96, \infty[$
-
-If the `lethal_temp_file` parameter is not defined, single values will be used independently of the age. These values are provided in the `cold_lethal_salinity_egg` and `warm_lethal_salinity_egg` parameters.
-
-Note that the `temperature_field` parameter, providing the name of the temperature variable, must also be provided.
-
-<!-- ```{index} lethal_temp_file, temperature_field, lethal_temp_file, cold_lethal_salinity_egg, warm_lethal_salinity_egg
-``` -->
-
-#### Growth enabled
-
-If the growth module is enabled, two cold and warm lethal temperatures must be provided. One for eggs (`cold_lethal_temperature_egg` and `hot_lethal_temperature_egg`), one for larva (`cold_lethal_temperature_larva` and `hot_lethal_temperature_larva`).
-
-The stage (`egg` or `larva`) is determined by the growth module, and the right temperature range is applied to the particle.
-
-<!-- ```{index} cold_lethal_temperature_egg, hot_lethal_temperature_egg, cold_lethal_temperature_larva, hot_lethal_temperature_larva
-``` -->
-
-### Lethal salinity
-
-Lethal salinity can either be provided in a CSV file (`lethal_salt_file` parameter), which provides the lower and upper salinity values that can be supported by the particle as a function of age (in hours). The file must have the following format:
-
-```bash
-Time(hour);Fresh salinity (PSU);Salty salinity (PSU)
-0;35;40
-48;30;40
-96;30;45
-```
-
-In this case, three age classes will be considered: $[0, 48[$, $[48, 96[$ and $[96, \infty[$
-
-If the `lethal_salt_file` parameter is not defined, single values will be used independently of the age. These values are provided in the `fresh_lethal_salinity_egg` and `saline_lethal_salinity_egg` parameters.
-
-Note that the `salinity_field_` parameter, providing the name of the salinity variable, must also be provided.
-
-<!-- ```{index} lethal_salt_file, salinity_field, fresh_lethal_salinity_egg, saline_lethal_salinity_egg
-``` -->
+The first column provides the class intervals, which are either the age of the
+particle (in days) or the length of the particle (in cm). The variable that is
+used to determine the class is provided by the `temperature.class` parameter.

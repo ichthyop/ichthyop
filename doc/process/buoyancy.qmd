@@ -13,7 +13,7 @@ with $a$ and $b$ the semi-major axis and semi-minor axis of an ellipse (`mean_ma
 There are two possibilities to define the particle buoyancy, which are provided by the `density.method` parameter:
 
 - If `constant`, then a constant density (in $g.cm^{-3}$) is used, which is provided by the `particle_density` parameter.
-- If `file`, then the buoyancy is read from a file and can vary with either age or length. The class that is used is provided by the `particle.class` parameter.
+- If `file`, then the buoyancy is read from a file and can vary with either age or length. The class that is used is provided by the `density.class` parameter.
 
 The density CSV file must be formatted in the following way:
 
