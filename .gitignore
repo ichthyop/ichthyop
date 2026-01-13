@@ -36,3 +36,6 @@ doc/index.tex
 
 **/.DS_Store
 .VSCodeCounter
+doc/index.aux
+doc/index.pdf
+doc/index.toc
