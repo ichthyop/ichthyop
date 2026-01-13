@@ -3501,6 +3501,20 @@
             </parameter>
 
             <parameter>
+                <key>density.class</key>
+                <long_name>Defines whether age (in days) or length (in cm) is used for density class</long_name>
+                <value>age</value>
+                <format>combo</format>
+                <accepted>age</accepted>
+                <accepted>length</accepted>
+                <default>age</default>
+                <description>
+                   Defines whether age (in days) or length (in cm) is used for density class
+                </description>
+            </parameter>
+
+
+            <parameter>
                 <key>density_file</key>
                 <long_name>Density file</long_name>
                 <value></value>
