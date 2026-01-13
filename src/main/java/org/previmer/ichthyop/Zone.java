@@ -349,9 +349,9 @@ public class Zone extends SimulationManagerAccessor {
     }
 
     private boolean isXYBetweenBathyLines(double x, double y) {
-        return (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
+        return (getSimulationManager().getDataset().getBathy((int) Math.floor(x), (int) Math.floor(y))
                 > inshoreLine
-                & getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
+                & getSimulationManager().getDataset().getBathy((int) Math.floor(x), (int) Math.floor(y))
                 < offshoreLine);
     }
 

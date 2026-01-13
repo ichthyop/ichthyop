@@ -55,6 +55,6 @@ public class BathyTracker extends FloatTracker {
     @Override
     float getValue(IParticle particle) {
         double[] pGrid = {particle.getX(), particle.getY(), particle.getZ()};
-        return (float) getSimulationManager().getDataset().getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return (float) getSimulationManager().getDataset().getBathy((int) Math.floor(pGrid[0]), (int) Math.floor(pGrid[1]));
     }
 }
