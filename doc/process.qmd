@@ -1,5 +1,5 @@
 
-# Ichthyop processes {#sec-pricess}
+# Ichthyop processes {#sec-process}
 
 In this section, the different Ichthyop processes are described. These processes are implemented in the classes within
 the `action` folder.

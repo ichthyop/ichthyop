@@ -1,6 +1,6 @@
 ## Simulation configuration file {#sec-xml-config}
 
-Ichthyop simulations are configured using [XML](https://en.wikipedia.org/wiki/XML) configuration files. It should always start as follows:
+Ichthyop simulations are configured using [XML](https://en.wikipedia.org/wiki/XML) configuration files. These files should always start as follows:
 
 ```XML
 <icstructure>
@@ -14,8 +14,8 @@ Ichthyop simulations are configured using [XML](https://en.wikipedia.org/wiki/XM
 
 Ichthyop is configured by blocks, each block managing a specific aspect of the model. The blocks are as follows:
 
-- `ACTION`: Block of parameters related to the `action` classes (cf. {numref}`process`).
-- `RELEASE`: Block of parameters related to the `release` classes (cf. {numref}`release`)
+- `ACTION`: Block of parameters related to the `action` classes (cf. @sec-process).
+- `RELEASE`: Block of parameters related to the `release` classes (cf. @sec-sec-release)
 - `DATASET`: Block of parameters related to the `datasets` classes.
 - `OPTION`: Block of parameters related to the remaining parameters.
 
@@ -30,23 +30,23 @@ New blocks can be added in the XML file as follows:
 </block>
 ```
 
-The `key` tag is used to identify the configuration block. The `tree_path` tag is used in the Ichthyop console to
-create the parameter tree. The `description` field is used to display the block description in the
+The `<key>` tag is used to identify the configuration block. The `<tree_path>` tag is used in the Ichthyop console to
+create the parameter tree. The `<description>` field is used to display the block description in the
 Ichthyop console.
 
-The `enabled` tag specifies whether the block should be considered by Ichthyop or not. By default, all blocks are enabled.
-But for the `RELEASE` and `DATASET`, one and only one block must be activated.
+The `<enabled>` tag specifies whether the block should be considered when running the Ichthyop code or not. By default, all blocks are enabled.
+But for the `RELEASE` and `DATASET` blocks, one and only one block must be enabled.
 
 ### Configuration parameters
 
-To each block is associated a list of parameters. This list of parameter is added in the XML as follows:
+A list of parameters is associated to each block. This is added in the XML file as follows:
 
 ```XML
 <parameters>
 </parameters>
 ```
 
-Inside the `parameters` tags, new parameters are defined as follows:
+Inside the `<parameters>` tag, new parameters are defined as follows:
 
 ```XML
 <parameter>
@@ -59,11 +59,11 @@ Inside the `parameters` tags, new parameters are defined as follows:
 </parameter>
 ```
 
-The `key` tag allows to identify the parameter, while the `value` tag specifies the value of the parameter. The
-remaining tags are only used by the Ichthyop console.  The `long_name` and `description` tags are used by the console
+The `<key>` tag allows to identify the parameter, while the `<value>` tag specifies the value of this parameter.
+The `<default>` tag provides the default value of the parameter.  The `<long_name>` and `<description>` tags are used by the console
 to provide informations about the parameter.
 
-The `format` tag specifies the parameter format, which will be used by the console parameter editor. The accepted values are:
+The `<format>` tag specifies the parameter format, which will be used by the console parameter editor. The accepted values are:
 
 - `path`: For files and folders
 - `date`: For dates (format must be `year YYYY month MM day at HH:MM`)
@@ -77,7 +77,7 @@ The `format` tag specifies the parameter format, which will be used by the conso
 - `lonlat`: For geographical coordinates.
 
 In the case of `combo` parameters, the list of accepted parameters is specified by
-providing as many `accepted` tags as necessary. For instance:
+providing as many `<accepted>` tags as necessary. For example:
 
 ```XML
 <parameter>
@@ -92,7 +92,7 @@ providing as many `accepted` tags as necessary. For instance:
 </parameter>
 ```
 
-If a parameter should appear as hidden in the Ichthyop console, it can be specified by adding the
+If a parameter should by default appears as hidden in the Ichthyop console, it can be specified by adding the
 `hidden="true"` argument to the `parameter` tag, as shown below:
 
 ```XML
@@ -102,14 +102,14 @@ If a parameter should appear as hidden in the Ichthyop console, it can be specif
 
 ### Serial parameters
 
-In order to test different values for a given parameter, a `serial` tag can be added as follows:
+In order to test different values of a given parameter, a `serial` tag can be added as follows:
 
 ```XML
 <parameter type="serial">
 </parameter>
 ```
 
-Different values are provided by replicating the `value` parameter as follows:
+Different values are then provided by replicating the `value` parameter as follows:
 
 ```XML
 <parameter type="serial">
@@ -122,8 +122,6 @@ Different values are provided by replicating the `value` parameter as follows:
 </parameter>
 ```
 
-
-
-When simulations are run with serial parameters, all possible combinations of parameters will be run. Output files
-will contain a `_sX` suffix, with `X` the simulation number. The parameters used in the simulation are provided as
-global NetCDF attributes.
+When simulations are run with serial parameters, all possible combinations of parameter values will be run. Output files
+will then contain a `_sX` suffix, with `X` the simulation number. The parameters used in a particular simulation `X` are provided as
+global NetCDF attributes in the corresponding `_sX` NetCDF output file.
