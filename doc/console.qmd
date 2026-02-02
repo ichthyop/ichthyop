@@ -1,6 +1,11 @@
-# Ichthyop console {#sec-console}
+# Ichthyop user interface (beginners) {#sec-console}
 
-In this section, the Ichthyop console is described.
+ When Ichthyop is ran with its user interface, a simulation comprises 4 steps
+
+ - configuration (@sec-console-conf)
+ - running (@sec-console-run)
+ - visualize results (@sec-console-visu)
+ - and animation (@sec-console-anim).
 
 {{< include console/configure.qmd >}}
 {{< include console/zone.qmd >}}

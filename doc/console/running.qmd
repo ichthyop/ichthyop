@@ -1,4 +1,4 @@
-## Running
+## Running {#sec-console-run}
 
 ![Step 2, simulation](console/_static/step2-simulate.png)
 

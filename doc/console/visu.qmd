@@ -1,4 +1,4 @@
-## Visualize results
+## Visualize results {#sec-console-visu}
 
 ![Step 3, mapping](console/_static/step3-mapping.png)
 

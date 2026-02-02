@@ -34,6 +34,7 @@ book:
         - process.qmd
     - part: developer.qmd
       chapters:
+        - developer/java.qmd
         - developer/manager_initialization.qmd
         - developer/particle.qmd
         - developer/grid.qmd

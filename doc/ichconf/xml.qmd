@@ -15,7 +15,7 @@ Ichthyop simulations are configured using [XML](https://en.wikipedia.org/wiki/XM
 Ichthyop is configured by blocks, each block managing a specific aspect of the model. The blocks are as follows:
 
 - `ACTION`: Block of parameters related to the `action` classes (cf. @sec-process).
-- `RELEASE`: Block of parameters related to the `release` classes (cf. @sec-sec-release)
+- `RELEASE`: Block of parameters related to the `release` classes (cf. @sec-release)
 - `DATASET`: Block of parameters related to the `datasets` classes.
 - `OPTION`: Block of parameters related to the remaining parameters.
 

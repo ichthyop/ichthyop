@@ -1,12 +1,14 @@
-## Zone definition
+### Zone definition
 
-In Ichthyop, the user can define zones, either release zones or recruitment zones.
+Users can define geographical zones either for “release” (i.e., origin) or “recruitment” (i.e., destination) of particles.
 
-The zones can be edited using the GUI, as shown in @fig-gui-zone
+The first time the user enable (`Enabled` tick box) zones for release (into block `Release – From zones`) or for recruitment (into block `Biology – Recruitment – In zones`), do not forget to create a new zone file (by clicking `New` in the zone file value field) as the filename is preset in the configuration editor but the file itself may not exist yet on your disk. After that the user will be able to edit an existing zone file by clicking `Edit` in the zone file value field.
+
+Zones can be added, edited or removed directly within the user interface (@fig-gui-zone).
 
 ![Ichthyop Zone editor](console/_static/zone.png){#fig-gui-zone}
 
-### Adding, removing and renaming zones
+#### Adding, removing and renaming zones
 
 The number of zones is managed on the left part of the panel.
 
@@ -15,32 +17,29 @@ clicking on the ![](console/_static/ico22/list-remove.png) button.
 
 The reordering of the zones is achieved by clicking on the ![](console/_static/ico22/up.png) and ![](console/_static/ico22/down.png) buttons.
 
-When double-clicking on the name of the zone on the left panel, the user can edit the zone name.
+When double-clicking on the name of the zone on the left panel, the user rename a zone.
 
-### Editing a zone
+#### Editing a zone
 
 When a zone is selected, the user can edit different parameters associated with the zone.
 
-First, the user can enable or disable a zone by clicking on the {guilabel}`Enabled` tick box.
+First, the user can enable or disable a zone by clicking on the `Enabled` tick box.
 
-The zones are defined by providing the points coordinates. Points can be added, removed and reordered by using the
+The zones are defined by providing the geographic points coordinates. Points can be added, removed and reordered by using the
 ![](console/_static/ico22/list-add.png), ![](console/_static/ico22/list-remove.png), ![](console/_static/ico22/up.png) and ![](console/_static/ico22/down.png) buttons, respectively. The user can also change the format of the points coordinates by clicking on the radio buttons in the `Options` bottom panel.
 
-Ichthyop defines two types of zones: one for release (see @sec-zone-release) problèmeand one for recruitment purposes.
+Ichthyop uses three types of zones: one for release (see @sec-zone-release), one for recruitment of particles and one for orientation (see @sec-proc-orient).
 This type is chosen by using the `Type of zone` combo box. For release zones, the user can specify the number of
 particles that will be released in the zone (only if the `user_defined_nparticles` parameter is
-set equal to true, cf @sec-zone-release). It is done by filling the `Number of released particles` textbox
+set equal to true, cf @sec-zone-release). This is done by filling the `Proportion of released particles` textbox
 and pressing `ENTER`
 
-Each zone is associated with a color, that will be used to its representation in the graphical interface during the
-preview and the display of the simulation results.
+Each zone is associated with a color for the preview and the display of the simulation results.
 This color can be edited by using the ![](console/_static/ico22/fill-color.png) button.
 
-In the case of 3D simulations, you can specify the depth range to use in the zone. To activate this feature,
-click on the `Activated` tick box of the `Thickness` panel.
-You can provide the lower and upper depth that must be considered in the given zone (negative values).
+- `<bathy_mask>` (optional) specifies a subset of zone area based on bathymetry (for example 0 to 200m, for using only the subset of zone area from 0 to 200 m depth)
+- `<thickness>` (optional) specifies the upper and lower depths subsets of zone areas (**only valid for 3D runs**).
 
-In 3D simulations, you can also specify the bathymetric range that you want to include, for
-instance if you want to release particles only
-on the ocean shelf (i.e depth less than 200m). This can be done by activating the feature by clicking on the
-`Activated` tick box of the `Bathymetric mask` panel.
+In the case of 3D simulations, the user can specify a subset of zone area based on a lower and upper depth. This feature is activated by
+clicking on the `Activated` tick box of the `Thickness` panel.
+The user can also specify a subset of zone area based on bathymetry (for example 0 to 200m, for using only the subset of zone area from 0 to 200 m depth). This feature is activated by clicking on the `Activated` tick box of the `Bathymetric mask` panel.
