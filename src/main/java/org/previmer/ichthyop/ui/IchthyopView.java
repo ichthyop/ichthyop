@@ -1813,6 +1813,7 @@ public class IchthyopView extends FrameView
         cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel<Object>(new String[] { "Offline", "http://www.openstreetmap.org/", "http://www.marine-geo.org/services/wms?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&" }));
         cbBoxWMS.setAction(actionMap.get("changeWMS")); // NOI18N
         cbBoxWMS.setName("cbBoxWMS"); // NOI18N
+        cbBoxWMS.setSelectedItem("http://www.marine-geo.org/services/wms?");
 
         lblWMS.setName("lblWMS"); // NOI18N
 
