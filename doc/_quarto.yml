@@ -25,8 +25,8 @@ book:
     - part: user_guide.qmd
       chapters:
         - start.qmd
-        - ichconf.qmd
         - console.qmd
+        - ichconf.qmd
         - faq.qmd
     - part: documentation.qmd
       chapters:
