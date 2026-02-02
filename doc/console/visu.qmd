@@ -36,7 +36,7 @@ Depending on the quality of the Internet connection and how busy is the Web Map 
 
 When the settings of the map looks satisfactory, click on "Make maps" button. Ichthyop will create a folder that has exactly the same name than the simulation NetCDF output file (without the .nc extension) in the output directory. Then maps are recorded in this folder as PNG pictures.
 
-Again, depending on the computer capabilities and the number of particles, the map creation might require a large amount of the available dynamic memory and the application looks like it is frozen. Wait for the application to complete this step. Refer to section "Java Heap Space" if the application crashes because of memory problem.
+Again, depending on the computer capabilities and the number of particles, the map creation might require a large amount of the available dynamic memory and the application looks like it is frozen. Wait for the application to complete this step. Refer to @sec-faq-heap-space if the application crashes because of memory problem.
 
 ### Export trajectories to KMZ format
 

@@ -37,9 +37,6 @@ and pressing `ENTER`
 Each zone is associated with a color for the preview and the display of the simulation results.
 This color can be edited by using the ![](console/_static/ico22/fill-color.png) button.
 
-- `<bathy_mask>` (optional) specifies a subset of zone area based on bathymetry (for example 0 to 200m, for using only the subset of zone area from 0 to 200 m depth)
-- `<thickness>` (optional) specifies the upper and lower depths subsets of zone areas (**only valid for 3D runs**).
-
 In the case of 3D simulations, the user can specify a subset of zone area based on a lower and upper depth. This feature is activated by
 clicking on the `Activated` tick box of the `Thickness` panel.
 The user can also specify a subset of zone area based on bathymetry (for example 0 to 200m, for using only the subset of zone area from 0 to 200 m depth). This feature is activated by clicking on the `Activated` tick box of the `Bathymetric mask` panel.

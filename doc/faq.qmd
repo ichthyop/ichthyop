@@ -1,5 +1,20 @@
 # FAQ
 
+## Java Heap Space {#sec-faq-heap-space}
+
+In case of memory issues, run Ichthyop in the Terminal as follows:
+
+```bash
+java -jar -Xms1g -Xmx16g ichthyop_X.Y.Z.jar
+```
+
+The first argument provides the initial heap memory while the second argument provides the maximum size of the heap memory. Replace `16g` by any number.
+
+::: {.callout-important}
+You need to make sure that your computer has at least the memory indicated by the `Xmx` parameter
+:::
+
+
 ## What to do when Ichthyop does not manage my ocean dataset
 
 Ichthyop developers cannot manage all the different ocean datasets that exist. First, there
