@@ -42,3 +42,8 @@ Do not forget to save the configuration file before going to the next step.
 **Parameters cannot be added from within the Ichthyop console. Only paramters that are already defined
 on the XML file can be edited using the console**
 :::
+
+:::{.callout-caution}
+**Using the user interface, additionnal values can be provided to serial parameters only when hidden parameters are
+displayed**
+:::
