@@ -408,7 +408,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     @Override
     public boolean isInWater(double[] pGrid) {
-        return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return isInWater((int) Math.floor(pGrid[0]), (int) Math.floor(pGrid[1]));
     }
 
     @Override
