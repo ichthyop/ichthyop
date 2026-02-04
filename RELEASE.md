@@ -6,6 +6,7 @@
 
 - Correction of `isInWater` for RomsDataset: use `floor` instead of `round`.
 - Correction of bathymetry computation: use `floor` instead of `round`
+- Solving #139: constraining last dimension by `nx` rather than `ny`
 
 These corrections, for Roms, allow for consistency between the land-sea mask and the bathymetry (bug fix for Ousmane)
 
