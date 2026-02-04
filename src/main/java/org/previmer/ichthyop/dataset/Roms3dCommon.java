@@ -878,11 +878,11 @@ abstract public class Roms3dCommon extends RomsCommon {
         switch (variableShape.length) {
             case 4:
                 origin = new int[]{rank, 0, jpo, ipo};
-                shape = new int[]{1, nz, Math.min(ny, variableShape[2]), Math.min(ny, variableShape[3])};
+                shape = new int[]{1, nz, Math.min(ny, variableShape[2]), Math.min(nx, variableShape[3])};
                 break;
             case 2:
                 origin = new int[]{jpo, ipo};
-                shape = new int[]{Math.min(ny, variableShape[2]), Math.min(ny, variableShape[3])};
+                shape = new int[]{Math.min(ny, variableShape[2]), Math.min(nx, variableShape[3])};
                 break;
             case 3:
                 if (!variable.isUnlimited()) {

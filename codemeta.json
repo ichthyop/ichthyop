@@ -218,7 +218,7 @@
     "name": "Ichthyop: A Lagrangian tool for modelling ichthyoplankton dynamics",
     "programmingLanguage": "Java",
     "relatedLink": "https://ichthyop.org/",
-    "schema:releaseNotes": "https://github.com/ichthyop/ichthyop/compare/3.4.1...3.5.0",
+    "schema:releaseNotes": "https://github.com/ichthyop/ichthyop/compare/3.4.2...3.5.0",
     "runtimePlatform": "JVM",
     "version": "3.5.0",
     "contIntegration": "https://github.com/ichthyop/ichthyop/actions",
