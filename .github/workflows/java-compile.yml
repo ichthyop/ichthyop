@@ -47,8 +47,26 @@ jobs:
       - name: Install C dependencies
         run: sudo apt install -yq libnetcdf-dev
 
+      - name: Cache Input Files
+        id: cache-input
+        uses: actions/cache@v3
+        env:
+            cache-name: cache-input-files
+        with:
+            path: input
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('input/*.nc') }}
+            restore-keys: |
+                ${{ runner.os }}-build-${{ env.cache-name }}-
+                ${{ runner.os }}-build-
+                ${{ runner.os }}-
+
       - name: Download java files
-        run: echo wget
+        if: steps.cache-input.outputs.cache-hit != 'true'
+        run: wget https://zenodo.org/records/10890690/files/input.zip
+
+      - name: Unzip input files
+        if: steps.cache-input.outputs.cache-hit != 'true'
+        run: unzip input.zip
 
       - name: Compile Java code
         run:  |
