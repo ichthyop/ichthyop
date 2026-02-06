@@ -50,7 +50,7 @@ $$ {#eq-deb-repfonct}
 
 with $F$ the food vector and $K$ the half-saturation constant.
 
-Assimilation rates $\{\dot{p_{Am}}\}$, energy conductance $\dot{v}, volume specific somatic maintenance ($[\dot{p}_M]$) and maturity maintenances rates ($\dot{k}_J$) are corrected by the $c_T$ factor.
+Assimilation rates $\{\dot{p_{Am}}\}$, energy conductance $\dot{v}$, volume specific somatic maintenance ($[\dot{p}_M]$) and maturity maintenances rates ($\dot{k}_J$) are corrected by the $c_T$ factor.
 
 If the accelerated DEB model is used (see e.g. Kooijman et al. (2011) and Kooijman (2014) for more details), the acceleration factor is computed as follows
 
@@ -63,9 +63,11 @@ s_M =
 \end{cases}
 $$ {#eq-deb-sm}
 
-with $L_b$ the structural length of the particle when $E_H = E_Hb$ (i.e the length at birth, i.e. first feeding) and $L_j$ the structural length of the particle when $E_H = E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate $\{\dot{p_{Am}}\}$ and the energy conductance $\dot{\v}$. (NICOLAS: s'agit il de la longueur structurelle $L = V^{1/3}}$ ou de la longueur mesurée $L_w = L / \delta_M$). Please note that $L_b$ and $L_j$ are here considered as parameters but they should be in fact calculated prior any Ichthyop runs at (e.g. at $f = 1$) as they depend on the other parameters. If you are considering testing different parameter sets, $L_b$ and $L_j$ should be modified accordingly (e.g. using the DEBtool function get_tj.m).
+with $L_b$ the structural length of the particle when $E_H = E_Hb$ (i.e the length at birth, i.e. first feeding) and $L_j$ the structural length of the particle when $E_H = E_Hj$ (i.e the length when metamorphosis occurs). The $s_M$ factor is then used to multiply the assimilation rate $\{\dot{p_{Am}}\}$ and the energy conductance $\dot{v}$.
 
-Consequently, the assimilation (in J.d$^{-1}$) is computed as follows:
+(NICOLAS: s'agit il de la longueur structurelle $L = V^{1/3}$ ou de la longueur mesurée $L_w = L / \delta_M$). Please note that $L_b$ and $L_j$ are here considered as parameters but they should be in fact calculated prior any Ichthyop runs at (e.g. at $f = 1$) as they depend on the other parameters. If you are considering testing different parameter sets, $L_b$ and $L_j$ should be modified accordingly (e.g. using the DEBtool function `get_tj.m`).
+
+Consequently, the assimilation (in $J.d^{-1}$) is computed as follows:
 
 $$
 \dot{p}_A = \begin{cases}

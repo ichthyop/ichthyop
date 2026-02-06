@@ -24,7 +24,7 @@ $$
 \Delta \phi = \varepsilon \times F \times \left(\Delta \lambda_0 \times \sin\left(\frac{\theta \pi}{180}\right) + \Delta \phi_0 \times \sin\left(\frac{\theta \pi}{180}\right)\right)
 $$
 
-where $\Delta \lambda_0$ and $\Delta \phi_0 $ are the changes in longitudes and latitudes due to wind, $\Delta \lambda$ and $\Delta \phi $ are the effective changes in longitudes and latitudes of the particle when taking into account the angle $\theta$, $\Delta t$ is Ichthyop time-step (in days) and $U_w$ and $V_w$ are the zonal and meridional wind components (in $m.s^{-1}$).
+where $\Delta \lambda_{0}$ and $\Delta \phi_{0} $ are the changes in longitudes and latitudes due to wind, $\Delta \lambda$ and $\Delta \phi $ are the effective changes in longitudes and latitudes of the particle when taking into account the angle $\theta$, $\Delta t$ is Ichthyop time-step (in days) and $U_w$ and $V_w$ are the zonal and meridional wind components (in $m.s^{-1}$).
 
 :::{.callout-note}
 $R$ is the Earth Radius and equals 6367.74 km. In the code, $\dfrac{R \pi}{180}$, which is the distance in m of a 1 degree cell,  is  approximated to 111138 m
