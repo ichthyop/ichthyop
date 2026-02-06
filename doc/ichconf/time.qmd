@@ -1,7 +1,7 @@
 
 ## Time configuration {#sec-time-config}
 
-### Beginning of the simulation
+### Beginning of the simulation {#sec-time-beginning}
 
 In Ichthyop, the user provides the time at which the simulation should start. This `initial_time` parameter, which must be
 defined in the `app.time` option block, must be formatted as `year YYYY month MM day DD at HH:MM`, with `YYYY` the year, `MM` the

@@ -1,15 +1,31 @@
 # Release schedule
 
-In Ichthyop, there is the possibility to schedule release events. These events are parameterized in the `release.schedule` option block.
+`Advanced - Release - Schedule`
 
-It mainly contains two parameters:
-
-- `is_enabled` specifies whether release events schedule is activated or not
-- `events` is list of release date strings, which are formatted as the beginning simulation parameter (`year YYYY month MM day DD at YY:MM`).
+There is also the possibility to schedule several release events as a list of release date strings, formatted as `year YYYY month MM day DD at YY:MM`.
 
 The resulting output file will contain the same number of time-steps as in the case of a simple release, but the number of particles will be
 multiplied by the number of release events.
 
-:::{.callout-warning}
+<!-- :::{.callout-warning}
 The output time array will be consistent with the beginning simulation time (`initial_time` parameter), **not with the release schedule dates**.
+::: -->
+
+::: {.callout-tip}
+
+It is recommended to avoid using the release schedule feature and instead to change the value of the `initial_time` parameter (@sec-time-beginning)
+
+:::
+
+
+::: {.callout-warning}
+
+If the simulation duration to 30 days `initial_time` is set to `year 2000 month 01 day 01 at 00:00` and your first release event is set to `year 2001 month 01 day 01 at 00:00`, Ichthyop will run without without any particles from 2000-01-01 to 2001-01-01
+
+:::
+
+::: {.callout-warning}
+
+If the simulation duration to 30 days `initial_time` is set to `year 2000 month 01 day 01 at 00:00` and your first release event is set to `year 2001 month 01 day 01 at 00:00`, the final time-step will occurs in 2001-01-30.
+
 :::
