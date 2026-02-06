@@ -1412,6 +1412,14 @@
         <format>float</format>
         <description>Swimming speed settle [m/s]</description>
       </parameter>
+          <parameter>
+        <key>swimming.speed.csv.enabled</key>
+        <long_name>Speed as CSV</long_name>
+        <value>false</value>
+        <default>true</default>
+        <format>boolean</format>
+        <description>True if speed must be computed as CSV</description>
+      </parameter>
       <parameter>
         <key>zone_file</key>
         <long_name>Orientation Zone File</long_name>
