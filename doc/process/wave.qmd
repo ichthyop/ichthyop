@@ -1,4 +1,4 @@
-## Wave drift
+### Wave drift
 
 Ichthyop can take into account the effects of waves on the particles trajectories, following the Stokes drift equations of @stokes_2009:
 

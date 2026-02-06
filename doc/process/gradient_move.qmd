@@ -1,4 +1,4 @@
-## Gradient movement
+### Gradient movement
 
 The `GradientMoveAction.java` class allows a particle to flow across the gradient of a field variable.
 

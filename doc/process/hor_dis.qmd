@@ -1,4 +1,4 @@
-## Horizontal dispersion
+### Horizontal dispersion
 
 Horizontal dispersion is implemented following @PELIZ2007215. The horizontal velocity component due to diffusion is:
 

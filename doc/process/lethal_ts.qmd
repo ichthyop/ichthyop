@@ -1,6 +1,6 @@
-## Lethal temperature and salinity
+### Lethal temperature and salinity
 
-In Ichthyop, there is the possibility to define a range of temperature and salinity beyond which the particle is killed.
+In Ichthyop, there is the possibility to define temperature and salinity values below and above which the particle is killed.
 
 The same set of parameters are used in both cases, with the `temperature` and `salinity` prefix.
 There are two ways to define lethal temperatures and salinities:

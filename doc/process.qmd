@@ -7,8 +7,8 @@ the `action` folder.
 Parameters associated with these processes must be included in `action` blocks. They can be activated or deactivated by setting the
 `enabled` tag (cf. @sec-xml-config).
 
-{{< include process/growth.qmd >}}
-{{< include process/lethal_ts.qmd >}}
+## Transport processes
+
 {{< include process/buoyancy.qmd >}}
 {{< include process/migration.qmd >}}
 {{< include process/hor_dis.qmd >}}
@@ -17,5 +17,10 @@ Parameters associated with these processes must be included in `action` blocks. 
 {{< include process/swim.qmd >}}
 {{< include process/wave.qmd >}}
 {{< include process/land.qmd >}}
+
+## Biological processes
+
 {{< include process/orientation.qmd >}}
+{{< include process/growth.qmd >}}
+{{< include process/lethal_ts.qmd >}}
 {{< include process/deb.qmd >}}
