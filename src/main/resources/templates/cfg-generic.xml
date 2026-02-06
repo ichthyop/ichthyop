@@ -114,7 +114,7 @@
     </block>
 
     <block type="option">
-        <tree_path>Transport/General</tree_path>
+        <tree_path>Transport/Coastline</tree_path>
         <key>app.transport</key>
         <description>Set the general transport options of the simulation.</description>
 
