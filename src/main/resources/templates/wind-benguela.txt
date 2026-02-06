@@ -1,0 +1,64 @@
+##########################
+# Ichthyop - Wind scenario
+##########################
+
+# (Character '#' at the begining of a line means "comment", the line is not interprated by the application)
+
+#
+## Howto ? ##
+#
+
+# A wind scenario is defined as a serie of patterns
+# (it may actually be a single pattern, which means wind is constant for the whole simulation).
+# A pattern is always defined by the same set of parameters.
+# Each parameter must be defined for every pattern, even though the value does not vary.
+# For instance, you may have a constant wind direction (North) and a varying intensity.
+# Every pattern will re-defined the wind direction as being North.
+# Here is the full set of parameters:
+
+# pattern [n]
+# wind.intensity[n] = 15.6
+# wind.direction[n] = 90.0
+# windage[n] = 3.5
+# from.time[n] = year 2008 month 01 day 07 at 18:00
+
+# wind intensity [meter / second] decimal number
+# wind direction [angle in degree] a decimal number ranging from 0 to 359
+#    0 = Northward (wind blows toward North)
+#   90 = Eastward (wind blows toward East)
+#  180 = Southward (wind blows toward South)
+#  270 = Westward (wind blows toward West)
+#  Carefull, the adopted convention (oceanography) is opposite to the meteorology convention.
+#  Indeed, the wheatherman considers the direction where the wind comes from,
+#  whereas we consider where it is heading.
+# windage is a percent (decimal number ranging from 0.0 to 100.0) that expresses how much is the particle affected by the wind.
+#  eg: wind blowing Northward 10m/s windage = 1% ==> particle drift Northward 0.1m/s
+#  Effectively, the windage for an immersed object, windage will never exceed a few percent.
+# from.time [year #### month ## day ## at HH:mm]
+#  The start time for this set of parameter.
+#  Make sure we always have from.time[n] < from.time[n + 1]
+#  There is no end.time parameter so the last set of parameter will be active until the end of the simulation
+#  If you want to have wind blowing for a few days and then no more wind,
+#  a last pattern has to be defined with wind.intensity = 0 or windage = 0, for instance.
+
+#
+## Example ##
+#
+
+# pattern [0]
+wind.intensity[0] = 10
+wind.direction[0] = 135
+windage[0] = 3
+from.time[0] = year 01 month 05 day 05 at 00:00
+
+# pattern [1]
+wind.intensity[1] = 15
+wind.direction[1] = 0
+windage[1] = 3
+from.time[1] = year 01 month 05 day 08 at 00:00
+
+# pattern [2]
+wind.intensity[2] = 0
+wind.direction[2] = 0
+windage[2] = 0
+from.time[2] = year 01 month 05 day 12 at 00:00
