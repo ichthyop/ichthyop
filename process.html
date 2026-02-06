@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; Ichthyop processes – Ichthyop User Guide (3.5)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./developer.html" rel="next">
+<link href="./release.html" rel="prev">
+<link href="./_static/logo-ichthyop.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-b0e010db8d3c3951acea83dbd083b6f6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./documentation.html">Documentation</a></li><li class="breadcrumb-item"><a href="./process.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Ichthyop processes</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./_static/logo-ichthyop.svg" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="./_static/logo-ichthyop.svg" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Ichthyop User Guide (3.5)</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/ichthyop/ichthyop/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="./Ichthyop-User-Guide--3.5-.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./user_guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">User guide</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./start.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Getting started</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./console.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Ichthyop user interface (beginners)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ichconf.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Ichthyop configuration (advanced users)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./faq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">FAQ</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./documentation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Documentation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Particle release</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./process.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Ichthyop processes</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./developer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Developer documentation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./developer/java.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Java install</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./developer/manager_initialization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Manager initialization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./developer/particle.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Particles</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./developer/grid.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Grid management</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./developer/new_action.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Adding new processes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./developer/tracker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Adding output variable</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./biblio.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">References</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#activationdeactivation-of-a-process" id="toc-activationdeactivation-of-a-process" class="nav-link active" data-scroll-target="#activationdeactivation-of-a-process"><span class="header-section-number">6.1</span> Activation/Deactivation of a process</a></li>
+  <li><a href="#transport-processes" id="toc-transport-processes" class="nav-link" data-scroll-target="#transport-processes"><span class="header-section-number">6.2</span> Transport processes</a>
+  <ul>
+  <li><a href="#advection" id="toc-advection" class="nav-link" data-scroll-target="#advection"><span class="header-section-number">6.2.1</span> Advection</a></li>
+  <li><a href="#horizontal-advection" id="toc-horizontal-advection" class="nav-link" data-scroll-target="#horizontal-advection"><span class="header-section-number">6.2.2</span> Horizontal advection</a></li>
+  <li><a href="#vertical-advection" id="toc-vertical-advection" class="nav-link" data-scroll-target="#vertical-advection"><span class="header-section-number">6.2.3</span> Vertical advection</a></li>
+  <li><a href="#buoyancy" id="toc-buoyancy" class="nav-link" data-scroll-target="#buoyancy"><span class="header-section-number">6.2.4</span> Buoyancy</a></li>
+  <li><a href="#daily-vertical-migration" id="toc-daily-vertical-migration" class="nav-link" data-scroll-target="#daily-vertical-migration"><span class="header-section-number">6.2.5</span> Daily vertical migration</a></li>
+  <li><a href="#horizontal-dispersion" id="toc-horizontal-dispersion" class="nav-link" data-scroll-target="#horizontal-dispersion"><span class="header-section-number">6.2.6</span> Horizontal dispersion</a></li>
+  <li><a href="#ontogenetic-vertical-migration" id="toc-ontogenetic-vertical-migration" class="nav-link" data-scroll-target="#ontogenetic-vertical-migration"><span class="header-section-number">6.2.7</span> Ontogenetic vertical migration</a></li>
+  <li><a href="#wind-drift" id="toc-wind-drift" class="nav-link" data-scroll-target="#wind-drift"><span class="header-section-number">6.2.8</span> Wind drift</a></li>
+  <li><a href="#random-swimming" id="toc-random-swimming" class="nav-link" data-scroll-target="#random-swimming"><span class="header-section-number">6.2.9</span> Random swimming</a></li>
+  <li><a href="#wave-drift" id="toc-wave-drift" class="nav-link" data-scroll-target="#wave-drift"><span class="header-section-number">6.2.10</span> Wave drift</a></li>
+  <li><a href="#coastal-behaviour" id="toc-coastal-behaviour" class="nav-link" data-scroll-target="#coastal-behaviour"><span class="header-section-number">6.2.11</span> Coastal behaviour</a>
+  <ul class="collapse">
+  <li><a href="#default" id="toc-default" class="nav-link" data-scroll-target="#default"><span class="header-section-number">6.2.11.1</span> Default</a></li>
+  <li><a href="#beaching" id="toc-beaching" class="nav-link" data-scroll-target="#beaching"><span class="header-section-number">6.2.11.2</span> Beaching</a></li>
+  <li><a href="#standstill" id="toc-standstill" class="nav-link" data-scroll-target="#standstill"><span class="header-section-number">6.2.11.3</span> Standstill</a></li>
+  <li><a href="#bouncing" id="toc-bouncing" class="nav-link" data-scroll-target="#bouncing"><span class="header-section-number">6.2.11.4</span> Bouncing</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#biological-processes" id="toc-biological-processes" class="nav-link" data-scroll-target="#biological-processes"><span class="header-section-number">6.3</span> Biological processes</a>
+  <ul>
+  <li><a href="#sec-proc-orient" id="toc-sec-proc-orient" class="nav-link" data-scroll-target="#sec-proc-orient"><span class="header-section-number">6.3.1</span> Orientation</a></li>
+  <li><a href="#swimming-velocity" id="toc-swimming-velocity" class="nav-link" data-scroll-target="#swimming-velocity"><span class="header-section-number">6.3.2</span> Swimming velocity</a></li>
+  <li><a href="#von-mises-distributions" id="toc-von-mises-distributions" class="nav-link" data-scroll-target="#von-mises-distributions"><span class="header-section-number">6.3.3</span> Von Mises distributions</a></li>
+  <li><a href="#computation-of-displacement" id="toc-computation-of-displacement" class="nav-link" data-scroll-target="#computation-of-displacement"><span class="header-section-number">6.3.4</span> Computation of displacement</a></li>
+  <li><a href="#cardinal-orientation" id="toc-cardinal-orientation" class="nav-link" data-scroll-target="#cardinal-orientation"><span class="header-section-number">6.3.5</span> Cardinal orientation</a></li>
+  <li><a href="#rheotaxis-orientation" id="toc-rheotaxis-orientation" class="nav-link" data-scroll-target="#rheotaxis-orientation"><span class="header-section-number">6.3.6</span> Rheotaxis orientation</a></li>
+  <li><a href="#reef-orientation" id="toc-reef-orientation" class="nav-link" data-scroll-target="#reef-orientation"><span class="header-section-number">6.3.7</span> Reef orientation</a></li>
+  <li><a href="#sec-growth-proc" id="toc-sec-growth-proc" class="nav-link" data-scroll-target="#sec-growth-proc"><span class="header-section-number">6.3.8</span> Growth</a>
+  <ul class="collapse">
+  <li><a href="#linear-growth" id="toc-linear-growth" class="nav-link" data-scroll-target="#linear-growth"><span class="header-section-number">6.3.8.1</span> Linear growth</a></li>
+  <li><a href="#sole-growth" id="toc-sole-growth" class="nav-link" data-scroll-target="#sole-growth"><span class="header-section-number">6.3.8.2</span> Sole growth</a></li>
+  <li><a href="#exponential-growth" id="toc-exponential-growth" class="nav-link" data-scroll-target="#exponential-growth"><span class="header-section-number">6.3.8.3</span> Exponential growth</a></li>
+  </ul></li>
+  <li><a href="#lethal-temperature-and-salinity" id="toc-lethal-temperature-and-salinity" class="nav-link" data-scroll-target="#lethal-temperature-and-salinity"><span class="header-section-number">6.3.9</span> Lethal temperature and salinity</a>
+  <ul class="collapse">
+  <li><a href="#deb-growth" id="toc-deb-growth" class="nav-link" data-scroll-target="#deb-growth"><span class="header-section-number">6.3.9.1</span> DEB growth</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/ichthyop/ichthyop/edit/main/process.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ichthyop/ichthyop/issues" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./documentation.html">Documentation</a></li><li class="breadcrumb-item"><a href="./process.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Ichthyop processes</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-process" class="quarto-section-identifier"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Ichthyop processes</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this section, the different Ichthyop processes are described. These processes are implemented in the classes within the <code>action</code> folder.</p>
+<p>Parameters associated with these processes must be included in <code>action</code> blocks. They can be activated or deactivated by setting the <code>enabled</code> tag (cf. <a href="ichconf.html#sec-xml-config" class="quarto-xref"><span>Section 3.1</span></a>).</p>
+<section id="activationdeactivation-of-a-process" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="activationdeactivation-of-a-process"><span class="header-section-number">6.1</span> Activation/Deactivation of a process</h2>
+<p>Each process can be enabled or disabled by ticking on the <code>enable</code> tick box.</p>
+<p>Furthermore, it is also possible to activate/deactivate some processes depending on the particle age (in days) or size (in <span class="math inline">\(cm\)</span>).</p>
+<p>This is done by providing, for each of these processes, the following parameters:</p>
+<ul>
+<li><code>activation_variable</code>, which indicates whether age (in days) or length (in cm) must be used</li>
+<li><code>activation_minimum_class_value</code>, which indicates the age (in days) or lengh (in cm) when the process becomes active. <strong>Default is 0</strong></li>
+<li><code>activation_maximum_class_value</code>, which indicates the age (in days) or lengh (in cm) when the process becomes inactive. <strong>Default is <span class="math inline">\(\infty\)</span></strong></li>
+</ul>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The length can be used only if one of the different growth process (see <a href="#sec-growth-proc" class="quarto-xref"><span>Section 6.3.8</span></a>) is enabled</p>
+</div>
+</div>
+</section>
+<section id="transport-processes" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="transport-processes"><span class="header-section-number">6.2</span> Transport processes</h2>
+<section id="advection" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="advection"><span class="header-section-number">6.2.1</span> Advection</h3>
+<p>The primary process in Ichthyop is the advection by the ocean currents.</p>
+</section>
+<section id="horizontal-advection" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="horizontal-advection"><span class="header-section-number">6.2.2</span> Horizontal advection</h3>
+<p>The particle grid coordinates will change according as follows:</p>
+<p><span class="math display">\[
+X(t + \Delta t) = X(t) + \frac{U \times \Delta t}{\Delta X}
+\]</span></p>
+<p><span class="math display">\[
+Y(t + \Delta t) = Y(t) + \frac{U \times \Delta t}{\Delta Y}
+\]</span></p>
+<p>with <span class="math inline">\(X,Y\)</span> the particle grid position, <span class="math inline">\(t\)</span> the time, <span class="math inline">\(\Delta t\)</span> the time step (in seconds), <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> the zonal and meridional velocities (in <span class="math inline">\(m.s^{-1}\)</span>) and <span class="math inline">\(\Delta X\)</span> and <span class="math inline">\(\Delta Y\)</span> the zonal and meridional extent of the grid cell.</p>
+</section>
+<section id="vertical-advection" class="level3" data-number="6.2.3">
+<h3 data-number="6.2.3" class="anchored" data-anchor-id="vertical-advection"><span class="header-section-number">6.2.3</span> Vertical advection</h3>
+<p>For 3D simulations, vertical advection can also be activated. Particle depth, in grid coordinates, is given by:</p>
+<p><span class="math display">\[
+Z(t + \Delta t) = Z(t) + \frac{W \times \Delta t}{\Delta Z}
+\]</span></p>
+<p>with <span class="math inline">\(Z\)</span> the particle vertical grid position, <span class="math inline">\(t\)</span> the time, <span class="math inline">\(\Delta t\)</span> the time step (in seconds), <span class="math inline">\(W\)</span> the vertical velocity (in <span class="math inline">\(m.s^{-1}\)</span>) and <span class="math inline">\(\Delta Z\)</span> the height of the grid cell.</p>
+</section>
+<section id="buoyancy" class="level3" data-number="6.2.4">
+<h3 data-number="6.2.4" class="anchored" data-anchor-id="buoyancy"><span class="header-section-number">6.2.4</span> Buoyancy</h3>
+<p>A buoyancy module allows to displace a particle vertically, depending on it’s density and the sea water density, following <span class="citation" data-cites="parada2003modelling">Parada et al. (<a href="biblio.html#ref-parada2003modelling" role="doc-biblioref">2003</a>)</span>.</p>
+<p>The buoyancy-induced vertical velocity of the particle is given by:</p>
+<p><span class="math display">\[
+W_{buoy} =  \dfrac{1}{24} \times g \times  a \times  b  \times \dfrac{\rho_{water} - \rho_{part}}{\rho_{water}} \mu^{-1} \log\left(2 \dfrac{a}{b} + 0.5\right);
+\]</span></p>
+<p>with <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> the semi-major axis and semi-minor axis of an ellipse (<code>mean_major_axis</code> and <code>mean_minor_axis</code> parameters), <span class="math inline">\(\mu\)</span> the molecular viscosity (<code>molecular_viscosity</code> parameter), <span class="math inline">\(\rho_{water}\)</span> the water density, <span class="math inline">\(\rho_{part}\)</span> the particle density and <span class="math inline">\(g\)</span> the gravitational acceleration (<span class="math inline">\(cm.s^{-2}\)</span>).</p>
+<p>There are two possibilities to define the particle buoyancy, which are provided by the <code>density.method</code> parameter:</p>
+<ul>
+<li>If <code>constant</code>, then a constant density (in <span class="math inline">\(g.cm^{-3}\)</span>) is used, which is provided by the <code>particle_density</code> parameter.</li>
+<li>If <code>file</code>, then the buoyancy is read from a file and can vary with either age or length. The class that is used is provided by the <code>density.class</code> parameter.</li>
+</ul>
+<p>The density CSV file must be formatted in the following way:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Age</span><span class="er">(</span><span class="ex">Days</span><span class="kw">);</span><span class="ex">Density</span> <span class="er">(</span><span class="ex">g/cm3</span><span class="kw">)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">0</span><span class="kw">;</span><span class="ex">1.0235625</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">1</span><span class="kw">;</span><span class="ex">1.02374</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">2</span><span class="kw">;</span><span class="ex">1.023335</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">2.5</span><span class="kw">;</span><span class="ex">1.0239</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">2.75</span><span class="kw">;</span><span class="ex">1.025672</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="daily-vertical-migration" class="level3" data-number="6.2.5">
+<h3 data-number="6.2.5" class="anchored" data-anchor-id="daily-vertical-migration"><span class="header-section-number">6.2.5</span> Daily vertical migration</h3>
+<p>Daily migration of the particles can be activated by providing daytime and nighttime depths, and the timing of the sunset and sunrise.</p>
+<p>If the <code>daytime_depth_file</code> parameter is defined, it provides the depth of the particle during daytime. It is formatted as follows:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Age</span> <span class="er">(</span><span class="ex">day</span><span class="kw">);</span><span class="ex">Depth</span> <span class="er">(</span><span class="ex">m</span><span class="kw">)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">0.0</span><span class="kw">;</span><span class="ex">-20</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">3.0</span><span class="kw">;</span><span class="ex">-25</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">5.0</span><span class="kw">;</span><span class="ex">-30</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">8.0</span><span class="kw">;</span><span class="ex">-35</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If this parameter is not found, a constant daytime depth, provided by the <code>daytime_depth</code> parameter, is assumed.</p>
+<p>Same thing for the nighttime depths, which can be set by either the <code>nighttime_depth_file</code> or the <code>nighttime_depth</code> parameters.</p>
+<p>The sunset and sunrise hours are set by the <code>sunset</code> and <code>sunrise</code> parameters, which must have a <code>HH::mm</code> format.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When the target depth is greater than the total depth, the particle does not move.</p>
+</div>
+</div>
+</section>
+<section id="horizontal-dispersion" class="level3" data-number="6.2.6">
+<h3 data-number="6.2.6" class="anchored" data-anchor-id="horizontal-dispersion"><span class="header-section-number">6.2.6</span> Horizontal dispersion</h3>
+<p>Horizontal dispersion is implemented following <span class="citation" data-cites="PELIZ2007215">Peliz et al. (<a href="biblio.html#ref-PELIZ2007215" role="doc-biblioref">2007</a>)</span>. The horizontal velocity component due to diffusion is:</p>
+<p><span class="math display">\[
+u_T = \delta \sqrt{\dfrac{2 K_h}{\Delta t}}
+\]</span></p>
+<p>with <span class="math inline">\(\Delta t\)</span> the time step, <span class="math inline">\(\delta\)</span> a random number between -1 and 1 and <span class="math inline">\(K_h\)</span> the imposed explicit Lagrangian horizontal diffusion.</p>
+<p>The value of <span class="math inline">\(K_h\)</span> depends on the mean mesh size where the particle is located:</p>
+<p><span class="math display">\[
+K_h = \epsilon^{1/3} l^{4/3}
+\]</span></p>
+<p>with <span class="math inline">\(l\)</span> is the mean mesh size and <span class="math inline">\(\epsilon\)</span> is the turbulent dissipation rate (in <span class="math inline">\(m^2.s^{-3}\)</span>).</p>
+<p>In the Ichythop implementation (<code>HDispAction.java</code>), the displacement is computed:</p>
+<p><span class="math display">\[
+\Delta X = u_T \times \Delta t
+\]</span></p>
+<p>Combining all together, we obtain the following equation:</p>
+<p><span class="math display">\[
+\Delta X = \delta \times  \sqrt{\dfrac{2  \epsilon^{1/3} l^{4/3}}{\Delta t}} \times \Delta t
+\]</span></p>
+<p>By putting the rightmost <span class="math inline">\(\Delta t\)</span> within the square root, and by putting the <span class="math inline">\(l\)</span> and <span class="math inline">\(\epsilon\)</span> terms outside, this expression can be simplified as follows:</p>
+<p><span class="math display">\[
+\Delta X = \delta \times  \sqrt{2 {\Delta t}} \times  \epsilon^{1/6} \times l^{2/3}
+\]</span></p>
+<p>The value of <span class="math inline">\(l\)</span> is computing by averaging the mesh size along the <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> dimensions.</p>
+</section>
+<section id="ontogenetic-vertical-migration" class="level3" data-number="6.2.7">
+<h3 data-number="6.2.7" class="anchored" data-anchor-id="ontogenetic-vertical-migration"><span class="header-section-number">6.2.7</span> Ontogenetic vertical migration</h3>
+<p>The ontogenetic migration module controls the migration of particles at different depths as a function of age. Its implementation in Ichthyop follows the CMS one. It uses a CMS configuration file, which is formatted as follows:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nTime</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">nDepth</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">z1</span> z2 z3 z4 z5 z6 ... znDepth</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">t1</span> t2 t3 t4 t5 t6 ... tnTime</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ex">P1,1</span> P1,2 ... P1,nTime</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">P2,1</span> P2,2 ... P2,nTime</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">P3,1</span> P3,2 ... P3,nTime</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>          <span class="ex">...</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="ex">PnDepth,1</span> PnDepth,2 ... PnDepth,nTime</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first line provides the number of time steps in the CMS file, the second line provides the number of vertical levels in the CMS file. The third line provides the depth values and the fourth lines provides the time step values.</p>
+<p>The remaining lines provide the probability matrix <span class="math inline">\(P_{z, t}\)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The sum of the probability matrix along the depth dimension should equal 100.</p>
+</div>
+</div>
+<p>At each time step, the index of the CMS time step, <span class="math inline">\(k\)</span>, is determined by comparing the simulation and CMS times as follows:</p>
+<p><span class="math display">\[
+t_{CMS}(k) &lt; t \leq t_{CMS}(k + 1)
+\]</span></p>
+<p>When the CMS time index changes, all the particles are randomly distributed on the vertical, following the probability distribution of the given CMS time. If the CMS time index remains unchanged, nothing is done.</p>
+</section>
+<section id="wind-drift" class="level3" data-number="6.2.8">
+<h3 data-number="6.2.8" class="anchored" data-anchor-id="wind-drift"><span class="header-section-number">6.2.8</span> Wind drift</h3>
+<p>The wind-drift is implemented in the <code>WindDriftFileAction.java</code> class. This class requires that 2D (time, latitude, longitude) wind fields are provided. This is done by providing a <code>input_path</code> and a <code>file_filter</code> parameters, which specify the location and names of the wind files.</p>
+<p>The user also provides <code>field_time</code>, <code>wind_u</code>, <code>wind_v</code>, <code>longitude</code>, <code>latitude</code> parameters, which specify the names of the time, zonal wind, meridional wind, longitude and latitude variables in the NetCDF wind files.</p>
+<p>The user also provides a <code>depth_application</code> parameter, which specifies the depth at which the wind will impact the trajectories (only valid for 3D simulations), a <code>wind_factor</code> (<span class="math inline">\(F\)</span>, multiplication factor), an <code>angle</code> (<span class="math inline">\(\theta\)</span>) and a <code>wind_convention</code> parameter (<span class="math inline">\(\varepsilon\)</span>, +1 if convention is ocean-based, i.e.&nbsp;wind-to, -1 if convention is atmospheric based, i.e.&nbsp;wind-from).</p>
+<p>The changes in particle longitude (<span class="math inline">\(\lambda\)</span>) and latitude (<span class="math inline">\(\phi\)</span>) is computed as follows:</p>
+<p><span class="math display">\[
+\Delta \lambda_0 = \frac{\Delta  t \times U_W }{\frac{R \pi}{180} \times \cos(\frac{\pi \phi}{ 180})}
+\]</span></p>
+<p><span class="math display">\[
+\Delta \phi_0 =  \frac{\Delta  t \times V_W}{ \frac{R \pi}{180}}
+\]</span></p>
+<p><span class="math display">\[
+\Delta \lambda = \varepsilon \times F \times \left(\Delta \lambda_0 \times \cos\left(\frac{\theta \pi}{180}\right) - \Delta \phi_0 \times \sin\left(\frac{\theta \pi}{180}\right)\right)
+\]</span></p>
+<p><span class="math display">\[
+\Delta \phi = \varepsilon \times F \times \left(\Delta \lambda_0 \times \sin\left(\frac{\theta \pi}{180}\right) + \Delta \phi_0 \times \sin\left(\frac{\theta \pi}{180}\right)\right)
+\]</span></p>
+<p>where <span class="math inline">\(\Delta \lambda_{0}\)</span> and $_{0} $ are the changes in longitudes and latitudes due to wind, <span class="math inline">\(\Delta \lambda\)</span> and $$ are the effective changes in longitudes and latitudes of the particle when taking into account the angle <span class="math inline">\(\theta\)</span>, <span class="math inline">\(\Delta t\)</span> is Ichthyop time-step (in days) and <span class="math inline">\(U_w\)</span> and <span class="math inline">\(V_w\)</span> are the zonal and meridional wind components (in <span class="math inline">\(m.s^{-1}\)</span>).</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><span class="math inline">\(R\)</span> is the Earth Radius and equals 6367.74 km. In the code, <span class="math inline">\(\dfrac{R \pi}{180}\)</span>, which is the distance in m of a 1 degree cell, is approximated to 111138 m</p>
+</div>
+</div>
+</section>
+<section id="random-swimming" class="level3" data-number="6.2.9">
+<h3 data-number="6.2.9" class="anchored" data-anchor-id="random-swimming"><span class="header-section-number">6.2.9</span> Random swimming</h3>
+<p>Ichthyop allows particles to randomly swim. This is achieved by using the <code>SwimmingAction.java</code>. The velocity may vary with the age of the particle.</p>
+<p>The user provides a CSV absolute velocity file (<code>velocity_file</code> parameter), which must me formatted as follows:</p>
+<pre><code>Age (days);Speed (m/s)
+0;0.1
+5;0.2
+15;0.3</code></pre>
+<p>The user also provides a boolean parameter (<code>constant_velocity</code>) that specifies whether the velocity should remain as defined in the CSV file, or if the absolute velocity should be randomly selected as follows:</p>
+<p><span class="math display">\[
+\|U\| = \|U\|_{file} \times \kappa
+\]</span></p>
+<p>with <span class="math inline">\(\kappa\)</span> a random value in the <span class="math inline">\([0, 2]\)</span> interval and <span class="math inline">\(\|U\|_{file}\)</span> the velocity defined in the CSV file.</p>
+<p>At each time-step, the zonal and meridonal velocities are defined as follows:</p>
+<p><span class="math display">\[
+U = \kappa' \varepsilon  \|U\|
+\]</span></p>
+<p><span class="math display">\[
+V = \varepsilon' \sqrt{\|U\|^2 - U^2}
+\]</span></p>
+<p>with <span class="math inline">\(\kappa'\)</span> a random value between 0 and 1, and <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\varepsilon'\)</span> random values either equal to 1 or -1.</p>
+</section>
+<section id="wave-drift" class="level3" data-number="6.2.10">
+<h3 data-number="6.2.10" class="anchored" data-anchor-id="wave-drift"><span class="header-section-number">6.2.10</span> Wave drift</h3>
+<p>Ichthyop can take into account the effects of waves on the particles trajectories, following the Stokes drift equations (<span class="citation" data-cites="stokes_2009">Stokes (<a href="biblio.html#ref-stokes_2009" role="doc-biblioref">2009</a>)</span>):</p>
+<p><span class="math display">\[
+U_{S} = w \times k_{wave} \times a^2 \times \exp\left(2 \times k_{wave} \times z\right)
+\]</span></p>
+<p>where <span class="math inline">\(w \times k \times a^2\)</span> is the Stokes drift velocity, <span class="math inline">\(k_{wave}\)</span> is the wave number and <span class="math inline">\(z\)</span> is the depth.</p>
+<p>In Ichthyop, the user provides the zonal and meridional components of the Stokes drift (<span class="math inline">\(U_{stokes}\)</span> and <span class="math inline">\(V_{stokes}\)</span>), the zonal and meridional wave velocities (<span class="math inline">\(U_{wave}\)</span> and <span class="math inline">\(V_{wave}\)</span>) and the wave period (<span class="math inline">\(T_{wave}\)</span>).</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Note that all the fields provided by the user are 2D!</p>
+</div>
+</div>
+<p>First, the value of <span class="math inline">\(k_{wave}\)</span> is computed from the wave velocity and the wave period:</p>
+<p><span class="math display">\[
+\|U_{wave}\| = U_{wave}^2 + V_{wave}^2
+\]</span></p>
+<p><span class="math display">\[
+\lambda_{wave} =  \|U_{wave}\| \times T_{wave}
+\]</span></p>
+<p><span class="math display">\[
+k_{wave} =  \dfrac{2 \pi}{\lambda_{wave}}
+\]</span></p>
+<p>Then, the horizontal displacement due to the Stokes drift is computed as follows:</p>
+<p><span class="math display">\[
+\Delta X = F \times U_{stokes} \times \Delta t \times \exp\left(2 \times k_{wave} \times z\right)
+\]</span></p>
+<p><span class="math display">\[
+\Delta Y = F \times V_{stokes} \times \Delta t \times \exp\left(2 \times k_{wave} \times z\right)
+\]</span></p>
+<p>with <span class="math inline">\(k_{wave}\)</span> the wave number as computed above, <span class="math inline">\(U_{stokes}\)</span> and <span class="math inline">\(V_{stokes}\)</span> the zonal and meridional components of the Stokes drift, <span class="math inline">\(z\)</span> the depth and <span class="math inline">\(F\)</span> a multiplication factor provided by the user.</p>
+</section>
+<section id="coastal-behaviour" class="level3" data-number="6.2.11">
+<h3 data-number="6.2.11" class="anchored" data-anchor-id="coastal-behaviour"><span class="header-section-number">6.2.11</span> Coastal behaviour</h3>
+<p>Coastal behaviour defines what is done before aplying the change in location to an Ichthyop particle</p>
+<section id="default" class="level4" data-number="6.2.11.1">
+<h4 data-number="6.2.11.1" class="anchored" data-anchor-id="default"><span class="header-section-number">6.2.11.1</span> Default</h4>
+<p>The default behavior is to do nothing prior the displacement of a particle. The change in coordinate of the particle is applied whatsoever, and the particle may be inland. It remains alive but then its behavior is uncertain.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It is strongly advised not to use this default mode</p>
+</div>
+</div>
+</section>
+<section id="beaching" class="level4" data-number="6.2.11.2">
+<h4 data-number="6.2.11.2" class="anchored" data-anchor-id="beaching"><span class="header-section-number">6.2.11.2</span> Beaching</h4>
+<p>Before the particle is moved, Ichthyop checks whether the coming displacement will bring the particle inland. If so, the particle is moved and then is killed, with the <code>BEACHED</code> mortality status.</p>
+</section>
+<section id="standstill" class="level4" data-number="6.2.11.3">
+<h4 data-number="6.2.11.3" class="anchored" data-anchor-id="standstill"><span class="header-section-number">6.2.11.3</span> Standstill</h4>
+<p>Before the particle is moved, Ichthyop checks whether the coming displacement will bring the particle inland. If so, its deplacement is cancelled and the particle remains at the same position until a new displacement brings it in a water cell.</p>
+</section>
+<section id="bouncing" class="level4" data-number="6.2.11.4">
+<h4 data-number="6.2.11.4" class="anchored" data-anchor-id="bouncing"><span class="header-section-number">6.2.11.4</span> Bouncing</h4>
+<p>In the bouncing mode, Ichthyop will check whether the displacement will bring the particle inland. If so, the particle will bounce on the coast. First, whether the bouncing occurs on a meridional or a zonal coastline is determined.</p>
+<p>In case of a meridional coastline, as shown in <a href="#fig-bouncing" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, the calculation of the new position is performed as follows.</p>
+<p>Let’s assume that the particle is at the position <span class="math inline">\((x, y)\)</span> and would normally move at the postion <span class="math inline">\((x + \Delta x, y + \Delta y)\)</span>. We suppose that</p>
+<p><span id="eq-bounc_1"><span class="math display">\[
+\Delta y = \Delta y_1  + \Delta y_2,
+\tag{6.1}\]</span></span></p>
+<p>where <span class="math inline">\(\Delta y_1\)</span> is the meridional distance between the particle and the coastline, and <span class="math inline">\(\Delta y_2\)</span> is the distance that the particle would travel on land.</p>
+<p>In the bouncing mode, the position increment can be written as</p>
+<p><span id="eq-bounc_2"><span class="math display">\[
+\Delta y_{cor} = \Delta y_1 - \Delta y_2
+\tag{6.2}\]</span></span></p>
+<p>By replacing <span class="math inline">\(\Delta y_2\)</span> using <a href="#eq-bounc_1" class="quarto-xref">Equation&nbsp;<span>6.1</span></a>, we can write:</p>
+<p><span class="math display">\[
+\Delta_{cor} y = \Delta y_1 - (\Delta y - \Delta y_1)
+\]</span></p>
+<p><span class="math display">\[
+\Delta_{cor} y = 2 \Delta y_1 - \Delta y
+\]</span></p>
+<div id="fig-bouncing" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bouncing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="process/_static/bouncing.jpg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bouncing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Coastal behaviour in bouncing mode.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+</section>
+<section id="biological-processes" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="biological-processes"><span class="header-section-number">6.3</span> Biological processes</h2>
+<section id="sec-proc-orient" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="sec-proc-orient"><span class="header-section-number">6.3.1</span> Orientation</h3>
+<p>Active swimming has been implemented in Ichthyop following the work of Romain Chaput. Three active swimming behaviours have been implemented: the rheotaxis orientation (i.e.&nbsp;against the current), the cardinal orientation (i.e toward a given direction) and the reef orientation, i.e.&nbsp;orientation toward points of interests.</p>
+<p>These three implementations involve the computation of a swimming velocity and direction. The former is common to all three methods, but the directions depend on the method considered.</p>
+<div id="8542fbc5" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> glob <span class="im">import</span> glob</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> subprocess</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>pom_file <span class="op">=</span> os.path.join(<span class="st">'..'</span>, <span class="st">'pom.xml'</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>command <span class="op">=</span> [<span class="st">'mvn'</span>, <span class="st">'package'</span>, <span class="st">'-f'</span>, pom_file, <span class="st">'-DskipTests=true'</span>]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>subprocess.run(command, capture_output<span class="op">=</span><span class="va">False</span>, text<span class="op">=</span><span class="va">False</span>, stdout<span class="op">=</span>subprocess.DEVNULL)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>conflist <span class="op">=</span> glob(os.path.join(<span class="st">'ichthyop_configs'</span>, <span class="st">'*'</span>))</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>conflist.sort()</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>confnames <span class="op">=</span> [os.path.basename(f) <span class="cf">for</span> f <span class="kw">in</span> conflist]</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> conf <span class="kw">in</span> confnames:</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os.path.isdir(os.path.join(<span class="st">'ichthyop_output'</span>, conf)):</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Configuration </span><span class="sc">{</span>conf<span class="sc">}</span><span class="ss"> already exists in output directory"</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        jarname <span class="op">=</span> glob(os.path.join(<span class="st">'..'</span>, <span class="st">'target'</span>, <span class="st">'ichthyop*[0-9].jar'</span>))</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(jarname)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        jarname.sort()</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        jarname <span class="op">=</span> jarname[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(jarname)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        command <span class="op">=</span> [<span class="st">'java'</span>, <span class="st">'-jar'</span>, jarname, os.path.join(<span class="st">'ichthyop_configs'</span>, conf, <span class="ss">f'</span><span class="sc">{</span>conf<span class="sc">}</span><span class="ss">.xml'</span>)]</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(command)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> subprocess.run(command, capture_output<span class="op">=</span><span class="va">False</span>, text<span class="op">=</span><span class="va">False</span>, stdout<span class="op">=</span>subprocess.DEVNULL)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Configuration card already exists in output directory
+Configuration combined already exists in output directory
+Configuration control already exists in output directory
+Configuration reef already exists in output directory
+Configuration rheo already exists in output directory</code></pre>
+</div>
+</div>
+</section>
+<section id="swimming-velocity" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="swimming-velocity"><span class="header-section-number">6.3.2</span> Swimming velocity</h3>
+<p>The orientation processes all share common features. They both depend on a swimming velocity and random directions. The methods described below differ on the way the random directions are drafted.</p>
+<p>Swimming velocity is computed following <span class="citation" data-cites="staatermanOrientationBehaviorFish2012">Staaterman, Paris, and Helgers (<a href="biblio.html#ref-staatermanOrientationBehaviorFish2012" role="doc-biblioref">2012</a>)</span>:</p>
+<p>#|echo: false <span class="math display">\[
+V = V_{hatch} + (V_{settle} - V_{hatch}) ^ {\log(age) / \log(PLD)}
+\]</span></p>
+<p>with <span class="math inline">\(V_{hatch}\)</span> and <span class="math inline">\(V_{settle}\)</span> the larval velocity at hatching and settle, <span class="math inline">\(A\)</span> the age of the larva and <span class="math inline">\(PLD\)</span> the transport duraction.</p>
+</section>
+<section id="von-mises-distributions" class="level3" data-number="6.3.3">
+<h3 data-number="6.3.3" class="anchored" data-anchor-id="von-mises-distributions"><span class="header-section-number">6.3.3</span> Von Mises distributions</h3>
+<p>Von Mises distribution is used in all three methods.The Von Mises distribution is given by:</p>
+<p><span class="math display">\[
+f(\theta, \mu, \kappa) = \dfrac
+{\exp(\kappa \cos(\theta - \mu))}
+{2 \pi I_{0}(\kappa)}
+\]</span></p>
+<p>where <span class="math inline">\(I_{0}(\kappa)\)</span> is the modified Bessel function of the first kind of order 0, <span class="math inline">\(\mu\)</span> is angle where the distribution is centerred and <span class="math inline">\(\kappa\)</span> is the concentration parameter. The distribution is as follows:</p>
+<div id="82c9aad8" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.special <span class="im">import</span> i0</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span>np.pi, np.pi, <span class="dv">200</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> von_misses(kappa):</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.exp(kappa<span class="op">*</span>np.cos(x<span class="op">-</span>mu))<span class="op">/</span>(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>i0(kappa))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> [<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>]:</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    plt.plot(x, von_misses(i), label<span class="op">=</span><span class="ss">f'$</span><span class="er">\</span><span class="ss">kappa = </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">$'</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>plt.xlim(x.<span class="bu">min</span>(), x.<span class="bu">max</span>())</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="process_files/figure-html/cell-6-output-1.png" width="579" height="411" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For computation purposes, all the Von Mises drafts performed in Ichthyop are done by using <span class="math inline">\(mu = 0\)</span>. The angles are thus centerred around 0. Then, the <span class="math inline">\(mu\)</span> value is added.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><span class="math inline">\(\theta = 0\)</span> is eastward, <span class="math inline">\(\theta = \frac{\pi}{2}\)</span> is northward, etc.</p>
+</div>
+</div>
+</section>
+<section id="computation-of-displacement" class="level3" data-number="6.3.4">
+<h3 data-number="6.3.4" class="anchored" data-anchor-id="computation-of-displacement"><span class="header-section-number">6.3.4</span> Computation of displacement</h3>
+<p>Given a swimming velocity <span class="math inline">\(V\)</span> and a direction <span class="math inline">\(\theta\)</span>, the larva displacement (in <span class="math inline">\(m\)</span>) is computed as follows:</p>
+<p><span class="math display">\[
+\Delta X = V \times \cos(\theta) \times \Delta t
+\]</span></p>
+<p><span class="math display">\[
+\Delta Y = V \times \sin(\theta) \times \Delta t
+\]</span></p>
+<p>with <span class="math inline">\(\Delta t\)</span> the time step. Next, the corresponding change in longitude (<span class="math inline">\(\lambda\)</span>) and latitude (<span class="math inline">\(\varphi\)</span>) is computed as follows:</p>
+<p><span class="math display">\[
+\Delta \lambda = \dfrac{\Delta X}{111138 \times \cos{\varphi}}
+\]</span></p>
+<p><span class="math display">\[
+\Delta \varphi = \dfrac{\Delta Y}{111138 }
+\]</span></p>
+</section>
+<section id="cardinal-orientation" class="level3" data-number="6.3.5">
+<h3 data-number="6.3.5" class="anchored" data-anchor-id="cardinal-orientation"><span class="header-section-number">6.3.5</span> Cardinal orientation</h3>
+<p>In cardinal orientation, the user provides a fixed heading <span class="math inline">\(\theta_{card}\)</span> and a fixed <span class="math inline">\(\kappa\)</span> parameter. Then, at each time step, a new angle is randomly drafted following a Von Misses distribution <span class="math inline">\(f(\theta, \theta_{card}, \kappa)\)</span>.</p>
+<div id="e8b990ff" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray <span class="im">as</span> xr</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.crs <span class="im">as</span> ccrs</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.feature <span class="im">as</span> cfeature</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> glob <span class="im">import</span> glob</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib <span class="im">as</span> mpl</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> <span class="st">'card'</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.path.isdir(<span class="st">'ichthyop_output'</span>):</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> os.path.join(<span class="st">'ichthyop_output'</span>, config, <span class="st">'*nc'</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> :</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> os.path.join(<span class="st">'..'</span>, <span class="st">'..'</span>, <span class="st">'ichthyop_output'</span>, config, <span class="st">'*nc'</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>pattern</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>filelist <span class="op">=</span> glob(pattern)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>filelist</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> xr.open_mfdataset(filelist, decode_times<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>data</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>lon <span class="op">=</span> data[<span class="st">'lon'</span>].values</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>lat <span class="op">=</span> data[<span class="st">'lat'</span>].values</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>mort <span class="op">=</span> data[<span class="st">'mortality'</span>].values</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>lon <span class="op">=</span> np.ma.masked_where(mort <span class="op">&gt;</span> <span class="dv">0</span>, lon)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>lat <span class="op">=</span> np.ma.masked_where(mort <span class="op">&gt;</span> <span class="dv">0</span>, lat)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>ntime, ndrifters <span class="op">=</span> lon.shape</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> np.arange(ntime)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>drifters <span class="op">=</span> np.arange(ndrifters)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>d2d, t2d <span class="op">=</span> np.meshgrid(drifters, time)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>projin <span class="op">=</span> ccrs.PlateCarree()</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>projout <span class="op">=</span> ccrs.PlateCarree()</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes(projection <span class="op">=</span> projout)</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>ax.scatter(lon[:, :], lat[:, :], c<span class="op">=</span>t2d, marker<span class="op">=</span><span class="st">'.'</span>, transform<span class="op">=</span>projin, s<span class="op">=</span><span class="fl">0.5</span>, cmap<span class="op">=</span>mpl.colormaps[<span class="st">'jet'</span>])</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>feat <span class="op">=</span> ax.add_feature(cfeature.LAND)</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>feat <span class="op">=</span> ax.add_feature(cfeature.COASTLINE)</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>ax.set_extent([<span class="dv">49</span>, <span class="fl">55.25</span>, <span class="op">-</span><span class="fl">13.13</span>, <span class="op">-</span><span class="fl">9.45</span>], crs<span class="op">=</span>projin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="process_files/figure-html/cell-7-output-1.png" width="540" height="326" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="rheotaxis-orientation" class="level3" data-number="6.3.6">
+<h3 data-number="6.3.6" class="anchored" data-anchor-id="rheotaxis-orientation"><span class="header-section-number">6.3.6</span> Rheotaxis orientation</h3>
+<p>In the rheotaxis orientation method, the particles swim against the current. The user only provides a kappa parameter.</p>
+<p>First, the angle of the current is computed as follows:</p>
+<p><span class="math display">\[
+\theta_{current} = \arctan2(V_{current}, U_{current})
+\]</span></p>
+<p>Then, the angle that the particle must follow is given by adding <span class="math inline">\(\pi\)</span>:</p>
+<p><span class="math display">\[
+\theta_{direction} = \theta_{current} + \pi
+\]</span></p>
+<p>Finally, a random angle is picked up following a Von Mises distribution <span class="math inline">\(f(\theta, \theta_{direction}, \kappa_{reef})\)</span></p>
+<p>(ref-rheo)=</p>
+<div id="dc90cb7e" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray <span class="im">as</span> xr</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.crs <span class="im">as</span> ccrs</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.feature <span class="im">as</span> cfeature</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> glob <span class="im">import</span> glob</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib <span class="im">as</span> mpl</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> <span class="st">'rheo'</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.path.isdir(<span class="st">'ichthyop_output'</span>):</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> os.path.join(<span class="st">'ichthyop_output'</span>, config, <span class="st">'*nc'</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> :</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> os.path.join(<span class="st">'..'</span>, <span class="st">'..'</span>, <span class="st">'ichthyop_output'</span>, config, <span class="st">'*nc'</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>pattern</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>filelist <span class="op">=</span> glob(pattern)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>filelist</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> xr.open_mfdataset(filelist, decode_times<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>data</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>lon <span class="op">=</span> data[<span class="st">'lon'</span>].values</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>lat <span class="op">=</span> data[<span class="st">'lat'</span>].values</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>mort <span class="op">=</span> data[<span class="st">'mortality'</span>].values</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>lon <span class="op">=</span> np.ma.masked_where(mort <span class="op">&gt;</span> <span class="dv">0</span>, lon)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>lat <span class="op">=</span> np.ma.masked_where(mort <span class="op">&gt;</span> <span class="dv">0</span>, lat)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>ntime, ndrifters <span class="op">=</span> lon.shape</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> np.arange(ntime)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>drifters <span class="op">=</span> np.arange(ndrifters)</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>d2d, t2d <span class="op">=</span> np.meshgrid(drifters, time)</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>projin <span class="op">=</span> ccrs.PlateCarree()</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>projout <span class="op">=</span> ccrs.PlateCarree()</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes(projection <span class="op">=</span> projout)</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>ax.scatter(lon[:, :], lat[:, :], c<span class="op">=</span>t2d, marker<span class="op">=</span><span class="st">'.'</span>, transform<span class="op">=</span>projin, s<span class="op">=</span><span class="fl">0.5</span>, cmap<span class="op">=</span>mpl.colormaps[<span class="st">'jet'</span>])</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>feat <span class="op">=</span> ax.add_feature(cfeature.LAND)</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>feat <span class="op">=</span> ax.add_feature(cfeature.COASTLINE)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>ax.set_extent([<span class="dv">49</span>, <span class="fl">55.25</span>, <span class="op">-</span><span class="fl">13.13</span>, <span class="op">-</span><span class="fl">9.45</span>], crs<span class="op">=</span>projin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="process_files/figure-html/cell-8-output-1.png" width="540" height="326" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="reef-orientation" class="level3" data-number="6.3.7">
+<h3 data-number="6.3.7" class="anchored" data-anchor-id="reef-orientation"><span class="header-section-number">6.3.7</span> Reef orientation</h3>
+<p>In the reef orientation method, the larva will target the closest target area (for instance coral reef). These areas are defined in an <code>XML</code> zone file by a polygon and a zone-specific <span class="math inline">\(\kappa\)</span> parameter. The user also provides the sensory detection threshold of the larva (maximum detection distance <span class="math inline">\(\beta\)</span>).</p>
+<p>If the distance between the particle and the barycenter of the closest reef (<span class="math inline">\(D\)</span>) is below the detection thereshold <span class="math inline">\(\beta\)</span>, the larva will swim in the direction of the reef.</p>
+<p>(ref-orientation)=</p>
+<div id="94aa9327" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.size'</span>] <span class="op">=</span> <span class="dv">15</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">10</span>))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>xnew <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>ynew <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">#draw point at orgin</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>plt.plot(xnew, ynew, color <span class="op">=</span> <span class="st">'red'</span>, marker <span class="op">=</span> <span class="st">'o'</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>plt.gca().annotate(<span class="st">'$P_</span><span class="sc">{t}</span><span class="st">$'</span>, xy<span class="op">=</span>(<span class="dv">0</span> <span class="op">+</span> <span class="fl">0.05</span>, <span class="dv">0</span> <span class="op">-</span> <span class="fl">0.07</span>), xycoords<span class="op">=</span><span class="st">'data'</span>, color<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#draw circle</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fl">1.5</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>angles <span class="op">=</span> np.linspace(<span class="dv">0</span> <span class="op">*</span> np.pi, <span class="dv">2</span> <span class="op">*</span> np.pi, <span class="dv">100</span> )</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> r <span class="op">*</span> np.cos(angles)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>ys <span class="op">=</span> r <span class="op">*</span> np.sin(angles)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>plt.plot(xs, ys, color <span class="op">=</span> <span class="st">'k'</span>, ls<span class="op">=</span><span class="st">'--'</span>, lw<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>angle_old <span class="op">=</span> np.pi <span class="op">/</span> <span class="fl">6.</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>rold <span class="op">=</span> <span class="fl">1.</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>xold <span class="op">=</span> rold <span class="op">*</span> np.cos(angle_old)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>yold <span class="op">=</span> rold <span class="op">*</span> np.sin(angle_old)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>plt.plot(xold, yold, marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">'blue'</span>)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>plt.gca().annotate(<span class="st">'$P_{t - 1}$'</span>, xy<span class="op">=</span>(xold <span class="op">+</span> <span class="fl">0.05</span>, yold), xycoords<span class="op">=</span><span class="st">'data'</span>, color<span class="op">=</span><span class="st">'blue'</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>angle_reef <span class="op">=</span> np.pi <span class="op">+</span> np.pi <span class="op">/</span> <span class="fl">3.</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.rad2deg(angle_reef))</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>rreef <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>xreef <span class="op">=</span> rreef <span class="op">*</span> np.cos(angle_reef)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>yreef <span class="op">=</span> rreef <span class="op">*</span> np.sin(angle_reef)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(yreef)</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>plt.plot(xreef, yreef, marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">'orange'</span>)</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>plt.gca().annotate(<span class="st">'$R$'</span>, xy<span class="op">=</span>(xreef <span class="op">+</span> <span class="fl">0.1</span>, yreef), xycoords<span class="op">=</span><span class="st">'data'</span>, color<span class="op">=</span><span class="st">'orange'</span>)</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>plt.gca().annotate(<span class="vs">r'</span><span class="dv">$</span><span class="vs">D</span><span class="dv">$</span><span class="vs">'</span>, xy<span class="op">=</span>(<span class="fl">0.5</span><span class="op">*</span>(xreef) <span class="op">+</span> <span class="fl">0.02</span>, <span class="fl">0.5</span><span class="op">*</span>yreef), xycoords<span class="op">=</span><span class="st">'data'</span>, color<span class="op">=</span><span class="st">'orange'</span>, ha<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>plt.axvline(xnew, color<span class="op">=</span><span class="st">'k'</span>, ls<span class="op">=</span><span class="st">'--'</span>, lw<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>plt.axhline(ynew, color<span class="op">=</span><span class="st">'k'</span>, ls<span class="op">=</span><span class="st">'--'</span>, lw<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> np.polyfit([xold, xnew], [yold, ynew], deg<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>xtemp <span class="op">=</span> np.linspace(xold, xold <span class="op">-</span><span class="dv">2</span>, <span class="dv">100</span>)</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>plt.plot(xtemp, np.polyval(p, xtemp), color<span class="op">=</span><span class="st">'black'</span>, ls<span class="op">=</span><span class="st">'--'</span>)</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>angle_current <span class="op">=</span> angle_old <span class="op">+</span> np.pi</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>tmp_angle <span class="op">=</span> np.linspace(<span class="dv">0</span>, angle_current, <span class="dv">100</span>)</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>rtmp <span class="op">=</span> <span class="fl">0.2</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="dv">0</span> <span class="op">+</span> rtmp <span class="op">*</span> np.cos(tmp_angle), <span class="dv">0</span> <span class="op">+</span> rtmp <span class="op">*</span> np.sin(tmp_angle), color<span class="op">=</span><span class="st">'k'</span>, ls<span class="op">=</span><span class="st">'--'</span>)</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>plt.gca().annotate(<span class="vs">r'</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">heta_{actual}</span><span class="dv">$</span><span class="vs">'</span>, xy<span class="op">=</span>(xnew <span class="op">+</span> <span class="fl">0.2</span>, ynew<span class="op">+</span><span class="fl">0.05</span>), xycoords<span class="op">=</span><span class="st">'data'</span>, color<span class="op">=</span><span class="st">'k'</span>)</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>plt.plot([xnew, xreef], [ynew, yreef], color<span class="op">=</span><span class="st">'orange'</span>, ls<span class="op">=</span><span class="st">'--'</span>)</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>angle_current <span class="op">=</span> angle_reef</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>tmp_angle <span class="op">=</span> np.linspace(<span class="dv">0</span>, angle_current, <span class="dv">100</span>)</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>rtmp <span class="op">=</span> <span class="fl">0.3</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="dv">0</span> <span class="op">+</span> rtmp <span class="op">*</span> np.cos(tmp_angle), <span class="dv">0</span> <span class="op">+</span> rtmp <span class="op">*</span> np.sin(tmp_angle), color<span class="op">=</span><span class="st">'orange'</span>, ls<span class="op">=</span><span class="st">'--'</span>)</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>plt.gca().annotate(<span class="vs">r'</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">heta_{reef}</span><span class="dv">$</span><span class="vs">'</span>, xy<span class="op">=</span>(xnew <span class="op">-</span> <span class="fl">0.3</span>, ynew<span class="op">+</span><span class="fl">0.1</span>), xycoords<span class="op">=</span><span class="st">'data'</span>, color<span class="op">=</span><span class="st">'orange'</span>,ha<span class="op">=</span><span class="st">'right'</span>)</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>angle_current <span class="op">=</span> angle_old <span class="op">+</span> np.pi</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>tmp_angle <span class="op">=</span> np.linspace(angle_current, angle_reef, <span class="dv">100</span>)</span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>rtmp <span class="op">=</span> <span class="fl">0.4</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="dv">0</span> <span class="op">+</span> rtmp <span class="op">*</span> np.cos(tmp_angle), <span class="dv">0</span> <span class="op">+</span> rtmp <span class="op">*</span> np.sin(tmp_angle), color<span class="op">=</span><span class="st">'plum'</span>, ls<span class="op">=</span><span class="st">'--'</span>)</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>plt.gca().annotate(<span class="vs">r'</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">heta_{turning}</span><span class="dv">$</span><span class="vs">'</span>, xy<span class="op">=</span>(<span class="op">-</span><span class="fl">0.43</span>, <span class="op">-</span><span class="fl">0.34</span>), xycoords<span class="op">=</span><span class="st">'data'</span>, color<span class="op">=</span><span class="st">'plum'</span>)</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>off <span class="op">=</span> <span class="fl">0.05</span></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>plt.xlim(xreef <span class="op">-</span> off, xold <span class="op">+</span> off)</span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>plt.ylim(yreef <span class="op">-</span> off, yold <span class="op">+</span> off)</span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>plt.gca().set_aspect(<span class="st">'equal'</span>)</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>239.99999999999997
+-0.8660254037844384</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="process_files/figure-html/cell-9-output-2.png" width="802" height="758" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>First, the angle of the current trajectory, <span class="math inline">\(\theta_{actual}\)</span>, is computed by using the particle position at the previous time step (blue point) and the actual position (red point).</p>
+<p><span class="math display">\[
+\Delta_X = (X_{t - 1} - X_{t})
+\]</span></p>
+<p><span class="math display">\[
+\Delta_Y = (Y_{t - 1} - Y_{t})
+\]</span></p>
+<p><span class="math display">\[
+\theta_{actual} = \arctan2(\Delta Y, \Delta X) + \pi
+\]</span></p>
+<p>The direction toward the reef, <span class="math inline">\(\theta_{reef}\)</span> is also computed.</p>
+<p><span class="math display">\[
+\Delta_X = (X_{reef} - X_{t})
+\]</span></p>
+<p><span class="math display">\[
+\Delta_Y = (Y_{reef} - Y_{t})
+\]</span></p>
+<p><span class="math display">\[
+\theta_{reef} = \arctan2(\Delta Y, \Delta X)
+\]</span></p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The angles are computed in the <span class="math inline">\((X, Y)\)</span> space. Therefore, longitude and latitude coordinates are converted in <span class="math inline">\((X, Y)\)</span> using the <code>latlon2xy</code> Dataset methods.</p>
+</div>
+</div>
+<p>The turning angle <span class="math inline">\(\theta_{turning}\)</span> is given by:</p>
+<p><span class="math display">\[
+\theta_{turning} = \theta_{reef} - \theta_{actual}
+\]</span></p>
+<p>The turning angle is then ponderated by the ratio of the distance from the reef to the detection threshold as follows:</p>
+<p><span class="math display">\[
+\theta_{ponderated} = \left(1 - \dfrac{D}{\beta}\right) \theta_{turning}
+\]</span></p>
+<p><span class="math display">\[
+\theta_{ponderated} = \left(1 - \dfrac{D}{\beta}\right) \left(\theta_{reef} - \theta_{actual}\right)
+\]</span></p>
+<p>Therefore, the closest to the reef, the strongest the turning angle.</p>
+<p>Then, a random angle is picked up following a Von Mises distribution <span class="math inline">\(f(\theta, \theta_{ponderated}, \kappa_{reef})\)</span></p>
+<p>An example of a trajectory is provided below. In this case, two target destinations are provided (black boxes). The same <span class="math inline">\(\kappa\)</span> value was used for both ares (1.2) and the <span class="math inline">\(\beta\)</span> parameter has been set equal to 3 km.</p>
+<p>(ref-orientation-2)=</p>
+<div id="4d3ec33b" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray <span class="im">as</span> xr</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.crs <span class="im">as</span> ccrs</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.feature <span class="im">as</span> cfeature</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> glob <span class="im">import</span> glob</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib <span class="im">as</span> mpl</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> <span class="st">'reef'</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.path.isdir(<span class="st">'ichthyop_output'</span>):</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> os.path.join(<span class="st">'ichthyop_output'</span>, config, <span class="st">'*nc'</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> :</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> os.path.join(<span class="st">'..'</span>, <span class="st">'..'</span>, <span class="st">'ichthyop_output'</span>, config, <span class="st">'*nc'</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>pattern</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>filelist <span class="op">=</span> glob(pattern)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>filelist</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> xr.open_mfdataset(filelist, decode_times<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>data</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>lon <span class="op">=</span> data[<span class="st">'lon'</span>].values</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>lat <span class="op">=</span> data[<span class="st">'lat'</span>].values</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>mort <span class="op">=</span> data[<span class="st">'mortality'</span>].values</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>lon <span class="op">=</span> np.ma.masked_where(mort <span class="op">&gt;</span> <span class="dv">0</span>, lon)</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>lat <span class="op">=</span> np.ma.masked_where(mort <span class="op">&gt;</span> <span class="dv">0</span>, lat)</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>ntime, ndrifters <span class="op">=</span> lon.shape</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> np.arange(ntime)</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>drifters <span class="op">=</span> np.arange(ndrifters)</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>d2d, t2d <span class="op">=</span> np.meshgrid(drifters, time)</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="co"># +</span></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>projin <span class="op">=</span> ccrs.PlateCarree()</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>projout <span class="op">=</span> ccrs.PlateCarree()</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes(projection <span class="op">=</span> projout)</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>ax.scatter(lon[:, :], lat[:, :], c<span class="op">=</span>t2d, marker<span class="op">=</span><span class="st">'.'</span>, transform<span class="op">=</span>projin, s<span class="op">=</span><span class="fl">0.5</span>, cmap<span class="op">=</span>mpl.colormaps[<span class="st">'jet'</span>])</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>feat <span class="op">=</span> ax.add_feature(cfeature.LAND)</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>feat <span class="op">=</span> ax.add_feature(cfeature.COASTLINE)</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>xp <span class="op">=</span> np.array([<span class="fl">51.625</span>, <span class="fl">52.625</span>, <span class="fl">52.625</span>,<span class="fl">51.625</span>, <span class="fl">51.625</span>])</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>yp <span class="op">=</span> np.array([<span class="op">-</span><span class="fl">1.179878E1</span>, <span class="op">-</span><span class="fl">1.179878E1</span>, <span class="op">-</span><span class="fl">1.079878E1</span>, <span class="op">-</span><span class="fl">1.079878E1</span>, <span class="op">-</span><span class="fl">1.179878E1</span>])</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>ax.plot(xp, yp, transform<span class="op">=</span>projin, color<span class="op">=</span><span class="st">'k'</span>, ls<span class="op">=</span><span class="st">'--'</span>)</span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>xp <span class="op">=</span> np.array([<span class="fl">51.625</span>, <span class="fl">52.625</span> <span class="op">-</span> <span class="fl">0.5</span>, <span class="fl">52.625</span> <span class="op">-</span> <span class="fl">0.5</span>,<span class="fl">51.625</span>, <span class="fl">51.625</span>]) <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>yp <span class="op">=</span> np.array([<span class="op">-</span><span class="fl">1.179878E1</span> <span class="op">+</span> <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">1.179878E1</span> <span class="op">+</span> <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">1.079878E1</span>, <span class="op">-</span><span class="fl">1.079878E1</span>, <span class="op">-</span><span class="fl">1.179878E1</span> <span class="op">+</span> <span class="fl">0.5</span>]) <span class="op">-</span> <span class="fl">0.25</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>ax.plot(xp, yp, transform<span class="op">=</span>projin, color<span class="op">=</span><span class="st">'k'</span>, ls<span class="op">=</span><span class="st">'--'</span>)</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>ax.set_extent([<span class="dv">49</span>, <span class="fl">55.25</span>, <span class="op">-</span><span class="fl">13.13</span>, <span class="op">-</span><span class="fl">9.45</span>], crs<span class="op">=</span>projin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="process_files/figure-html/cell-10-output-1.png" width="540" height="326" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-growth-proc" class="level3" data-number="6.3.8">
+<h3 data-number="6.3.8" class="anchored" data-anchor-id="sec-growth-proc"><span class="header-section-number">6.3.8</span> Growth</h3>
+<p>There are 3 different implementations of the growth module. They can be selected by setting the <code>class_name</code> parameter in the <code>action.growth</code> action configuration block.</p>
+<section id="linear-growth" class="level4" data-number="6.3.8.1">
+<h4 data-number="6.3.8.1" class="anchored" data-anchor-id="linear-growth"><span class="header-section-number">6.3.8.1</span> Linear growth</h4>
+<p>In the linear growth method described in <span class="citation" data-cites="LETT20081210">Lett et al. (<a href="biblio.html#ref-LETT20081210" role="doc-biblioref">2008</a>)</span>, length depends on temperature but may also depend on the available food if the <code>growth.food.enabled</code> parameter is set to True.</p>
+<p>If food dependence is enabled, length increment (in <span class="math inline">\(cm\)</span>) is given by:</p>
+<p><span class="math display">\[
+\Delta L = C1 + C2 \times \dfrac{F}{F + K_S} \times max(T, T_{thres}) \times \Delta t
+\]</span></p>
+<p>where <span class="math inline">\(\Delta t\)</span> is the time-step (in seconds), <span class="math inline">\(C1\)</span> and <span class="math inline">\(C2\)</span> are parameters (<code>coeff1</code> and <code>coeff2</code>), <span class="math inline">\(T_{thres}\)</span> is a temperature threshold (<code>threshold_temp</code> parameter), <span class="math inline">\(F\)</span> is the food quantity (read from a biogeochemical dataset), and <span class="math inline">\(K_S\)</span> is a half-saturation constant (<code>half_saturation</code> parameter) and <span class="math inline">\(T\)</span> is the temperature (read from the hydrodynamic dataset).</p>
+<p>If food dependence is disabled, then increment is provided as follows:</p>
+<p><span class="math display">\[
+\Delta L = C1 + C2 \times max(T, T_{thres}) \times \Delta t
+\]</span></p>
+<p>The name of the food and temperature variables are provided by the <code>food_field</code> and <code>temperature_field</code> parameters.</p>
+<p>The initial length of the particle is provided by the <code>initial_length</code> parameter.</p>
+</section>
+<section id="sole-growth" class="level4" data-number="6.3.8.2">
+<h4 data-number="6.3.8.2" class="anchored" data-anchor-id="sole-growth"><span class="header-section-number">6.3.8.2</span> Sole growth</h4>
+<p>In the Sole growth model used in <span class="citation" data-cites="TANNER201778">Tanner et al. (<a href="biblio.html#ref-TANNER201778" role="doc-biblioref">2017</a>)</span>, length increment (in <span class="math inline">\(cm\)</span>) relies on the growth equation from <span class="citation" data-cites="fonds1979laboratory">Fonds (<a href="biblio.html#ref-fonds1979laboratory" role="doc-biblioref">1979</a>)</span> :</p>
+<p><span class="math display">\[
+\Delta L = C1 \times T^{C2} \times \Delta t
+\]</span></p>
+<p>with <span class="math inline">\(L\)</span> the length (in <span class="math inline">\(cm\)</span>), <span class="math inline">\(T\)</span> the temperature and <span class="math inline">\(\Delta t\)</span> the time step seconds, and <span class="math inline">\(C1\)</span> and <span class="math inline">\(C2\)</span> are parameters (<code>c1</code> and <code>c2</code> respectively).</p>
+<p>The temperature field is provided by the <code>temperature_field</code> parameter.</p>
+</section>
+<section id="exponential-growth" class="level4" data-number="6.3.8.3">
+<h4 data-number="6.3.8.3" class="anchored" data-anchor-id="exponential-growth"><span class="header-section-number">6.3.8.3</span> Exponential growth</h4>
+<p>In the exponential model, length is given by the following equation:</p>
+<p><span class="math display">\[
+L(t) = L_0 \times \exp{\left(b T^c t\right)}
+\]</span></p>
+<p>with <span class="math inline">\(L_0\)</span> the initial length (in cm), <span class="math inline">\(b\)</span> the growth rate and <span class="math inline">\(c\)</span> the temperature dependence of the growth rate.</p>
+<p>Taking the derivative of this expression, we obtain the length increment (in <span class="math inline">\(cm\)</span>) as a function of time:</p>
+<p><span class="math display">\[
+\Delta L = L \times b \times T^{c} \times \Delta t
+\]</span></p>
+<p>The initial length of the particle is provided by the <code>initial_length</code> parameter.</p>
+</section>
+</section>
+<section id="lethal-temperature-and-salinity" class="level3" data-number="6.3.9">
+<h3 data-number="6.3.9" class="anchored" data-anchor-id="lethal-temperature-and-salinity"><span class="header-section-number">6.3.9</span> Lethal temperature and salinity</h3>
+<p>In Ichthyop, there is the possibility to define temperature and salinity values below and above which the particle is killed.</p>
+<p>The same set of parameters are used in both cases, with the <code>temperature</code> and <code>salinity</code> prefix. There are two ways to define lethal temperatures and salinities:</p>
+<ul>
+<li>Using constant lethal temperatures or salinities (if <code>temperature.file.enabled</code> or <code>salinity.file.enabled</code> is set to false)</li>
+<li>Using a CSV file containing lethal temperatures or salinities as a function of the particle class.</li>
+</ul>
+<p>If constant lethal temperatures or salinities are provided, the cold and warm lethal temperatures are provided with the <code>cold_lethal_temperature</code>, <code>warm_lethal_temperature</code>, <code>fresh_lethal_salinity</code>, <code>saline_lethal_salinity</code>, .</p>
+<p>If a CSV file is used, the lethal temperatures and salinities are provided in a CSV (<code>lethal_temperature_file</code> and <code>lethal_salinity_file</code> parameters) which is formatted as follows:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Age</span><span class="er">(</span><span class="ex">days</span><span class="kw">);</span><span class="ex">Cold</span> temperature <span class="er">(</span><span class="ex">C</span><span class="kw">);</span><span class="ex">Warm</span> temperature <span class="er">(</span><span class="ex">C</span><span class="kw">)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">0</span><span class="kw">;</span><span class="ex">14</span><span class="kw">;</span><span class="ex">22</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ex">2</span><span class="kw">;</span><span class="ex">13</span><span class="kw">;</span><span class="ex">22</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="ex">6</span><span class="kw">;</span><span class="ex">12</span><span class="kw">;</span><span class="ex">22</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first column provides the class intervals, which are either the age of the particle (in days) or the length of the particle (in cm). The variable that is used to determine the class is provided by the <code>temperature.class</code> parameter.</p>
+<section id="deb-growth" class="level4" data-number="6.3.9.1">
+<h4 data-number="6.3.9.1" class="anchored" data-anchor-id="deb-growth"><span class="header-section-number">6.3.9.1</span> DEB growth</h4>
+<p>The DEB equations are based on Kooijman (2010) and can be found in <span class="citation" data-cites="FLORESVALIENTE2023103034">Flores-Valiente et al. (<a href="biblio.html#ref-FLORESVALIENTE2023103034" role="doc-biblioref">2023</a>)</span></p>
+<p>Influence of temperature is given by equation 5 of <span class="citation" data-cites="FLORESVALIENTE2023103034">Flores-Valiente et al. (<a href="biblio.html#ref-FLORESVALIENTE2023103034" role="doc-biblioref">2023</a>)</span>:</p>
+<p><span id="eq-deb-temp"><span class="math display">\[
+c_T = \exp \left( \dfrac{T_A}{T_1} - \dfrac{T_A}{T} \right)
+\left[
+\dfrac{
+1 +
+\exp
+\left(
+\dfrac{T_{AL}}{T_1}
+-
+\dfrac{T_{AL}}{T_L}
+\right)
++
+\exp
+\left(
+\dfrac{T_{AH}}{T_H}
+-
+\dfrac{T_{AH}}{T_1}
+\right)
+}
+{
+1 +
+\exp
+\left(
+\dfrac{T_{AL}}{T}
+-
+\dfrac{T_{AL}}{T_L}
+\right)
++
+\exp
+\left(
+\dfrac{T_{AH}}{T_H}
+-
+\dfrac{T_{AH}}{T}
+\right)
+}
+\right]
+\tag{6.3}\]</span></span></p>
+<p>If the particle is an embryo (<span class="math inline">\(E_H &lt; E_{Hb}\)</span>), then it does not feed. Please note that, according to this definition, a larva that hatched but does not feed is considered an embryo in DEB theory. Else, the scaled functional response <span class="math inline">\(f\)</span> is computed as:</p>
+<p><span id="eq-deb-repfonct"><span class="math display">\[
+f = \dfrac{F}{F + K}
+\tag{6.4}\]</span></span></p>
+<p>with <span class="math inline">\(F\)</span> the food vector and <span class="math inline">\(K\)</span> the half-saturation constant.</p>
+<p>Assimilation rates <span class="math inline">\(\{\dot{p_{Am}}\}\)</span>, energy conductance <span class="math inline">\(\dot{v}\)</span>, volume specific somatic maintenance (<span class="math inline">\([\dot{p}_M]\)</span>) and maturity maintenances rates (<span class="math inline">\(\dot{k}_J\)</span>) are corrected by the <span class="math inline">\(c_T\)</span> factor.</p>
+<p>If the accelerated DEB model is used (see e.g.&nbsp;Kooijman et al.&nbsp;(2011) and Kooijman (2014) for more details), the acceleration factor is computed as follows</p>
+<p><span id="eq-deb-sm"><span class="math display">\[
+s_M =
+\begin{cases}
+1 &amp; (E &lt; E_{Hb})\\
+\dfrac{V^{1/3}}{L_b} &amp; (E_{Hb} \le E_H &lt; E_{Hj}) \\
+\dfrac{L_j}{L_b} &amp; (E_{H} &gt; E_{Hj})
+\end{cases}
+\tag{6.5}\]</span></span></p>
+<p>with <span class="math inline">\(L_b\)</span> the structural length of the particle when <span class="math inline">\(E_H = E_Hb\)</span> (i.e the length at birth, i.e.&nbsp;first feeding) and <span class="math inline">\(L_j\)</span> the structural length of the particle when <span class="math inline">\(E_H = E_Hj\)</span> (i.e the length when metamorphosis occurs). The <span class="math inline">\(s_M\)</span> factor is then used to multiply the assimilation rate <span class="math inline">\(\{\dot{p_{Am}}\}\)</span> and the energy conductance <span class="math inline">\(\dot{v}\)</span>.</p>
+<p>(NICOLAS: s’agit il de la longueur structurelle <span class="math inline">\(L = V^{1/3}\)</span> ou de la longueur mesurée <span class="math inline">\(L_w = L / \delta_M\)</span>). Please note that <span class="math inline">\(L_b\)</span> and <span class="math inline">\(L_j\)</span> are here considered as parameters but they should be in fact calculated prior any Ichthyop runs at (e.g.&nbsp;at <span class="math inline">\(f = 1\)</span>) as they depend on the other parameters. If you are considering testing different parameter sets, <span class="math inline">\(L_b\)</span> and <span class="math inline">\(L_j\)</span> should be modified accordingly (e.g.&nbsp;using the DEBtool function <code>get_tj.m</code>).</p>
+<p>Consequently, the assimilation (in <span class="math inline">\(J.d^{-1}\)</span>) is computed as follows:</p>
+<p><span id="eq-deb-pA"><span class="math display">\[
+\dot{p}_A = \begin{cases}
+0 &amp; (E_{H} &lt; E_{Hb}) \\
+c_T s_M f \{ \dot{p}_{Am}\}  V^{2/3}  &amp; (E_{H} \ge E_{Hb}) \\
+\end{cases}
+\tag{6.6}\]</span></span></p>
+<p>Energy loss to maintenance is given by</p>
+<p><span id="eq-deb-pM"><span class="math display">\[
+\dot{p}_M = c_T [ \dot{p}_M ]  V
+\tag{6.7}\]</span></span></p>
+<p>The mobilized energy is given by:</p>
+<p><span id="eq-deb-pC"><span class="math display">\[
+\dot{p_C} = c_T
+\dfrac{\dfrac{E}{V} \left([E_G]  s_M \dot{v} V^{2/3} + \dot{p}_M\right)}
+{\kappa \dfrac{E}{V} + [E_G]}
+\tag{6.8}\]</span></span></p>
+<p>Maturity maintenance is given by</p>
+<p><span id="eq-deb-pJ"><span class="math display">\[
+\dot{p}_J = c_T \dot{k}_J E_H
+\tag{6.9}\]</span></span></p>
+<p>Energy that is sent to structural growth is given by:</p>
+<p><span id="eq-deb-pG"><span class="math display">\[
+\dot{p}_G = \kappa \dot{p}_C - \dot{p}_M
+\tag{6.10}\]</span></span></p>
+<p>Energy that goes to development (as embryo and juvenile) or to reproduction (as adults) is given by:</p>
+<p><span id="eq-deb-pR"><span class="math display">\[
+\dot{p}_R = (1 - \kappa) \dot{p}_C - \dot{p}_J
+\tag{6.11}\]</span></span></p>
+<p>Finally, the increment of reserve <span class="math inline">\(E\)</span> and structural volume <span class="math inline">\(V\)</span> is given by:</p>
+<p><span id="eq-deb-dEdt"><span class="math display">\[
+\dfrac{dE}{dt} = \dot{p}_A - \dot{p}_C
+\tag{6.12}\]</span></span></p>
+<p><span id="eq-deb-dVdt"><span class="math display">\[
+\dfrac{dV}{dt} = \dfrac{\dot{p}_G}{{[E_G]}}
+\tag{6.13}\]</span></span></p>
+<p>The increment of the energy invested into development or reproduction depends on the value of <span class="math inline">\(E_H\)</span>.</p>
+<p><span id="eq-deb-dHdt"><span class="math display">\[
+\dfrac{dE_H}{dt} =
+\begin{cases}
+\dot{p}_R &amp; E_H &lt; E_{Hp}\\
+0 &amp;  \text{otherwise}
+\end{cases}
+\tag{6.14}\]</span></span></p>
+<p><span id="eq-deb-dRdt"><span class="math display">\[
+\dfrac{dE_R}{dt} =
+\begin{cases}
+0 &amp; E_H &lt; E_{Hp}\\
+\dot{p}_R &amp;  \text{otherwise}
+\end{cases}
+\tag{6.15}\]</span></span></p>
+<p>Finally, starvation mortality is determined whether one of the following conditions are matched:</p>
+<p><span id="eq-deb-starv"><span class="math display">\[
+M_{starv} =
+\begin{cases}
+\kappa \dot{p}_C  &lt;  \dot{p}_M\\
+(1 - \kappa) \dot{p}_C  &lt;  \dot{p}_J
+\end{cases}
+\tag{6.16}\]</span></span></p>
+<p>Finally, all the states variables are then incremented:</p>
+<p><span id="eq-deb-incr-e"><span class="math display">\[
+E(t + \Delta t) = E(t) + \dfrac{dE}{dt}\Delta t
+\tag{6.17}\]</span></span></p>
+<p><span id="eq-deb-incr-v"><span class="math display">\[
+V(t + \Delta t) = V(t) + \dfrac{dV}{dt}\Delta t
+\tag{6.18}\]</span></span></p>
+<p><span id="eq-deb-incr-h"><span class="math display">\[
+E_H(t + \Delta t) = E_H(t) + \dfrac{dE_H}{dt}\Delta t
+\tag{6.19}\]</span></span></p>
+<p><span id="eq-deb-incr-r"><span class="math display">\[
+E_R(t + \Delta t) = E_R(t) + \dfrac{dE_R}{dt}\Delta t
+\tag{6.20}\]</span></span></p>
+<p>Additional references</p>
+<p>Kooijman, S. A. L. M. (2010). Dynamic Energy Budget theory for metabolic organisation. Cambridge Univ. Press, Cambridge. doi: 10.1098/rstb.2010. Kooijman, S. A. L. M. (2014). Metabolic acceleration in animal ontogeny: An evolutionary perspective. Journal of Sea Research, 94(Supplement C), 128–137. https://doi.org/10.1016/j.seares.2014.06.005 Kooijman, S. A. L. M., Pecquerie, L., Augustine, S., &amp; Jusup, M. (2011). Scenarios for acceleration in fish development and the role of metamorphosis. J. Sea Res., 66, 419–423. https://doi.org/10.1016/j.seares.2011.04.016</p>
+<p><span class="citation" data-cites="book">(<a href="biblio.html#ref-book" role="doc-biblioref"><strong>book?</strong></a>)</span>{kooijman_dynamic_2010, title = {Dynamic {Energy} {Budget} theory for metabolic organisation}, isbn = {978-0-521-13191-9}, url = {doi: 10.1098/rstb.2010.}, publisher = {Cambridge Univ. Press, Cambridge}, author = {Kooijman, S.A.L.M.}, year = {2010}, }</p>
+<p><span class="citation" data-cites="article">(<a href="biblio.html#ref-article" role="doc-biblioref"><strong>article?</strong></a>)</span>{kooijman_scenarios_2011, title = {Scenarios for acceleration in fish development and the role of metamorphosis.}, volume = {66}, doi = {https://doi.org/10.1016/j.seares.2011.04.016}, journal = {J. Sea Res.}, author = {Kooijman, S. A. L. M. and Pecquerie, L. and Augustine, S. and Jusup, M.}, year = {2011}, pages = {419–423}, }</p>
+<p><span class="citation" data-cites="article">(<a href="biblio.html#ref-article" role="doc-biblioref"><strong>article?</strong></a>)</span>{kooijman_metabolic_2014, series = {Dynamic {Energy} {Budget} theory: applications in marine sciences and fishery biology}, title = {Metabolic acceleration in animal ontogeny: {An} evolutionary perspective}, volume = {94}, issn = {1385-1101}, shorttitle = {Metabolic acceleration in animal ontogeny}, url = {http://www.sciencedirect.com/science/article/pii/S1385110114001105}, doi = {10.1016/j.seares.2014.06.005}, number = {Supplement C}, urldate = {2017-11-21}, journal = {Journal of Sea Research}, author = {Kooijman, S. A. L. M.}, month = nov, year = {2014}, keywords = {Acceleration, Dispersal, Maturation, Parental care, add_my_pet}, pages = {128–137}, }</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-FLORESVALIENTE2023103034" class="csl-entry" role="listitem">
+Flores-Valiente, Jorge, Christophe Lett, François Colas, Laure Pecquerie, Arturo Aguirre-Velarde, Fanny Rioual, Jorge Tam, et al. 2023. <span>“Influence of Combined Temperature and Food Availability on Peruvian Anchovy (Engraulis Ringens) Early Life Stages in the Northern Humboldt Current System: A Modelling Approach.”</span> <em>Progress in Oceanography</em> 215: 103034. https://doi.org/<a href="https://doi.org/10.1016/j.pocean.2023.103034">https://doi.org/10.1016/j.pocean.2023.103034</a>.
+</div>
+<div id="ref-fonds1979laboratory" class="csl-entry" role="listitem">
+Fonds, M. 1979. <span>“Laboratory Observations on the Influence of Temperature and Salinity on Development of the Eggs and Growth of the Larvae of Solea Solea (Pisces).”</span> <em>Mar. Ecol. Prog. Ser</em> 1 (9).
+</div>
+<div id="ref-LETT20081210" class="csl-entry" role="listitem">
+Lett, Christophe, Philippe Verley, Christian Mullon, Carolina Parada, Timothée Brochier, Pierrick Penven, and Bruno Blanke. 2008. <span>“A Lagrangian Tool for Modelling Ichthyoplankton Dynamics.”</span> <em>Environmental Modelling &amp; Software</em> 23 (9): 1210–14. https://doi.org/<a href="https://doi.org/10.1016/j.envsoft.2008.02.005">https://doi.org/10.1016/j.envsoft.2008.02.005</a>.
+</div>
+<div id="ref-parada2003modelling" class="csl-entry" role="listitem">
+Parada, C, CD Van Der Lingen, C Mullon, and P Penven. 2003. <span>“Modelling the Effect of Buoyancy on the Transport of Anchovy (Engraulis Capensis) Eggs from Spawning to Nursery Grounds in the Southern Benguela: An IBM Approach.”</span> <em>Fisheries Oceanography</em> 12 (3): 170–84.
+</div>
+<div id="ref-PELIZ2007215" class="csl-entry" role="listitem">
+Peliz, Alvaro, Patrick Marchesiello, Jesus Dubert, Martinho Marta-Almeida, Claude Roy, and Henrique Queiroga. 2007. <span>“A Study of Crab Larvae Dispersal on the Western Iberian Shelf: Physical Processes.”</span> <em>Journal of Marine Systems</em> 68 (1): 215–36. https://doi.org/<a href="https://doi.org/10.1016/j.jmarsys.2006.11.007">https://doi.org/10.1016/j.jmarsys.2006.11.007</a>.
+</div>
+<div id="ref-staatermanOrientationBehaviorFish2012" class="csl-entry" role="listitem">
+Staaterman, Erica, Claire B. Paris, and Judith Helgers. 2012. <span>“Orientation Behavior in Fish Larvae: <span>A</span> Missing Piece to <span>Hjort</span>’s Critical Period Hypothesis.”</span> <em>Journal of Theoretical Biology</em> 304 (July): 188–96. <a href="https://doi.org/10.1016/j.jtbi.2012.03.016">https://doi.org/10.1016/j.jtbi.2012.03.016</a>.
+</div>
+<div id="ref-stokes_2009" class="csl-entry" role="listitem">
+Stokes, George Gabriel. 2009. <span>“On the Theory of Oscillatory Waves.”</span> In <em>Mathematical and Physical Papers</em>, 1:197–229. Cambridge Library Collection - Mathematics. Cambridge University Press. <a href="https://doi.org/10.1017/CBO9780511702242.013">https://doi.org/10.1017/CBO9780511702242.013</a>.
+</div>
+<div id="ref-TANNER201778" class="csl-entry" role="listitem">
+Tanner, Susanne E., Ana Teles-Machado, Filipe Martinho, Álvaro Peliz, and Henrique N. Cabral. 2017. <span>“Modelling Larval Dispersal Dynamics of Common Sole (Solea Solea) Along the Western Iberian Coast.”</span> <em>Progress in Oceanography</em> 156: 78–90. https://doi.org/<a href="https://doi.org/10.1016/j.pocean.2017.06.005">https://doi.org/10.1016/j.pocean.2017.06.005</a>.
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./release.html" class="pagination-link" aria-label="Particle release">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Particle release</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./developer.html" class="pagination-link" aria-label="Developer documentation">
+        <span class="nav-page-text">Developer documentation</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/ichthyop/ichthyop/edit/main/process.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ichthyop/ichthyop/issues" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -1,2 +1,0 @@
-# The version must always be consistent with org.previmer.ichthyop.Version.java 
-Application.version = ${version}
