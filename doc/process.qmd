@@ -7,6 +7,8 @@ the `action` folder.
 Parameters associated with these processes must be included in `action` blocks. They can be activated or deactivated by setting the
 `enabled` tag (cf. @sec-xml-config).
 
+Note also that for each process, two parameters provide the length (in $cm$) or age (in $days$) of the particle for which the process is enabled.
+
 ## Transport processes
 
 {{< include process/advection.qmd >}}
