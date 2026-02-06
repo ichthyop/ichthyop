@@ -43,7 +43,7 @@ jobs:
         run:  sudo apt update -yq
 
       - name: Install Python
-        run:  sudo apt install python3 pip python-is-python3
+        run:  sudo apt install python3 pip python-is-python3 maven openjdk-21-jdk
 
       - name: Install Packages
         run:  pip install cartopy matplotlib numpy nbformat jupyter-cache netcdf4 jupytext ipykernel xarray pandas
