@@ -7,7 +7,23 @@ the `action` folder.
 Parameters associated with these processes must be included in `action` blocks. They can be activated or deactivated by setting the
 `enabled` tag (cf. @sec-xml-config).
 
-Note also that for each process, two parameters provide the length (in $cm$) or age (in $days$) of the particle for which the process is enabled.
+## Activation/Deactivation of a process
+
+Each process can be enabled or disabled by ticking on the `enable` tick box.
+
+Furthermore, it is also possible to activate/deactivate some processes depending on the particle age (in days) or size (in $cm$).
+
+This is done by providing, for each of these processes, the following parameters:
+
+- `activation_variable`, which indicates whether age (in days) or length (in cm) must be used
+- `activation_minimum_class_value`, which indicates the age (in days) or lengh (in cm) when the process becomes active. **Default is 0**
+- `activation_maximum_class_value`, which indicates the age (in days) or lengh (in cm) when the process becomes inactive. **Default is $\infty$**
+
+::: {.callout-caution}
+
+The length can be used only if one of the different growth process (see @sec-growth-proc) is enabled
+
+:::
 
 ## Transport processes
 

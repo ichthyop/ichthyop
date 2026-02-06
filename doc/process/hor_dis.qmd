@@ -8,7 +8,7 @@ $$
 
 with $\Delta t$ the time step, $\delta$ a random number between -1 and 1 and $K_h$ the imposed explicit Lagrangian horizontal diffusion.
 
-The value of $K_h$ depends on the mean mesh size where the partical is located:
+The value of $K_h$ depends on the mean mesh size where the particle is located:
 
 $$
 K_h = \epsilon^{1/3} l^{4/3}
