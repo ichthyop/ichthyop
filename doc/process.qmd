@@ -9,6 +9,7 @@ Parameters associated with these processes must be included in `action` blocks. 
 
 ## Transport processes
 
+{{< include process/advection.qmd >}}
 {{< include process/buoyancy.qmd >}}
 {{< include process/migration.qmd >}}
 {{< include process/hor_dis.qmd >}}
