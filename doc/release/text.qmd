@@ -1,8 +1,8 @@
 ## Text release
 
-If the user wants to simulate some specific trajectories, for instance DCPs or buoys, particles can be relased
-by providing a text file containing the release coordinates (`TxtFileRelease.java`). The name of the text file is
-given by the `txtfile` parameter.
+`Advanced - Release - Drifters from text file`
+
+Particles can also be released by providing a text file containing their release coordinates.
 
 The file must be formatted as follows:
 
@@ -15,8 +15,8 @@ The file must be formatted as follows:
 -5.45 48.30 -20
 ```
 
-Each line is a drifter. Each character starting with `#` is considered as a comment.
-If the depth column is not provided, depth will be set equal to 0.
+Each line is a particle. Each character starting with `#` is considered as a comment.
+If the depth column is not provided, depth will be set to 0.
 
 For 2D simulations, the depth column will be ignored.
 

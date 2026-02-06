@@ -1,4 +1,4 @@
-### Zone definition
+### Zone definition {#sec-zone-console}
 
 Users can define geographical zones either for “release” (i.e., origin) or “recruitment” (i.e., destination) of particles.
 

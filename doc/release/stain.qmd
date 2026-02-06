@@ -1,9 +1,11 @@
 ## Stain release
 
-The release stain (`StainRelease.java`) consits of releasing particles within a given circle. The user provides the longitude and latitudes of the release stain, the radius of the release stain (in $m$) and the number of particles to release.
+`Main - Release Stain`
 
-For a 3D simulation, the user also provides the depth and the thickness of the release stains (both in $m$).
+The release stain consists in releasing particles within a given disk. The user provides the longitude and latitude of this disk center and its radius (in $m$), and the number of particles to release.
 
-An example of a stain release is provided in @fig-stain-release
+For a 3D simulation, the release stain becomes a cylinder and the user also has to provide the depth of the center of the cylinder and its height (both in $m$).
 
-![Example of a stain release.](release/_static/release_stain.jpg){#fig-stain-release}
+Particles are randomly distributed within a release stain (@fig-stain-release)
+
+![Example of a stain release. Note that here the disk is truncated due to the coast.](release/_static/release_stain.jpg){#fig-stain-release}
