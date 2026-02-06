@@ -36,9 +36,9 @@ for conf in confnames:
         print(jarname)
         command = ['java', '-jar', jarname, os.path.join('ichthyop_configs', conf, f'{conf}.xml')]
         print(command)
-        result = subprocess.run(command, capture_output=False, text=False, stdout=subprocess.DEVNULL)
+        result = subprocess.run(command, capture_output=False, text=False)
 ```
-
+<!--
 
 ```{python}
 #|label: fig-ref-control
@@ -536,4 +536,4 @@ xp = np.array([51.625, 52.625 - 0.5, 52.625 - 0.5,51.625, 51.625]) - 1
 yp = np.array([-1.179878E1 + 0.5, -1.179878E1 + 0.5, -1.079878E1, -1.079878E1, -1.179878E1 + 0.5]) - 0.25
 ax.plot(xp, yp, transform=projin, color='k', ls='--')
 ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
-```
+``` -->
