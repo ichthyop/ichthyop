@@ -35,6 +35,7 @@ print("++++++++++++++++++++++++++++++++++++++++++ ", outdir)
 
 def savefig(figname, bbox=None):
     plt.savefig(os.path.join(outdir, figname + '.svg'), bbox_inches=bbox)
+    plt.savefig(os.path.join(outdir, figname + '.jpg'), bbox_inches=bbox)
 
 
 # +

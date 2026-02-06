@@ -90,6 +90,19 @@ public class BuoyancyAction extends AbstractAction {
     final private static double C13 = 1.6546f * Math.pow(10, -6);
     final private static double C14 = 1.0227f * Math.pow(10, -4);
     final private static double C15 = 5.72466f * Math.pow(10, -3);
+
+    @FunctionalInterface
+    private interface GetValue {
+        double getValue(IParticle particle);
+    }
+    private GetValue getValue;
+
+    @FunctionalInterface
+    private interface GetDensity {
+        double getDensity(IParticle particle);
+    }
+    private GetDensity getDensity;
+
     ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -101,17 +114,16 @@ public class BuoyancyAction extends AbstractAction {
     /**
      * Egg density [g/cm3], a key parameter to calculate the egg buoyancy.
      */
-    private float particleDensity;
+    private float constantDensity;
     /**
      * Sea water density at particle location.
      */
     private static double waterDensity;
     private String salinity_field;
     private String temperature_field;
-    private boolean isGrowth;
     private float[] particleDensities;
-    private float[] ages;
-    private BuoyancyModel buoyancyModel;
+    private float[] classes;
+    private double secs_in_day = 86400;
 
     @Override
     public void loadParameters() throws Exception {
@@ -133,25 +145,22 @@ public class BuoyancyAction extends AbstractAction {
             MOLECULAR_VISCOSITY = Double.valueOf(getParameter(key));
         }
 
-
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
-        isGrowth = CheckGrowthParam.checkParams();
-        if (!isGrowth) {
-            try {
-                maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;
-            } catch (Exception ex) {
-                maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
-                getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
-            }
-        }
+
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
+
+        // Adding an easy way to switch from density file to constant density
+        boolean use_file  = false;
+        if(!isNull("density.method")) {
+            use_file = getParameter("density.method").toLowerCase().equals("file");
+        }
 
         /*
          * Check whether there is a density CSV file
          */
-        if (!isNull("density_file")) {
+        if (use_file) {
             String pathname = IOTools.resolveFile(getParameter("density_file"));
             File f = new File(pathname);
             if (!f.isFile()) {
@@ -160,11 +169,25 @@ public class BuoyancyAction extends AbstractAction {
             if (!f.canRead()) {
                 throw new IOException("Density file " + pathname + " cannot be read.");
             }
+
+            String density_class = getParameter("density.class").toLowerCase();
+
+            boolean isGrowth = CheckGrowthParam.checkParams();  // check if growth or debgrowth is true (xor)
+            if (!isGrowth && density_class.equals("length")) {
+                throw new IllegalArgumentException("Velocity cannot be based on particle length since no growth model not activated.");
+            }
+
+            if(density_class.equals("age")) {
+                getValue = (particle) -> (particle.getAge() / secs_in_day); // age of the particle in days
+            } else {
+                getValue = (particle) -> (particle.getLength()); // lengh in cm
+            }
+
             loadDensities(pathname);
-            buoyancyModel = BuoyancyModel.DENSITY_AS_AGE_FUNCTION;
+            getDensity = (particle -> getDensityFile(particle));
         } else {
-            particleDensity = Float.valueOf(getParameter("particle_density"));
-            buoyancyModel = BuoyancyModel.CONSTANT_DENSITY;
+            constantDensity = Float.valueOf(getParameter("particle_density"));
+            getDensity = (particle -> getDensityConstant(particle));
         }
     }
 
@@ -181,19 +204,45 @@ public class BuoyancyAction extends AbstractAction {
             List<String[]> lines = reader.readAll();
 
             // init arrays
-            ages = new float[lines.size() - 1];
-            particleDensities = new float[ages.length];
+            classes = new float[lines.size() - 1];
+            particleDensities = new float[classes.length];
 
             // read ages (hours converted to seconds) and densities
-            for (int i = 0; i < ages.length; i++) {
+            for (int i = 0; i < classes.length; i++) {
                 String[] line = lines.get(i + 1);
-                ages[i] = Float.valueOf(line[0]) * 3600.f;
+                classes[i] = Float.valueOf(line[0]);
                 particleDensities[i] = Float.valueOf(line[1]);
             }
         } catch (IOException ex) {
             Logger.getLogger(BuoyancyAction.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    public double getDensityFile(IParticle particle) {
+
+        double particleDensity = particleDensities[classes.length - 1];
+        double particle_class = getValue.getValue(particle);
+        if (particle_class < classes[0]) {
+            particleDensity = particleDensities[0];
+        } else {
+
+            // if particle class exceeds upper bound, then force the density to the upper
+            // value
+            particleDensity = particleDensities[classes.length - 1];
+            for (int i = 0; i < classes.length - 1; i++) {
+                if (classes[i] <= particle_class && particle_class < classes[i + 1]) {
+                    particleDensity = particleDensities[i];
+                    break;
+                }
+            }
+        }
+
+        return particleDensity;
+    }
+
+     public double getDensityConstant(IParticle particle) {
+        return constantDensity;
+     }
 
     @Override
     public void execute(IParticle particle) {
@@ -202,20 +251,8 @@ public class BuoyancyAction extends AbstractAction {
             return;
         }
 
-        /*
-         * For case of particle density varying with particle age, we determine what is
-         * current density for the particle
-         */
-        if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
-            particleDensity = particleDensities[ages.length - 1];
-            float age = particle.getAge();
-            for (int i = 0; i < ages.length - 1; i++) {
-                if (ages[i] <= age && age < ages[i + 1]) {
-                    particleDensity = particleDensities[i];
-                    break;
-                }
-            }
-        }
+        double particle_density = getDensity.getDensity(particle);
+
         // System.out.println("My age is " + (particle.getAge() / 3600.f) + " density: "
         // + particleDensity);
         double time = getSimulationManager().getTimeManager().getTime();
@@ -225,7 +262,7 @@ public class BuoyancyAction extends AbstractAction {
         double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time)
                 .doubleValue();
         double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(),
-                particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
+                particle.getDepth() + move(particle_density, sal, tp, dt)) - particle.getZ();
         particle.increment(new double[] { 0.d, 0.d, dz });
     }
 
@@ -249,7 +286,7 @@ public class BuoyancyAction extends AbstractAction {
      * location
      * @return a double, the vertical move of the particle [meter] dw * dt / 100
      */
-    private double move(double sal, double tp, double dt) {
+    private double move(double particleDensity, double sal, double tp, double dt) {
 
         /* Methodology:
          waterDensity = waterDensity(salt, temperature);
@@ -307,10 +344,5 @@ public class BuoyancyAction extends AbstractAction {
         return ((1000.d + (C1 * sal + R3 * Math.sqrt(Math.abs(sal)) + R2) * sal + R1 + DR350) / 1000.d);
     }
 
-    public enum BuoyancyModel {
-
-        CONSTANT_DENSITY,
-        DENSITY_AS_AGE_FUNCTION;
-    }
     //---------- End of class
 }

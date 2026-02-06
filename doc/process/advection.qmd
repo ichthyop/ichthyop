@@ -1,0 +1,28 @@
+### Advection
+
+The primary process in Ichthyop is the advection by the ocean currents.
+
+### Horizontal advection
+
+The particle grid coordinates will change according as follows:
+
+$$
+X(t + \Delta t) = X(t) + \frac{U \times \Delta t}{\Delta X}
+$$
+
+$$
+Y(t + \Delta t) = Y(t) + \frac{U \times \Delta t}{\Delta Y}
+$$
+
+with $X,Y$ the particle grid position, $t$ the time, $\Delta t$ the time step (in seconds), $U$ and $V$ the zonal and meridional velocities (in $m.s^{-1}$) and $\Delta X$ and $\Delta Y$ the zonal and meridional extent of the grid cell.
+
+### Vertical advection
+
+For 3D simulations, vertical advection can also be activated. Particle depth, in grid coordinates, is given by:
+
+$$
+Z(t + \Delta t) = Z(t) + \frac{W \times \Delta t}{\Delta Z}
+$$
+
+
+with $Z$ the particle vertical grid position, $t$ the time, $\Delta t$ the time step (in seconds), $W$ the vertical velocity (in $m.s^{-1}$) and $\Delta Z$ the height of the grid cell.

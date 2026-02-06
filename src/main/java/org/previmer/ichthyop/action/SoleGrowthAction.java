@@ -64,19 +64,27 @@ public class SoleGrowthAction extends AbstractAction {
     private double dt_day;
     private LengthStage lengthStage;
     private float[] c1, c2;
+    private double initialLength;
 
     @Override
     public void loadParameters() throws Exception {
 
         // Request the temperature variable from the hydrodynamic dataset
         temperature_field = getParameter("temperature_field");
+        initialLength = Double.valueOf(getParameter("initial_length"));
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
 
+        String key = "length_tracker";
+        if(!isNull(key) && Boolean.valueOf(key)) {
         // Add the length tracker
         getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
+        }
 
-        // Add the stage tracker
-        getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
+        key = "stage_tracker";
+        if (!isNull(key) && Boolean.valueOf(key)) {
+            // Add the stage tracker
+            getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
+        }
 
         // Time step expressed in day
         dt_day = (double) getSimulationManager().getTimeManager().get_dt() / Constant.ONE_DAY;
@@ -92,14 +100,17 @@ public class SoleGrowthAction extends AbstractAction {
         if (sCoeff.length != c1.length) {
             throw new IOException("In Sole Growth section, the number of c1 coefficients must be equal to the number of stages.");
         }
+
         for (int iStage = 0; iStage < c1.length; iStage++) {
             c1[iStage] = Float.parseFloat(sCoeff[iStage]);
         }
+
         c2 = new float[lengthStage.getNStage()];
         sCoeff = getListParameter("c2");
         if (sCoeff.length != c2.length) {
             throw new IOException("In Sole Growth section, the number of c2 coefficients must be equal to the number of stages.");
         }
+
         for (int iStage = 0; iStage < c2.length; iStage++) {
             c2[iStage] = Float.parseFloat(sCoeff[iStage]);
         }
@@ -108,7 +119,7 @@ public class SoleGrowthAction extends AbstractAction {
     @Override
     public void init(IParticle particle) {
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.setLength(lengthStage.getThreshold(0));
+        lengthLayer.setLength(initialLength);
     }
 
     @Override

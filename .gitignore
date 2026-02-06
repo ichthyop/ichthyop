@@ -11,11 +11,14 @@ output
 .settings
 **/*.swp
 
+*.bak
+
 doc/_build
 doc/**/*ipynb*
 doc/generated
 doc/*sh
 doc/**/_static/*svg
+doc/**/_static/*jpg
 doc/**/_static/*pdf
 doc/ichthyop_output
 doc/_static/javadoc
@@ -33,3 +36,6 @@ doc/index.tex
 
 **/.DS_Store
 .VSCodeCounter
+doc/index.aux
+doc/index.pdf
+doc/index.toc

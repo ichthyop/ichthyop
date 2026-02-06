@@ -1,0 +1,76 @@
+### Gradient movement
+
+The `GradientMoveAction.java` class allows a particle to flow across the gradient of a field variable.
+
+First, the cell in which the particle is located is determined (black cross in @fig-gradient-move). The coordinates of this cell are $(X_{particle}, Y_{particle})$. Then, all the neighbouring cells are extracted, and the gradient between the particle cell and the surrounding cell is computed, using the geodesic distance between the center of the cells.
+
+Then, the particle for which the gradient is maximum is chosen (blue cross in @fig-gradient-move). The coordinates of this cell are $(X_{target}, Y_{target})$.
+
+Then, the particle displacement is computed as follows:
+
+$$
+\Delta X = \dfrac{X_{target} - X_{particle}}{D} \times V_{particle} \times \Delta t
+$$
+
+$$
+\Delta Y = \dfrac{Y_{target} - Y_{particle}}{D} \times V_{particle} \times \Delta t
+$$
+
+with $D$ the geodesic distance between the particles, $V_{particle}$ the particle velocity (in $m.s^{-1}$ and $\Delta t$ the time step (in $s$).
+
+::: {.callout-note}
+
+Velocity is provided in $cm.s^{-1}$ in the configuration file and converted into $m.s^{-1}$ in the model
+
+:::
+
+
+```{python}
+#|label: fig-gradient-move
+#|fig-cap: "Trajectory without orientation"
+#|echo: false
+#|output: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib as mpl
+
+cmap = mpl.colormaps['RdBu_r']
+np.random.seed(4)
+
+x = np.arange(3) - 1
+y = np.arange(3) - 1
+value = np.random.rand(3*3) - 0.5
+
+x2d, y2d = np.meshgrid(x, y)
+x2dr = np.ravel(x2d)
+y2dr = np.ravel(y2d)
+
+icenter = np.nonzero((x2dr == 0) & (y2dr == 0))[0]
+
+distance = np.sqrt((y2dr - 0)**2 + (x2dr**2)).astype(float)
+gradient = np.divide(value - value[icenter], distance, where=distance > 0, out=np.full(distance.shape, 0, dtype=float) )
+gradient = np.ma.masked_where(distance == 0, gradient)
+print(gradient)
+
+icell = np.nonzero(gradient == gradient.max())[0]
+print(icell, x2dr[icell], y2dr[icell])
+
+print(x2d.shape, y2d.shape, np.reshape(value, (3,3)).shape)
+
+plt.figure()
+cmax = np.max(np.abs(value)) * 2
+cs = plt.pcolormesh(x2d, y2d, np.reshape(value, (3,3)), cmap=cmap)
+cs.set_clim(-cmax, cmax)
+plt.plot(0.2, 0.4, marker='o', color='k', label='Particle', ls='none')
+plt.plot(x2dr[icenter], y2dr[icenter], marker='x', color='k', label="Particle cell", ls='none')
+plt.plot(x2dr[icell], y2dr[icell], marker='x', color='blue', label='Destination cell', ls='none')
+ax = plt.gca()
+ax.axis('off')
+plt.legend()
+
+ax.annotate(xy=[x2dr[icell], y2dr[icell]], text='', xytext=[x2dr[icenter], y2dr[icenter]], arrowprops=dict(facecolor='black', shrink=0.05),)
+
+# plt.colorbar(cs)
+```

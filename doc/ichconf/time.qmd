@@ -1,15 +1,15 @@
 
 ## Time configuration {#sec-time-config}
 
-### Beginning of the simulation
+### Beginning of the simulation {#sec-time-beginning}
 
 In Ichthyop, the user provides the time at which the simulation should start. This `initial_time` parameter, which must be
 defined in the `app.time` option block, must be formatted as `year YYYY month MM day DD at HH:MM`, with `YYYY` the year, `MM` the
-month, `DD` the day, `HH` the hour and `MM` the minutes where the simulation should start.
+month, `DD` the day, `HH` the hour and `MM` the minute when the simulation should start.
 
 ### Reading NetCDF times
 
-When reading a NetCDF file (ocean currents, temperature, wind, wave, etc.), Ichthyop will determine the units in which NetCDF time is stored.
+When reading a NetCDF input file, Ichthyop will determine the units in which NetCDF time is stored in this file.
 These units must meet the [CF Metadata Conventions](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/build/ch04s04.html)
 and therefore be provided as follows:
 
@@ -17,20 +17,19 @@ and therefore be provided as follows:
 UNITS since YYYY-MM-DD HH:MM:SS
 ```
 
-with `UNITS` the units in which the time is stored (usually `seconds`, `days` or `hours`), `YYYY` the year, `MM` the month, `DD` the day, `HH` the hour, `MM` the minutes  and `SS` the seconds of the reference date.
+with `UNITS` the units in which the time is stored (usually `seconds`, `days` or `hours`), `YYYY` the year, `MM` the month, `DD` the day, `HH` the hour, `MM` the minutes  and `SS` the second of the reference date.
 
-If a NetCDF `time::units` attribute is defined, Ichthyop will try to infer the NetCDF reference date and time units using this convention.
+If a NetCDF `time::units` attribute is defined, Ichthyop will try to infer the NetCDF reference date and time units using the CF conventions.
 
-If it fails (i.e. the `time::units` attribute does not follow the convention) or if no `time::units` attribute is found,
+If it fails (i.e. the `time::units` attribute does not follow the CF conventions) or if no `time::units` attribute is provided in the input file,
 Ichthyop will read the `time_origin` parameter from the `app.time` option block, which must be defined following the CF conventions.
 
 :::{.callout-caution}
-When reading two datasets (an ocean currents dataset and a wind dataset for instance), if none meets the CF convention, Ichthyop
-will apply the units defined in the `time_origin` parameter to both datasets, even though they may have different time units.
-**Therefeore, in this case, it is strongly recommended to manually include CF-like  time units attributes to each dataset (cf. below).**
+When reading two different NetCDF input files (for example one providing the ocean currents and one provinding surface winds), if none meets the CF convention, Ichthyop will apply the units defined in the `time_origin` parameter of Ichthyop configuration file to both, even though they may have different time units.
+**Therefore, in this case, it is strongly recommended to include CF-like  time units attributes manually to each file (cf. below).**
 :::
 
-Manually updating the `units` attribute can be done by using
+This can be done by using
 the [ncatted](https://linux.die.net/man/1/ncatted)  command (**Linux users**):
 
 ```bash

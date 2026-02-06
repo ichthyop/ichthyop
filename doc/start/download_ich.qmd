@@ -1,14 +1,14 @@
 
 ## Downloading Ichthyop {#sec-osm-inst}
 
-The Ichthyop model is available on [GitHub](https://github.com/ichthyop/ichthyop). There is two ways to recover Ichthyop:
+The Ichthyop tool is available on [GitHub](https://github.com/ichthyop/ichthyop). There are two ways to use Ichthyop:
 
-- Using executable files (`.jar` files).
-- From source files.
+- Use executable files (`.jar` files) (**preferably for beginners**)
+- Use source files (**preferably for advanced users and developers**)
 
-### Using executables
+### Using executable files
 
-Ichthyop users can download Ichthyop executables [here](https://github.com/ichthyop/ichthyop/releases). Choose a version, and download the {samp}`ichthyop-X.Y.Z-jar-with-dependencies.jar` file (replacing {samp}`X.Y.Z` by the version number).
+Ichthyop executable files can be downloaded [here](https://github.com/ichthyop/ichthyop/releases). Download the  latest `ichthyop-X.Y.Z-jar-with-dependencies.jar` file (replacing `X.Y.Z` by the version number). Older versions are also available if necessary.
 
 ### From source
 

@@ -1,0 +1,12 @@
+## Java install {#sec-java-install}
+
+Beforehand, let us clarify some of the acronyms regarding the Java
+technologies.
+
+`JVM`: Java Virtual Machine. It is a set of software programs that interprets the Java byte code.
+
+`JRE`: Java Runtime Environment. It is a kit distributed by Sun to execute Java programs. A `JRE` provides a `JVM` and some basic Java libraries.
+
+`JDK` or `SDK`: Java (or Software) Development Kit bound to the programmer. It provides a `JRE`, a compiler, useful programs, examples and the source of the API (Application Programming Interface: some standard libraries).
+
+It is strongly recommended to download a `JDK`, in order to both compile and run the model. Builds for different platforms can be found [here](https://www.oracle.com/java/technologies/downloads/).

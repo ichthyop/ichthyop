@@ -1,4 +1,6 @@
-## Ichthyop configuration
+## Ichthyop configuration (advanced users) {#sec-ich-conf}
+
+Advanced users may want to change the configuration files directly rather than via the graphic interface.
 
 {{< include ichconf/xml.qmd >}}
 {{< include ichconf/zone-xml.qmd >}}

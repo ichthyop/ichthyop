@@ -1,37 +1,60 @@
 
 
-## Growth {#sec-growth-proc}
+### Growth {#sec-growth-proc}
 
-There is 2 different implementations of the growth module. They can be selected by setting the
+There are 3 different implementations of the growth module. They can be selected by setting the
 `class_name` parameter in the `action.growth` action configuration block.
 
-### Linear growth
+#### Linear growth
 
-To use the linear growth method described in @LETT20081210, choose the `LinearGrowthAction.java` class.
+In the linear growth method described in @LETT20081210, length depends on temperature but may
+also depend on the available food if the `growth.food.enabled` parameter is set to True.
 
-Length increment is provided as follows:
+If food dependence is enabled, length increment (in $cm$) is given by:
 
 $$
-\Delta L = C_1 + C_2 \times \dfrac{F}{F + K_S} \times max(T, T_{thres}) \times \Delta t
+\Delta L = C1 + C2 \times \dfrac{F}{F + K_S} \times max(T, T_{thres}) \times \Delta t
 $$
 
-where $\Delta t$ is the time-step (in days), $C_1$ and $C_2$ are parameters (`coeff1` and `coeff2`), $T_{thres}$ is a temperature threshold (`threshold_temp` parameter), $F$ is the food quantity and $K_S$ is
-a half-saturation constant (`half_saturation` parameter). If the latter is not defined or equals 0, $Q$ is assumed to be $1$.
+where $\Delta t$ is the time-step (in seconds), $C1$ and $C2$ are parameters (`coeff1` and `coeff2`), $T_{thres}$ is a temperature threshold (`threshold_temp` parameter), $F$ is the food quantity (read from a biogeochemical dataset),  and $K_S$ is
+a half-saturation constant (`half_saturation` parameter) and $T$ is the temperature (read from the hydrodynamic dataset).
+
+If food dependence is disabled, then increment is provided as follows:
+
+$$
+\Delta L = C1 + C2 \times max(T, T_{thres}) \times \Delta t
+$$
 
 The name of the food and temperature variables are provided by the `food_field` and `temperature_field` parameters.
 
-<!-- TODO Add the description of the DEB module -->
+The initial length of the particle is provided by the `initial_length` parameter.
 
+#### Sole growth
 
-### Sole growth
-
-If the {samp}`SoleGrowthAction.java` class is selected, the growth model used in @TANNER201778 is
-used. It relies on the growth equation from @fonds1979laboratory and given by:
+In the Sole growth model used in @TANNER201778, length increment (in $cm$) relies on the growth equation from @fonds1979laboratory :
 
 $$
-\Delta L = C_1 \times T^{C_2} \times \Delta t
+\Delta L = C1 \times T^{C2} \times \Delta t
 $$
 
-with $L$ the length, $T$ the temperature and $\Delta t$ the time step in days, and $C_1$ and $C_2$ are parameters (`c1` and `c2` respectively).
+with $L$ the length (in $cm$), $T$ the temperature and $\Delta t$ the time step seconds, and $C1$ and $C2$ are parameters (`c1` and `c2` respectively).
 
 The temperature field is provided by the `temperature_field` parameter.
+
+#### Exponential growth
+
+In the exponential model, length is given by the following equation:
+
+$$
+L(t) = L_0 \times \exp{\left(b T^c t\right)}
+$$
+
+with $L_0$ the initial length (in cm), $b$ the growth rate and $c$ the temperature dependence of the growth rate.
+
+Taking the derivative of this expression, we obtain the length increment (in $cm$) as a function of time:
+
+$$
+\Delta L = L \times b \times T^{c} \times \Delta t
+$$
+
+The initial length of the particle is provided by the `initial_length` parameter.

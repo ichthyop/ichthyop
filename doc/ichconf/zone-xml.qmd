@@ -1,7 +1,7 @@
 
 ## Zone configuration file {#sec-zone-xml-config}
 
-Zone configuration files are also managed via a dedicated XML file. The file must be as follows:
+Zone configuration files are also managed via a dedicated XML files. These files must be as follows:
 
 ```XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -10,16 +10,22 @@ Zone configuration files are also managed via a dedicated XML file. The file mus
 </zones>
 ```
 
-Each zone is defined on a `zone` tag, which contain the following tags:
+Each zone is defined into a `<zone>` tag, which contain the following tags:
 
-- `key` is the name of the zone
-- `enabled` specifies whether this zone must be considered or not.
-- `type` specifies whether the zone should be used for release (see :numref:``` , ``release ``` value) or recruitment processes (`recruitment` value)
-- `polygon` specifies the different points used to define the area
-- `bathy_mask` specifies the bathymetric zone (for instance 0 to 200m, i.e. continental shelf) where the zone is defined.
-- `thickness` specifies the upper and lower depths where this zone is defined (**only valid for 3D runs**).
-- `color` specifies the display color of the zone (format is `[r=102,g=51,b=255]`).
-- `proportion_particles` specifies the proportion (values in $[0-1]$) of particles to be released in the area. Only used when `type` is `release` and if the `user_defined_nparticles` parameter is set to True (cf. {numref}`zone-release`)
+- `<key>` is the name of the zone
+- `<enabled>` specifies whether this zone must be activated by default or not.
+- `<type>` specifies whether the zone should be used for release (`release` value, see @sec-zone-release) or recruitment (`recruitment` value)
+- `<polygon>` specifies the different points used to define the zond area
+- `<bathy_mask>` (optional) specifies a subset of zone area based on bathymetry (for example 0 to 200m, for using only the subset of zone area from 0 to 200 m depth)
+- `<thickness>` (optional) specifies the upper and lower depths subsets of zone areas (**only valid for 3D runs**).
+- `<color>` specifies the display color of the zone (format is `[r=102,g=51,b=255]`).
+- `<proportion_particles>` (optional) specifies the percentage of total particles  (values in $[0-1]$) to be released in the area. This attribute is only used when `type` is `release` and if the `user_defined_nparticles` parameter is set to True (cf. @sec-zone-release)
+
+::: {.callout-warning}
+
+The sum of the values of `proportion_particles` over all the release zones should be 1!
+
+:::
 
 An example of a zone definition is provided below.
 

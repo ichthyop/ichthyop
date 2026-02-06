@@ -12,4 +12,8 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "editor.detectIndentation": false,
     "java.debug.settings.forceBuildBeforeLaunch": false,
+    "files.associations": {
+        "**/*xml": "xml"
+    },
+    "xml.format.preservedNewlines": 2,
 }

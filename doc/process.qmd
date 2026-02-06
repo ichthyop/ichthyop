@@ -1,5 +1,5 @@
 
-# Ichthyop processes {#sec-pricess}
+# Ichthyop processes {#sec-process}
 
 In this section, the different Ichthyop processes are described. These processes are implemented in the classes within
 the `action` folder.
@@ -7,8 +7,27 @@ the `action` folder.
 Parameters associated with these processes must be included in `action` blocks. They can be activated or deactivated by setting the
 `enabled` tag (cf. @sec-xml-config).
 
-{{< include process/growth.qmd >}}
-{{< include process/lethal_ts.qmd >}}
+## Activation/Deactivation of a process
+
+Each process can be enabled or disabled by ticking on the `enable` tick box.
+
+Furthermore, it is also possible to activate/deactivate some processes depending on the particle age (in days) or size (in $cm$).
+
+This is done by providing, for each of these processes, the following parameters:
+
+- `activation_variable`, which indicates whether age (in days) or length (in cm) must be used
+- `activation_minimum_class_value`, which indicates the age (in days) or lengh (in cm) when the process becomes active. **Default is 0**
+- `activation_maximum_class_value`, which indicates the age (in days) or lengh (in cm) when the process becomes inactive. **Default is $\infty$**
+
+::: {.callout-caution}
+
+The length can be used only if one of the different growth process (see @sec-growth-proc) is enabled
+
+:::
+
+## Transport processes
+
+{{< include process/advection.qmd >}}
 {{< include process/buoyancy.qmd >}}
 {{< include process/migration.qmd >}}
 {{< include process/hor_dis.qmd >}}
@@ -17,4 +36,10 @@ Parameters associated with these processes must be included in `action` blocks. 
 {{< include process/swim.qmd >}}
 {{< include process/wave.qmd >}}
 {{< include process/land.qmd >}}
+
+## Biological processes
+
 {{< include process/orientation.qmd >}}
+{{< include process/growth.qmd >}}
+{{< include process/lethal_ts.qmd >}}
+{{< include process/deb.qmd >}}

@@ -1,6 +1,6 @@
-## Buoyancy
+### Buoyancy
 
-The buoyancy module allow to vertically displace a particle, depending on it's density and on the sea water density, following @parada2003modelling.
+A buoyancy module allows to  displace a particle vertically, depending on it's density and  the sea water density, following @parada2003modelling.
 
 The buoyancy-induced vertical velocity of the particle is given by:
 
@@ -10,19 +10,18 @@ $$
 
 with $a$ and $b$ the semi-major axis and semi-minor axis of an ellipse (`mean_major_axis` and `mean_minor_axis` parameters), $\mu$ the molecular viscosity (`molecular_viscosity` parameter), $\rho_{water}$ the water density, $\rho_{part}$ the particle density and $g$ the gravitational acceleration ($cm.s^{-2}$).
 
-If the particle density varies with age, it can be provided in a CSV file (`density_file` parameter), formatted as follows:
+There are two possibilities to define the particle buoyancy, which are provided by the `density.method` parameter:
+
+- If `constant`, then a constant density (in $g.cm^{-3}$) is used, which is provided by the `particle_density` parameter.
+- If `file`, then the buoyancy is read from a file and can vary with either age or length. The class that is used is provided by the `density.class` parameter.
+
+The density CSV file must be formatted in the following way:
 
 ```bash
-Age(hour);Density (g/cm3)
+Age(Days);Density (g/cm3)
 0;1.0235625
-24;1.02374
-48;1.023335
-60;1.0239
-66;1.025672
+1;1.02374
+2;1.023335
+2.5;1.0239
+2.75;1.025672
 ```
-
-If the `density_file` parameter is not found, a constant density will be assumed (`particle_density` parameter).
-
-The buoyancy process is only applied for the early life stages. If the growth process is disabled, it is controlled by the `age_max` parameter (provided in days). If this parameter is not provided, the buoyancy process will always be applied.
-
-If the growth process is enabled, the application of the buoyancy module will be automatically managed.

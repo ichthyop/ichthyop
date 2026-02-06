@@ -25,8 +25,8 @@ book:
     - part: user_guide.qmd
       chapters:
         - start.qmd
-        - ichconf.qmd
         - console.qmd
+        - ichconf.qmd
         - faq.qmd
     - part: documentation.qmd
       chapters:
@@ -34,6 +34,7 @@ book:
         - process.qmd
     - part: developer.qmd
       chapters:
+        - developer/java.qmd
         - developer/manager_initialization.qmd
         - developer/particle.qmd
         - developer/grid.qmd
@@ -60,7 +61,10 @@ format:
   html:
     number-sections: true
     theme: cosmo
-    number-depth: 3
+    number-depth: 4
+    toc-depth: 4
 
   pdf:
     fontfamily: libertinus
+    keep-tex: false
+    pdf-engine: xelatex

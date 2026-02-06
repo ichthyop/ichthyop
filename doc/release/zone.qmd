@@ -1,7 +1,9 @@
 
 ## Zone release {#sec-zone-release}
 
-The zone release method (`ZoneRelease.java`) allows to release particles in different areas, which are defined in an XML zone file (`zone_file` parameter).
+`Advanced - Release - From zones`
+
+The zone release method allows to release particles in user-defined areas (see @sec-zone-console and @sec-zone-xml-config)
 
 By default, the number of particles released in each zone ($N_k$) is equal to
 
@@ -11,8 +13,14 @@ $$
 
 with $N_{tot}$ the total number of released particles, $S_k$ the surface of the $k^{th}$ release area and $N$ the number of release areas.
 
-However, if the `user_defined_nparticles` parameter is set equal to `true`, then the proportion of the particles to release in each zone is defined by the user.
+::: {.callout-warning}
 
-An example of zone release is provided below.
+The thickness of the area is not taken into account when computing the proportion of particles that will be released, only the horizontal surface
 
-![Example of a zone release.](release/_static/release_zones.svg){#fig-zone-release}
+:::
+
+However, the user has the possibility to control the proportion of particles that is released in each zone.
+
+For details on how to define release zones, see @sec-zone-console and @sec-zone-xml-config
+
+![Example of a zone release. ](release/_static/release_zones.jpg){#fig-zone-release}

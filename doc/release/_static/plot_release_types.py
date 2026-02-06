@@ -63,6 +63,7 @@ def is_over_land(x, y):
 
 def savefig(figname):
     plt.savefig(os.path.join(dirout, figname + '.svg'), bbox_inches='tight')
+    plt.savefig(os.path.join(dirout, figname + '.jpg'), bbox_inches='tight')
 
 
 def inpolygon(x, y, x_pol, y_pol):
@@ -104,10 +105,11 @@ def plot_bkg():
 
 
 def _plot_single_zone(lonzone, latzone, color='gray', hatch='/'):
-    xy = np.transpose(np.array([lonzone, latzone])) # 7 x 2
-    p = mp.patches.Polygon(xy, closed=True,
-               fill=False, hatch=hatch, color=color, linewidth=2)
-    plt.gca().add_artist(p)
+    # xy = np.transpose(np.array([lonzone, latzone])) # 7 x 2
+    # p = mp.patches.Polygon(xy, closed=True,
+    #            fill=False, hatch=hatch, color=color, linewidth=2)
+    # plt.gca().add_artist(p)
+    return
 
 
 def zone_release_particles(N, xzone, yzone):
@@ -204,7 +206,7 @@ plt.plot(xp, yp, color=col1, marker='.', linestyle='none')
 
 xp, yp = zone_release_particles(300, lonzone2, latzone2)
 plt.plot(xp, yp, color=col2, marker='.', linestyle='none')
-plt.title('Zone release')
+# plt.title('Zone release')
 
 savefig('release_zones')
 # -

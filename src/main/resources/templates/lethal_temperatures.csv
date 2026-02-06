@@ -1,4 +1,4 @@
-Time(hour);Cold temperature (Celsius degree);Hot temperature (Celsius degree)
+Time(Day);Cold temperature (Celsius degree);Hot temperature (Celsius degree)
 0;14;22
-48;13;22
-96;12;22
+2;13;22
+4;12;22

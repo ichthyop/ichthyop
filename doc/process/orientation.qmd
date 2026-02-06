@@ -1,4 +1,4 @@
-## Orientation
+### Orientation {#sec-proc-orient}
 
 Active swimming has been implemented in Ichthyop following the work of Romain Chaput.
 Three active swimming behaviours have been implemented: the rheotaxis orientation (i.e. against the current), the

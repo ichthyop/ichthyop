@@ -311,9 +311,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>org.swinglabs</groupId>
-            <artifactId>swingx-core</artifactId>
-            <version>1.6.2-2</version>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+            <version>1.6.5</version>
         </dependency>
         <dependency>
             <groupId>org.swinglabs</groupId>

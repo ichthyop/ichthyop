@@ -96,7 +96,7 @@
       <parameter>
         <key>output_path</key>
         <long_name>Output path</long_name>
-        <value>ichthyop_output/reef</value>
+        <value>ichthyop_output/combined</value>
         <format>path</format>
         <default>output</default>
         <description>Select the folder where the simulation NetCDF output file should be saved. For instance, relative paths 'output' or 'output/' or './output' or './output/' are supported and equivalent. They will be interpretated as /path_from_where_you_run_ichthyop/ouput/ If ouput folder does not exist, application will attempt to create it.</description>
