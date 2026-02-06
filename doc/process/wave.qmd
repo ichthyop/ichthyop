@@ -1,6 +1,6 @@
 ### Wave drift
 
-Ichthyop can take into account the effects of waves on the particles trajectories, following the Stokes drift equations of @stokes_2009:
+Ichthyop can take into account the effects of waves on the particles trajectories, following the Stokes drift equations (@stokes_2009):
 
 $$
 U_{S} = w \times k_{wave} \times a^2 \times \exp\left(2 \times k_{wave} \times z\right)
