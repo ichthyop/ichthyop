@@ -46,7 +46,7 @@ jobs:
         run:  sudo apt install python3 pip python-is-python3
 
       - name: Install Packages
-        run:  pip install cartopy matplotlib numpy
+        run:  pip install cartopy matplotlib numpy nbformat jupyter-cache netcdf4 jupytext
 
       - name: Build png maps
         run: cd doc && quarto render
