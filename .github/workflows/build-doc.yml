@@ -28,6 +28,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        env:
+            GH_TOKEN: ${{ secrets.GH_GITHUB_COM_TOKEN }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -36,8 +42,12 @@ jobs:
       - name: Update apt
         run:  sudo apt update -yq
 
-      - name: Install NetCDF and Latex
-        run:  sudo apt install -yq quarto
+      - name: Install Python
+        run:  sudo apt install python pip
+
+      - name: Install Packages
+        run:  pip install cartopy matplotlib numpy
+
 
       - name: Build png maps
         run: cd doc && quarto render
