@@ -3020,7 +3020,7 @@
    <block type="action">
     <key>action.growthDeb</key>
     <description>Block of options that control the growth process based on the DEB theory</description>
-    <tree_path>Growth/DEB</tree_path>
+    <tree_path>Biology/Growth/DEB</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter hidden="false">
@@ -3293,7 +3293,7 @@
         <key>action.swimming</key>
         <description>Block of options that control the random swimming process. Swimming velocities
             are provided in a CSV file as an age function of the particle.</description>
-        <tree_path>Transport/Swimming</tree_path>
+        <tree_path>Transport/Movements/Swimming</tree_path>
         <enabled>false</enabled>
 
         <parameters>
@@ -3599,7 +3599,7 @@
             then the DVM operates during the larvae stages (yolk-sac and feeding larva). If not it
             operates after a “minimum age”. Setting the daytime depth equal to the night-time depth,
             the pattern forces the motion of particles at a constant depth.</description>
-        <tree_path>Transport/Vertical migration</tree_path>
+        <tree_path>Transport/Movements/Vertical migration</tree_path>
         <enabled>false</enabled>
 
         <parameters>
@@ -4109,7 +4109,7 @@
 
     <block type="action">
         <key>action.lethal_salt</key>
-        <tree_path>Biology/Lethal salinity</tree_path>
+        <tree_path>Biology/Mortality/Lethal salinity</tree_path>
         <enabled>false</enabled>
         <description>Block of option for setting up the mortality by salinity.</description>
 
@@ -4249,7 +4249,7 @@
 
     <block type="action">
         <key>action.lethal_temp</key>
-        <tree_path>Biology/Lethal temperature</tree_path>
+        <tree_path>Biology/Mortality/Lethal temperature</tree_path>
         <enabled>false</enabled>
          <description>Block of option for setting up the mortality by temperature.</description>
 
@@ -4877,7 +4877,7 @@
 
     <block type="action">
         <key>action.gradient</key>
-        <tree_path>Movements/Gradient movement</tree_path>
+        <tree_path>Transport/Movements/Gradient movement</tree_path>
         <enabled>false</enabled>
         <description>Block of options for the gradient move process.</description>
 
@@ -5263,7 +5263,7 @@
     <!-- ++++++++++++++++++++++++++++++++++++++++++++++ ReefOrientation.java -->
     <block type="action">
         <key>action.orientation.reef</key>
-        <tree_path>Transport/Orientation/Reef</tree_path>
+        <tree_path>Transport/Movements/Orientation/Reef</tree_path>
         <enabled>true</enabled>
         <description>Block of options for defining reef orientation process.</description>
 
@@ -5418,7 +5418,7 @@
     <!-- ++++++++++++++++++++++++++++++++++++++++++++++ CardinalOrientation.java -->
     <block type="action">
         <key>action.orientation.cardinal</key>
-        <tree_path>Transport/Orientation/Cardinal</tree_path>
+        <tree_path>Transport/Movements/Orientation/Cardinal</tree_path>
         <enabled>true</enabled>
         <description>Block of options for defining some recruitment criterions and recruitment
             zones, in order to study, for instance, the recruitment success of a particular
@@ -5551,7 +5551,7 @@
     <!-- ++++++++++++++++++++++++++++++++++++++++++++++ RheotaxisOrientation.java -->
     <block type="action">
         <key>action.orientation.rheotaxis</key>
-        <tree_path>Transport/Orientation/Rheotaxis</tree_path>
+        <tree_path>Transport/Movements/Orientation/Rheotaxis</tree_path>
         <enabled>true</enabled>
         <description>Block of options for defining Rheotaxis orientation process</description>
 
