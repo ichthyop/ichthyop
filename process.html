@@ -714,7 +714,7 @@ Figure&nbsp;6.1: Coastal behaviour in bouncing mode.
 <h3 data-number="6.3.1" class="anchored" data-anchor-id="sec-proc-orient"><span class="header-section-number">6.3.1</span> Orientation</h3>
 <p>Active swimming has been implemented in Ichthyop following the work of Romain Chaput. Three active swimming behaviours have been implemented: the rheotaxis orientation (i.e.&nbsp;against the current), the cardinal orientation (i.e toward a given direction) and the reef orientation, i.e.&nbsp;orientation toward points of interests.</p>
 <p>These three implementations involve the computation of a swimming velocity and direction. The former is common to all three methods, but the directions depend on the method considered.</p>
-<div id="8542fbc5" class="cell" data-execution_count="3">
+<div id="eddd0ce8" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> glob <span class="im">import</span> glob</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> subprocess</span>
@@ -740,7 +740,7 @@ Figure&nbsp;6.1: Coastal behaviour in bouncing mode.
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(jarname)</span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        command <span class="op">=</span> [<span class="st">'java'</span>, <span class="st">'-jar'</span>, jarname, os.path.join(<span class="st">'ichthyop_configs'</span>, conf, <span class="ss">f'</span><span class="sc">{</span>conf<span class="sc">}</span><span class="ss">.xml'</span>)]</span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(command)</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> subprocess.run(command, capture_output<span class="op">=</span><span class="va">False</span>, text<span class="op">=</span><span class="va">False</span>, stdout<span class="op">=</span>subprocess.DEVNULL)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> subprocess.run(command, capture_output<span class="op">=</span><span class="va">False</span>, text<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Configuration card already exists in output directory
 Configuration combined already exists in output directory
@@ -768,7 +768,7 @@ f(\theta, \mu, \kappa) = \dfrac
 {2 \pi I_{0}(\kappa)}
 \]</span></p>
 <p>where <span class="math inline">\(I_{0}(\kappa)\)</span> is the modified Bessel function of the first kind of order 0, <span class="math inline">\(\mu\)</span> is angle where the distribution is centerred and <span class="math inline">\(\kappa\)</span> is the concentration parameter. The distribution is as follows:</p>
-<div id="82c9aad8" class="cell" data-execution_count="6">
+<div id="2abfb283" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.special <span class="im">import</span> i0</span>
@@ -830,7 +830,7 @@ Note
 <section id="cardinal-orientation" class="level3" data-number="6.3.5">
 <h3 data-number="6.3.5" class="anchored" data-anchor-id="cardinal-orientation"><span class="header-section-number">6.3.5</span> Cardinal orientation</h3>
 <p>In cardinal orientation, the user provides a fixed heading <span class="math inline">\(\theta_{card}\)</span> and a fixed <span class="math inline">\(\kappa\)</span> parameter. Then, at each time step, a new angle is randomly drafted following a Von Misses distribution <span class="math inline">\(f(\theta, \theta_{card}, \kappa)\)</span>.</p>
-<div id="e8b990ff" class="cell" data-execution_count="7">
+<div id="d8c76ce2" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray <span class="im">as</span> xr</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.crs <span class="im">as</span> ccrs</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.feature <span class="im">as</span> cfeature</span>
@@ -902,7 +902,7 @@ Note
 \]</span></p>
 <p>Finally, a random angle is picked up following a Von Mises distribution <span class="math inline">\(f(\theta, \theta_{direction}, \kappa_{reef})\)</span></p>
 <p>(ref-rheo)=</p>
-<div id="dc90cb7e" class="cell" data-execution_count="8">
+<div id="8cee1d26" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray <span class="im">as</span> xr</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.crs <span class="im">as</span> ccrs</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.feature <span class="im">as</span> cfeature</span>
@@ -966,7 +966,7 @@ Note
 <p>In the reef orientation method, the larva will target the closest target area (for instance coral reef). These areas are defined in an <code>XML</code> zone file by a polygon and a zone-specific <span class="math inline">\(\kappa\)</span> parameter. The user also provides the sensory detection threshold of the larva (maximum detection distance <span class="math inline">\(\beta\)</span>).</p>
 <p>If the distance between the particle and the barycenter of the closest reef (<span class="math inline">\(D\)</span>) is below the detection thereshold <span class="math inline">\(\beta\)</span>, the larva will swim in the direction of the reef.</p>
 <p>(ref-orientation)=</p>
-<div id="94aa9327" class="cell" data-execution_count="9">
+<div id="1744ad36" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1101,7 +1101,7 @@ Warning
 <p>Then, a random angle is picked up following a Von Mises distribution <span class="math inline">\(f(\theta, \theta_{ponderated}, \kappa_{reef})\)</span></p>
 <p>An example of a trajectory is provided below. In this case, two target destinations are provided (black boxes). The same <span class="math inline">\(\kappa\)</span> value was used for both ares (1.2) and the <span class="math inline">\(\beta\)</span> parameter has been set equal to 3 km.</p>
 <p>(ref-orientation-2)=</p>
-<div id="4d3ec33b" class="cell" data-execution_count="10">
+<div id="ca571e28" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray <span class="im">as</span> xr</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.crs <span class="im">as</span> ccrs</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.feature <span class="im">as</span> cfeature</span>
