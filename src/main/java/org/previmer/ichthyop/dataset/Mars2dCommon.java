@@ -214,7 +214,7 @@ public abstract class Mars2dCommon extends MarsCommon {
 
     @Override
     public int get_nz() {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+        return 1;
     }
 
     @Override

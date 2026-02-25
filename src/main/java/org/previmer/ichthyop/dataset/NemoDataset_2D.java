@@ -1315,7 +1315,7 @@ public class NemoDataset_2D extends AbstractDataset {
 
     @Override
     public int get_nz() {
-        throw new UnsupportedOperationException("Method not supported in 2D");
+        return 1;
     }
 
     @Override

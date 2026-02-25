@@ -886,7 +886,7 @@ public class Regular2DProjected extends AbstractDataset {
      */
     @Override
     public int get_nz() {
-        throw new UnsupportedOperationException("Method not supported in 2D");
+        return 1;
     }
 
     /**

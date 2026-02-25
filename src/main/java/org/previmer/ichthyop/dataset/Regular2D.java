@@ -898,7 +898,7 @@ public class Regular2D extends AbstractDataset {
      */
     @Override
     public int get_nz() {
-        throw new UnsupportedOperationException("Method not supported in 2D");
+        return 1;
     }
 
     /**
