@@ -1,0 +1,13 @@
+image: ghcr.io/quarto-dev/quarto-full:1.9.27
+
+build-pages:
+  pages:
+    publish: public
+  script:
+  - apt update -y
+  - apt install -y python3 openjdk-11-jdk python3 pip python-is-python3 maven libgeos-dev
+  - pip install cartopy matplotlib numpy nbformat jupyter-cache netcdf4 jupytext ipykernel xarray pandas dask scipy
+  - quarto render doc --output-dir=public
+  artifacts:
+    paths:
+    - public
