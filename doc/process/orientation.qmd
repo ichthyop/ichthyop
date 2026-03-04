@@ -8,8 +8,19 @@ These three implementations involve the computation of a swimming velocity and d
 three methods, but the directions depend on the method considered.
 
 ```{python}
-#| echo: true
-#| output: true
+#| echo: false
+#| output: false
+from urllib.request import urlopen
+from io import BytesIO
+from zipfile import ZipFile
+http_response = urlopen('https://zenodo.org/records/10890690/files/input.zip')
+zipfile = ZipFile(BytesIO(http_response.read()))
+zipfile.extractall(path='..')
+```
+
+```{python}
+#| echo: false
+#| output: false
 
 import os
 from glob import glob
@@ -97,14 +108,13 @@ feat = ax.add_feature(cfeature.COASTLINE)
 ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
 ```
 
-### Swimming velocity
+#### Swimming velocity
 
 The orientation processes all share common features. They both depend on a swimming velocity and random directions. The methods described
 below differ on the way the random directions are drafted.
 
 Swimming velocity is computed following @staatermanOrientationBehaviorFish2012:
 
-#|echo: false
 $$
 V = V_{hatch} + (V_{settle} - V_{hatch}) ^ {\log(age) / \log(PLD)}
 $$
@@ -136,7 +146,7 @@ plt.title('$PLD = %dd, V_{hatch}=%d cm.s^{-1}, V_{settle}=%d cm.s^{-1}$' %(PLD, 
 plt.show()
 ```
 
-### Von Mises distributions
+#### Von Mises distributions
 
 Von Mises distribution is used in all three methods.The Von Mises distribution is given by:
 
@@ -151,6 +161,8 @@ $\mu$ is angle where the distribution is centerred and $\kappa$ is the concentra
 parameter. The distribution is as follows:
 
 ```{python}
+#|echo: false
+#|output: false
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import i0
@@ -178,7 +190,7 @@ angles are thus centerred around 0. Then, the $mu$ value is added.
 $\theta = 0$ is eastward, $\theta = \frac{\pi}{2}$ is northward, etc.
 :::
 
-### Computation of displacement
+#### Computation of displacement
 
 Given a swimming velocity $V$ and a direction $\theta$,
 the larva displacement (in $m$) is computed as follows:
@@ -201,7 +213,7 @@ $$
 \Delta \varphi = \dfrac{\Delta Y}{111138 }
 $$
 
-### Cardinal orientation
+#### Cardinal orientation
 
 In cardinal orientation, the user provides a fixed heading $\theta_{card}$ and a fixed $\kappa$ parameter.
 Then, at each time step, a new angle is randomly drafted following a Von Misses distribution $f(\theta, \theta_{card}, \kappa)$.
@@ -260,7 +272,7 @@ ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
 
 ```
 
-### Rheotaxis orientation
+#### Rheotaxis orientation
 
 In the rheotaxis orientation method, the particles swim against the current. The user only provides a kappa parameter.
 
@@ -332,7 +344,7 @@ feat = ax.add_feature(cfeature.COASTLINE)
 ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
 ```
 
-### Reef orientation
+#### Reef orientation
 
 In the reef orientation method, the larva will target the closest target area (for instance coral reef).
 These areas are defined in an `XML` zone file by a polygon and a zone-specific $\kappa$ parameter. The user also provides the sensory detection threshold of the larva (maximum detection distance $\beta$).

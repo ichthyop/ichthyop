@@ -5,16 +5,16 @@ build-pages:
     paths:
       - .cache/pip
       - .venv
-      - doc/input
+      - input
       - doc/ichthyop_output
 
   pages:
-    publish: public
+    publish: doc/public
   script:
   - apt update -y
   - apt install -y python3 openjdk-11-jdk python3 pip python-is-python3 maven libgeos-dev
   - pip install cartopy matplotlib numpy nbformat jupyter-cache netcdf4 jupytext ipykernel xarray pandas dask scipy
-  - quarto render doc --output-dir=../public
+  - quarto render doc --output-dir=public
   artifacts:
     paths:
     - public
