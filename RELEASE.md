@@ -6,6 +6,7 @@
 
 - Release zone output was computed at record frequency, which led sometimes to -1 values. Now it is computed just after release event (Eliot bug)
 - In the `MigrationAction.java`, positive depth values were not converted to negative ones, contrary to what is stated on the console
+- Bug in bouncing when 2D datasets are used (bug introduced in 3.4)
 
 ### New features
 
