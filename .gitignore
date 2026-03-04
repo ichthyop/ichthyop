@@ -1,3 +1,6 @@
+ .gitlab-ci-local/
+doc/public/
+
 dist
 target
 nbactions.xml
