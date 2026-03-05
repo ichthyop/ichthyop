@@ -56,7 +56,7 @@ jobs:
         run:  sudo apt update -yq
 
       - name: Install Python
-        run:  sudo apt install python3 pip python-is-python3 maven openjdk-21-jdk
+        run:  sudo apt install python3 pip python-is-python3 maven openjdk-21-jdk wget unzip
 
       - name: Download input files
         if: steps.cache-input.outputs.cache-hit != 'true'
@@ -68,6 +68,12 @@ jobs:
       - name: Build png maps
         run: cd doc && quarto render
 
+      - name: Tinytex install
+        run: quarto install tinytex
+  
+      - name: Render doc
+        run: quarto render doc --output-dir=public --cache-refresh
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -75,7 +81,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: 'doc/_book'
+          path: 'public'
 
       - name: Deploy to GitHub Pages
         id: deployment

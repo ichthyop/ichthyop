@@ -1,22 +1,27 @@
-image: ghcr.io/quarto-dev/quarto:1.9.27
+image: ubuntu:jammy
 
 build-pages:
   cache:
     paths:
       - .cache/pip
-      - .venv
       - input
       - doc/ichthyop_output
   pages:
     publish: doc/public
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   script:
   - apt update -y
-  - apt install -y python3 openjdk-11-jdk python3 pip python-is-python3 maven libgeos-dev
+  - apt install -y python3 openjdk-11-jdk python3 pip python-is-python3 maven libgeos-dev wget unzip
   - pip install cartopy matplotlib numpy nbformat jupyter-cache netcdf4 jupytext ipykernel xarray pandas dask scipy
   - wget https://zenodo.org/records/10890690/files/input.zip && unzip -o input.zip
   - python -m ipykernel install --user --name python3 --display-name "Python 3"
-  - quarto install chromium
-  - quarto render doc --output-dir=public --cache-refresh
+  - wget https://github.com/quarto-dev/quarto-cli/releases/download/v1.9.29/quarto-1.9.29-linux-amd64.deb
+  - dpkg -i quarto-1.9.29-linux-amd64.deb
+  - quarto --version
+  - quarto install tinytex
+  - quarto install chrome-headless-shell
+  - quarto render doc --output-dir=public --cache-refresh --to html
   artifacts:
     paths:
-    - public
+    - doc/public
