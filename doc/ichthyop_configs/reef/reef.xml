@@ -104,7 +104,7 @@
       <parameter>
         <key>record_frequency</key>
         <long_name>Record frequency</long_name>
-        <value>1</value>
+        <value>4</value>
         <format>integer</format>
         <default>4</default>
         <description>Lagrangian model runs with its own computational time-step, set in the 'time option block'. You may not need to record every step of the simulation in the NetCDF output file. Set the record frequency as a number of computational time-steps. For instance, let's take dt = 1800s and record frequency = 6. Particle positions will be recorded every 3 hours (1800 * 6 = 10800s = 3h) in the NetCDF output file.</description>
