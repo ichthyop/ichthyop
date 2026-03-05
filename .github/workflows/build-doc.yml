@@ -65,14 +65,11 @@ jobs:
       - name: Install Packages
         run:  pip install cartopy matplotlib numpy nbformat jupyter-cache netcdf4 jupytext ipykernel xarray pandas dask scipy
 
-      - name: Build png maps
-        run: cd doc && quarto render
-
       - name: Tinytex install
         run: quarto install tinytex
   
       - name: Render doc
-        run: quarto render doc --output-dir=public --cache-refresh
+        run: quarto render doc --output-dir=public --to html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -81,7 +78,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: 'public'
+          path: 'doc/public'
 
       - name: Deploy to GitHub Pages
         id: deployment
