@@ -16,7 +16,7 @@ build-pages:
   - wget https://zenodo.org/records/10890690/files/input.zip && unzip -o input.zip
   - python -m ipykernel install --user --name python3 --display-name "Python 3"
   - quarto install chromium
-  - quarto render doc --output-dir=public
+  - quarto render doc --output-dir=public --cache-refresh
   artifacts:
     paths:
     - public
