@@ -1,4 +1,4 @@
-image: ghcr.io/quarto-dev/quarto:1.8.27
+image: ghcr.io/quarto-dev/quarto:1.9.27
 
 build-pages:
   cache:
