@@ -44,7 +44,6 @@ book:
   search: true
   repo-url: https://github.com/ichthyop/ichthyop/
   repo-actions: [edit]
-  downloads: [pdf]
   sidebar:
     style: "docked"
     logo: _static/logo-ichthyop.svg
