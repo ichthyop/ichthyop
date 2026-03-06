@@ -4,8 +4,9 @@ build-pages:
   cache:
     paths:
       - .cache/pip
-      - input
       - doc/ichthyop_output
+  only:
+    - release/.*
   pages:
     publish: doc/public
   variables:

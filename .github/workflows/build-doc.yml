@@ -3,7 +3,7 @@ name: Build Ichthyop Documentation
 
 on:
     push:
-        branches: ["release/*", "master"]
+        branches: ["release/*"]
 
     # Allows you to run this workflow manually from the Actions tab
     workflow_dispatch:
@@ -67,7 +67,7 @@ jobs:
 
       - name: Tinytex install
         run: quarto install tinytex
-  
+
       - name: Render doc
         run: quarto render doc --output-dir=public --to html
 
