@@ -100,13 +100,15 @@ import ucar.nc2.Dimension;
 public class OutputManager extends AbstractManager implements LastStepListener, NextStepListener {
 
     final private static OutputManager outputManager = new OutputManager();
+    private static final int FVCOM_UTM_ZONE = 10;
+    private static final boolean FVCOM_UTM_NORTHERN_HEMISPHERE = true;
     private final static String block_key = "app.output";
     private int dt_record;
     private NCDimFactory dimensionFactory;
     private int i_record;
     private int record_frequency;
-    private List<GeoPosition> region;
-    private List<List<Point2D>> zoneAreas;
+    private List<GeoPosition> region = new ArrayList<>();
+    private List<List<Point2D>> zoneAreas = new ArrayList<>();
     private Dimension latlonDim;
     private boolean clearPredefinedTrackerList = false;
     private boolean clearCustomTrackerList = false;
@@ -238,10 +240,94 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         variable.addAttribute(new Attribute("unit", "lat degree north lon degree east"));
     }
 
+    private void addFvcomRegion() {
+
+        region = new ArrayList<>();
+        zoneAreas = new ArrayList<>();
+
+        IDataset dataset = getSimulationManager().getDataset();
+        double latMin = dataset.getLatMin();
+        double latMax = dataset.getLatMax();
+        double lonMin = dataset.getLonMin();
+        double lonMax = dataset.getLonMax();
+
+        if (!Double.isFinite(latMin) || !Double.isFinite(latMax)
+                || !Double.isFinite(lonMin) || !Double.isFinite(lonMax)
+                || latMin >= latMax || lonMin >= lonMax) {
+            return;
+        }
+
+        region.add(utmToLatLon(lonMin, latMin, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMax, latMin, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMax, latMax, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMin, latMax, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMin, latMin, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
+
+        Dimension edge = bNcOut.addDimension("edge", region.size());
+        latlonDim = bNcOut.addDimension("latlon", 2);
+        Variable.Builder<?> variable = bNcOut.addVariable("region_edge", DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(edge, latlonDim)));
+        variable.addAttribute(new Attribute("long_name", "geoposition of region edge"));
+        variable.addAttribute(new Attribute("unit", "lat degree north lon degree east"));
+    }
+
+        private GeoPosition utmToLatLon(double easting, double northing, int zone, boolean northernHemisphere) {
+
+        final double a = 6378137.0;
+        final double eccSquared = 0.00669438;
+        final double k0 = 0.9996;
+
+        double x = easting - 500000.0;
+        double y = northing;
+        if (!northernHemisphere) {
+            y -= 10000000.0;
+        }
+
+        double lonOrigin = (zone - 1) * 6 - 180 + 3;
+        double eccPrimeSquared = eccSquared / (1 - eccSquared);
+
+        double m = y / k0;
+        double mu = m / (a * (1 - eccSquared / 4 - 3 * eccSquared * eccSquared / 64
+            - 5 * eccSquared * eccSquared * eccSquared / 256));
+
+        double e1 = (1 - Math.sqrt(1 - eccSquared)) / (1 + Math.sqrt(1 - eccSquared));
+        double phi1Rad = mu
+            + (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32) * Math.sin(2 * mu)
+            + (21 * e1 * e1 / 16 - 55 * Math.pow(e1, 4) / 32) * Math.sin(4 * mu)
+            + (151 * Math.pow(e1, 3) / 96) * Math.sin(6 * mu)
+            + (1097 * Math.pow(e1, 4) / 512) * Math.sin(8 * mu);
+
+        double n1 = a / Math.sqrt(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad));
+        double t1 = Math.tan(phi1Rad) * Math.tan(phi1Rad);
+        double c1 = eccPrimeSquared * Math.cos(phi1Rad) * Math.cos(phi1Rad);
+        double r1 = a * (1 - eccSquared)
+            / Math.pow(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad), 1.5);
+        double d = x / (n1 * k0);
+
+        double latRad = phi1Rad - (n1 * Math.tan(phi1Rad) / r1)
+            * (d * d / 2
+            - (5 + 3 * t1 + 10 * c1 - 4 * c1 * c1 - 9 * eccPrimeSquared) * Math.pow(d, 4) / 24
+            + (61 + 90 * t1 + 298 * c1 + 45 * t1 * t1 - 252 * eccPrimeSquared - 3 * c1 * c1)
+            * Math.pow(d, 6) / 720);
+
+        double lonRad = (d
+            - (1 + 2 * t1 + c1) * Math.pow(d, 3) / 6
+            + (5 - 2 * c1 + 28 * t1 - 3 * c1 * c1 + 8 * eccPrimeSquared + 24 * t1 * t1)
+            * Math.pow(d, 5) / 120) / Math.cos(phi1Rad);
+
+        double lat = Math.toDegrees(latRad);
+        double lon = lonOrigin + Math.toDegrees(lonRad);
+        return new GeoPosition(lat, lon);
+        }
+
     private void writeRegion() throws IOException, InvalidRangeException {
 
         // If no bounding box, nothing is done.
-        if (region.size() == 0) {
+        if (region == null || region.isEmpty()) {
+            return;
+        }
+
+        Variable varRegion = ncOut.findVariable("region_edge");
+        if (varRegion == null) {
             return;
         }
 
@@ -252,7 +338,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             edge.set(i, 1, (float) gp.getLongitude());
             i++;
         }
-        ncOut.write(ncOut.findVariable("region_edge"), edge);
+        ncOut.write(varRegion, edge);
     }
 
     private void addDrifters() {
@@ -278,23 +364,41 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void addZones() {
 
         int iZone = 0;
+        IDataset dataset = getSimulationManager().getDataset();
+        boolean isFvcom = dataset instanceof FvcomDataset;
         zoneAreas = new ArrayList<>();
+
+        if (latlonDim == null) {
+            latlonDim = bNcOut.addDimension("latlon", 2);
+        }
+
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
+            if (isFvcom) {
+                getLogger().log(Level.INFO, "Exporting {0} {1} zones to NetCDF map metadata.",
+                    new Object[]{getSimulationManager().getZoneManager().getZones(type).size(), type});
+            }
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
-                    zoneAreas.add(iZone, makeZoneArea(zone));
-                    Dimension zoneDim = bNcOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
-                    Variable.Builder<?> varZone = bNcOut.addVariable("coord_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
-                    varZone.addAttribute(new Attribute("long_name", zone.getKey()));
-                    varZone.addAttribute(new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
-                    varZone.addAttribute(new Attribute("type", zone.getType().toString()));
                     String color = zone.getColor().toString();
                     color = color.substring(color.lastIndexOf("["));
-                    varZone.addAttribute(new Attribute("color", color));
+
+                    if (!isFvcom) {
+                        zoneAreas.add(iZone, makeZoneArea(zone));
+                        Dimension zoneDim = bNcOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
+                        Variable.Builder<?> varZone = bNcOut.addVariable("coord_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
+                        varZone.addAttribute(new Attribute("long_name", zone.getKey()));
+                        varZone.addAttribute(new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
+                        varZone.addAttribute(new Attribute("type", zone.getType().toString()));
+                        varZone.addAttribute(new Attribute("color", color));
+                    }
 
                     Dimension geoDim = bNcOut.addDimension("geozone" + iZone, zone.getLat().size());
-                    bNcOut.addVariable("coord_geo_zone" + iZone, DataType.FLOAT,
+                    Variable.Builder<?> varGeoZone = bNcOut.addVariable("coord_geo_zone" + iZone, DataType.FLOAT,
                             new ArrayList<Dimension>(Arrays.asList(geoDim, latlonDim)));
+                    varGeoZone.addAttribute(new Attribute("long_name", zone.getKey()));
+                    varGeoZone.addAttribute(new Attribute("unit", "lat degree north lon degree east"));
+                    varGeoZone.addAttribute(new Attribute("type", zone.getType().toString()));
+                    varGeoZone.addAttribute(new Attribute("color", color));
 
                     iZone++;
 
@@ -302,34 +406,54 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             }
         }
         bNcOut.addAttribute(new Attribute("nb_zones", iZone));
+        if (isFvcom && iZone == 0) {
+            getLogger().warning("No zones exported to NetCDF (nb_zones=0). Enable a zone-based release/action and provide a zone_file to visualize zones.");
+        }
     }
 
     private void writeZones() throws IOException, InvalidRangeException {
 
-        int iZone = 0;
-        for (List<Point2D> zoneArea : zoneAreas) {
-            ArrayFloat.D2 arrZoneArea = new ArrayFloat.D2(zoneArea.size(), 2);
-            int i = 0;
-            for (Point2D xy : zoneArea) {
-                arrZoneArea.set(i, 0, (float) xy.getX());
-                arrZoneArea.set(i, 1, (float) xy.getY());
-                i++;
+        if (zoneAreas != null && !zoneAreas.isEmpty()) {
+            int iZone = 0;
+            for (List<Point2D> zoneArea : zoneAreas) {
+                ArrayFloat.D2 arrZoneArea = new ArrayFloat.D2(zoneArea.size(), 2);
+                int i = 0;
+                for (Point2D xy : zoneArea) {
+                    arrZoneArea.set(i, 0, (float) xy.getX());
+                    arrZoneArea.set(i, 1, (float) xy.getY());
+                    i++;
+                }
+                Variable varZone = ncOut.findVariable("coord_zone" + iZone);
+                if (varZone != null) {
+                    ncOut.write(varZone, arrZoneArea);
+                }
+                iZone++;
             }
-            ncOut.write(ncOut.findVariable("coord_zone" + iZone), arrZoneArea);
-            iZone++;
         }
 
-        iZone = 0 ;
+        int iZone = 0 ;
+        IDataset dataset = getSimulationManager().getDataset();
+        boolean projectedFvcomDataset = dataset instanceof FvcomDataset;
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
                     int nPoints = zone.getLon().size();
                     ArrayFloat.D2 arrZoneArea = new ArrayFloat.D2(nPoints, 2);
                     for(int k = 0; k < nPoints; k++) {
-                        arrZoneArea.set(k, 0,  ((float) zone.getLat().get(k)));
-                        arrZoneArea.set(k, 1, (float) (zone.getLon().get(k)));
+                        double lat = zone.getLat().get(k);
+                        double lon = zone.getLon().get(k);
+                        if (projectedFvcomDataset && (Math.abs(lon) > 180.d || Math.abs(lat) > 90.d)) {
+                            GeoPosition gp = utmToLatLon(lon, lat, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE);
+                            lat = gp.getLatitude();
+                            lon = gp.getLongitude();
+                        }
+                        arrZoneArea.set(k, 0, (float) lat);
+                        arrZoneArea.set(k, 1, (float) lon);
                     }
-                    ncOut.write(ncOut.findVariable("coord_geo_zone" + iZone), arrZoneArea);
+                    Variable varGeoZone = ncOut.findVariable("coord_geo_zone" + iZone);
+                    if (varGeoZone != null) {
+                        ncOut.write(varGeoZone, arrZoneArea);
+                    }
                     iZone++;
                 }
             }
@@ -649,6 +773,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         // if no fvcom output, write zone in file
         if(!(dataset instanceof FvcomDataset)) {
             addRegion();
+        } else {
+            addFvcomRegion();
         }
 
         // add drifter variables
@@ -802,11 +928,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         // add the zones It cannnot be done in the setup because the definition of the
         // zones requires that dataset has been initialized first.
-        // if FvcomDataset, no writting of Zones in Netcdf
-        IDataset dataset = getSimulationManager().getDataset();
-        if (!(dataset instanceof FvcomDataset)) {
-            addZones();
-        }
+        addZones();
 
         /* reset counter */
         i_record = 0;

@@ -85,6 +85,7 @@ import org.jdesktop.swingx.mapviewer.wms.WMSService;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.dataset.IDataset;
+import org.previmer.ichthyop.dataset.FvcomDataset;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 
@@ -121,6 +122,8 @@ public class WMSMapper extends JXMapKit {
      */
     LocalDateTime dateRef = LocalDateTime.of(1900, 1, 1, 0, 0);
     private static final long serialVersionUID = 7832980650722821920L;
+    private static final int FVCOM_UTM_ZONE = 10;
+    private static final boolean FVCOM_UTM_NORTHERN_HEMISPHERE = true;
     private List<GeoPosition> region;
     private HashMap<String, WMSMapper.DrawableZone> zones;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
@@ -425,7 +428,9 @@ public class WMSMapper extends JXMapKit {
                 Rectangle rect = map.getViewportBounds();
                 g.translate(-rect.x, -rect.y);
 
-                //drawRegion(g, map);
+                if (getSimulationManager().getDataset() instanceof FvcomDataset) {
+                    drawRegion(g, map);
+                }
                 for (WMSMapper.DrawableParticle particle : listParticles) {
                     drawParticle(g, map, particle);
                 }
@@ -469,7 +474,9 @@ public class WMSMapper extends JXMapKit {
                 Rectangle rect = map.getViewportBounds();
                 g.translate(-rect.x, -rect.y);
 
-//                drawRegion(g, map);
+                if (getSimulationManager().getDataset() instanceof FvcomDataset) {
+                    drawRegion(g, map);
+                }
                 drawZones(g, map);
                 if (gridVisible) {
                     drawGrid(g, map);
@@ -497,19 +504,36 @@ public class WMSMapper extends JXMapKit {
 
     private HashMap<String, WMSMapper.DrawableZone> readZones() {
         HashMap<String, WMSMapper.DrawableZone> lzones = new HashMap<>();
+        boolean isFvcom = getSimulationManager().getDataset() instanceof FvcomDataset;
         if (null != nc.findGlobalAttribute("nb_zones")) {
             int nbZones = nc.findGlobalAttribute("nb_zones").getNumericValue().intValue();
+            if (isFvcom && nbZones == 0) {
+                SimulationManager.getLogger().warning("No zones found in output file (nb_zones=0).");
+            }
             for (int iZone = 0; iZone < nbZones; iZone++) {
                 List<Point2D.Float> points = new ArrayList<>();
                 try {
                     Variable varZone = nc.findVariable("coord_zone" + iZone);
-                    ArrayFloat.D2 zoneEdge = (D2) varZone.read();
-                    String type = varZone.findAttribute("type").getStringValue();
-                    String color = varZone.findAttribute("color").getStringValue();
-                    for (int i = 0; i < zoneEdge.getShape()[0]; i++) {
-                        points.add(new Point2D.Float(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
+                    Variable sourceVar = varZone;
+                    if (sourceVar == null && isFvcom) {
+                        sourceVar = nc.findVariable("coord_geo_zone" + iZone);
                     }
-                    WMSMapper.DrawableZone zone = new WMSMapper.DrawableZone(points, color);
+                    if (sourceVar == null) {
+                        continue;
+                    }
+
+                    ArrayFloat.D2 zoneEdge = (D2) sourceVar.read();
+                    String type = sourceVar.findAttribute("type").getStringValue();
+                    String color = sourceVar.findAttribute("color").getStringValue();
+                    boolean geoPolygon = isFvcom && varZone == null;
+                    for (int i = 0; i < zoneEdge.getShape()[0]; i++) {
+                        if (geoPolygon) {
+                            points.add(new Point2D.Float(zoneEdge.get(i, 1), zoneEdge.get(i, 0)));
+                        } else {
+                            points.add(new Point2D.Float(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
+                        }
+                    }
+                    WMSMapper.DrawableZone zone = new WMSMapper.DrawableZone(points, color, geoPolygon);
                     lzones.put(type + "_zone" + iZone, zone);
 
                 } catch (IOException ex) {
@@ -517,6 +541,8 @@ public class WMSMapper extends JXMapKit {
                             .getName()).log(Level.SEVERE, null, ex);
                 }
             }
+        } else if (isFvcom) {
+            SimulationManager.getLogger().warning("No zone metadata found in output file (missing nb_zones attribute).");
         }
         return lzones;
     }
@@ -526,6 +552,19 @@ public class WMSMapper extends JXMapKit {
         Color color = zone.getColor();
         Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 30);
         Color edgeColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 70);
+
+        if (zone.isGeoPolygon()) {
+            Polygon polygon = new Polygon();
+            for (Point2D pt : zone.getPoints()) {
+                addGeoPoint(map, polygon, new GeoPosition(pt.getY(), pt.getX()));
+            }
+            g.setColor(fillColor);
+            g.fill(polygon);
+            g.setColor(edgeColor);
+            g.draw(polygon);
+            return;
+        }
+
         for (Point2D pt : zone.getPoints()) {
             Polygon polygon = new Polygon();
             addCellPoint(map, polygon, pt.getX() - 0.5, pt.getY() - 0.5);
@@ -667,7 +706,6 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
-    /*
     private void drawRegion(Graphics2D g, JXMapViewer map) {
         Polygon poly = new Polygon();
         for (GeoPosition gp : getRegion()) {
@@ -682,7 +720,6 @@ public class WMSMapper extends JXMapKit {
         g.setColor(Color.WHITE);
         g.draw(poly);
     }
-    */
 
     private void drawParticle(Graphics2D g, JXMapViewer map, WMSMapper.DrawableParticle particle) {
 
@@ -953,19 +990,21 @@ public class WMSMapper extends JXMapKit {
             }
             int length = arrLon.getShape()[0];
             for (int i = 0; i < length; i++) {
-                float lon = arrLon.get(i);
+                double[] geo = normalizeToGeo(arrLon.get(i), arrLat.get(i));
+                float lon = (float) geo[0];
+                float lat = (float) geo[1];
                 if (arrMortality.get(i) == 0) {
                     if (null != arrColorVariable) {
                         if (arrColorVariable.getSize() < 2) {
-                            list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
+                            list.add(new WMSMapper.DrawableParticle(lon, lat, arrColorVariable.getFloat(0)));
                         } else {
-                            list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
+                            list.add(new WMSMapper.DrawableParticle(lon, lat, arrColorVariable.getFloat(i)));
                         }
                     } else {
-                        list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), Float.NaN));
+                        list.add(new WMSMapper.DrawableParticle(lon, lat, Float.NaN));
                     }
                 } else {
-                    list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i)));
+                    list.add(new WMSMapper.DrawableParticle(lon, lat));
 
                 }
             }
@@ -977,6 +1016,66 @@ public class WMSMapper extends JXMapKit {
                     .getName()).log(Level.SEVERE, null, ex);
         }
         return list;
+    }
+
+    private double[] normalizeToGeo(float lonValue, float latValue) {
+        IDataset dataset = getSimulationManager().getDataset();
+        if (dataset instanceof FvcomDataset) {
+            if (Math.abs(lonValue) > 180.f || Math.abs(latValue) > 90.f) {
+                GeoPosition gp = utmToLatLon(lonValue, latValue, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE);
+                return new double[]{gp.getLongitude(), gp.getLatitude()};
+            }
+        }
+        return new double[]{lonValue, latValue};
+    }
+
+    private GeoPosition utmToLatLon(double easting, double northing, int zone, boolean northernHemisphere) {
+
+        final double a = 6378137.0;
+        final double eccSquared = 0.00669438;
+        final double k0 = 0.9996;
+
+        double x = easting - 500000.0;
+        double y = northing;
+        if (!northernHemisphere) {
+            y -= 10000000.0;
+        }
+
+        double lonOrigin = (zone - 1) * 6 - 180 + 3;
+        double eccPrimeSquared = eccSquared / (1 - eccSquared);
+
+        double m = y / k0;
+        double mu = m / (a * (1 - eccSquared / 4 - 3 * eccSquared * eccSquared / 64
+                - 5 * eccSquared * eccSquared * eccSquared / 256));
+
+        double e1 = (1 - Math.sqrt(1 - eccSquared)) / (1 + Math.sqrt(1 - eccSquared));
+        double phi1Rad = mu
+                + (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32) * Math.sin(2 * mu)
+                + (21 * e1 * e1 / 16 - 55 * Math.pow(e1, 4) / 32) * Math.sin(4 * mu)
+                + (151 * Math.pow(e1, 3) / 96) * Math.sin(6 * mu)
+                + (1097 * Math.pow(e1, 4) / 512) * Math.sin(8 * mu);
+
+        double n1 = a / Math.sqrt(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad));
+        double t1 = Math.tan(phi1Rad) * Math.tan(phi1Rad);
+        double c1 = eccPrimeSquared * Math.cos(phi1Rad) * Math.cos(phi1Rad);
+        double r1 = a * (1 - eccSquared)
+                / Math.pow(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad), 1.5);
+        double d = x / (n1 * k0);
+
+        double latRad = phi1Rad - (n1 * Math.tan(phi1Rad) / r1)
+                * (d * d / 2
+                - (5 + 3 * t1 + 10 * c1 - 4 * c1 * c1 - 9 * eccPrimeSquared) * Math.pow(d, 4) / 24
+                + (61 + 90 * t1 + 298 * c1 + 45 * t1 * t1 - 252 * eccPrimeSquared - 3 * c1 * c1)
+                * Math.pow(d, 6) / 720);
+
+        double lonRad = (d
+                - (1 + 2 * t1 + c1) * Math.pow(d, 3) / 6
+                + (5 - 2 * c1 + 28 * t1 - 3 * c1 * c1 + 8 * eccPrimeSquared + 24 * t1 * t1)
+                * Math.pow(d, 5) / 120) / Math.cos(phi1Rad);
+
+        double lat = Math.toDegrees(latRad);
+        double lon = lonOrigin + Math.toDegrees(lonRad);
+        return new GeoPosition(lat, lon);
     }
 
     public void createKML() {
@@ -1309,10 +1408,12 @@ public class WMSMapper extends JXMapKit {
 
         private List<Point2D.Float> points;
         private Color color;
+        private boolean geoPolygon;
 
-        DrawableZone(List<Point2D.Float> points, String color) {
+        DrawableZone(List<Point2D.Float> points, String color, boolean geoPolygon) {
             this.points = points;
             this.color = getColor(color);
+            this.geoPolygon = geoPolygon;
         }
 
         public Color getColor() {
@@ -1321,6 +1422,10 @@ public class WMSMapper extends JXMapKit {
 
         public List<Point2D.Float> getPoints() {
             return points;
+        }
+
+        public boolean isGeoPolygon() {
+            return geoPolygon;
         }
 
         private Color getColor(String strColor) {
