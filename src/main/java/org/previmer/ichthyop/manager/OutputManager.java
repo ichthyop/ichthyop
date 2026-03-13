@@ -100,8 +100,6 @@ import ucar.nc2.Dimension;
 public class OutputManager extends AbstractManager implements LastStepListener, NextStepListener {
 
     final private static OutputManager outputManager = new OutputManager();
-    private static final int FVCOM_UTM_ZONE = 10;
-    private static final boolean FVCOM_UTM_NORTHERN_HEMISPHERE = true;
     private final static String block_key = "app.output";
     private int dt_record;
     private NCDimFactory dimensionFactory;
@@ -257,11 +255,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return;
         }
 
-        region.add(utmToLatLon(lonMin, latMin, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
-        region.add(utmToLatLon(lonMax, latMin, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
-        region.add(utmToLatLon(lonMax, latMax, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
-        region.add(utmToLatLon(lonMin, latMax, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
-        region.add(utmToLatLon(lonMin, latMin, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMin, latMin, FvcomDataset.UTM_ZONE, FvcomDataset.UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMax, latMin, FvcomDataset.UTM_ZONE, FvcomDataset.UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMax, latMax, FvcomDataset.UTM_ZONE, FvcomDataset.UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMin, latMax, FvcomDataset.UTM_ZONE, FvcomDataset.UTM_NORTHERN_HEMISPHERE));
+        region.add(utmToLatLon(lonMin, latMin, FvcomDataset.UTM_ZONE, FvcomDataset.UTM_NORTHERN_HEMISPHERE));
 
         Dimension edge = bNcOut.addDimension("edge", region.size());
         latlonDim = bNcOut.addDimension("latlon", 2);
@@ -443,7 +441,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                         double lat = zone.getLat().get(k);
                         double lon = zone.getLon().get(k);
                         if (projectedFvcomDataset && (Math.abs(lon) > 180.d || Math.abs(lat) > 90.d)) {
-                            GeoPosition gp = utmToLatLon(lon, lat, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE);
+                            GeoPosition gp = utmToLatLon(lon, lat, FvcomDataset.UTM_ZONE, FvcomDataset.UTM_NORTHERN_HEMISPHERE);
                             lat = gp.getLatitude();
                             lon = gp.getLongitude();
                         }
@@ -467,6 +465,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 ? "3d"
                 : "2d";
         bNcOut.addAttribute(new Attribute("transport_dimension", dim));
+
+        if (getSimulationManager().getDataset() instanceof FvcomDataset) {
+            bNcOut.addAttribute(new Attribute("map_projection", FvcomDataset.MAP_PROJECTION_EPSG));
+            bNcOut.addAttribute(new Attribute("map_projection_name", FvcomDataset.MAP_PROJECTION_NAME));
+        }
 
         /* Write all parameters */
         for (BlockType type : BlockType.values()) {

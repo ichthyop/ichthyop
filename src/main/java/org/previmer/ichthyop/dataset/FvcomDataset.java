@@ -64,6 +64,13 @@ import ucar.nc2.NetcdfFile;
  */
 public class FvcomDataset extends AbstractDataset {
 
+    public static final int UTM_ZONE = 10;
+    public static final boolean UTM_NORTHERN_HEMISPHERE = true;
+    public static final String MAP_PROJECTION_EPSG = UTM_NORTHERN_HEMISPHERE
+            ? "EPSG:" + (32600 + UTM_ZONE)
+            : "EPSG:" + (32700 + UTM_ZONE);
+    public static final String MAP_PROJECTION_NAME = "UTM Zone " + UTM_ZONE + (UTM_NORTHERN_HEMISPHERE ? "N" : "S");
+
     private int time_arrow;
     private double dt_HyMo;
 

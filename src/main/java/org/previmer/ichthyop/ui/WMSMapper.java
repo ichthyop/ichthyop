@@ -122,8 +122,6 @@ public class WMSMapper extends JXMapKit {
      */
     LocalDateTime dateRef = LocalDateTime.of(1900, 1, 1, 0, 0);
     private static final long serialVersionUID = 7832980650722821920L;
-    private static final int FVCOM_UTM_ZONE = 10;
-    private static final boolean FVCOM_UTM_NORTHERN_HEMISPHERE = true;
     private List<GeoPosition> region;
     private HashMap<String, WMSMapper.DrawableZone> zones;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
@@ -428,7 +426,7 @@ public class WMSMapper extends JXMapKit {
                 Rectangle rect = map.getViewportBounds();
                 g.translate(-rect.x, -rect.y);
 
-                if (getSimulationManager().getDataset() instanceof FvcomDataset) {
+                if (isProjectedMapFile()) {
                     drawRegion(g, map);
                 }
                 for (WMSMapper.DrawableParticle particle : listParticles) {
@@ -474,7 +472,7 @@ public class WMSMapper extends JXMapKit {
                 Rectangle rect = map.getViewportBounds();
                 g.translate(-rect.x, -rect.y);
 
-                if (getSimulationManager().getDataset() instanceof FvcomDataset) {
+                if (isProjectedMapFile()) {
                     drawRegion(g, map);
                 }
                 drawZones(g, map);
@@ -504,7 +502,7 @@ public class WMSMapper extends JXMapKit {
 
     private HashMap<String, WMSMapper.DrawableZone> readZones() {
         HashMap<String, WMSMapper.DrawableZone> lzones = new HashMap<>();
-        boolean isFvcom = getSimulationManager().getDataset() instanceof FvcomDataset;
+        boolean isFvcom = isProjectedMapFile();
         if (null != nc.findGlobalAttribute("nb_zones")) {
             int nbZones = nc.findGlobalAttribute("nb_zones").getNumericValue().intValue();
             if (isFvcom && nbZones == 0) {
@@ -1019,14 +1017,25 @@ public class WMSMapper extends JXMapKit {
     }
 
     private double[] normalizeToGeo(float lonValue, float latValue) {
-        IDataset dataset = getSimulationManager().getDataset();
-        if (dataset instanceof FvcomDataset) {
+        if (isProjectedMapFile()) {
             if (Math.abs(lonValue) > 180.f || Math.abs(latValue) > 90.f) {
-                GeoPosition gp = utmToLatLon(lonValue, latValue, FVCOM_UTM_ZONE, FVCOM_UTM_NORTHERN_HEMISPHERE);
+                GeoPosition gp = utmToLatLon(lonValue, latValue, FvcomDataset.UTM_ZONE, FvcomDataset.UTM_NORTHERN_HEMISPHERE);
                 return new double[]{gp.getLongitude(), gp.getLatitude()};
             }
         }
         return new double[]{lonValue, latValue};
+    }
+
+    private boolean isProjectedMapFile() {
+        if (nc == null) {
+            return false;
+        }
+        Attribute projectionAttr = nc.findGlobalAttributeIgnoreCase("map_projection");
+        if (projectionAttr == null || projectionAttr.getStringValue() == null) {
+            return false;
+        }
+        String value = projectionAttr.getStringValue().trim().toUpperCase();
+        return value.contains(FvcomDataset.MAP_PROJECTION_EPSG.toUpperCase()) || value.contains("UTM");
     }
 
     private GeoPosition utmToLatLon(double easting, double northing, int zone, boolean northernHemisphere) {
