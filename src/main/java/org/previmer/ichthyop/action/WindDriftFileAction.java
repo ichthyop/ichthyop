@@ -136,6 +136,9 @@ public class WindDriftFileAction extends WindDriftAction {
      */
     RequiredExternalVariable V_variable;
 
+    /** Patch for Audrey */
+    boolean shiftLat = false;
+
     @Override
     public void loadParameters() throws Exception {
         strTime = getParameter("field_time");
@@ -166,17 +169,24 @@ public class WindDriftFileAction extends WindDriftAction {
         try {
             Variable variable = ncIn.findVariable(name);
             int[] origin = null, shape = null;
+            int shift_dim = -999;
             switch (variable.getShape().length) {
                 case 4:
                     origin = new int[]{rank, 0, 0, 0};
                     shape = new int[]{1, 1, ny, nx};
+                    shift_dim = 2;
                     break;
                 case 3:
                     origin = new int[]{rank, 0, 0};
                     shape = new int[]{1, ny, nx};
+                    shift_dim = 1;
                     break;
             }
-            return variable.read(origin, shape).reduce();
+            if(shiftLat) {
+                return variable.read(origin, shape).flip(shift_dim).reduce();
+            } else {
+                return variable.read(origin, shape).reduce();
+            }
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading UW wind velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -334,10 +344,28 @@ public class WindDriftFileAction extends WindDriftAction {
             throw ioex;
         }
 
+        // patch for shifting wind fields
+        Index indexLat = arrLat.getIndex();
+        indexLat.set(0);
+        double lat_min_meteo = arrLat.getDouble(indexLat);
+        indexLat.set(ny - 1);
+        double lat_max_meteo = arrLat.getDouble(indexLat);
+
+        if(lat_max_meteo < lat_min_meteo) {
+            shiftLat = true;
+            arrLat = ncIn.findVariable(strLat).read().flip(0);
+        }
+
+        indexLat = arrLat.getIndex();
+        indexLat.set(0);
+        lat_min_meteo = arrLat.getDouble(indexLat);
+        indexLat.set(ny - 1);
+        lat_max_meteo = arrLat.getDouble(indexLat);
+
+        Index indexLon = arrLon.getIndex();
+
         lonRho = new double[ny][nx];
         latRho = new double[ny][nx];
-        Index indexLon = arrLon.getIndex();
-        Index indexLat = arrLat.getIndex();
         for (int j = 0; j < ny; j++) {
             indexLat.set(j);
             for (int i = 0; i < nx; i++) {
