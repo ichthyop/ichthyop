@@ -59,7 +59,7 @@ jobs:
             cache-name: cache-output-files
         with:
             path: doc/ichthyop_output/
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('input/*.nc') }}
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('doc/ichthyop_output/*.nc') }}
             restore-keys: |
                 ${{ runner.os }}-build-${{ env.cache-name }}-
                 ${{ runner.os }}-build-
