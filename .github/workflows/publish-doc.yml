@@ -37,14 +37,12 @@ jobs:
 
       - name: Compile Java code
         run:  |
-            mvn clean
+            mvn build-helper:remove-project-artifact
             mvn -B package -DskipTests=true
 
       - name: Render Quarto Project
-        uses: quarto-dev/quarto-actions/render@v2
-        with:
-            to: html # If set, it will be equivalent to `quarto render --to html`
-            path: doc # By default, the current working dir is used i.e `quarto render .`
+        run: |
+            cd doc && quarto render --to html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
