@@ -17,8 +17,6 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-
-
       - name: Setup Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         env:
@@ -29,7 +27,7 @@ jobs:
       - name: Install Apt Packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y maven netcdf-bin libnetcdf-dev openjdk-17-jdk python3 pip
+          sudo apt-get install -y maven netcdf-bin libnetcdf-dev openjdk-17-jdk python3 pip wget
 
       - name: Install Python Packages
         run: |
@@ -39,6 +37,23 @@ jobs:
         run:  |
             mvn build-helper:remove-project-artifact
             mvn -B package -DskipTests=true
+
+      - name: Cache Input Files
+        id: cache-input
+        uses: actions/cache@v3
+        env:
+            cache-name: cache-input-files
+        with:
+            path: input
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('input/*.nc') }}
+            restore-keys: |
+                ${{ runner.os }}-build-${{ env.cache-name }}-
+                ${{ runner.os }}-build-
+                ${{ runner.os }}-
+
+      - name: Download input files
+        if: steps.cache-input.outputs.cache-hit != 'true'
+        run: wget https://zenodo.org/records/10890690/files/input.zip && unzip input.zip
 
       - name: Render Quarto Project
         run: |
