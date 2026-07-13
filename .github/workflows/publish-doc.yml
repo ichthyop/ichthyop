@@ -26,10 +26,14 @@ jobs:
         with:
             tinytex: true
 
-      - name: Install packages
+      - name: Install Apt Packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y maven netcdf-bin libnetcdf-dev openjdk-17-jdk
+          sudo apt-get install -y maven netcdf-bin libnetcdf-dev openjdk-17-jdk python3 pip
+
+      - name: Install Python Packages
+        run: |
+            pip install xarray cartopy jupyter scipy matplotlib pandas netcdf4 numpy
 
       - name: Compile Java code
         run:  |
