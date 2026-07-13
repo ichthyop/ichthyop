@@ -1,4 +1,4 @@
-## Rafting
+### Rafting
 
 The rafting process allows a particle to move at the surface, given a certain age, in order to take benefic from the ocean currents.
 
