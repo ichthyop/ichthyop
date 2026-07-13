@@ -1,0 +1,5 @@
+## Rafting
+
+The rafting process allows a particle to move at the surface, given a certain age, in order to take benefic from the ocean currents.
+
+In Ichthyop implementation, when a particle reaches a certain age or size, then the particle is moved at the surface and will remain there.
