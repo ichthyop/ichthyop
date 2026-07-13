@@ -29,16 +29,11 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y maven netcdf-bin libnetcdf-dev
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: oracle
+          sudo apt-get install -y maven netcdf-bin libnetcdf-dev openjdk-17-jdk
 
       - name: Compile Java code
         run:  |
-            mvn build-helper:remove-project-artifact
+            mvn clean
             mvn -B package -DskipTests=false
 
       - name: Render Quarto Project
