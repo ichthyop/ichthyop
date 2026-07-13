@@ -38,7 +38,7 @@ jobs:
                 ${{ runner.os }}-
 
       - name: Update apt
-        run: sudo apt install
+        run: sudo apt update -y
 
       - name: Install C dependencies
         run: sudo apt install -yq libnetcdf-dev
