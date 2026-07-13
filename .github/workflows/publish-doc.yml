@@ -33,7 +33,7 @@ jobs:
 
       - name: Install Python Packages
         run: |
-            pip install xarray cartopy jupyter scipy matplotlib pandas netcdf4 numpy
+            pip install xarray cartopy jupyter scipy matplotlib pandas netcdf4 numpy jupyter-cache
 
       - name: Compile Java code
         run:  |
