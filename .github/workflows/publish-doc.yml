@@ -1,0 +1,55 @@
+# This is a basic workflow to help you get started with Actions
+name: publish-doc
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on: [push]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven netcdf-bin libnetcdf-dev quarto
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: oracle
+
+      - name: Compile Java code
+        run:  |
+            mvn build-helper:remove-project-artifact
+            mvn -B package -DskipTests=false
+
+      - name: Build documentation
+        run:  |
+            cd doc && quarto render --to html
+            cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+            path: doc/_book
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
