@@ -52,6 +52,19 @@ jobs:
                 ${{ runner.os }}-build-
                 ${{ runner.os }}-
 
+      - name: Cache Output Files
+        id: cache-output
+        uses: actions/cache@v3
+        env:
+            cache-name: cache-output-files
+        with:
+            path: doc/ichthyop_output/
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('input/*.nc') }}
+            restore-keys: |
+                ${{ runner.os }}-build-${{ env.cache-name }}-
+                ${{ runner.os }}-build-
+                ${{ runner.os }}-
+
       - name: Update apt
         run:  sudo apt update -yq
 

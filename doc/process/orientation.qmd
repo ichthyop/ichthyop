@@ -8,8 +8,8 @@ These three implementations involve the computation of a swimming velocity and d
 three methods, but the directions depend on the method considered.
 
 ```{python}
-#| echo: true
-#| output: true
+#| echo: false
+#| output: false
 
 import os
 from glob import glob
