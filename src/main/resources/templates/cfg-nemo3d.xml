@@ -246,8 +246,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>byte_mask_pattern</key>
                 <long_name>Mask file pattern</long_name>
-                <value>*mask*.nc</value>
-                <default>*mask*.nc</default>
+                <value>nemo*mask*.nc</value>
+                <default>nemo*mask*.nc</default>
                 <description>Filename filter for identifying the "mask" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the dimensions x, y, z and the variable land/ocean mask at T points</description>
             </parameter>
             <parameter>
