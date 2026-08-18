@@ -28,8 +28,11 @@ Since Ichthyop 3.5, it is strongly recommended to use the generic configuration 
 
 To create a configuration file from the generic configuration, use the graphical interface as described in @sec-console-new-conf. Choose the generic template. Depending on the test case study, you will need to update the `Beginning of simulation` and `Transport duration` parameters, and the following @tbl-dataset-times
 
-| Dataset  | Beginning                            | Lon | Lat |
-|----------|--------------------------------------|-----|-----|
-| OPA NEMO | `year 2001 month 10 day 20 at 00:00` | 53  |     |
+| Dataset     | Beginning                            | Lon   | Lat    |
+|-------------|--------------------------------------|-------|--------|
+| OPA NEMO    | `year 2001 month 10 day 20 at 00:00` | 53    | -11.5  |
+| ROMS 2D/3D  | `year 1900 month 05 day 02 at 12:00` | 17    | -33    |
+| MARS 2D/3D  | `year 2010 month 05 day 13 at 12:00` | -5.5  | 48.4   |
+| MERCATOR 3D | `year 2026 month 04 day 01 at 10:00` | 35.66 | -21.75 |
 
 : `Beginning of simulation` and `Transport duration` parameters to define for each test case study {#tbl-dataset-times}

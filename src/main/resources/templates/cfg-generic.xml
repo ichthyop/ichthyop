@@ -289,7 +289,7 @@
             <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
-                <value>./</value>
+                <value>input/</value>
                 <format>path</format>
                 <default>lon</default>
                 <description></description>
@@ -298,8 +298,8 @@
             <parameter>
                 <key>hgr_pattern</key>
                 <long_name>HGR file</long_name>
-                <value>MED-MFC_006_004_coordinates.nc</value>
-                <default>MED-MFC_006_004_coordinates</default>
+                <value>mercator_scalefactors.nc</value>
+                <default>mercator_scalefactors.nc</default>
                 <description>Folder containing the MARS NetCDF files. Relative pathnames
                     are
                     supported. For instance, 'input' or 'input/' or './input' or
@@ -312,8 +312,8 @@
             <parameter>
                 <key>zgr_pattern</key>
                 <long_name>ZGR file</long_name>
-                <value>MED-MFC_006_004_coordinates.nc</value>
-                <default>MED-MFC_006_004_coordinates</default>
+                <value>mercator_scalefactors.nc</value>
+                <default>mercator_scalefactors.nc</default>
                 <description>Folder containing the MARS NetCDF files. Relative pathnames
                     are
                     supported. For instance, 'input' or 'input/' or './input' or
@@ -326,8 +326,8 @@
             <parameter>
                 <key>byte_mask_pattern</key>
                 <long_name>Mask file</long_name>
-                <value>MED-MFC_006_004_mask_bathy.nc</value>
-                <default>MED-MFC_006_004_mask_bathy.nc</default>
+                <value>mercator_mask.nc</value>
+                <default>mercator_mask.nc</default>
                 <description>Folder containing the MARS NetCDF files. Relative pathnames
                     are
                     supported. For instance, 'input' or 'input/' or './input' or
@@ -340,8 +340,8 @@
             <parameter>
                 <key>gridu_pattern</key>
                 <long_name>U files</long_name>
-                <value>*_m-CMCC--RFVL-MFSe3r1-MED-*nc</value>
-                <default>MED-MFC_006_004_mask_bathy.nc</default>
+                <value>mercator_forcings.nc</value>
+                <default>mercator_forcings.nc</default>
                 <description>Folder containing the MARS NetCDF files. Relative pathnames
                     are
                     supported. For instance, 'input' or 'input/' or './input' or
@@ -354,8 +354,8 @@
             <parameter>
                 <key>gridv_pattern</key>
                 <long_name>V files</long_name>
-                <value>*_m-CMCC--RFVL-MFSe3r1-MED-*nc</value>
-                <default>MED-MFC_006_004_mask_bathy.nc</default>
+                <value>mercator_forcings.nc</value>
+                <default>mercator_forcings.nc</default>
                 <description>Folder containing the MARS NetCDF files. Relative pathnames
                     are
                     supported. For instance, 'input' or 'input/' or './input' or
@@ -368,8 +368,8 @@
             <parameter>
                 <key>gridt_pattern</key>
                 <long_name>T files</long_name>
-                <value>*_m-CMCC--RFVL-MFSe3r1-MED-*nc</value>
-                <default>MED-MFC_006_004_mask_bathy.nc</default>
+                <value>mercator_forcings.nc</value>
+                <default>mercator_forcings.nc</default>
                 <description>Folder containing the MARS NetCDF files. Relative pathnames
                     are
                     supported. For instance, 'input' or 'input/' or './input' or
