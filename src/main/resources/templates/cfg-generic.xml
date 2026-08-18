@@ -293,7 +293,7 @@
 
     <block type="dataset">
         <key>dataset.mercator3d</key>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <tree_path>Dataset/MERCATOR3D</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined
             block for
@@ -512,7 +512,7 @@
 
     <block type="dataset">
         <key>dataset.mars_2d_opendap</key>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <tree_path>Dataset/MARS 2D OpenDAP</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined
             block for
