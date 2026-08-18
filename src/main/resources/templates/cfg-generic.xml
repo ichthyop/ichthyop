@@ -136,21 +136,6 @@
 
         <parameters>
 
-            <parameter>
-                <key>keep_drifting</key>
-                <long_name>Particle keep drifting</long_name>
-                <value>true</value>
-                <default>true</default>
-                <format>boolean</format>
-                <description>Determine whether a particle should be deactivated or on
-                    the contrary
-                    should keep drifting once its age exceeds transport duration. This
-                    parameter
-                    only operates with several release events (see section release
-                    schedule) when
-                    the simulation duration is upper than the transport duration.</description>
-            </parameter>
-
             <parameter type="serial">
                 <key>initial_time</key>
                 <long_name>Beginning of simulation</long_name>
@@ -5933,7 +5918,7 @@
     <block type="action">
         <key>action.orientation.reef</key>
         <tree_path>Transport/Movements/Orientation/Reef</tree_path>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <description>Block of options for defining reef orientation process.</description>
 
         <parameters>
@@ -6105,7 +6090,7 @@
     <block type="action">
         <key>action.orientation.cardinal</key>
         <tree_path>Transport/Movements/Orientation/Cardinal</tree_path>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <description>Block of options for defining some recruitment criterions and
             recruitment
             zones, in order to study, for instance, the recruitment success of a
@@ -6256,7 +6241,7 @@
     <block type="action">
         <key>action.orientation.rheotaxis</key>
         <tree_path>Transport/Movements/Orientation/Rheotaxis</tree_path>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <description>Block of options for defining Rheotaxis orientation process</description>
 
         <parameters>
@@ -6411,7 +6396,7 @@
     <block type="action">
         <key>action.waveDriftFile</key>
         <tree_path>Transport/WaveDrift</tree_path>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <description>Description of the wave drift action file.</description>
 
         <parameters>
@@ -6453,7 +6438,7 @@
 
             <parameter>
                 <long_name>Wave input directory</long_name>
-                <key>input_file</key>
+                <key>input_path</key>
                 <format>path</format>
                 <description>Name of the V component of the stokes drift variable in the
                     wave file</description>
