@@ -1890,6 +1890,7 @@
 
     <block type="dataset">
         <key>dataset.roms_3d_opendap</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/ROMS 3D OpenDAP</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined
             block for
@@ -2120,6 +2121,7 @@
     </block>
 
     <block type="dataset">
+        <enabled>true</enabled>
         <key>dataset.nemo</key>
         <tree_path>Dataset/OPA NEMO</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined
@@ -2508,6 +2510,7 @@
 
     <block type="dataset">
         <key>dataset.mercator2d</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/MERCATOR2D</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined
             block for
@@ -2619,6 +2622,7 @@
     </block>
 
     <block type="dataset">
+        <enabled>false</enabled>
         <key>dataset.noveltis</key>
         <tree_path>Dataset/Noveltis</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined
@@ -2840,6 +2844,7 @@
 
     <block type="dataset">
         <key>dataset.oscar</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/OSCAR</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined
             block for
@@ -2985,6 +2990,7 @@
 
     <block type="dataset">
         <key>dataset.symphonie</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/Symphonie</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined
             block for
