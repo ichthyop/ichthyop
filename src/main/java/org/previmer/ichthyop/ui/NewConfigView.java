@@ -199,11 +199,15 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     }
 
     private void createTemplateTree() {
+        DefaultMutableTreeNode  treeNode1, treeNode2, treeNode3;
+        treeNode1 = new DefaultMutableTreeNode("Config templates");
 
-        DefaultMutableTreeNode treeNode1 = new DefaultMutableTreeNode("Config templates");
+        // Add generic configuration on top of the configuration list
+        treeNode2 = new DefaultMutableTreeNode(TEMPLATE.GENERIC);
+        treeNode1.add(treeNode2);
 
-        DefaultMutableTreeNode treeNode2 = new DefaultMutableTreeNode("MARS");
-        DefaultMutableTreeNode treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MANGA_2D_OPENDAP);
+        treeNode2 = new DefaultMutableTreeNode("MARS");
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MANGA_2D_OPENDAP);
         treeNode2.add(treeNode3);
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MANGA_3D_OPENDAP);
         treeNode2.add(treeNode3);
@@ -235,8 +239,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         treeNode1.add(treeNode2);
 
         treeNode2 = new DefaultMutableTreeNode("Miscellaneous");
-        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.GENERIC);
-        treeNode2.add(treeNode3);
+        // treeNode3 = new DefaultMutableTreeNode(TEMPLATE.GENERIC);
+        // treeNode2.add(treeNode3);
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.OSCAR);
         treeNode2.add(treeNode3);
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MERCATOR2D);
