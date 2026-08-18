@@ -2,9 +2,7 @@
 
 ### Clicking on file (Windows)
 
-Open the Ichthyop folder and double click on the
-`ichthyop-X.Y.Z-jar-with-dependencies.jar` file, where `X.Y.Z` is the Ichthyop version. The
-Ichthyop console should open up
+Open the Ichthyop folder and double click on the `ichthyop-X.Y.Z-jar-with-dependencies.jar` file, where `X.Y.Z` is the Ichthyop version. The Ichthyop console should open up
 
 ### From command line (Unix/Mac Os X)
 
@@ -12,15 +10,26 @@ Open a command line prompt (Terminal or CMD prompt) and navigate to the Ichthyop
 
 Then, type:
 
-```bash
+``` bash
 java -jar ichthyop-X.Y.Z-jar-with-dependencies.jar
 ```
 
 with `X.Y.Z` the Ichthyop version.
 
-This will prompt the Java console. In order to run Ichthyop without the console, you need to specify a supplementary argument, which
-is the XML configuration file (see @sec-ich-conf)
+This will prompt the Java console. In order to run Ichthyop without the console, you need to specify a supplementary argument, which is the XML configuration file (see @sec-ich-conf)
 
-```bash
+``` bash
 java -jar ichthyop-X.Y.Z-jar-with-dependencies.jar cfg-roms3d.xml
 ```
+
+### Starting from a generic configuration
+
+Since Ichthyop 3.5, it is strongly recommended to use the generic configuration as a template. It proposes all the possible parameters and datasets. In the future, only this template will be maintained.
+
+To create a configuration file from the generic configuration, use the graphical interface as described in @sec-console-new-conf. Choose the generic template. Depending on the test case study, you will need to update the `Beginning of simulation` and `Transport duration` parameters, and the following @tbl-dataset-times
+
+| Dataset  | Beginning                            | Lon | Lat |
+|----------|--------------------------------------|-----|-----|
+| OPA NEMO | `year 2001 month 10 day 20 at 00:00` | 53  |     |
+
+: `Beginning of simulation` and `Transport duration` parameters to define for each test case study {#tbl-dataset-times}

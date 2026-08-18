@@ -1371,8 +1371,8 @@
             <parameter>
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
-                <value>*.nc</value>
-                <default>*.nc</default>
+                <value>roms-benguela.nc</value>
+                <default>roms-benguela.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String)
                     and ? (for
                     any single character). Let's say the input files you want to use for
@@ -1613,8 +1613,8 @@
             <parameter>
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
-                <value>*.nc</value>
-                <default>*.nc</default>
+                <value>roms-benguela.nc</value>
+                <default>roms-benguela.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String)
                     and ? (for
                     any single character). Let's say the input files you want to use for

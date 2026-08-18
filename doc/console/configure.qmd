@@ -5,7 +5,7 @@ Firstly you will find the usual "File menu" functions : create a new configurati
 ![Step 1, configure](console/_static/step1-configure.png)
 
 
-### New configuration file
+### New configuration file {#sec-console-new-conf}
 
 ![Step 1, create a new configuration file](console/_static/new.png)
 
