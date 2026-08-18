@@ -2226,8 +2226,8 @@
             <parameter>
                 <key>byte_mask_pattern</key>
                 <long_name>Mask file pattern</long_name>
-                <value>*mask*.nc</value>
-                <default>*mask*.nc</default>
+                <value>nemo*mask*.nc</value>
+                <default>nemo*mask*.nc</default>
                 <description>Filename filter for identifying the "mask" NetCDF output
                     file. Accepted
                     metacharacters * (for any String) and ? (for any single character).
