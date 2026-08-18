@@ -34,5 +34,6 @@ To create a configuration file from the generic configuration, use the graphical
 | ROMS 2D/3D  | `year 1900 month 05 day 02 at 12:00` | 17    | -33    |
 | MARS 2D/3D  | `year 2010 month 05 day 13 at 12:00` | -5.5  | 48.4   |
 | MERCATOR 3D | `year 2026 month 04 day 01 at 10:00` | 35.66 | -21.75 |
+| SYMPHONIE   | `year 1998 month 03 day 11 at 01:00` | -1    | 37     |
 
 : `Beginning of simulation` and `Transport duration` parameters to define for each test case study {#tbl-dataset-times}
