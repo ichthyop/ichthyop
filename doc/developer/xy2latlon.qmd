@@ -14,8 +14,9 @@ Conversion from grid to geographical coordinates is done by using the `xy2latlon
 This function is a bilinear interpolation of the grid coordinates, as shown in @fig-xy2latlon
 
 ```{python}
-#| echo: true
-#| output: true
+#| echo: false
+#| output: false
+#|label: fig-xy2latlon
 import matplotlib.pyplot as plt
 import numpy as np
 
