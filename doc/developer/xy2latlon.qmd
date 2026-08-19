@@ -72,3 +72,101 @@ dxdy \lambda_(i+1, j+1)
 $$
 
 Note that by construction, the sum of the weight equals to 1, so no need to divide by the total weight.
+
+### Geographical to grid coordinates
+
+The switch from geographical to grid coordinates is a bit more tricky, considering that the grid may be irregular. Let's consider the example in @fig-latlon2xy
+
+The first step is to determine the coordinates of the cell in wich the particle is located. In the code, this is done by a dichotomic search. We first look in which quarter of the domain the particle is located. This quarter is then decomposed into 4 quarters, and we determine in which subquarter the particle is locate. At the end, the cell in which the particle is located is selected  (@fig-latlon2xy).
+
+
+```{python}
+#| echo: false
+#| output: false
+#|label: fig-latlon2xy
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import transforms
+
+plt.figure()
+
+base = plt.gca().transData
+rot = transforms.Affine2D().rotate_deg(90)
+
+alpha = np.deg2rad(0)
+
+xO = yO = 0
+
+xA = np.cos(alpha)
+yA = np.sin(alpha)
+
+xB = np.cos(alpha) - np.sin(alpha)
+yB = np.sin(alpha) + np.cos(alpha)
+
+xC = -np.sin(alpha)
+yC = np.cos(alpha)
+
+x = np.array([xO, xA, xB, xC, xO])
+y = np.array([xO, yA, yB, yC, yO])
+
+xP = 0.3 * (xA)
+yP = 0.7 * (yB)
+
+plt.plot(x, y)
+plt.plot(xP, yP, marker='o')
+
+arrowprops2 = dict(facecolor='black', arrowstyle='<-')
+
+off = 0.04
+plt.annotate('P', (xP + off, yP + off), va='center', ha='center')
+plt.annotate('O', (xO - off, yO - off), va='center', ha='center')
+plt.annotate('A', (xA+off, yA-off), va='center', ha='center')
+plt.annotate('B', (xB+off, yB+off), va='center', ha='center')
+plt.annotate('C', (xC-off, yC+off), va='center', ha='center')
+
+plt.annotate('', (0, yP), xytext=(0, 0), arrowprops=arrowprops,)
+plt.annotate('dy', (0-0.01, yP / 2), ha='right', va='center')
+
+plt.annotate('', (xP, 0), xytext=(0, 0), arrowprops=arrowprops,)
+plt.annotate('dx', (xP / 2, -0.01), ha='center', va='top')
+
+plt.annotate('', (xO,yO), xytext=(xP,yP), va='center', ha='center', arrowprops=arrowprops2,)
+
+plt.annotate('xi', (xP, yO - off), va='center', ha='center',)
+
+plt.axis('off')
+offset = 0.2
+plt.ylim(-offset, 1 + offset)
+plt.xlim(-offset, 1 + offset)
+
+plt.plot([-0.2, 1.2], [yP, yP], linestyle='--')
+plt.plot([xP, xP], [-0.2, 1.2], linestyle='--')
+
+# plt.axis('equal')
+```
+
+Each corner of the cell is given by a longitude and latitude $\lambda_{i,j}, \phi_{i,j}$, while the particle has longitude and latitudes given by $\lambda_{P}, \phi_{P}$. The objective is to determine, given the geographical coordinates of the points and of the particle, the $\Delta x$ and $\Delta y$ values of the particle, so that:
+
+$$
+x_P = i + \Delta x
+x_P = j + \Delta y
+$$
+
+We assume that:
+
+$$
+\mathbf{OP} = \Delta x + \mathbf{OA} + \Delta y\mathbf{OC}
+$$
+
+When using the geographical coordinates:
+
+$$
+\lambda_P - \lambda_O = \Delta x \times (\lambda_A - \lambda_O) + \Delta y  (\lambda_C - \lambda_O)
+$$
+and
+
+$$
+\phi_P - \phi_O = \Delta x \times (\phi_A - \phi_O) + \Delta y  (\phi_C - \phi_O)
+$$
+
+This is a system of 2 equations with two unknown ($\Delta x$ and $\Delta y$). It is not resolved directly. Instead, we will look
