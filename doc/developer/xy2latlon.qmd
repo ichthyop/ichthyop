@@ -15,8 +15,8 @@ This function is a bilinear interpolation of the grid coordinates, as shown in @
 
 ```{python}
 #| echo: false
-#| output: false
-#|label: fig-xy2latlon
+#| output: true
+#| label: fig-xy2latlon
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -58,6 +58,7 @@ plt.axis('off')
 offset = 0.2
 plt.ylim(-offset, 1 + offset)
 plt.xlim(-offset, 1 + offset)
+plt.show()
 ```
 
 The coordinate of the particle P is determined as a weighted mean of the coordinates of the four corners, with the weight being provided by the distance of the particle from the corners (`dx` `dy`). The closest the particle is to a corner, the more weight is has.
@@ -81,119 +82,127 @@ The first step is to determine the coordinates of the cell in wich the particle 
 
 ```{python}
 #| echo: false
-#| output: false
-#|label: fig-latlon2xy
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib import transforms
+#| output: true
+#| label: fig-latlon2xy
+lonO = 43
+latO = 5
 
-def offset_radial(px, py, off, sign=1):
-    """Décale une étiquette dans la direction radiale (utile quand la figure tourne)."""
-    r = np.hypot(px, py)
-    if r == 0:
-        return 0, 0
-    return sign * off * px / r, sign * off * py / r
+lonA = 46
+latA = 7
 
-plt.figure()
+lonB = 42
+latB = 8
 
-base = plt.gca().transData
-rot = transforms.Affine2D().rotate_deg(90)
+lonC = 41
+latC = 6
 
-alpha = np.deg2rad(25)
+lonP = 1 / 4. * (lonB + lonA + lonO + lonC)
+latP = 1 / 4. * (latB + latA + latO + latC)
 
-xO = yO = 0
+plt.plot([lonO, lonA, lonB, lonC, lonO], [latO, latA, latB, latC, latO])
+plt.plot([lonO], latO, marker='o', label='O')
+plt.plot([lonA], latA, marker='o', label='A')
+plt.plot([lonB], latB, marker='o', label='B')
+plt.plot([lonC], latC, marker='o', label='C')
+plt.plot([lonP], latP, marker='o', label='P')
 
-xA = np.cos(alpha)
-yA = np.sin(alpha)
+# Coordonnees pour tracer les droites
+x = np.linspace(41, 46, 20)
 
-xB = np.cos(alpha) - np.sin(alpha)
-yB = np.sin(alpha) + np.cos(alpha)
+# tracer d'une droite en s'appuyant sur un invariant
+dy = latC - latO
+dx = lonC - lonO
+c = lonP * dy - latP * dx
+y = (x*dy -c) / dx
+plt.plot(x, y, ls='--')
 
-xC = -np.sin(alpha)
-yC = np.cos(alpha)
+# tracer d'une droite en s'appuyant sur un invariant
+dy = latA - latO
+dx = lonA - lonO
+c = lonP * dy - latP * dx
+y = (x*dy -c) / dx
+plt.plot(x, y , ls='--')
 
-x = np.array([xO, xA, xB, xC, xO])
-y = np.array([xO, yA, yB, yC, yO])
+# Calcul de l'intersection en coordoonnes
+dy1 = latC - latO
+dx1 = lonC - lonO
+dy2 = latA - latO
+dx2 = lonA - lonO
+c1 = lonP * dy1 - latP * dx1 # droite c1 qui passe par P et parallele a OC
+c2 = lonO * dy2 - latO * dx2 # droite c2 = droite OA
+D = (dx2 * dy1 - dy2 * dx1)
+lonI = (c1 * dx2 - c2 * dx1) / D
+latI = -(c2 * dy1 - c1 * dy2) / D
+deltax1 = (lonI - lonO) / (lonA - lonO)
 
-tA = 0.5
-tC = 0.7
-xP = tA * xA + tC * xC
-yP = tA * yA + tC * yC
+plt.plot(lonI, latI, marker='o')
 
-plt.plot(x, y)
-plt.plot(xP, yP, marker='o')
+# Calcul de l'intersection en coordoonnes
+dy2 = latC - latO
+dx2 = lonC - lonO
+dy1 = latA - latO
+dx1 = lonA - lonO
+c1 = lonP * dy1 - latP * dx1 # droite c1 qui passe par P et parallele a OC
+c2 = lonO * dy2 - latO * dx2 # droite c2 = droite OA
+D = (dx2 * dy1 - dy2 * dx1)
+lonJ = (c1 * dx2 - c2 * dx1) / D
+latJ = -(c2 * dy1 - c1 * dy2) / D
 
-arrowprops = dict(facecolor='black', arrowstyle='<->')
-arrowprops2 = dict(facecolor='black', arrowstyle='<-')
+plt.plot(lonJ, latJ, marker='o')
+deltay1 = (latJ - latO) / (latC - latO)
 
-off = 0.04
-oxA, oyA = offset_radial(xA, yA, off)
-oxB, oyB = offset_radial(xB, yB, off)
-oxC, oyC = offset_radial(xC, yC, off)
+# Resolution reelle de dx sans passer par les coordonnes
+D = (lonA - lonO) * (latC - latO) - (latA - latO) * (lonC - lonO)
+Dx = (lonP - lonO) * (latC - latO) - (latP - latO) * (lonC - lonO)
+Dy = (lonA - lonO) * (latP - latO) - (latA - latO) * (lonP - lonO)
 
-plt.annotate('P', (xP + off, yP + off), va='center', ha='center')
-plt.annotate('O', (xO - off, yO - off), va='center', ha='center')
-plt.annotate('A', (xA + oxA, yA + oyA), va='center', ha='center')
-plt.annotate('B', (xB + oxB, yB + oyB), va='center', ha='center')
-plt.annotate('C', (xC + oxC, yC + oyC), va='center', ha='center')
+deltax2 = Dx / D
+deltay2 = Dy / D
 
-uOA = np.array([xA, yA])   # vecteur unitaire le long de OA
-uOC = np.array([xC, yC])   # vecteur unitaire le long de OC (perpendiculaire à OA)
-Pv = np.array([xP, yP])
+print(deltax1, deltax2)
+print(deltay1, deltay2)
 
-Pa = np.dot(Pv, uOA) * uOA   # projection (pied de perpendiculaire) de P sur OA -> donne dx
-Pc = np.dot(Pv, uOC) * uOC   # projection de P sur OC -> donne dy
-
-axis_len = 1.
-plt.plot([-axis_len * xA + xP, axis_len * xA + xP], [-axis_len * yA + yP, axis_len * yA + yP],
-          color='0.7', linewidth=0.8, zorder=0)
-plt.plot([-axis_len * xC + xP, axis_len * xC + xP], [-axis_len * yC + yP, axis_len * yC + yP],
-          color='0.7', linewidth=0.8, zorder=0)
-
-# flèches dx (O -> Pa, le long de OA) et dy (O -> Pc, le long de OC)
-plt.annotate('', xy=(Pa[0], Pa[1]), xytext=(xO, yO), arrowprops=arrowprops)
-plt.annotate('', xy=(Pc[0], Pc[1]), xytext=(xO, yO), arrowprops=arrowprops)
-
-plt.annotate('(xi, yi)', xy=(xP+0.2, 0.1))
-
-plt.axis('off')
-offset = 0.2
-# plt.ylim(-offset, 1 + offset)
-# plt.xlim(-offset, 1 + offset)
-
-# plt.axis('equal')
+plt.axis('equal')
+plt.legend()
 
 ```
 
-Each corner of the cell is given by a longitude and latitude $\lambda_{i,j}, \phi_{i,j}$, while the particle has longitude and latitudes given by $\lambda_{P}, \phi_{P}$. The objective is to determine, given the geographical coordinates of the points and of the particle, the $\Delta x$ and $\Delta y$ values of the particle, so that:
+Each corner of the cell is given by a longitude and latitude $\lambda_{i,j}, \phi_{i,j}$, while the particle has longitude and latitude given by $\lambda_{P}, \phi_{P}$. The objective is to determine, given the geographical coordinates of the coordinates and of the particle, the $\Delta x$ and $\Delta y$ values of the particle, so that:
 
 $$
 x_P = i + \Delta x
-x_P = j + \Delta y
 $$
+
+$$
+y_P = j + \Delta y
+$$
+
+with $(x_P, y_P)$ the particle grid coordinate and $(i,j)$ the coordinate of the lower left corner.
 
 We assume that:
 
 $$
-\mathbf{OP} = \Delta x + \mathbf{OA} + \Delta y\mathbf{OC}
+\mathbf{OP} = A \times  \mathbf{OA} + B \times \mathbf{OC}
 $$
 
 When using the geographical coordinates:
 
 $$
-\lambda_P - \lambda_O = \Delta x \times (\lambda_A - \lambda_O) + \Delta y  (\lambda_C - \lambda_O)
-$$ and
+\lambda_P - \lambda_O = \Delta X \times (\lambda_A - \lambda_O) + \Delta y \times  (\lambda_C - \lambda_O)
+$$ #eq-lambda-p
+
+and
 
 $$
-\phi_P - \phi_O = \Delta x \times (\phi_A - \phi_O) + \Delta y  (\phi_C - \phi_O)
+\phi_P - \phi_O = \Delta X \times (\phi_A - \phi_O) + \Delta y  \times (\phi_C - \phi_O)
+$$  #eq-phi-p
+
+This is a system of 2 equations with two unknown ($\Delta X$ and $\Delta y$). It is not resolved directly. Instead, we will look for the value of the longitude of the intersect of the straight line that crosses P and which is perpendicular to $\mathbf{OC}$ with the straight line $\mathbf{OA}$.
+
+Based on the fact that each point $(X, Y)$ belonging to a straight line width a slope $(S_y, S_x)$, we have:
+
 $$
-
-This is a system of 2 equations with two unknown ($\Delta x$ and $\Delta y$). It is not resolved directly. Instead, we will look for the intersect of the straight line that crosses P and which is perpendicular to $\mathbf{OC}$ with the straight line $\mathbf{OA}$.
-
-Based on the fact that each point $(X, Y)$ belonging to a straight line width a slope $(\Delta Y, \Delta X)$, we have:
-
-$$
-X \times \Delta Y - Y \times \Delta X = c
+X \times S_y - Y \times S_x = c
 $$
 
 with $c$ a constant, we can characterise these two straight lines with the known coordinates:
@@ -202,9 +211,13 @@ $$
 \phi_P (\lambda_C - \lambda_O) - \lambda_P (\phi_C - \phi_O) = c1
 $$
 
+which characterize the line that crosses P and that is parallel to OC
+
 $$
 \phi_O (\lambda_A - \lambda_O) - \lambda_O (\phi_A - \phi_O) = c2
 $$
+
+which characterize the OA line.
 
 Since the unknown point also is on these two lines, we can write
 
@@ -216,7 +229,7 @@ $$
 \phi_I (\lambda_A - \lambda_O) - \lambda_I (\phi_A - \phi_O) = c2
 $$
 
-This is an equation with two unknown that can be solved using the Cramer formula, which allows to get $\lambda I$:
+This is an equation with two unknown ($\phi_I$ and $\lambda_I$) that can be solved using the Cramer formula. In this case, we are only interested in $\lambda I$:
 
 $$
 \lambda_I =
@@ -231,5 +244,37 @@ $$
 Finally, the grid increment is given as follows:
 
 $$
-X_P = X_i + \frac{(\lambda_I - \lambda_O)}{(\lambda_I - \lambda_A)}
+\Delta x = \frac{(\lambda_I - \lambda_O)}{(\lambda_I - \lambda_A)}
+$$
+
+The same operation is done to determine the latitude of $\phi_J$ and hence the $\Delta y$ grid increment.
+
+::: {.callout-caution}
+
+Since the grid is irregular, the cell edges may not be orthogonal. Therefore, a simple projection does not work
+
+:::
+
+::: {.callout-note}
+
+The equation could be resolved more easily using @eq-lambda-p and @eq-phi-p, also using Cramer's formula:
+
+$$
+D = (lonA - lonO)(latC - latO) - (latA - latO)(lonC-lonO)
+$$
+
+$$
+D_x = (lonP - lonO)(latC - latO) - (lonC - lonO) (latP - latO)
+$$
+
+$$
+D_y = (lonA - lonO)(latP - latO) - (latA - latO) (lonP - lonO)
+$$
+
+$$
+\Delta x = \dfrac{D_x}{D}
+$$
+
+$$
+\Delta y = \dfrac{D_x}{D}
 $$

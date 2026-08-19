@@ -40,6 +40,7 @@ book:
         - developer/grid.qmd
         - developer/new_action.qmd
         - developer/tracker.qmd
+        - developer/xy2latlon.qmd
     - biblio.qmd
   search: true
   repo-url: https://github.com/ichthyop/ichthyop/
