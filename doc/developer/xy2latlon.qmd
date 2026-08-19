@@ -1,0 +1,73 @@
+## Interpolation of coordinates
+
+There are two coordinate systems in Ichthyop:
+
+- the grid coordinate, with `x` ranging from 0 to `nx - 1` and `y` ranging from `0` to `ny - 1`
+- the geographical coordinates, i.e. longitude and latitude
+
+In Ichthyop, there are fonctions that allows to switch from one system to another, considering that the grid may be irregular (for example NEMO or CROCO grid).
+
+### Grid to geographical coordinates
+
+Conversion from grid to geographical coordinates is done by using the `xy2latlon` methods associated with `Dataset` objects.
+
+This function is a bilinear interpolation of the grid coordinates, as shown in @fig-xy2latlon
+
+```{python}
+#| echo: true
+#| output: true
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.figure()
+
+x = [0, 1, 1, 0, 0]
+y = [0, 0, 1, 1, 0]
+
+xp = 0.3
+yp = 0.6
+
+arrowprops = dict(facecolor='black', arrowstyle='<->')
+
+plt.plot(x, y)
+plt.annotate('(i, j)', (0, -0.05), va='top', ha='center')
+plt.annotate('(i+1, j)', (1, -0.05), va='top', ha='center')
+plt.annotate('(i, j+1)', (0, 1 + 0.05), va='bottom', ha='center')
+plt.annotate('(i+1, j+1)', (1, 1 + 0.05), va='bottom', ha='center')
+
+plt.plot(xp, yp, marker='o')
+plt.annotate('P', (xp, yp + 0.01), ha='left', va='bottom')
+
+plt.annotate('', (xp, 0), xytext=(0, 0), arrowprops=arrowprops,)
+plt.annotate('dx', (xp / 2, -0.01), ha='center', va='top')
+
+plt.annotate('', (0, yp), xytext=(0, 0), arrowprops=arrowprops,)
+plt.annotate('dy', (0-0.01, yp / 2), ha='right', va='center')
+
+plt.annotate('', (0, yp), xytext=(0, 1), arrowprops=arrowprops,)
+plt.annotate('1 - dy', (0-0.01, yp + (1 - yp) / 2), ha='right', va='center')
+
+plt.annotate('', (xp, 0), xytext=(1, 0), arrowprops=arrowprops,)
+plt.annotate('1 - dx', (xp + (1 - xp) / 2, 0-0.01, ), ha='center', va='top')
+
+plt.plot([0, 1], [yp, yp], ls='--', lw=0.5)
+plt.plot([xp, xp], [0, 1], ls='--', lw=0.5)
+
+plt.axis('off')
+offset = 0.2
+plt.ylim(-offset, 1 + offset)
+plt.xlim(-offset, 1 + offset)
+```
+
+The coordinate of the particle P is determined as a weighted mean of the coordinates of the four corners, with the weight being provided by the distance of the particle from the corners (`dx` `dy`). The closest the particle is to a corner, the more weight is has.
+
+For example, the longitude of the particle $lambda_P$ is given by:
+
+$$
+\lambda_P =  (1 - dx)(1-dy) \lambda_(i, j) +
+dx(1-dy) \lambda_(i + 1, j) +
+(1 - dx)dy \lambda_(i, j+1) +
+dxdy \lambda_(i+1, j+1)
+$$
+
+Note that by construction, the sum of the weight equals to 1, so no need to divide by the total weight.
