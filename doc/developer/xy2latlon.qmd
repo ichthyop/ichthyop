@@ -2,8 +2,8 @@
 
 There are two coordinate systems in Ichthyop:
 
-- the grid coordinate, with `x` ranging from 0 to `nx - 1` and `y` ranging from `0` to `ny - 1`
-- the geographical coordinates, i.e. longitude and latitude
+-   the grid coordinate, with `x` ranging from 0 to `nx - 1` and `y` ranging from `0` to `ny - 1`
+-   the geographical coordinates, i.e. longitude and latitude
 
 In Ichthyop, there are fonctions that allows to switch from one system to another, considering that the grid may be irregular (for example NEMO or CROCO grid).
 
@@ -77,8 +77,7 @@ Note that by construction, the sum of the weight equals to 1, so no need to divi
 
 The switch from geographical to grid coordinates is a bit more tricky, considering that the grid may be irregular. Let's consider the example in @fig-latlon2xy
 
-The first step is to determine the coordinates of the cell in wich the particle is located. In the code, this is done by a dichotomic search. We first look in which quarter of the domain the particle is located. This quarter is then decomposed into 4 quarters, and we determine in which subquarter the particle is locate. At the end, the cell in which the particle is located is selected  (@fig-latlon2xy).
-
+The first step is to determine the coordinates of the cell in wich the particle is located. In the code, this is done by a dichotomic search. We first look in which quarter of the domain the particle is located. This quarter is then decomposed into 4 quarters, and we determine in which subquarter the particle is locate. At the end, the cell in which the particle is located is selected (@fig-latlon2xy).
 
 ```{python}
 #| echo: false
@@ -88,12 +87,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import transforms
 
+def offset_radial(px, py, off, sign=1):
+    """Décale une étiquette dans la direction radiale (utile quand la figure tourne)."""
+    r = np.hypot(px, py)
+    if r == 0:
+        return 0, 0
+    return sign * off * px / r, sign * off * py / r
+
 plt.figure()
 
 base = plt.gca().transData
 rot = transforms.Affine2D().rotate_deg(90)
 
-alpha = np.deg2rad(0)
+alpha = np.deg2rad(25)
 
 xO = yO = 0
 
@@ -109,40 +115,54 @@ yC = np.cos(alpha)
 x = np.array([xO, xA, xB, xC, xO])
 y = np.array([xO, yA, yB, yC, yO])
 
-xP = 0.3 * (xA)
-yP = 0.7 * (yB)
+tA = 0.5
+tC = 0.7
+xP = tA * xA + tC * xC
+yP = tA * yA + tC * yC
 
 plt.plot(x, y)
 plt.plot(xP, yP, marker='o')
 
+arrowprops = dict(facecolor='black', arrowstyle='<->')
 arrowprops2 = dict(facecolor='black', arrowstyle='<-')
 
 off = 0.04
+oxA, oyA = offset_radial(xA, yA, off)
+oxB, oyB = offset_radial(xB, yB, off)
+oxC, oyC = offset_radial(xC, yC, off)
+
 plt.annotate('P', (xP + off, yP + off), va='center', ha='center')
 plt.annotate('O', (xO - off, yO - off), va='center', ha='center')
-plt.annotate('A', (xA+off, yA-off), va='center', ha='center')
-plt.annotate('B', (xB+off, yB+off), va='center', ha='center')
-plt.annotate('C', (xC-off, yC+off), va='center', ha='center')
+plt.annotate('A', (xA + oxA, yA + oyA), va='center', ha='center')
+plt.annotate('B', (xB + oxB, yB + oyB), va='center', ha='center')
+plt.annotate('C', (xC + oxC, yC + oyC), va='center', ha='center')
 
-plt.annotate('', (0, yP), xytext=(0, 0), arrowprops=arrowprops,)
-plt.annotate('dy', (0-0.01, yP / 2), ha='right', va='center')
+uOA = np.array([xA, yA])   # vecteur unitaire le long de OA
+uOC = np.array([xC, yC])   # vecteur unitaire le long de OC (perpendiculaire à OA)
+Pv = np.array([xP, yP])
 
-plt.annotate('', (xP, 0), xytext=(0, 0), arrowprops=arrowprops,)
-plt.annotate('dx', (xP / 2, -0.01), ha='center', va='top')
+Pa = np.dot(Pv, uOA) * uOA   # projection (pied de perpendiculaire) de P sur OA -> donne dx
+Pc = np.dot(Pv, uOC) * uOC   # projection de P sur OC -> donne dy
 
-plt.annotate('', (xO,yO), xytext=(xP,yP), va='center', ha='center', arrowprops=arrowprops2,)
+axis_len = 1.
+plt.plot([-axis_len * xA + xP, axis_len * xA + xP], [-axis_len * yA + yP, axis_len * yA + yP],
+          color='0.7', linewidth=0.8, zorder=0)
+plt.plot([-axis_len * xC + xP, axis_len * xC + xP], [-axis_len * yC + yP, axis_len * yC + yP],
+          color='0.7', linewidth=0.8, zorder=0)
 
-plt.annotate('xi', (xP, yO - off), va='center', ha='center',)
+# flèches dx (O -> Pa, le long de OA) et dy (O -> Pc, le long de OC)
+plt.annotate('', xy=(Pa[0], Pa[1]), xytext=(xO, yO), arrowprops=arrowprops)
+plt.annotate('', xy=(Pc[0], Pc[1]), xytext=(xO, yO), arrowprops=arrowprops)
+
+plt.annotate('(xi, yi)', xy=(xP+0.2, 0.1))
 
 plt.axis('off')
 offset = 0.2
-plt.ylim(-offset, 1 + offset)
-plt.xlim(-offset, 1 + offset)
-
-plt.plot([-0.2, 1.2], [yP, yP], linestyle='--')
-plt.plot([xP, xP], [-0.2, 1.2], linestyle='--')
+# plt.ylim(-offset, 1 + offset)
+# plt.xlim(-offset, 1 + offset)
 
 # plt.axis('equal')
+
 ```
 
 Each corner of the cell is given by a longitude and latitude $\lambda_{i,j}, \phi_{i,j}$, while the particle has longitude and latitudes given by $\lambda_{P}, \phi_{P}$. The objective is to determine, given the geographical coordinates of the points and of the particle, the $\Delta x$ and $\Delta y$ values of the particle, so that:
@@ -162,11 +182,54 @@ When using the geographical coordinates:
 
 $$
 \lambda_P - \lambda_O = \Delta x \times (\lambda_A - \lambda_O) + \Delta y  (\lambda_C - \lambda_O)
-$$
-and
+$$ and
 
 $$
 \phi_P - \phi_O = \Delta x \times (\phi_A - \phi_O) + \Delta y  (\phi_C - \phi_O)
 $$
 
-This is a system of 2 equations with two unknown ($\Delta x$ and $\Delta y$). It is not resolved directly. Instead, we will look
+This is a system of 2 equations with two unknown ($\Delta x$ and $\Delta y$). It is not resolved directly. Instead, we will look for the intersect of the straight line that crosses P and which is perpendicular to $\mathbf{OC}$ with the straight line $\mathbf{OA}$.
+
+Based on the fact that each point $(X, Y)$ belonging to a straight line width a slope $(\Delta Y, \Delta X)$, we have:
+
+$$
+X \times \Delta Y - Y \times \Delta X = c
+$$
+
+with $c$ a constant, we can characterise these two straight lines with the known coordinates:
+
+$$
+\phi_P (\lambda_C - \lambda_O) - \lambda_P (\phi_C - \phi_O) = c1
+$$
+
+$$
+\phi_O (\lambda_A - \lambda_O) - \lambda_O (\phi_A - \phi_O) = c2
+$$
+
+Since the unknown point also is on these two lines, we can write
+
+$$
+\phi_I (\lambda_C - \lambda_O) - \lambda_I (\phi_C - \phi_O) = c1
+$$
+
+$$
+\phi_I (\lambda_A - \lambda_O) - \lambda_I (\phi_A - \phi_O) = c2
+$$
+
+This is an equation with two unknown that can be solved using the Cramer formula, which allows to get $\lambda I$:
+
+$$
+\lambda_I =
+\frac{
+c_2(\lambda_C-\lambda_O)-c_1(\lambda_A-\lambda_O)
+}{
+(\lambda_A-\lambda_O)(\phi_C-\phi_O)
+-(\lambda_C-\lambda_O)(\phi_A-\phi_O)
+}
+$$
+
+Finally, the grid increment is given as follows:
+
+$$
+X_P = X_i + \frac{(\lambda_I - \lambda_O)}{(\lambda_I - \lambda_A)}
+$$
