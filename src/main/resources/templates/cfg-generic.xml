@@ -3260,7 +3260,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -3273,7 +3273,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -3284,10 +3284,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -3394,7 +3394,7 @@
             <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -3776,7 +3776,7 @@
         <description>Block of options that control the vertical dissipation process.
             This block can
             be enabled for 3D simulations only. Activate with caution!!</description>
-        <tree_path>Transport/Buoyancy</tree_path>
+        <tree_path>Transport/Vertical dissipation</tree_path>
         <enabled>false</enabled>
 
         <parameters>
@@ -3832,7 +3832,7 @@
             <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -4650,7 +4650,7 @@
             <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -4801,7 +4801,7 @@
             <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -4930,7 +4930,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -4943,7 +4943,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -4954,10 +4954,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -5135,7 +5135,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -5148,7 +5148,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -5159,10 +5159,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -5307,7 +5307,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -5320,7 +5320,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -5331,10 +5331,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -5470,7 +5470,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -5483,7 +5483,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -5494,10 +5494,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -5923,7 +5923,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -5936,7 +5936,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -5947,10 +5947,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -6102,7 +6102,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -6115,7 +6115,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -6126,10 +6126,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -6246,7 +6246,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -6259,7 +6259,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -6270,10 +6270,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
@@ -6401,7 +6401,7 @@
 
         <parameters>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_variable</key>
                 <long_name>Variable used to activate/deactivate process</long_name>
                 <value>age</value>
@@ -6414,7 +6414,7 @@
                     length (in cm)</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_minimum_class_value</key>
                 <long_name>Activation age (days) or length(cm)</long_name>
                 <value>0</value>
@@ -6425,10 +6425,10 @@
                     particle is greater, then the process is activated</description>
             </parameter>
 
-            <parameter hidden="true">
+            <parameter hidden="false">
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
-                <value>1e30</value>
+                <value>1e50</value>
                 <default>1e30</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
