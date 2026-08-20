@@ -189,13 +189,13 @@ When using the geographical coordinates:
 
 $$
 \lambda_P - \lambda_O = \Delta X \times (\lambda_A - \lambda_O) + \Delta y \times  (\lambda_C - \lambda_O)
-$$ #eq-lambda-p
+$$ {#eq-lambda-p}
 
 and
 
 $$
 \phi_P - \phi_O = \Delta X \times (\phi_A - \phi_O) + \Delta y  \times (\phi_C - \phi_O)
-$$  #eq-phi-p
+$$  {#eq-phi-p}
 
 This is a system of 2 equations with two unknown ($\Delta X$ and $\Delta y$). It is not resolved directly. Instead, we will look for the value of the longitude of the intersect of the straight line that crosses P and which is perpendicular to $\mathbf{OC}$ with the straight line $\mathbf{OA}$.
 

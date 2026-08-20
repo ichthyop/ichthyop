@@ -3,7 +3,7 @@
 In the Ichthyop repository (https://github.com/ichthyop/ichthyop), there is a feature branch, called `feature/fvcom-grid`,
 which allows to use the unstructured mesh grid from the FVCOM model.
 
-![Example of unstructered FVCOM grid. Source: @QI2009153](grid/_static/fvcom-grid.jpg) {#fig-fvcom-grid}.
+![Example of unstructered FVCOM grid. Source: @QI2009153](grid/_static/fvcom-grid.jpg){#fig-fvcom-grid}
 
 In order to use Ichthyop with FVCOM grid, you will need to download this specific branch and compile the code manually (see @sec-install-source).
 
@@ -14,7 +14,7 @@ Laki Premathilake for his very important contribution and his very kind help.
 
 The FVCOM grid is associated with shape functions that are used to interpolate vector (i.e. velocities) and scalar properties (i.e. temperature) at given locations. These scale factors are
 
-$a1u(N, 4)$, $a2u(N, 4)$, $aw0(N, 3)$, $awX(N, 3)$ and $awy(N, 3)$ with $N$ the number of elements (i.e. triangles) defined in the grid.
+$a1u(N, 4)$, $a2u(N, 4)$, $aw0(N_e, 3)$, $awx(N_e, 3)$ and $awy(N_e, 3)$ with $N$ the number of elements (i.e. triangles) defined in the grid and $N_{e}$ the number of nodes.
 
 #### Velocity computations
 
