@@ -25,6 +25,9 @@ $$
 \Delta L = C1 + C2 \times max(T, T_{thres}) \times \Delta t
 $$
 
+The $max(T, T_{thres})$ term has been added to ensure that the particles keep growing with a minimum rate, though they are
+facing colder sea water.
+
 The name of the food and temperature variables are provided by the `food_field` and `temperature_field` parameters.
 
 The initial length of the particle is provided by the `initial_length` parameter.
