@@ -13,7 +13,7 @@ also depend on the available food if the `growth.food.enabled` parameter is set 
 If food dependence is enabled, length increment (in $cm$) is given by:
 
 $$
-\Delta L = C1 + C2 \times \dfrac{F}{F + K_S} \times max(T, T_{thres}) \times \Delta t
+\Delta L = \left[C1 + C2 \times \dfrac{F}{F + K_S} \times max(T, T_{thres})\right] \times \Delta t
 $$
 
 where $\Delta t$ is the time-step (in seconds), $C1$ and $C2$ are parameters (`coeff1` and `coeff2`), $T_{thres}$ is a temperature threshold (`threshold_temp` parameter), $F$ is the food quantity (read from a biogeochemical dataset),  and $K_S$ is
@@ -22,7 +22,7 @@ a half-saturation constant (`half_saturation` parameter) and $T$ is the temperat
 If food dependence is disabled, then increment is provided as follows:
 
 $$
-\Delta L = C1 + C2 \times max(T, T_{thres}) \times \Delta t
+\Delta L = \left[C1 + C2 \times max(T, T_{thres})\right] \times \Delta t
 $$
 
 The $max(T, T_{thres})$ term has been added to ensure that the particles keep growing with a minimum rate, though they are

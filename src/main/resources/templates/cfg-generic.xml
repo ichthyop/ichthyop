@@ -4968,7 +4968,7 @@
 
             <parameter>
                 <key>coeff1</key>
-                <long_name>Growth coefficient 1 (C1)</long_name>
+                <long_name>Growth coefficient 1 (C1, cm/day)</long_name>
                 <value>0.02</value>
                 <default>0.02</default>
                 <format>float</format>
@@ -4979,7 +4979,7 @@
 
             <parameter>
                 <key>coeff2</key>
-                <long_name>Growth coefficient 2 (C2) </long_name>
+                <long_name>Growth coefficient 2 (C2, cm/day) </long_name>
                 <value>0.03</value>
                 <default>0.03</default>
                 <format>float</format>
