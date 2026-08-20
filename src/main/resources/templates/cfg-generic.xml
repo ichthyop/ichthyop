@@ -3288,7 +3288,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -3395,7 +3395,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -3833,7 +3833,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -4651,7 +4651,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -4802,7 +4802,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -4958,7 +4958,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -5163,7 +5163,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -5335,7 +5335,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -5498,7 +5498,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -5951,7 +5951,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -6130,7 +6130,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -6274,7 +6274,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
@@ -6429,7 +6429,7 @@
                 <key>activation_maximum_class_value</key>
                 <long_name>Dectivation age (days) or length(cm)</long_name>
                 <value>1e50</value>
-                <default>1e30</default>
+                <default>1e50</default>
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
