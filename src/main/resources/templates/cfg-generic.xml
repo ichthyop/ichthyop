@@ -3867,10 +3867,10 @@
                 <accepted>constant</accepted>
                 <accepted>file</accepted>
                 <default>constant</default>
-                <description> Defines the method used to infer the density of the particle. If <i>
-                    file</i>, then the particule is read in a CSV file (<b>
-                        density_file</b> parameter). Else, the density is constant (<b>
-                    particle_density</b> parameter)</description>
+                <description> Defines the method used to infer the density of the particle. If
+                    file, then the particule is read in a CSV file (
+                        density_file parameter). Else, the density is constant (
+                    particle_density parameter)</description>
             </parameter>
 
             <parameter>
@@ -4625,7 +4625,7 @@
 
             <parameter hidden="false">
                 <key>activation_variable</key>
-                <long_name>Variable used to activate/deactivate process</long_name>
+                <long_name>Activation/Deactivation variable</long_name>
                 <value>age</value>
                 <default>age</default>
                 <format>combo</format>
@@ -4660,7 +4660,7 @@
 
             <parameter>
                 <key>salinity_file_enabled</key>
-                <long_name>True if salinity file should be used</long_name>
+                <long_name>Use salinity file</long_name>
                 <value>false</value>
                 <format>boolean</format>
                 <default>false</default>
@@ -4669,23 +4669,23 @@
 
             <parameter>
                 <key>salinity_class</key>
-                <long_name>Particle attribute that determines the salinity class value (age or length)</long_name>
+                <long_name>Class parameter</long_name>
                 <value>age</value>
                 <format>combo</format>
                 <default>age</default>
                 <accepted>age</accepted>
                 <accepted>length</accepted>
                 <description>Provides the particle attribute (age in days or length in cm) that is used to determine the lethal salinity value.
-                    <b>Only used if the <i>salinity.file.enabled</i> parameter is set to True</b></description>
+                    Only used if the salinity.file.enabled parameter is set to True</description>
             </parameter>
 
             <parameter>
                 <key>salinity_tracker</key>
-                <long_name>True if salinity should be tracked along the trajectory</long_name>
+                <long_name>Track salinity</long_name>
                 <value>false</value>
                 <format>boolean</format>
                 <default>false</default>
-                <description></description>
+                <description>True if the salinity should be tracked</description>
             </parameter>
 
             <parameter>
@@ -4704,7 +4704,7 @@
                     type a new file name and
                     Ichthyop will generate a CSV template. If this parameter is left
                     void, ichthyop
-                    assumes constant lethal temperatures. <b>Only used if the <i>salinity.file.enabled</i> parameter is set to True</b></description>
+                    assumes constant lethal temperatures. Only used if the salinity.file.enabled parameter is set to True</description>
             </parameter>
 
             <parameter>
@@ -4713,7 +4713,7 @@
                 <value>so</value>
                 <default>so</default>
                 <description>The name of the salinity variable (case sensitive) in the
-                    hydrodynamic dataset. <b>Only used if the <i>salinity.file.enabled</i> parameter is set to True</b></description>
+                    hydrodynamic dataset. Only used if the salinity.file.enabled parameter is set to True</description>
             </parameter>
 
             <parameter>
@@ -4722,7 +4722,7 @@
                 <value>14.0</value>
                 <default>14.0</default>
                 <format>float</format>
-                <description>Fresh lethal water salinity [PSU] for the particles.<b>Only used if the <i>salinity.file.enabled</i> parameter is set to False</b></description>
+                <description>Fresh lethal water salinity [PSU] for the particles. Only used if the salinity.file.enabled parameter is set to False</description>
             </parameter>
 
             <parameter>
@@ -4731,7 +4731,7 @@
                 <value>22.0</value>
                 <default>22.0</default>
                 <format>float</format>
-                <description>Saline lethal water salinity [PSU] for the particles. <b>Only used if the <i>salinity.file.enabled</i> parameter is set to False</b></description>
+                <description>Saline lethal water salinity [PSU] for the particles. Only used if the salinity.file.enabled parameter is set to False</description>
             </parameter>
 
             <parameter hidden="true">
@@ -5349,9 +5349,9 @@
                 <value>"0.02","0.02","0.02"</value>
                 <default>"0.02","0.02","0.02"</default>
                 <format>list</format>
-                <description>c1 coefficient of the sole growth module. <b>For
+                <description>c1 coefficient of the sole growth module. For
                         SoleGrowth, one value
-                        per stage must be provided</b></description>
+                        per stage must be provided</description>
             </parameter>
 
             <parameter>
@@ -5360,9 +5360,9 @@
                 <value>"0.02","0.02","0.02"</value>
                 <default>"0.02","0.02","0.02"</default>
                 <format>list</format>
-                <description>c coefficient of the sole growth module. <b>For SoleGrowth,
+                <description>c coefficient of the sole growth module. For SoleGrowth,
                         one value
-                        per stage must be provided</b></description>
+                        per stage must be provided</description>
             </parameter>
 
             <parameter>
@@ -5533,10 +5533,10 @@
                 <format>combo</format>
                 <accepted>+</accepted>
                 <accepted>-</accepted>
-                <description> If +, then the particle will follow the highest gradient. <b>Should
+                <description> If +, then the particle will follow the highest gradient. Should
                         be
                         the default, since the interpretation with - is not
-                        straightforward</b>
+                        straightforward
                 </description>
             </parameter>
 
