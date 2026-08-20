@@ -43,4 +43,3 @@ The length can be used only if one of the different growth process (see @sec-gro
 {{< include process/orientation.qmd >}}
 {{< include process/growth.qmd >}}
 {{< include process/lethal_ts.qmd >}}
-{{< include process/deb.qmd >}}

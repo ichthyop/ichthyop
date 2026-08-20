@@ -1,6 +1,12 @@
 #### DEB growth
 
-The DEB equations are based on Kooijman (2010) and can be found in @FLORESVALIENTE2023103034
+::: {.callout-caution}
+
+The documentation for the DEB module is still ongoing
+
+:::
+
+The DEB equations are based on @kooijman2010dynamic, @KOOIJMAN2011, @KOOIJMAN2014 and can be found in @FLORESVALIENTE2023103034
 
 Influence of temperature is given by equation 5 of @FLORESVALIENTE2023103034:
 
@@ -52,7 +58,7 @@ with $F$ the food vector and $K$ the half-saturation constant.
 
 Assimilation rates $\{\dot{p_{Am}}\}$, energy conductance $\dot{v}$, volume specific somatic maintenance ($[\dot{p}_M]$) and maturity maintenances rates ($\dot{k}_J$) are corrected by the $c_T$ factor.
 
-If the accelerated DEB model is used (see e.g. Kooijman et al. (2011) and Kooijman (2014) for more details), the acceleration factor is computed as follows
+If the accelerated DEB model is used (see e.g. @KOOIJMAN2011 and @KOOIJMAN2014 for more details), the acceleration factor is computed as follows
 
 $$
 s_M =
@@ -165,47 +171,3 @@ $$ {#eq-deb-incr-h}
 $$
 E_R(t + \Delta t) = E_R(t) + \dfrac{dE_R}{dt}\Delta t
 $$ {#eq-deb-incr-r}
-
-Additional references
-
-  Kooijman, S. A. L. M. (2010). Dynamic Energy Budget theory for metabolic organisation. Cambridge Univ. Press, Cambridge. doi: 10.1098/rstb.2010.
-  Kooijman, S. A. L. M. (2014). Metabolic acceleration in animal ontogeny: An evolutionary perspective. Journal of Sea Research, 94(Supplement C), 128–137. https://doi.org/10.1016/j.seares.2014.06.005
-  Kooijman, S. A. L. M., Pecquerie, L., Augustine, S., & Jusup, M. (2011). Scenarios for acceleration in fish development and the role of metamorphosis. J. Sea Res., 66, 419–423. https://doi.org/10.1016/j.seares.2011.04.016
-
-
-@book{kooijman_dynamic_2010,
-	title = {Dynamic {Energy} {Budget} theory for metabolic organisation},
-	isbn = {978-0-521-13191-9},
-	url = {doi: 10.1098/rstb.2010.},
-	publisher = {Cambridge Univ. Press, Cambridge},
-	author = {Kooijman, S.A.L.M.},
-	year = {2010},
-}
-
-@article{kooijman_scenarios_2011,
-	title = {Scenarios for acceleration in fish development and the role of metamorphosis.},
-	volume = {66},
-	doi = {https://doi.org/10.1016/j.seares.2011.04.016},
-	journal = {J. Sea Res.},
-	author = {Kooijman, S. A. L. M. and Pecquerie, L. and Augustine, S. and Jusup, M.},
-	year = {2011},
-	pages = {419--423},
-}
-
-@article{kooijman_metabolic_2014,
-	series = {Dynamic {Energy} {Budget} theory: applications in marine sciences and fishery biology},
-	title = {Metabolic acceleration in animal ontogeny: {An} evolutionary perspective},
-	volume = {94},
-	issn = {1385-1101},
-	shorttitle = {Metabolic acceleration in animal ontogeny},
-	url = {http://www.sciencedirect.com/science/article/pii/S1385110114001105},
-	doi = {10.1016/j.seares.2014.06.005},
-	number = {Supplement C},
-	urldate = {2017-11-21},
-	journal = {Journal of Sea Research},
-	author = {Kooijman, S. A. L. M.},
-	month = nov,
-	year = {2014},
-	keywords = {Acceleration, Dispersal, Maturation, Parental care, add\_my\_pet},
-	pages = {128--137},
-}
