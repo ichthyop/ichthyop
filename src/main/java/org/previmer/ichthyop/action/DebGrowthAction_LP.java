@@ -63,32 +63,27 @@ public class DebGrowthAction_LP extends AbstractAction {
     private String temperature_field;
     private String food_field;
     private double p_Am;        // J cm-2 d-1, max. surf. specific assimilation rate
+
     // Energetic related parameters
-    //private double E_m;       // J/cm^3, reserve capacity
     private double E_G;       // Volume specific costs of strcture
     private double p_M;         // J cm-3 d-1; Volume specific maint. cost
-    // private double Kappa_X;       // Fraction of odd energy fixed in reserves
+
     // Temperature related params
     private double TA;      // Arehnius temp (K) Pecquerie et al. 2009
     private double T1;	 // K, Ref temp = 16C (avg. mid-water temp in GoL)
     private static double length_init; // = 0.025d; // Initial length [millimeter] for the particles.
-    //private static double feeding_length;// = 4.5d; // hreshold [millimeter] between Yolk-Sac Larvae and Feeding Larvae
     private double shape_larvae; // size related conversion params
     private double E_0; // initial reserve
-    //private double Vj; // Structure at mouth opening (yolk_to_feeding)
     private double E_Hb;  // Maturity threshold at birth
-    // private double E_Hh;  // Maturity threshold at hatching
     private double E_Hj;  // Maturity threshold at metamorphosis
     private double E_Hp;  // Maturity threshold at puberty
     private double k_J;   // Maturity maintenance rate coefficient
     private double Kappa;  // fraction of mobilized reserve allocated to soma
-    //private double Kappa_R;  // fraction of reproduction energy fixed in eggs
     private double T_AL; // Ahr. temperature at higher boundary
     private double T_L;  // Lower boundary of thermal range
     private double T_AH;  // Ahr. temperature at higher boundary
     private double T_H;  // Upper boundary of thermal range
     private double dt;  // time step
-    //private double F_m;  // surface area specific rate
     private double K;   // half saturation constance
     private double V_dot;   // energy conductance
 
@@ -98,6 +93,7 @@ public class DebGrowthAction_LP extends AbstractAction {
     /**
      * Pointer to the class method to compute Tcorr.
      */
+    @FunctionalInterface
     interface FunctionTcor {
 
         double getCorr(double T_kelvin);
@@ -106,7 +102,7 @@ public class DebGrowthAction_LP extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        String key = "accelerated.deb.enabled";
+        String key = "accelerated_deb_enabled";
         if (this.isNull(key)) {
             // if the parameter is not found, use standard deb
             modelType = ModelType.STD;
@@ -130,41 +126,36 @@ public class DebGrowthAction_LP extends AbstractAction {
         // Temperature related params
         T_AH = Double.valueOf(getParameter("arrhenius_upper_thermal_range"));      //9800 ; Arrhenius temp (K) Pecquerie et al. 2009
 
-        //F_m = Double.valueOf(getParameter("surface_area_searching_rate")) / (86400.0 * 100.0);  // m3/cm2/day converted into m3/mm2/sec
-        //this.Kappa_X = Double.valueOf(getParameter("fraction_fixed_reserve"));  // no unit
         p_Am = Double.valueOf(getParameter("assimilation rate")) / (86400.0 * 100.0);        // 325;J cm-2 d-1, max. surf. specific ingestion rate
-        // divisé par 86400 pour la conversion en secondes et divisé par 100 pour la conversion en mm-2
+        // divided by 86400 for conversion in seconds and divided by 100 for conversion in mm-2
 
-        this.V_dot = Double.valueOf(getParameter("energy_conductance")) * 100 / (86400.0);  //   cm/day -> conversion into mm/sec
+        // NB: TODO. Check with Laure if this is ok!
+        // NB: correct wrong conversion: cm to mm -> mult by 10 and not 100
+        this.V_dot = Double.valueOf(getParameter("energy_conductance")) * 10 / (86400.0);  //   cm/day -> conversion into mm/sec
 
         this.Kappa = Double.valueOf(getParameter("fraction_mobilized_somma")); // no unit
 
-        //this.Kappa_R = Double.valueOf(getParameter("fraction_fixed_eggs")); // no unit
-
         // Energetic related parameters
-        //E_m = Double.valueOf(getParameter("reserve_capacity")) / 1000.0;       //2700; J/cm^3, reserve capacity
         this.p_M = Double.valueOf(getParameter("volume_specific_somatic_maintenance")) / (86400 * 1e3); // J/cm3/day conversion into J/mm3/day
 
         this.k_J = Double.valueOf(getParameter("maturity_maintenance_rate")) / (86400);  // day-1, converted into s-1
 
         // divisé par 1000 pour la conversion en mm-3
-        this.E_G = Double.valueOf(getParameter("cost_growth")) / 1000.0;       //4000; J cm-3; // Cost for growth
+        this.E_G = Double.valueOf(getParameter("cost_growth")) / 1000.0;       //4000; J cm-3 -> J/mm3; // Cost for growth
 
         this.T1 = Double.valueOf(getParameter("ref_temp"));	 //273.15 + 20; K, Ref temp = 20C (avg. mid-water temp in GoL)
-        //p= [p_Xm ae XK_chl E_m E_g p_M Kappa TA T1 mu_E shape_larvae ]; // pack params
 
-        //this.E_Hh = Double.valueOf(getParameter("maturity_thres_hatching")); // J
         this.E_Hb = Double.valueOf(getParameter("maturity_thres_birth")); // J
         this.E_Hj = Double.valueOf(getParameter("maturity_thres_metamorphosis")); // J
         this.E_Hp = Double.valueOf(getParameter("maturity_thres_puberty")); // J
 
         length_init = Double.valueOf(getParameter("initial_length"));
-        //feeding_length = Double.valueOf(getParameter("yolk2feeding_length"));
+
         shape_larvae = Double.valueOf(getParameter("shape")); //0.152 ; larvae < 3.7cm length and weight data  - Palomera et al.
+
         E_0 = Double.valueOf(getParameter("initial_reserve")); //0.022;//0.89998;// //-0.087209;      // J, Reserve at size of hatching.
 
         // Structure at mouth opening (yolk_to_feeding)
-        // Vj = Math.pow(shape_larvae * feeding_length, 3);
         dt = getSimulationManager().getTimeManager().get_dt();
 
         temperature_field = getParameter("temperature_field");
@@ -173,7 +164,6 @@ public class DebGrowthAction_LP extends AbstractAction {
         food_field = getParameter("food_field");
         getSimulationManager().getDataset().requireVariable(food_field, getClass());
 
-        //this.K = (this.p_Xm) / (this.Kappa_X * this.F_m);
         // K should be defined using physio, but in practice calibration parameter
         this.K = Double.valueOf(getParameter("half_saturation_constant"));
 

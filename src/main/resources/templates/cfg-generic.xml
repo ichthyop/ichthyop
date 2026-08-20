@@ -3403,7 +3403,7 @@
             </parameter>
 
             <parameter hidden="false">
-                <key>accelerated.deb.enabled</key>
+                <key>accelerated_deb_enabled</key>
                 <long_name>Use accelerated DEB</long_name>
                 <value>false</value>
                 <default>false</default>
@@ -3520,6 +3520,33 @@
             </parameter>
 
             <parameter hidden="false">
+                <key>maturity_thres_birth</key>
+                <long_name>Maturity threshold for birth (J)</long_name>
+                <value>0</value>
+                <default>0.152</default>
+                <format>float</format>
+                <description>Maturity threshold for birth (J)</description>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>maturity_thres_metamorphosis</key>
+                <long_name>Maturity threshold for metamorphosis (J)</long_name>
+                <value>0</value>
+                <default>0.152</default>
+                <format>float</format>
+                <long_name>Maturity threshold for metamorphosis (J)</long_name>
+            </parameter>
+
+            <parameter hidden="false">
+                <key>maturity_thres_puberty</key>
+                <long_name>Maturity threshold for puberty (J)</long_name>
+                <value> 0</value>
+                <default>0.152</default>
+                <format>float</format>
+                <long_name>Maturity threshold for puberty (J)</long_name>
+            </parameter>
+
+            <parameter hidden="false">
                 <key>initial_length</key>
                 <long_name>Initial length (cm)</long_name>
                 <value>0</value>
@@ -3553,33 +3580,6 @@
                 <default>0.5</default>
                 <format>float</format>
                 <description>Half saturation constant of functional response</description>
-            </parameter>
-
-            <parameter hidden="false">
-                <key>maturity_thres_birth</key>
-                <long_name>Maturity threshold for birth (J)</long_name>
-                <value>0</value>
-                <default>0.152</default>
-                <format>float</format>
-                <description>Maturity threshold for birth (J)</description>
-            </parameter>
-
-            <parameter hidden="false">
-                <key>maturity_thres_metamorphosis</key>
-                <long_name>Maturity threshold for metamorphosis (J)</long_name>
-                <value>0</value>
-                <default>0.152</default>
-                <format>float</format>
-                <long_name>Maturity threshold for metamorphosis (J)</long_name>
-            </parameter>
-
-            <parameter hidden="false">
-                <key>maturity_thres_puberty</key>
-                <long_name>Maturity threshold for puberty (J)</long_name>
-                <value> 0</value>
-                <default>0.152</default>
-                <format>float</format>
-                <long_name>Maturity threshold for puberty (J)</long_name>
             </parameter>
 
             <parameter>
@@ -4815,7 +4815,7 @@
                 <value>false</value>
                 <format>boolean</format>
                 <default>false</default>
-                <description>True if the lethal salinities should be read from a file</description>
+                <description>True if the lethal salinities should be read from a file.</description>
             </parameter>
 
             <parameter>
@@ -4826,16 +4826,17 @@
                 <default>age</default>
                 <accepted>age</accepted>
                 <accepted>length</accepted>
-                <description></description>
+                <description>Provides whether age (in days) or length (in cm) is used for the
+                    lethal temperature. Only used if temperature_file_enabled is set to true. </description>
             </parameter>
 
             <parameter>
                 <key>temperature_tracker</key>
-                <long_name>True if temperature should be tracked along the trajectory</long_name>
+                <long_name>Track temperature?</long_name>
                 <value>false</value>
                 <format>boolean</format>
                 <default>false</default>
-                <description></description>
+                <description>True if the temperature should be tracked along the trajectory.</description>
             </parameter>
 
             <parameter>
@@ -4853,7 +4854,7 @@
                     file name and
                     Ichthyop will generate a CSV template. If this parameter is left
                     void, ichthyop
-                    assumes constant lethal temperatures.</description>
+                    assumes constant lethal temperatures. Only used if temperature_file_enabled is set to true.</description>
             </parameter>
 
             <parameter>
@@ -4872,7 +4873,7 @@
                 <value>14.0</value>
                 <default>14.0</default>
                 <format>float</format>
-                <description>Cold lethal water temperature [C] for the particles.</description>
+                <description>Cold lethal water temperature [C] for the particles Only used if temperature_file_enabled is set to false.</description>
             </parameter>
 
             <parameter>
@@ -4881,7 +4882,7 @@
                 <value>22.0</value>
                 <default>22.0</default>
                 <format>float</format>
-                <description>Salty lethal water temperature [C] for the particles.</description>
+                <description>Salty lethal water temperature [C] for the particles. Only used if temperature_file_enabled is set to false.</description>
             </parameter>
 
             <parameter hidden="true">
