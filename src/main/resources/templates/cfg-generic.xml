@@ -5345,7 +5345,7 @@
 
             <parameter>
                 <key>c1</key>
-                <long_name>c1 coefficients of the sole growth module</long_name>
+                <long_name>c1 coefficients of the sole growth module (cm/day)</long_name>
                 <value>"0.02","0.02","0.02"</value>
                 <default>"0.02","0.02","0.02"</default>
                 <format>list</format>

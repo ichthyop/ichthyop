@@ -50,6 +50,7 @@ package org.previmer.ichthyop.particle;
  */
 public class LengthParticleLayer extends ParticleLayer {
 
+    /** The length of the particle (cm) */
     private double length;
 
     public LengthParticleLayer(IParticle particle) {
@@ -61,14 +62,26 @@ public class LengthParticleLayer extends ParticleLayer {
         length = 0;
     }
 
+    /**
+     * Returns the length of the particle (cm)
+     * @return
+     */
     public double getLength() {
         return length;
     }
 
+    /**
+     * Sets the length of the particle (cm)
+     * @param length (cm)
+     */
     public void setLength(double length) {
         this.length = length;
     }
 
+    /**
+     * Increments the length of the particle (cm)
+     * @param dlength
+     */
     public void incrementLength(double dlength) {
         length += dlength;
     }

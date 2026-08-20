@@ -75,9 +75,9 @@ public class SoleGrowthAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
 
         String key = "length_tracker";
-        if(!isNull(key) && Boolean.valueOf(key)) {
-        // Add the length tracker
-        getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
+        if (!isNull(key) && Boolean.valueOf(key)) {
+            // Add the length tracker
+            getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
         }
 
         key = "stage_tracker";
@@ -98,7 +98,8 @@ public class SoleGrowthAction extends AbstractAction {
         c1 = new float[lengthStage.getNStage()];
         String[] sCoeff = getListParameter("c1");
         if (sCoeff.length != c1.length) {
-            throw new IOException("In Sole Growth section, the number of c1 coefficients must be equal to the number of stages.");
+            throw new IOException(
+                    "In Sole Growth section, the number of c1 coefficients must be equal to the number of stages.");
         }
 
         for (int iStage = 0; iStage < c1.length; iStage++) {
@@ -108,7 +109,8 @@ public class SoleGrowthAction extends AbstractAction {
         c2 = new float[lengthStage.getNStage()];
         sCoeff = getListParameter("c2");
         if (sCoeff.length != c2.length) {
-            throw new IOException("In Sole Growth section, the number of c2 coefficients must be equal to the number of stages.");
+            throw new IOException(
+                    "In Sole Growth section, the number of c2 coefficients must be equal to the number of stages.");
         }
 
         for (int iStage = 0; iStage < c2.length; iStage++) {
@@ -130,7 +132,8 @@ public class SoleGrowthAction extends AbstractAction {
         }
 
         LengthParticleLayer sole = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(),
+                getSimulationManager().getTimeManager().getTime()).doubleValue();
         sole.incrementLength(grow(lengthStage.getStage(particle), temp));
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         stageLayer.setStage(lengthStage.getStage((float) sole.getLength()));

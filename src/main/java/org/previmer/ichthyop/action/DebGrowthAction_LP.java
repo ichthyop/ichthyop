@@ -52,6 +52,7 @@ import org.previmer.ichthyop.io.DebLjTracker;
 import org.previmer.ichthyop.io.DebVTracker;
 import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
@@ -149,6 +150,8 @@ public class DebGrowthAction_LP extends AbstractAction {
         this.E_Hj = Double.valueOf(getParameter("maturity_thres_metamorphosis")); // J
         this.E_Hp = Double.valueOf(getParameter("maturity_thres_puberty")); // J
 
+        // Length_init should be in mm? So that volume is in mm3?
+        // To check with Laure and Eline. Provided in cm, divided by 10?
         length_init = Double.valueOf(getParameter("initial_length"));
 
         shape_larvae = Double.valueOf(getParameter("shape")); //0.152 ; larvae < 3.7cm length and weight data  - Palomera et al.
@@ -198,7 +201,13 @@ public class DebGrowthAction_LP extends AbstractAction {
         debLayer.setE(E_0);
         debLayer.setE_R(0);
         debLayer.setE_H(0);
+
+        // TODO: check this
         debLayer.setV(Math.pow(shape_larvae * length_init, 3));
+
+        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
+        lengthLayer.setLength(shape_larvae * length_init);
+
     }
 
     @Override
@@ -214,6 +223,9 @@ public class DebGrowthAction_LP extends AbstractAction {
 
         // Recover the DEB variables for the current particle.
         DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
+
+        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
+        lengthLayer.setLength(computeLength(debLayer.getV()));
 
         // Computes the DEB growth for the given time step
         boolean starvation = grow(dt, debLayer, temp, food);
@@ -295,8 +307,6 @@ public class DebGrowthAction_LP extends AbstractAction {
         p_AmT *= s_M;
         V_dotT *= s_M;
 
-        //double FmT = this.F_m * s_M;
-        //double p_XmT = p_AmT / this.Kappa_X;
         //ENERGETIC FLUXES (J d-1)
         double flow_p_A;
         if (E_H < this.E_Hb) {
