@@ -92,7 +92,7 @@ public class LethalSaltAction extends AbstractAction {
         salinity_field = getParameter("salinity_field");
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
 
-        String key = "salinity.file.enabled";
+        String key = "salinity_file_enabled";
         if(!isNull(key) && (Boolean.valueOf(getParameter(key)))) {
             use_salinity_file = true;
         }
@@ -109,7 +109,7 @@ public class LethalSaltAction extends AbstractAction {
             }
             loadLethalSalinity(pathname);
 
-            String salinity_class = getParameter("salinity.class").toLowerCase();
+            String salinity_class = getParameter("salinity_class").toLowerCase();
 
             boolean isGrowth = CheckGrowthParam.checkParams();  // check if growth or debgrowth is true (xor)
             if (!isGrowth && salinity_class.equals("length")) {

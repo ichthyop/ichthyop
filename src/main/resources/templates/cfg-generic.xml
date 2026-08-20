@@ -4659,7 +4659,7 @@
             </parameter>
 
             <parameter>
-                <key>salinity.file.enabled</key>
+                <key>salinity_file_enabled</key>
                 <long_name>True if salinity file should be used</long_name>
                 <value>false</value>
                 <format>boolean</format>
@@ -4668,14 +4668,15 @@
             </parameter>
 
             <parameter>
-                <key>salinity.class</key>
-                <long_name>Lethal salinity class (age in days or length in cm)</long_name>
+                <key>salinity_class</key>
+                <long_name>Particle attribute that determines the salinity class value (age or length)</long_name>
                 <value>age</value>
                 <format>combo</format>
                 <default>age</default>
                 <accepted>age</accepted>
                 <accepted>length</accepted>
-                <description></description>
+                <description>Provides the particle attribute (age in days or length in cm) that is used to determine the lethal salinity value.
+                    <b>Only used if the <i>salinity.file.enabled</i> parameter is set to True</b></description>
             </parameter>
 
             <parameter>
@@ -4703,7 +4704,7 @@
                     type a new file name and
                     Ichthyop will generate a CSV template. If this parameter is left
                     void, ichthyop
-                    assumes constant lethal temperatures.</description>
+                    assumes constant lethal temperatures. <b>Only used if the <i>salinity.file.enabled</i> parameter is set to True</b></description>
             </parameter>
 
             <parameter>
@@ -4712,7 +4713,7 @@
                 <value>so</value>
                 <default>so</default>
                 <description>The name of the salinity variable (case sensitive) in the
-                    hydrodynamic dataset.</description>
+                    hydrodynamic dataset. <b>Only used if the <i>salinity.file.enabled</i> parameter is set to True</b></description>
             </parameter>
 
             <parameter>
@@ -4721,7 +4722,7 @@
                 <value>14.0</value>
                 <default>14.0</default>
                 <format>float</format>
-                <description>Fresh lethal water salinity [PSU] for the particles.</description>
+                <description>Fresh lethal water salinity [PSU] for the particles.<b>Only used if the <i>salinity.file.enabled</i> parameter is set to False</b></description>
             </parameter>
 
             <parameter>
@@ -4730,7 +4731,7 @@
                 <value>22.0</value>
                 <default>22.0</default>
                 <format>float</format>
-                <description>Saline lethal water salinity [PSU] for the particles.</description>
+                <description>Saline lethal water salinity [PSU] for the particles. <b>Only used if the <i>salinity.file.enabled</i> parameter is set to False</b></description>
             </parameter>
 
             <parameter hidden="true">
