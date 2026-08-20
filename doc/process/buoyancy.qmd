@@ -26,10 +26,10 @@ Age(Days);Density (g/cm3)
 2.75;1.025672
 ```
 
-Sea-water density is computed using sea-water temperature and salinity following @MILLERO1981625 and the technical implementation described in @fofonoff1983algorithms. Using the polynomials values from @MILLERO1981625, the density anomalie $\Delta \sigma = \sigma - \sigma_0$ is computed, with $\sigma_0 = \sigma(S=35, T=0, P=0)$ is computed, and then density is given as:
+Sea-water density is computed using sea-water temperature and salinity following @MILLERO1981625 and the technical implementation described in @fofonoff1983algorithms (EOS-80). Using the polynomials values from @MILLERO1981625, the density anomalie $\Delta \sigma = \sigma - \sigma_0$, with $\sigma_0 = \sigma(S=35, T=0, P=0)$, is computed. Density is then computed as:
 
 $$
 \rho = \sigma_0 + \Delta \sigma + \rho_0
 $$
 
-and converted into $g.cm^{-3}$ by dividing by 1000.
+with $rho_0 = 1000 kg.m^{m-3}$ the reference density of water. Finally, density is converted into $g.cm^{-3}$.
