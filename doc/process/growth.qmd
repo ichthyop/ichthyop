@@ -5,6 +5,12 @@
 There are 3 different implementations of the growth module. They can be selected by setting the
 `class_name` parameter in the `action.growth` action configuration block.
 
+::: {.callout-warning}
+
+All the growth modules should be parameterized to return length in $cm$.
+
+:::
+
 #### Linear growth
 
 In the linear growth method described in @LETT20081210, length depends on temperature but may
