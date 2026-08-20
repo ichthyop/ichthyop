@@ -1,0 +1,262 @@
+### FVCOM grid
+
+In the Ichthyop repository (https://github.com/ichthyop/ichthyop), there is a feature branch, called `feature/fvcom-grid`,
+which allows to use the unstructured mesh grid from the FVCOM model.
+
+![Example of unstructered FVCOM grid. Source: @QI2009153](grid/_static/fvcom-grid.jpg) {#fig-fvcom-grid}.
+
+In order to use Ichthyop with FVCOM grid, you will need to download this specific branch and compile the code manually (see @sec-install-source).
+
+In the present section, we describe some features of how tracer and velocity fields are computed. The authors acknowledge
+Laki Premathilake for his very important contribution and his very kind help.
+
+#### Scale factors description
+
+The FVCOM grid is associated with shape functions that are used to interpolate vector (i.e. velocities) and scalar properties (i.e. temperature) at given locations. These scale factors are
+
+$a1u(N, 4)$, $a2u(N, 4)$, $aw0(N, 3)$, $awX(N, 3)$ and $awy(N, 3)$ with $N$ the number of elements (i.e. triangles) defined in the grid.
+
+#### Velocity computations
+
+```{python}
+#| label: fig-fvcom-vel
+#| echo: false
+
+off = 0.3
+import matplotlib.pyplot as plt
+import numpy as np
+
+lonA = 0
+latA = 0
+
+lonB = 5
+latB = 0
+
+lonC = 2.5
+latC = 5
+
+lonD = -2.5
+latD = 7.5
+
+lonE = -3
+latE = 2.5
+
+lonF = -5
+latF = -2
+
+tE2 = [lonA, lonB, lonC, lonA], [latA, latB, latC, latA]
+tE1 = [lonE, lonC, lonD, lonE], [latE, latC, latD, latE]
+tE3 = [lonF, lonA, lonE, lonF], [latF, latA, latE, latF]
+tE0 = [lonA, lonC, lonE, lonA], [latA, latC, latE, latA],
+
+c2 = 1/3. * (lonA + lonB + lonC), 1/3. * (latA + latB + latC)
+c1 = 1/3. * (lonE + lonC + lonD), 1/3. * (latE + latC + latD)
+c3 = 1/3. * (lonF + lonA + lonE), 1/3. * (latF + latA + latE)
+c0 = 1/3. * (lonA + lonC + lonE), 1/3. * (latA + latC + latE)
+
+lonP, latP = -1.5, 2
+
+col1 = 'blue'
+col2 = 'orange'
+col3 = 'purple'
+col0 = 'k'
+colp = 'red'
+
+plt.figure()
+plt.plot(tE1[0], tE1[1], color=col1)
+plt.plot(c1[0], c1[1], marker='o', color=col1)
+plt.plot(tE2[0], tE2[1], color=col2)
+plt.plot(c2[0], c2[1], marker='o', color=col2)
+plt.plot(tE3[0], tE3[1], color=col3)
+plt.plot(c3[0], c3[1], marker='o', color=col3)
+
+plt.plot(tE0[0], tE0[1], color=col0, ls='--')
+plt.plot(c0[0], c0[1], marker='o', color=col0)
+
+plt.plot(lonP, latP, marker='o', color=colp)
+plt.annotate("P", (lonP + off, latP+ off), ha='center', va='center', color=colp)
+
+plt.annotate("C0", (c0[0] + off + 0.1, c0[1]+ off), ha='center', va='center', color=col0)
+plt.annotate("C1", (c1[0] + off, c1[1]+ off), ha='center', va='center', color=col1)
+plt.annotate("C2", (c2[0] + off, c2[1]+ off), ha='center', va='center', color=col2)
+plt.annotate("C3", (c3[0] + off, c3[1]+ off), ha='center', va='center', color=col3)
+
+plt.annotate("E1", xy=(0.5*(lonD + lonC), 0.5*(latD + latC) + off), ha='center', va='bottom', color=col1)
+
+plt.annotate("E3", xy=(0.5*(lonF + lonA), 0.5*(latF + latA) - off), ha='center', va='top', color=col3)
+
+plt.annotate("E2", xy=(0.5*(lonC + lonB) + off, 0.5*(latC + latB) - off), ha='left', va='center', color=col2)
+
+plt.annotate("u", xy=(c0[0], c0[1]), xytext=(c0[0] + 1, c0[1]), color=col0, va='center', arrowprops=dict(arrowstyle='<-'))
+
+plt.annotate("v", xy=(c0[0], c0[1]), xytext=(c0[0] , c0[1]+ 1), color=col0, va='center', ha='center', arrowprops=dict(arrowstyle='<-'))
+
+plt.axis('equal')
+plt.axis('off')
+
+plt.show()
+```
+
+To compute the velocity field at the particle location, we first determine in which triangle the particle belongs (black triangle in @fig-fvcom-vel) and we also determine the neighbouring triangles (E1, E2 and E3 in  @fig-fvcom-vel).
+
+We compute the relative distance of the particle relative to the centroid of the triangle to which it belongs:
+
+$$
+\overline{X} = X_P - X_O
+$$
+
+$$
+\overline{Y} = Y_P - Y_O
+$$
+
+Then, using the scale factors and velocity fields of the 4 triangles, the derivative of the velocity fields are computed at a given depth $L_i$
+
+$$
+\dfrac{dU}{dX} = a1u(E_0, 0) \times U(E_0, L_i) +
+a1u(E_1, 1) \times U(E_1, L_i) +
+a1u(E_2, 2) \times U(E_2, L_i) +
+a1u(E_3, 3) \times U(E_3, L_i)
+$$
+
+$$
+\dfrac{dU}{dY} = a2u(E_0, 0) \times U(E_0, L_i) +
+a2u(E_1, 1) \times U(E_1, L_i) +
+a2u(E_2, 2) \times U(E_2, L_i) +
+a2u(E_3, 3) \times U(E_3, L_i)
+$$
+
+$$
+\dfrac{dV}{dX} = a1u(E_0, 0) \times V(E_0, L_i) +
+a1u(E_1, 1) \times V(E_1, L_i) +
+a1u(E_2, 2) \times V(E_2, L_i) +
+a1u(E_3, 3) \times V(E_3, L_i)
+$$
+
+$$
+\dfrac{dV}{dY} = a2u(E_0, 0) \times V(E_0, L_i) +
+a2u(E_1, 1) \times V(E_1, L_i) +
+a2u(E_2, 2) \times V(E_2, L_i) +
+a2u(E_3, 3) \times V(E_3, L_i)
+$$
+
+Finally, the velocity at the particle location is given by:
+
+$$
+U_P = U(E_0, L_i) + \dfrac{dU}{dX}\overline{X} + \dfrac{dU}{dY}\overline{Y}
+$$
+
+$$
+V_P = V(E_0, L_i) + \dfrac{dV}{dX}\overline{X} + \dfrac{dV}{dY}\overline{Y}
+$$
+
+:::{callout-note}
+
+The first neighbouring element E1 corresponds to the neighbour relative to the first edge of the inner triangle, E2 corresponds to the neighbour relative relative to the second edge, and so on. **To be confirmed?**
+
+:::
+
+#### Tracer computation
+
+Interpolation of tracer fields can be done by using $aw0$, $awx$ and $awy$. In the model, tracer fields are computed at the **nodes** of the triangles.
+
+First, we find the triangle to which the particle belongs (black triangle in @fig-fvcom-trac).
+
+```{python}
+#| label: fig-fvcom-trac
+#| echo: false
+
+off = 0.2
+import matplotlib.pyplot as plt
+import numpy as np
+
+lonA = 0
+latA = 0
+
+lonB = 5
+latB = 0
+
+lonC = 2.5
+latC = 5
+
+lonD = -2.5
+latD = 7.5
+
+lonE = -3
+latE = 2.5
+
+lonF = -5
+latF = -2
+
+tE0 = [lonA, lonC, lonE, lonA], [latA, latC, latE, latA],
+
+
+c0 = 1/3. * (lonA + lonC + lonE), 1/3. * (latA + latC + latE)
+
+lonP, latP = -1.5, 2
+
+col1 = 'blue'
+col2 = 'orange'
+col3 = 'purple'
+col0 = 'k'
+colp = 'red'
+
+plt.figure()
+
+plt.plot(tE0[0], tE0[1], color=col0, ls='-')
+plt.plot(c0[0], c0[1], marker='o', color=col0)
+
+plt.plot(lonP, latP, marker='o', color=colp)
+plt.annotate("P", (lonP + off, latP+ off), ha='center', va='center', color=colp)
+
+plt.annotate("C0", (c0[0] + off + 0.1, c0[1]+ off), ha='center', va='center', color=col0)
+
+plt.annotate('N1', (lonA, latA-off))
+plt.annotate('N2', (lonC, latC))
+plt.annotate('N3', (lonE-2*off, latE))
+
+
+plt.axis('equal')
+plt.axis('off')
+plt.show()
+```
+
+First, we compute the distance of the particle to the center of the triangle:
+
+$$
+\overline{X} = X_P - X_O
+$$
+
+$$
+\overline{Y} = Y_P - Y_O
+$$
+
+Then, we compute the temperature at the center of the triangle as follows:
+
+$$
+T_O =
+aw0(E_0, 0) \times T(N_1, L_i) +
+aw0(E_0, 1) \times T(N_2, L_i)+
+aw0(E_0, 2) \times T(N_3, L_i)
+$$
+
+We also compute the tracer derivative as follows:
+
+$$
+\frac{dT}{dX} =
+awx(E_0, 0) \times T(N_1, L_i) +
+awx(E_0, 1) \times T(N_2, L_i) +
+awx(E_0, 2) \times T(N_3, L_i)
+$$
+
+$$
+\frac{dT}{dY} =
+awy(E_0, 0) \times T(N_1, L_i) +
+awy(E_0, 1) \times T(N_2, L_i) +
+awy(E_0, 2) \times T(N_3, L_i)
+$$
+
+Finally, the tracer field at the particle location is given by:
+
+$$
+T_P = T_O + \frac{dT}{dX}\times \overline{X} +  \frac{dT}{dY}\times \overline{Y}
+$$

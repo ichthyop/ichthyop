@@ -10,7 +10,7 @@ The Ichthyop tool is available on [GitHub](https://github.com/ichthyop/ichthyop)
 
 Ichthyop executable files can be downloaded [here](https://github.com/ichthyop/ichthyop/releases). Download the  latest `ichthyop-X.Y.Z-jar-with-dependencies.jar` file (replacing `X.Y.Z` by the version number). Older versions are also available if necessary.
 
-### From source
+### From source {#sec-install-source}
 
 To get the source code, type in a Terminal (Unix/MacOs) or Git Bash prompt (Windows):
 
