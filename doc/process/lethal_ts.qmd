@@ -5,7 +5,7 @@ In Ichthyop, there is the possibility to define temperature and salinity values 
 The same set of parameters are used in both cases, with the `temperature` and `salinity` prefix.
 There are two ways to define lethal temperatures and salinities:
 
-- Using constant lethal temperatures or salinities (if `temperature.file.enabled` or `salinity.file.enabled` is set to false)
+- Using constant lethal temperatures or salinities (if `temperature_file_enabled` or `salinity.file.enabled` is set to false)
 - Using a CSV file containing lethal temperatures or salinities as a function of the particle class.
 
 If constant lethal temperatures or salinities are provided, the cold and warm lethal temperatures

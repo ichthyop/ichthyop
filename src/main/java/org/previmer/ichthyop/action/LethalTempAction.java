@@ -92,7 +92,7 @@ public class LethalTempAction extends AbstractAction {
         temperature_field = getParameter("temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
 
-        String key = "temperature.file.enabled";
+        String key = "temperature_file_enabled";
         if(!isNull(key) && (Boolean.valueOf(getParameter(key)))) {
             use_temperature_file = true;
         }

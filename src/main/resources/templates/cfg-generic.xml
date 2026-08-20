@@ -3270,7 +3270,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -3281,7 +3281,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -3292,7 +3292,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -3377,7 +3377,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -3388,7 +3388,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -3399,7 +3399,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -3815,7 +3815,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -3826,7 +3826,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -3837,7 +3837,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter type="serial">
@@ -4633,7 +4633,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated.</description>
             </parameter>
 
             <parameter hidden="false">
@@ -4644,7 +4644,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -4655,7 +4655,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -4664,7 +4664,7 @@
                 <value>false</value>
                 <format>boolean</format>
                 <default>false</default>
-                <description>True if the lethal salinities should be read from a file</description>
+                <description>True if the lethal salinities should be read from a file. Only used if the salinity.file.enabled parameter is set to True </description>
             </parameter>
 
             <parameter>
@@ -4685,7 +4685,7 @@
                 <value>false</value>
                 <format>boolean</format>
                 <default>false</default>
-                <description>True if the salinity should be tracked</description>
+                <description>True if the salinity along the particle trajectories should be tracked</description>
             </parameter>
 
             <parameter>
@@ -4772,7 +4772,6 @@
         <enabled>false</enabled>
         <description>Block of option for setting up the mortality by temperature.</description>
 
-
         <parameters>
 
             <parameter hidden="false">
@@ -4785,7 +4784,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -4796,7 +4795,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -4807,11 +4806,11 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
-                <key>temperature.file.enabled</key>
+                <key>temperature_file_enabled</key>
                 <long_name>True if temperature file should be used</long_name>
                 <value>false</value>
                 <format>boolean</format>
@@ -4941,7 +4940,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -4952,7 +4951,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -4963,7 +4962,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -5146,7 +5145,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -5157,7 +5156,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -5168,7 +5167,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -5318,7 +5317,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -5329,7 +5328,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -5340,7 +5339,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -5481,7 +5480,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -5492,7 +5491,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -5503,7 +5502,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -5934,7 +5933,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -5945,7 +5944,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -5956,7 +5955,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -5969,7 +5968,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to compute orientation velocity. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter>
@@ -6113,7 +6112,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -6124,7 +6123,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -6135,7 +6134,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -6148,7 +6147,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to compute orientation velocity. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter>
@@ -6257,7 +6256,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -6268,7 +6267,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -6279,7 +6278,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
@@ -6292,7 +6291,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to compute orientation velocity. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter>
@@ -6412,7 +6411,7 @@
                 <accepted>length</accepted>
                 <description>Variable used to activate/deactivate a process. Can be age
                     (in days) or
-                    length (in cm)</description>
+                    length (in cm). Length can be used only if one growth module is activated</description>
             </parameter>
 
             <parameter hidden="false">
@@ -6423,7 +6422,7 @@
                 <format>float</format>
                 <description>Activation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is activated</description>
+                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
             </parameter>
 
             <parameter hidden="false">
@@ -6434,7 +6433,7 @@
                 <format>float</format>
                 <description>Dectivation age (days) or length(cm). If the age or length
                     of the
-                    particle is greater, then the process is deactivated</description>
+                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
             </parameter>
 
             <parameter>
