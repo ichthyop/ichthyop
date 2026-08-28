@@ -47,7 +47,7 @@
       <parameter>
         <key>file_prefix</key>
         <long_name>Prefix of the NetCDF output file</long_name>
-        <value>your-prefix</value>
+        <value>my-simulation</value>
         <default>my-simulation</default>
         <description>Type the prefix of the simulation output file. The output
                     filename will
@@ -74,7 +74,7 @@
       <parameter>
         <key>record_frequency</key>
         <long_name>Record frequency</long_name>
-        <value>2</value>
+        <value>24</value>
         <format>integer</format>
         <default>4</default>
         <description>Lagrangian model runs with its own computational time-step,
@@ -135,7 +135,7 @@
       <parameter type="serial">
         <key>transport_duration</key>
         <long_name>Transport duration</long_name>
-        <value>0010 day(s) 00 hour(s) 00 minute(s)</value>
+        <value>0025 day(s) 00 hour(s) 00 minute(s)</value>
         <default>0000 day(s) 12 hour(s) 00 minute(s)</default>
         <format>duration</format>
         <description>Set the duration of particle transport. Format: #### day(s)
