@@ -39,10 +39,6 @@ jobs:
         with:
             path: ~/.m2/repository
             key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.jar') }}
-            restore-keys: |
-                ${{ runner.os }}-build-${{ env.cache-name }}-
-                ${{ runner.os }}-build-
-                ${{ runner.os }}-
 
       - name: Cache Input Files
         id: cache-input
@@ -52,10 +48,6 @@ jobs:
         with:
             path: input
             key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('input/*.nc') }}
-            restore-keys: |
-                ${{ runner.os }}-build-${{ env.cache-name }}-
-                ${{ runner.os }}-build-
-                ${{ runner.os }}-
 
       - name: Download java files
         if: steps.cache-input.outputs.cache-hit != 'true'
