@@ -1370,7 +1370,7 @@
       <parameter>
         <key>can.swim.against.current</key>
         <long_name>True if particle can swim against current</long_name>
-        <value>false</value>
+        <value>true</value>
         <default>false</default>
         <format>boolean</format>
         <description>True if particle can swim against the current</description>
@@ -1378,7 +1378,7 @@
       <parameter>
         <key>swimming.speed.hatch</key>
         <long_name>Swimming speed hatch [m/s]</long_name>
-        <value>1.0</value>
+        <value>5.0</value>
         <default>1</default>
         <format>float</format>
         <description>Swimming speed hatch [m/s]</description>
@@ -1386,7 +1386,7 @@
       <parameter>
         <key>swimming.speed.settle</key>
         <long_name>Swimming speed settle [m/s]</long_name>
-        <value>100.0</value>
+        <value>50.0</value>
         <default>10</default>
         <format>float</format>
         <description>Swimming speed settle [m/s]</description>

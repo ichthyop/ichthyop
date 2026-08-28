@@ -1480,7 +1480,7 @@
       <parameter>
         <key>swimming.cardinal.heading</key>
         <long_name>Heading</long_name>
-        <value>60.0</value>
+        <value>90.0</value>
         <default>10</default>
         <format>float</format>
         <description>Heading</description>
