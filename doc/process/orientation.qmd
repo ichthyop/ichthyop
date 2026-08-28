@@ -43,7 +43,7 @@ for conf in confnames:
 ```{python}
 #|label: fig-ref-control
 #|fig-cap: "Trajectory without orientation"
-#|echo: true
+#|echo: false
 #|output: true
 
 import xarray as xr
@@ -112,8 +112,10 @@ with $V_{hatch}$ and $V_{settle}$ the larval velocity at hatching and settle, $A
 $PLD$ the transport duraction.
 
 ```{python}
-#|echo: true
+#|echo: false
 #|output: true
+#|label: fig-velocity-pld
+#|fig-cap: "Particle velocity as a function of age"
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import i0
@@ -150,8 +152,10 @@ $\mu$ is angle where the distribution is centerred and $\kappa$ is the concentra
 parameter. The distribution is as follows:
 
 ```{python}
-#|echo: true
-#|output: true
+#|echo: false
+#|output: false
+#|label: fig-ref-vonmises
+#|fig-cap: "Example of Von Mises distributions"
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import i0
@@ -209,6 +213,10 @@ Then, at each time step, a new angle is randomly drafted following a Von Misses 
 
 
 ```{python}
+#|label: fig-card
+#|fig-cap: "Trajectory with cardinal orientation"
+#|echo: false
+#|output: true
 import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -258,7 +266,6 @@ ax.scatter(lon[:, :], lat[:, :], c=t2d, marker='.', transform=projin, s=0.5, cma
 feat = ax.add_feature(cfeature.LAND)
 feat = ax.add_feature(cfeature.COASTLINE)
 ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
-
 ```
 
 #### Rheotaxis orientation
@@ -279,9 +286,11 @@ $$
 
 Finally, a random angle is picked up following a Von Mises distribution $f(\theta, \theta_{direction}, \kappa_{reef})$
 
-(ref-rheo)=
-
 ```{python}
+#|echo: false
+#|output: true
+#|label: fig-ref-rheo
+#|fig-cap: "Trajectory with rheotaxis orientation"
 import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -344,6 +353,10 @@ the detection thereshold $\beta$, the larva will swim in the direction of the re
 (ref-orientation)=
 
 ```{python}
+#|echo: false
+#|output: true
+#|label: fig-angle-computation
+#|fig-cap: "Scheme representing the trajectory angle calculation"
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -374,11 +387,11 @@ plt.plot(xold, yold, marker='o', color='blue')
 plt.gca().annotate('$P_{t - 1}$', xy=(xold + 0.05, yold), xycoords='data', color='blue')
 
 angle_reef = np.pi + np.pi / 3.
-print(np.rad2deg(angle_reef))
+# print(np.rad2deg(angle_reef))
 rreef = 1
 xreef = rreef * np.cos(angle_reef)
 yreef = rreef * np.sin(angle_reef)
-print(yreef)
+# print(yreef)
 
 plt.plot(xreef, yreef, marker='o', color='orange')
 plt.gca().annotate('$R$', xy=(xreef + 0.1, yreef), xycoords='data', color='orange')
@@ -482,6 +495,10 @@ used for both ares (1.2) and the $\beta$ parameter has been set equal to 3 km.
 (ref-orientation-2)=
 
 ```{python}
+#|echo: false
+#|output: true
+#|label: fig-ref-reef
+#|fig-cap: "Trajectory with reef orientation"
 import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
