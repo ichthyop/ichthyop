@@ -183,7 +183,7 @@
       <parameter>
         <key>byte_mask_pattern</key>
         <long_name>Mask file pattern</long_name>
-        <value>*mask*.nc</value>
+        <value>nemo*mask*.nc</value>
         <default>*mask*.nc</default>
         <description>Filename filter for identifying the "mask" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the dimensions x, y, z and the variable land/ocean mask at T points</description>
       </parameter>
@@ -1359,10 +1359,10 @@
     <enabled>true</enabled>
     <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
     <parameters>
-     <parameter>
+      <parameter>
         <key>swimming.speed.hatch</key>
         <long_name>Swimming speed hatch [m/s]</long_name>
-        <value>1.0</value>
+        <value>20.0</value>
         <default>1</default>
         <format>float</format>
         <description>Swimming speed hatch [m/s]</description>
@@ -1378,7 +1378,7 @@
       <parameter>
         <key>swimming.speed.settle</key>
         <long_name>Swimming speed settle [m/s]</long_name>
-        <value>100.0</value>
+        <value>50.0</value>
         <default>1000</default>
         <format>float</format>
         <description>Swimming speed settle [m/s]</description>
@@ -1394,7 +1394,7 @@
       <parameter>
         <key>swimming.cardinal.heading</key>
         <long_name>Heading</long_name>
-        <value>60.0</value>
+        <value>90.0</value>
         <default>10</default>
         <format>float</format>
         <description>Swimming speed settle [m/s]</description>

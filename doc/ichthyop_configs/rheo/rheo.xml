@@ -183,7 +183,7 @@
       <parameter>
         <key>byte_mask_pattern</key>
         <long_name>Mask file pattern</long_name>
-        <value>*mask*.nc</value>
+        <value>nemo*mask*.nc</value>
         <default>*mask*.nc</default>
         <description>Filename filter for identifying the "mask" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the dimensions x, y, z and the variable land/ocean mask at T points</description>
       </parameter>
@@ -1359,7 +1359,7 @@
     <enabled>true</enabled>
     <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
     <parameters>
-        <parameter>
+      <parameter>
         <key>swimming.speed.csv.enabled</key>
         <long_name>Speed as CSV</long_name>
         <value>false</value>
@@ -1368,12 +1368,12 @@
         <description>True if speed must be computed as CSV</description>
       </parameter>
       <parameter>
-       <key>can.swim.against.current</key>
-       <long_name>True if particle can swim against current</long_name>
-       <value>false</value>
-       <default>false</default>
-       <format>boolean</format>
-       <description>True if particle can swim against the current</description>
+        <key>can.swim.against.current</key>
+        <long_name>True if particle can swim against current</long_name>
+        <value>false</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>True if particle can swim against the current</description>
       </parameter>
       <parameter>
         <key>swimming.speed.hatch</key>

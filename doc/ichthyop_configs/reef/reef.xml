@@ -183,7 +183,7 @@
       <parameter>
         <key>byte_mask_pattern</key>
         <long_name>Mask file pattern</long_name>
-        <value>*mask*.nc</value>
+        <value>nemo*mask*.nc</value>
         <default>*mask*.nc</default>
         <description>Filename filter for identifying the "mask" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the dimensions x, y, z and the variable land/ocean mask at T points</description>
       </parameter>
@@ -1371,7 +1371,7 @@
       </parameter>
       <parameter>
         <key>swimming.speed.mode</key>
-        <long_name>Mode of velocity calculation. </long_name>
+        <long_name>Mode of velocity calculation.</long_name>
         <value>age</value>
         <default>age</default>
         <format>combo</format>
@@ -1382,13 +1382,13 @@
       </parameter>
       <parameter>
         <key>swimming.body.length.speed</key>
-        <long_name>Velocity in bodylength / s (cm/s) </long_name>
+        <long_name>Velocity in bodylength / s (cm/s)</long_name>
         <value>1</value>
         <default>1</default>
         <format>float</format>
         <description>Age, CSV (based on age) or Lenght (if growth process is on)</description>
       </parameter>
-        <parameter>
+      <parameter>
         <key>maximum.distance</key>
         <long_name>Maximum distance [meter]</long_name>
         <value>300000.0</value>
@@ -1412,7 +1412,7 @@
         <format>float</format>
         <description>Swimming speed settle [m/s]</description>
       </parameter>
-          <parameter>
+      <parameter>
         <key>swimming.speed.csv.enabled</key>
         <long_name>Speed as CSV</long_name>
         <value>false</value>
