@@ -73,7 +73,7 @@ public class TestGetParameter {
     @Test
     public void checkParameter() {
 
-        String expected = "0000 day(s) 12 hour(s) 00 minute(s)";
+        String expected = "0020 day(s) 00 hour(s) 00 minute(s)";
         String actual = cfgFile.getXParameter("transport_duration").getValues();
         assertEquals(expected, actual);
 
