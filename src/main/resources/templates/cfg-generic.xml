@@ -3233,7 +3233,7 @@
       <parameter>
         <key>lon_stain</key>
         <long_name>Longitude [East degree]</long_name>
-        <value>-5.5</value>
+        <value>53</value>
         <default>-5.5</default>
         <format>lonlat</format>
         <description>Longitude [East degree] of the stain. You can change the
@@ -3243,7 +3243,7 @@
       <parameter>
         <key>lat_stain</key>
         <long_name>Latitude [North degree]</long_name>
-        <value>48.4</value>
+        <value>-11.5</value>
         <default>48.4</default>
         <format>lonlat</format>
         <description>Latitude [North degree] of the stain. You can change the
