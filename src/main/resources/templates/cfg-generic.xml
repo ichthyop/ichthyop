@@ -125,7 +125,7 @@
       <parameter type="serial">
         <key>initial_time</key>
         <long_name>Beginning of simulation</long_name>
-        <value>year 2001 month 10 day 20 at 00:00</value>
+        <value>year 1900 month 05 day 02 at 12:00</value>
         <default>year 2010 month 05 day 13 at 10:00</default>
         <format>date</format>
         <description>Set the beginning date and time of the simulation. Format:
@@ -196,7 +196,7 @@
       <parameter hidden="true">
         <key>time_origin</key>
         <long_name>Origin of time</long_name>
-        <value>seconds since 1900-01-01 00:00:00</value>
+        <value>days since 2000-01-01 00:00:00</value>
         <default>seconds since 1900-01-01 00:00:00</default>
         <description>This parameter comes with Gregorian type of calendar only.
                     For
@@ -1401,7 +1401,7 @@
   <block type="dataset">
     <key>dataset.roms_3d</key>
     <tree_path>Dataset/ROMS 3D</tree_path>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <description>Block of options for managing the hydrodynamic dataset. Pre-defined
             block for
             ROMS model (Rutgers or UCLA), 3D simulation and local NetCDF files.</description>
@@ -1864,7 +1864,7 @@
     </parameters>
   </block>
   <block type="dataset">
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <key>dataset.nemo</key>
     <tree_path>Dataset/OPA NEMO</tree_path>
     <description>Block of options for managing the hydrodynamic dataset. Pre-defined
@@ -3233,7 +3233,7 @@
       <parameter>
         <key>lon_stain</key>
         <long_name>Longitude [East degree]</long_name>
-        <value>53</value>
+        <value>17</value>
         <default>-5.5</default>
         <format>lonlat</format>
         <description>Longitude [East degree] of the stain. You can change the
@@ -3243,7 +3243,7 @@
       <parameter>
         <key>lat_stain</key>
         <long_name>Latitude [North degree]</long_name>
-        <value>-11.5</value>
+        <value>-33</value>
         <default>48.4</default>
         <format>lonlat</format>
         <description>Latitude [North degree] of the stain. You can change the
@@ -3253,7 +3253,7 @@
       <parameter>
         <key>depth_stain</key>
         <long_name>Depth [meter]</long_name>
-        <value>-20.0</value>
+        <value>-21.75</value>
         <default>-20.0</default>
         <format>float</format>
         <description>Depth [meter] of the stain. The parameter is ignored for 2D
@@ -3264,7 +3264,7 @@
       <parameter>
         <key>radius_stain</key>
         <long_name>Radius of the stain [meter]</long_name>
-        <value>2000.0</value>
+        <value>50000.0</value>
         <default>2000.0</default>
         <format>float</format>
         <description>Radius [meter] of the stain. Particles are randomly
