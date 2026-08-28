@@ -135,7 +135,7 @@
       <parameter type="serial">
         <key>transport_duration</key>
         <long_name>Transport duration</long_name>
-        <value>0010 day(s) 12 hour(s) 00 minute(s)</value>
+        <value>0010 day(s) 00 hour(s) 00 minute(s)</value>
         <default>0000 day(s) 12 hour(s) 00 minute(s)</default>
         <format>duration</format>
         <description>Set the duration of particle transport. Format: #### day(s)
