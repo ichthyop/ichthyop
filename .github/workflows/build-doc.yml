@@ -39,15 +39,16 @@ jobs:
         with:
           lfs: 'true'
 
+      # Cache input files based on the Zenodo record link
       - name: Cache Input Files
         id: cache-input
         uses: actions/cache@v3
-        env:
-            cache-name: cache-input-files
         with:
             path: input
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('input/*.nc') }}
+            key: ${{ runner.os }}-doc-input-v10890690
 
+        # Cache output files based on the input Hash.
+        # If input file changes, then re-run the simulations
       - name: Cache Output Files
         id: cache-output
         uses: actions/cache@v3
@@ -55,13 +56,15 @@ jobs:
             cache-name: cache-output-files
         with:
             path: doc/ichthyop_output/
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('doc/ichthyop_output/*.nc') }}
+            key: ${{ runner.os }}-doc-output-${{ hashFiles('input/*.nc') }}
+
       - name: Update apt
         run:  sudo apt update -yq
 
       - name: Install Python
         run:  sudo apt install python3 pip python-is-python3 maven openjdk-21-jdk wget unzip
 
+        # If cache hit, files are not downloaded again.
       - name: Download input files
         if: steps.cache-input.outputs.cache-hit != 'true'
         run: wget https://zenodo.org/records/10890690/files/input.zip && unzip input.zip

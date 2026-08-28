@@ -31,15 +31,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ca-certificates ca-certificates-java libnetcdf-dev
 
-      - name: Cache Maven dependencies
-        id: maven-dep
-        uses: actions/cache@v3
-        env:
-            cache-name: maven-dep-modules
-        with:
-            path: ~/.m2/repository
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.jar') }}
-
       - name: Cache Input Files
         id: cache-input
         uses: actions/cache@v3
@@ -47,7 +38,7 @@ jobs:
             cache-name: cache-input-files
         with:
             path: input
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('input/*.nc') }}
+            key: ${{ runner.os }}-build-input-v10890690
 
       - name: Download java files
         if: steps.cache-input.outputs.cache-hit != 'true'
