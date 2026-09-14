@@ -498,7 +498,7 @@
       <parameter hidden="true">
         <key>vertical</key>
         <long_name>Vertical advection</long_name>
-        <value>true</value>
+        <value>false</value>
         <default>true</default>
         <format>boolean</format>
         <description>Determine whether vertical advection is enabled. For 2D simulations, this parameter is ignored.</description>
