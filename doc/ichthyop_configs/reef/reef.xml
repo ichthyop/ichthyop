@@ -8,6 +8,15 @@
     <key>app.time</key>
     <description>Set the general time options of the simulation.</description>
     <parameters>
+      <parameter>
+        <key>fixed_seed</key>
+        <long_name>True the random seed is fixed</long_name>
+        <value>true</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>True if the random is fixed. Used to make sure that
+                    the same simulation with the same parameters provide the same outputs</description>
+      </parameter>
       <parameter type="serial">
         <key>initial_time</key>
         <long_name>Beginning of simulation</long_name>
@@ -104,7 +113,7 @@
       <parameter>
         <key>record_frequency</key>
         <long_name>Record frequency</long_name>
-        <value>4</value>
+        <value>1</value>
         <format>integer</format>
         <default>4</default>
         <description>Lagrangian model runs with its own computational time-step, set in the 'time option block'. You may not need to record every step of the simulation in the NetCDF output file. Set the record frequency as a number of computational time-steps. For instance, let's take dt = 1800s and record frequency = 6. Particle positions will be recorded every 3 hours (1800 * 6 = 10800s = 3h) in the NetCDF output file.</description>
@@ -383,12 +392,12 @@
     <key>release.stain</key>
     <tree_path>Main/Release stain</tree_path>
     <description>Block of options for releasing a "stain" of particles aroung a given location.</description>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <parameters>
       <parameter>
         <key>number_particles</key>
         <long_name>Number of particles</long_name>
-        <value>20</value>
+        <value>30</value>
         <default>1000</default>
         <format>integer</format>
         <description>Number of particles released in the stain. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the stain per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
@@ -420,7 +429,7 @@
       <parameter>
         <key>radius_stain</key>
         <long_name>Radius of the stain [meter]</long_name>
-        <value>20000.0</value>
+        <value>70000.0</value>
         <default>20000.0</default>
         <format>float</format>
         <description>Radius [meter] of the stain. Particles are randomly released (for homogeneous distribution) within the circle defined by this radius.</description>
@@ -802,12 +811,12 @@
     <key>release.zone</key>
     <tree_path>Advanced/Release/From zones</tree_path>
     <description>Block of options for releasing particles within pre-defined geographical zones. This release mode adds a "zone" variable in the NetCDF output file. First time you enable the zone release, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <parameters>
       <parameter>
         <key>number_particles</key>
         <long_name>Number of particles</long_name>
-        <value>1000</value>
+        <value>40</value>
         <default>1000</default>
         <format>integer</format>
         <description>Number of particles released in the zones. The application randomly releases the particles within the zones in order to ensure a homogeneous distribution (= constant concentration of particles among the zones). The downside is that you do not control the number of particles released per zone. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the zones per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
@@ -815,7 +824,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Zone file</long_name>
-        <value>cfg/indian_zones.xml</value>
+        <value>ichthyop_configs/reef/release.xml</value>
         <default>cfg/my_zones.xml</default>
         <format>zonefile</format>
         <template>zone-indian.xml</template>
@@ -913,7 +922,7 @@
       <parameter>
         <key>txtfile</key>
         <long_name>Drifter file</long_name>
-        <value>cfg/indian_drifters.txt</value>
+        <value>ichthyop_configs/reef/initial_traj.txt</value>
         <default>cfg/my_drifters.txt</default>
         <format>textfile</format>
         <template>drifter-indian.txt</template>
@@ -1147,7 +1156,7 @@
   <block type="action">
     <key>action.recruitment.zone</key>
     <tree_path>Advanced/Biology/Recruitment/In zones</tree_path>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
     <parameters>
       <parameter>
@@ -1164,7 +1173,7 @@
       <parameter>
         <key>limit_age</key>
         <long_name>Recruitment limit age [day]</long_name>
-        <value>7.0</value>
+        <value>0.0</value>
         <default>7.0</default>
         <format>float</format>
         <description>A particle must be "older" than the specified age [day] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle length.</description>
@@ -1188,7 +1197,7 @@
       <parameter>
         <key>stop_moving</key>
         <long_name>Stop moving when recruited</long_name>
-        <value>false</value>
+        <value>true</value>
         <default>false</default>
         <format>boolean</format>
         <description>Force a particle to remain where it is as soon as it is recruited. If activated, the particle could not be recruited in any other recruitment area. On the contrary, a particle that does not stop moving when recruited can keep drifting and being recruited in others recruitment areas, as long as the recruitement conditions are fulfilled.</description>
@@ -1196,7 +1205,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Zone file</long_name>
-        <value>cfg/indian_zones.xml</value>
+        <value>ichthyop_configs/reef/recrutement.xml</value>
         <default>cfg/my_zones.xml</default>
         <format>zonefile</format>
         <template>zone-indian.xml</template>
@@ -1383,7 +1392,7 @@
       <parameter>
         <key>swimming.body.length.speed</key>
         <long_name>Velocity in bodylength / s (cm/s)</long_name>
-        <value>1</value>
+        <value>20.0</value>
         <default>1</default>
         <format>float</format>
         <description>Age, CSV (based on age) or Lenght (if growth process is on)</description>
@@ -1391,7 +1400,7 @@
       <parameter>
         <key>maximum.distance</key>
         <long_name>Maximum distance [meter]</long_name>
-        <value>300000.0</value>
+        <value>60000.0</value>
         <default>20.0</default>
         <format>float</format>
         <description>Maximum distance</description>
@@ -1399,7 +1408,7 @@
       <parameter>
         <key>swimming.speed.hatch</key>
         <long_name>Swimming speed hatch [m/s]</long_name>
-        <value>20.0</value>
+        <value>100.0</value>
         <default>1</default>
         <format>float</format>
         <description>Swimming speed hatch [m/s]</description>
@@ -1407,7 +1416,7 @@
       <parameter>
         <key>swimming.speed.settle</key>
         <long_name>Swimming speed settle [m/s]</long_name>
-        <value>50.0</value>
+        <value>1000.0</value>
         <default>10</default>
         <format>float</format>
         <description>Swimming speed settle [m/s]</description>

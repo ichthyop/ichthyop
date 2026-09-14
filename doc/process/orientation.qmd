@@ -492,13 +492,11 @@ An example of a trajectory is provided below. In this case, two
 target destinations are provided (black boxes). The same $\kappa$ value was
 used for both ares (1.2) and the $\beta$ parameter has been set equal to 3 km.
 
-(ref-orientation-2)=
-
 ```{python}
 #|echo: false
 #|output: true
 #|label: fig-ref-reef
-#|fig-cap: "Trajectory with reef orientation"
+#|fig-cap: "Trajectory with reef orientation. The cells where the reefs are detected are shown"
 import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -522,36 +520,177 @@ filelist
 data = xr.open_mfdataset(filelist, decode_times=False)
 data
 
-# +
-lon = data['lon'].values
-lat = data['lat'].values
-mort = data['mortality'].values
+import cartopy.geodesic
+g = cartopy.geodesic.Geodesic()
+def compute_dist_bary(xp, yp):
+    output = []
+    for lontemp, lattemp in zip(np.ravel(lont), np.ravel(latt)):
+        test = g.inverse([lontemp, lattemp], [xp, yp])
+        output.append(test[0][0])
+    output = np.reshape(output, lont.shape)
+    return output
 
-lon = np.ma.masked_where(mort > 0, lon)
-lat = np.ma.masked_where(mort > 0, lat)
+def closestPoint(lineStartA, lineEndB, thePoint):
+
+        #// calculates displacement from point to start edge
+        w = np.zeros([2]);
+        w[0] = thePoint[0] - lineStartA[0];
+        w[1] = thePoint[1] - lineStartA[1];
+
+        #// computes the displacement between start and end of the line
+        tempLineEndB = np.zeros([2]);
+        tempLineEndB[0] = lineEndB[0] - lineStartA[0];
+        tempLineEndB[1] = lineEndB[1] - lineStartA[1];
+
+        #// calculates the projection of w onto the line
+        proj = np.dot(w, tempLineEndB);
+        output = np.zeros([2]);
+
+        #// endpoint 0 is closest point
+        if (proj <= 0.0):
+            output[0] = lineStartA[0];
+            output[1] = lineStartA[1];
+        else:
+            #// square
+            vsq = np.dot(tempLineEndB, tempLineEndB);
+            #// B^2
+            proj /= vsq;
+            #// endpoint 1 is closest point
+            if (proj >= 1):
+                output[0] = lineEndB[0];
+                output[1] = lineEndB[1];
+            else:
+                output[0] = lineStartA[0] + (tempLineEndB[0] * proj);
+                output[1] = lineStartA[1] + (tempLineEndB[1] * proj);
+
+        return output;
+
+def compute_dist_edges(xp, yp):
+
+    xReefs = xp
+    yReefs = yp
+    output = []
+
+    nEdges = len(xReefs) - 1;
+
+    for lontemp, lattemp in zip(np.ravel(lont), np.ravel(latt)):
+
+        # lontemp = lont.max()
+        # lattemp = latt.max()
+        minDistance = 1e30;
+
+        xyCoords = [lontemp, lattemp]
+
+        for i in range(nEdges):
+
+            start = xReefs[i], yReefs[i]
+            end =  xReefs[i + 1], yReefs[i + 1]
+            temp_closest = closestPoint(start, end, xyCoords);
+
+            dist = np.sqrt(np.power(temp_closest[0] - xyCoords[0], 2) + np.power(temp_closest[1] - xyCoords[1], 2));
+
+            if (dist <= minDistance):
+                final_closest = temp_closest.copy();
+                minDistance = dist;
+        test = g.inverse([lontemp, lattemp], [final_closest[0], final_closest[1]])
+        output.append(test[0][0])
+
+    output = np.reshape(output, lont.shape)
+    return output
+
+plt.figure()
+
+mesh = xr.open_dataset('../input/nemo-indian_mesh_hgr.nc', decode_times=False)
+lont = mesh['glamt'].squeeze().values
+latt = mesh['gphit'].squeeze().values
+mesh
+
+lont = np.linspace(lont.min(), lont.max(), 200)
+latt = np.linspace(latt.min(), latt.max(), 200)
+lont, latt = np.meshgrid(lont, latt)
+print(lont.min(), lont.max())
+print(latt.min(), latt.max())
+
+lon = data['lon']
+lat = data['lat']
+mort = data['mortality']
+
+lon = lon.where(mort == 0)
+mortsum = mort.cumsum(dim='time')
+lon = lon.where(mortsum == 0)
+
 ntime, ndrifters = lon.shape
-
-# +
 time = np.arange(ntime)
 drifters = np.arange(ndrifters)
-
+# drifters = 12
 d2d, t2d = np.meshgrid(drifters, time)
+# t2d = time
 
-# +
-plt.figure()
+drifters = slice(None, None)
 
 projin = ccrs.PlateCarree()
 projout = ccrs.PlateCarree()
+itime = slice(None, None)
 
+D = 6e4
+plt.rcParams['lines.linewidth'] = 2
+
+# t2d = mort.values[itime, drifters]
 ax = plt.axes(projection = projout)
-ax.scatter(lon[:, :], lat[:, :], c=t2d, marker='.', transform=projin, s=0.5, cmap=mpl.colormaps['jet'])
+ax.scatter(lon[itime, drifters], lat[itime, drifters], c=t2d[itime, drifters], marker='.', transform=projin, s=0.5, cmap=mpl.colormaps['jet'])
 feat = ax.add_feature(cfeature.LAND)
 feat = ax.add_feature(cfeature.COASTLINE)
-xp = np.array([51.625, 52.625, 52.625,51.625, 51.625])
-yp = np.array([-1.179878E1, -1.179878E1, -1.079878E1, -1.079878E1, -1.179878E1])
-ax.plot(xp, yp, transform=projin, color='k', ls='--')
-xp = np.array([51.625, 52.625 - 0.5, 52.625 - 0.5,51.625, 51.625]) - 1
-yp = np.array([-1.179878E1 + 0.5, -1.179878E1 + 0.5, -1.079878E1, -1.079878E1, -1.179878E1 + 0.5]) - 0.25
-ax.plot(xp, yp, transform=projin, color='k', ls='--')
+
+off = -0.2
+lon1 = 50.625 + off
+lat1 = -11.54878
+lon2 = 51.125 + off
+lat2 = -11.54878
+lon3 = 51.125 + off
+lat3 = -11.04878
+lon4 = 50.625 + off
+lat4 = -11.04878
+
+xp = np.array([lon1, lon2, lon3, lon4, lon1])
+yp = np.array([lat1, lat2, lat3, lat4, lat1])
+xb = np.mean(xp[:4])
+yb = np.mean(yp[:4])
+
+dista = compute_dist_bary(xb, yb)
+# ax.plot(xb, yb, marker='o', color='r')
+ax.plot(xp, yp, transform=projin, color='r', ls='--')
+
+dista_edges = compute_dist_edges(xp, yp)
+
+lon1 = 51.625
+lat1 = -11.79877769947052
+lon2 = 52.625
+lat2 = -11.79877769947052
+lon3 = 52.625
+lat3 = -10.79877769947052
+lon4 = 51.625
+lat4 = -10.79877769947052
+
+xp = np.array([lon1, lon2, lon3, lon4, lon1])
+yp = np.array([lat1, lat2, lat3, lat4, lat1])
+
+xb = np.mean(xp[:4])
+yb = np.mean(yp[:4])
+distb = compute_dist_bary(xb, yb)
+distb_edges = compute_dist_edges(xp, yp)
+
+distot = np.min(np.array([dista, distb]), axis=0)
+distot_edges = np.min(np.array([dista_edges, distb_edges]), axis=0)
+
+ax.plot(xp, yp, transform=projin, color='b', ls='--')
+# ax.plot(xb, yb, marker='o', color='b')
+
 ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
+
+distot = np.ma.masked_where(distot >= D, distot)
+distot_edges = np.ma.masked_where(distot_edges >= D, distot_edges)
+# distot_edges = np.ma.masked_where(mask == 0, distot_edges)
+
+distot_edges = 1 - distot_edges / D
+cs = ax.pcolormesh(lont, latt, distot_edges, transform=projin, zorder=0, alpha=0.3, cmap=mpl.colormaps['Spectral_r'])
 ```
