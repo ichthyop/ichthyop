@@ -237,7 +237,7 @@ public class ReefOrientationAction extends OrientationVelocity {
 
             double mu = d * (thetaPref - thetaCurrent);
 
-            VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef);
+            VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef, getSimulationManager().getTimeManager().index(), particle.getIndex());
 
             double ti = vonMises.nextDouble();
 

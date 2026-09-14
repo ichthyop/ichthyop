@@ -69,7 +69,26 @@ public class VonMisesRandom {
     protected double mu, kappa;
     private double tau, rho, r;
 
+    // Large odd constants for mixing indices into the seed space
+    private static final long MULT_PARTICLE = 0x9E3779B97F4A7C15L; // golden ratio constant
+    private static final long MULT_TIME     = 0xBF58476D1CE4E5B9L;
+
+    public static long deriveSeed(long baseSeed, int iParticle, int iTime) {
+        long z = baseSeed + iParticle * MULT_PARTICLE + iTime * MULT_TIME;
+
+        // SplitMix64 finalizer (avalanche mixing)
+        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+        z = z ^ (z >>> 31);
+        return z;
+    }
+
+
     public VonMisesRandom(double mu, double kappa) {
+        this(mu, kappa, 0, 0);
+    }
+
+    public VonMisesRandom(double mu, double kappa, int time_index, int particle_index) {
 
         if (kappa <= 0.0) {
             throw new IllegalArgumentException();
@@ -77,7 +96,8 @@ public class VonMisesRandom {
 
         boolean isFixedSeed = ParameterManager.getInstance().getConfigurationFile().isFixedSeed();
         if (isFixedSeed) {
-            U = new Random(0);
+            long seed = deriveSeed(0, particle_index, time_index);
+            U = new Random(seed);
         } else {
             U = new Random();
         }
@@ -122,7 +142,7 @@ public class VonMisesRandom {
             c = kappa * (r - w);
         } while ((c * (2.0 - c) < v) && (Math.log(c / v) + 1.0 < c));         // Acceptance/Rejection
 
-        return (U.nextDouble() > 0.5) ? Math.acos(w) : -Math.acos(w);        // Random sign //
-
+        double output = (U.nextDouble() > 0.5) ? Math.acos(w) : -Math.acos(w);
+        return  output;
     }
 }
