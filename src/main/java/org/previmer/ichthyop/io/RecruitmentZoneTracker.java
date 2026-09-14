@@ -87,9 +87,9 @@ public class RecruitmentZoneTracker extends AbstractTracker {
             particle = iter.next();
             rparticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
             Index index = getArray().getIndex();
-            for (Zone zone : getZones()) {
-                index.set(0, particle.getIndex(), zone.getIndex());
-                int recruited = rparticle.isRecruited(zone.getIndex())
+            for (int  izone=0; izone<getZones().size(); izone++) {
+                index.set(0, particle.getIndex(), izone);
+                int recruited = rparticle.isRecruited(izone)
                         ? 1
                         : 0;
                 getArray().setInt(index, recruited);
@@ -105,6 +105,14 @@ public class RecruitmentZoneTracker extends AbstractTracker {
     }
 
     private ArrayList<Zone> getZones() {
-        return getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT);
+        ArrayList<Zone> zones = new ArrayList<>();
+        if (null != getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) {
+            zones.addAll(getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT));
+        }
+
+        if (null != getSimulationManager().getZoneManager().getZones(TypeZone.TARGET)) {
+            zones.addAll(getSimulationManager().getZoneManager().getZones(TypeZone.TARGET));
+        }
+        return zones;
     }
 }

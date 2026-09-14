@@ -46,6 +46,7 @@ package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.*;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  *
@@ -55,6 +56,33 @@ public class ZoneParticleLayer extends ParticleLayer {
 
     public ZoneParticleLayer(IParticle particle) {
         super(particle);
+    }
+
+    public int getNumZone(TypeZone[] typeZones) {
+        int nZone = -1;
+        boolean foundZone = false;
+        ArrayList<Zone> zones = new ArrayList<>();
+
+        for(TypeZone type : typeZones) {
+           if (null != getSimulationManager().getZoneManager().getZones(type)) {
+                zones.addAll(getSimulationManager().getZoneManager().getZones(type));
+           }
+        }
+
+        int cpt = -1;
+        Iterator<Zone> iter = zones.iterator();
+            while (!foundZone && iter.hasNext()) {
+                cpt++;
+                Zone znTmp = (Zone) iter.next();
+                if (znTmp.isParticleInZone(particle())) {
+                    nZone = cpt;
+                    System.out.println("Einaudi " + znTmp.getType() + nZone);
+                    foundZone = true;
+                }
+            }
+
+        return nZone;
+
     }
 
     public int getNumZone(TypeZone type) {

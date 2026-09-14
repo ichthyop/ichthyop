@@ -63,9 +63,12 @@ import org.previmer.ichthyop.TypeZone;
     public void init() {
         isNewRecruited = false;
         numRecruitmentZone = -1;
-        isRecruited = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT))
-                ? new boolean[getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT).size()]
-                : new boolean[1];
+
+        int nRecruitmentZones = (null == getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) ? 0 : getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT).size();
+        int nTarget = (null == getSimulationManager().getZoneManager().getZones(TypeZone.TARGET)) ? 0 : getSimulationManager().getZoneManager().getZones(TypeZone.TARGET).size();
+
+        isRecruited = (nTarget + nRecruitmentZones) == 0 ? new boolean[1] : new boolean[nTarget + nRecruitmentZones];
+
     }
 
     public boolean isRecruited() {
@@ -79,7 +82,6 @@ import org.previmer.ichthyop.TypeZone;
     }
 
     public boolean isRecruited(int numZone) {
-
         return isRecruited[numZone];
     }
 

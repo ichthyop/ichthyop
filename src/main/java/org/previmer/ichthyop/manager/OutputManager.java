@@ -1010,8 +1010,20 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 zoneDimension = new HashMap<>();
             }
             if (null == zoneDimension.get(type)) {
+
+                Dimension zoneDim;
                 String name = type.toString() + "_zone";
-                Dimension zoneDim = bNcOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size());
+
+                if(type == TypeZone.RECRUITMENT) {
+                    // NB: for recruitment zone, we merge with "target" zones (defined for reef orientation)
+                    ArrayList<Zone> targetZones = getSimulationManager().getZoneManager().getZones(TypeZone.TARGET);
+                    ArrayList<Zone> recruitmentZones = getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT);
+                    int nTargets = (targetZones == null) ? 0 : targetZones.size();
+                    int nRecruitments = (recruitmentZones == null) ? 0 : recruitmentZones.size();
+                    zoneDim = bNcOut.addDimension(name, nTargets + nRecruitments);
+                } else {
+                    zoneDim = bNcOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size());
+                }
                 zoneDimension.put(type, zoneDim);
                 dimensions.put(zoneDim.getShortName(), zoneDim);
             }

@@ -91,7 +91,14 @@ public class RecruitmentZoneAction extends AbstractAction {
             lengthMinAtRecruitment = Float.valueOf(getParameter("limit_length"));
         }
         stopMovingOnceRecruited = Boolean.valueOf(getParameter("stop_moving"));
-        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RECRUITMENT);
+
+        // Adding a patch so that
+        // no need for recruitment file, since recruitment can be defined by target
+        // reef orientation file
+        if(!isNull("zone_file")) {
+            getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RECRUITMENT);
+        }
+
         boolean addTracker = true;
         try {
             addTracker = Boolean.valueOf(getParameter("recruited_tracker"));
@@ -132,9 +139,8 @@ public class RecruitmentZoneAction extends AbstractAction {
             return;
         }
 
-        int numCurrentZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RECRUITMENT);
+        int numCurrentZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(new TypeZone[]{TypeZone.RECRUITMENT, TypeZone.TARGET});
         if ((numCurrentZone != -1) && !rParticle.isRecruited(numCurrentZone)) {
-
             if (satisfyRecruitmentCriterion(particle)) {
                 timeInZone = (rParticle.getNumRecruitmentZone() == numCurrentZone)
                         ? timeInZone + Math.abs(getSimulationManager().getTimeManager().get_dt())
