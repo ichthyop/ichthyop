@@ -608,8 +608,6 @@ mesh
 lont = np.linspace(lont.min(), lont.max(), 200)
 latt = np.linspace(latt.min(), latt.max(), 200)
 lont, latt = np.meshgrid(lont, latt)
-print(lont.min(), lont.max())
-print(latt.min(), latt.max())
 
 lon = data['lon']
 lat = data['lat']
@@ -685,7 +683,7 @@ distot_edges = np.min(np.array([dista_edges, distb_edges]), axis=0)
 ax.plot(xp, yp, transform=projin, color='b', ls='--')
 # ax.plot(xb, yb, marker='o', color='b')
 
-ax.set_extent([49, 55.25, -13.13, -9.45], crs=projin)
+ax.set_extent([49.5 + 0.1, 55.25-1, -13.13 + 0.4, -9.45 - 0.5], crs=projin)
 
 distot = np.ma.masked_where(distot >= D, distot)
 distot_edges = np.ma.masked_where(distot_edges >= D, distot_edges)
