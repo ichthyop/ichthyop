@@ -231,17 +231,23 @@ public class ReefOrientationAction extends OrientationVelocity {
 
             // computes the destination angle
             thetaPref = Math.atan2(xyReef[1] - xyParticule[1], xyReef[0] - xyParticule[0]);
+            if(thetaPref < 0) {
+                thetaPref += 2 * Math.PI;
+            }
 
             // computes the actual trajectory angle
             thetaCurrent = Math.atan2(xyOrigin[1] - xyParticule[1], xyOrigin[0] - xyParticule[0]) + Math.PI;
 
-            double mu = d * (thetaPref - thetaCurrent);
+            if(thetaCurrent < 0) {
+                thetaCurrent += 2 * Math.PI;
+            }
 
             VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef, getSimulationManager().getTimeManager().index(), particle.getIndex());
-
             double ti = vonMises.nextDouble();
 
-            double theta = ti + mu + thetaCurrent;
+            double turningAngle = d * (thetaPref - thetaCurrent) + ti;
+
+            double theta = thetaCurrent + turningAngle;
 
             double swimmingSpeed = getVelocity(particle);
 
