@@ -9,7 +9,7 @@ three methods, but the directions depend on the method considered.
 
 ```{python}
 #| echo: false
-#| output: false
+#| output: true
 
 import os
 from glob import glob
@@ -37,6 +37,11 @@ for conf in confnames:
         command = ['java', '-jar', jarname, os.path.join('ichthyop_configs', conf, f'{conf}.xml')]
         print(command)
         result = subprocess.run(command, capture_output=False, text=False)
+
+        if conf == 'reef':
+            command = ['java', '-jar', jarname, os.path.join('ichthyop_configs', conf, f'{conf}-noadv.xml')]
+            print(command)
+            result = subprocess.run(command, capture_output=False, text=False)
 ```
 
 
@@ -494,9 +499,7 @@ used for both ares (1.2) and the $\beta$ parameter has been set equal to 3 km.
 
 ```{python}
 #|echo: false
-#|output: true
-#|label: fig-ref-reef
-#|fig-cap: "Trajectory with reef orientation. The cells where the reefs are detected are shown"
+#|output: false
 import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -506,19 +509,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
 
-config = 'reef'
+mesh = xr.open_dataset('../input/nemo-indian_mesh_hgr.nc', decode_times=False)
+lont = mesh['glamt'].squeeze().values
+latt = mesh['gphit'].squeeze().values
+mesh
 
-if os.path.isdir('ichthyop_output'):
-    pattern = os.path.join('ichthyop_output', config, '*nc')
-else :
-    pattern = os.path.join('..', '..', 'ichthyop_output', config, '*nc')
-pattern
-
-filelist = glob(pattern)
-filelist
-
-data = xr.open_mfdataset(filelist, decode_times=False)
-data
+lont = np.linspace(lont.min(), lont.max(), 200)
+latt = np.linspace(latt.min(), latt.max(), 200)
+lont, latt = np.meshgrid(lont, latt)
 
 import cartopy.geodesic
 g = cartopy.geodesic.Geodesic()
@@ -598,97 +596,130 @@ def compute_dist_edges(xp, yp):
     output = np.reshape(output, lont.shape)
     return output
 
-plt.figure()
+def plot_figure(config):
 
-mesh = xr.open_dataset('../input/nemo-indian_mesh_hgr.nc', decode_times=False)
-lont = mesh['glamt'].squeeze().values
-latt = mesh['gphit'].squeeze().values
-mesh
+    if os.path.isdir('ichthyop_output'):
+        pattern = os.path.join('ichthyop_output', config, '*nc')
+    else :
+        pattern = os.path.join('..', '..', 'ichthyop_output', config, '*nc')
+    pattern
 
-lont = np.linspace(lont.min(), lont.max(), 200)
-latt = np.linspace(latt.min(), latt.max(), 200)
-lont, latt = np.meshgrid(lont, latt)
+    filelist = glob(pattern)
+    filelist
 
-lon = data['lon']
-lat = data['lat']
-mort = data['mortality']
+    data = xr.open_mfdataset(filelist, decode_times=False)
+    data
 
-lon = lon.where(mort == 0)
-mortsum = mort.cumsum(dim='time')
-lon = lon.where(mortsum == 0)
+    plt.figure()
 
-ntime, ndrifters = lon.shape
-time = np.arange(ntime)
-drifters = np.arange(ndrifters)
-# drifters = 12
-d2d, t2d = np.meshgrid(drifters, time)
-# t2d = time
+    mesh = xr.open_dataset('../input/nemo-indian_mesh_hgr.nc', decode_times=False)
+    lont = mesh['glamt'].squeeze().values
+    latt = mesh['gphit'].squeeze().values
+    mesh
 
-drifters = slice(None, None)
+    lont = np.linspace(lont.min(), lont.max(), 200)
+    latt = np.linspace(latt.min(), latt.max(), 200)
+    lont, latt = np.meshgrid(lont, latt)
 
-projin = ccrs.PlateCarree()
-projout = ccrs.PlateCarree()
-itime = slice(None, None)
+    lon = data['lon']
+    lat = data['lat']
+    mort = data['mortality']
 
-D = 6e4
-plt.rcParams['lines.linewidth'] = 2
+    lon = lon.where(mort == 0)
+    mortsum = mort.cumsum(dim='time')
+    lon = lon.where(mortsum == 0)
 
-# t2d = mort.values[itime, drifters]
-ax = plt.axes(projection = projout)
-ax.scatter(lon[itime, drifters], lat[itime, drifters], c=t2d[itime, drifters], marker='.', transform=projin, s=0.5, cmap=mpl.colormaps['jet'])
-feat = ax.add_feature(cfeature.LAND)
-feat = ax.add_feature(cfeature.COASTLINE)
+    ntime, ndrifters = lon.shape
+    time = np.arange(ntime)
+    drifters = np.arange(ndrifters)
+    # drifters = 12
+    d2d, t2d = np.meshgrid(drifters, time)
+    # t2d = time
 
-off = -0.2
-lon1 = 50.625 + off
-lat1 = -11.54878
-lon2 = 51.125 + off
-lat2 = -11.54878
-lon3 = 51.125 + off
-lat3 = -11.04878
-lon4 = 50.625 + off
-lat4 = -11.04878
+    drifters = slice(None, None)
 
-xp = np.array([lon1, lon2, lon3, lon4, lon1])
-yp = np.array([lat1, lat2, lat3, lat4, lat1])
-xb = np.mean(xp[:4])
-yb = np.mean(yp[:4])
+    projin = ccrs.PlateCarree()
+    projout = ccrs.PlateCarree()
+    itime = slice(None, None)
 
-dista = compute_dist_bary(xb, yb)
-# ax.plot(xb, yb, marker='o', color='r')
-ax.plot(xp, yp, transform=projin, color='r', ls='--')
+    D = 6e4
+    plt.rcParams['lines.linewidth'] = 2
 
-dista_edges = compute_dist_edges(xp, yp)
+    # t2d = mort.values[itime, drifters]
+    ax = plt.axes(projection = projout)
+    ax.scatter(lon[itime, drifters], lat[itime, drifters], c=t2d[itime, drifters], marker='.', transform=projin, s=0.5, cmap=mpl.colormaps['jet'])
 
-lon1 = 51.625
-lat1 = -11.79877769947052
-lon2 = 52.625
-lat2 = -11.79877769947052
-lon3 = 52.625
-lat3 = -10.79877769947052
-lon4 = 51.625
-lat4 = -10.79877769947052
+    feat = ax.add_feature(cfeature.LAND)
+    feat = ax.add_feature(cfeature.COASTLINE)
 
-xp = np.array([lon1, lon2, lon3, lon4, lon1])
-yp = np.array([lat1, lat2, lat3, lat4, lat1])
+    off = -0.2
+    lon1 = 50.625 + off
+    lat1 = -11.54878
+    lon2 = 51.125 + off
+    lat2 = -11.54878
+    lon3 = 51.125 + off
+    lat3 = -11.04878
+    lon4 = 50.625 + off
+    lat4 = -11.04878
 
-xb = np.mean(xp[:4])
-yb = np.mean(yp[:4])
-distb = compute_dist_bary(xb, yb)
-distb_edges = compute_dist_edges(xp, yp)
+    xp = np.array([lon1, lon2, lon3, lon4, lon1])
+    yp = np.array([lat1, lat2, lat3, lat4, lat1])
+    xb = np.mean(xp[:4])
+    yb = np.mean(yp[:4])
 
-distot = np.min(np.array([dista, distb]), axis=0)
-distot_edges = np.min(np.array([dista_edges, distb_edges]), axis=0)
+    dista = compute_dist_bary(xb, yb)
+    # ax.plot(xb, yb, marker='o', color='r')
+    ax.plot(xp, yp, transform=projin, color='r', ls='--')
 
-ax.plot(xp, yp, transform=projin, color='b', ls='--')
-# ax.plot(xb, yb, marker='o', color='b')
+    dista_edges = compute_dist_edges(xp, yp)
 
-ax.set_extent([49.5 + 0.1, 55.25-1, -13.13 + 0.4, -9.45 - 0.5], crs=projin)
+    lon1 = 51.625
+    lat1 = -11.79877769947052
+    lon2 = 52.625
+    lat2 = -11.79877769947052
+    lon3 = 52.625
+    lat3 = -10.79877769947052
+    lon4 = 51.625
+    lat4 = -10.79877769947052
 
-distot = np.ma.masked_where(distot >= D, distot)
-distot_edges = np.ma.masked_where(distot_edges >= D, distot_edges)
-# distot_edges = np.ma.masked_where(mask == 0, distot_edges)
+    xp = np.array([lon1, lon2, lon3, lon4, lon1])
+    yp = np.array([lat1, lat2, lat3, lat4, lat1])
 
-distot_edges = 1 - distot_edges / D
-cs = ax.pcolormesh(lont, latt, distot_edges, transform=projin, zorder=0, alpha=0.3, cmap=mpl.colormaps['Spectral_r'])
+    xb = np.mean(xp[:4])
+    yb = np.mean(yp[:4])
+    distb = compute_dist_bary(xb, yb)
+    distb_edges = compute_dist_edges(xp, yp)
+
+    distot = np.min(np.array([dista, distb]), axis=0)
+    distot_edges = np.min(np.array([dista_edges, distb_edges]), axis=0)
+
+    ax.plot(xp, yp, transform=projin, color='b', ls='--')
+    # ax.plot(xb, yb, marker='o', color='b')
+
+    ax.set_extent([49.5 + 0.1, 55.25-1, -13.13 + 0.4, -9.45 - 0.5], crs=projin)
+
+    distot = np.ma.masked_where(distot >= D, distot)
+    distot_edges = np.ma.masked_where(distot_edges >= D, distot_edges)
+    # distot_edges = np.ma.masked_where(mask == 0, distot_edges)
+
+    distot_edges = 1 - distot_edges / D
+    cs = ax.pcolormesh(lont, latt, distot_edges, transform=projin, zorder=0, alpha=0.3, cmap=mpl.colormaps['Spectral_r'])
+```
+
+```{python}
+#|echo: false
+#|output: true
+#|label: fig-ref-reef
+#|fig-cap: "Trajectory with reef orientation and advection. The cells where the reefs are detected are shown in colors"
+
+plot_figure('reef')
+```
+
+```{python}
+#|echo: false
+#|output: true
+#|label: fig-ref-reef-noadv
+#|fig-cap: "Trajectory with reef orientation only. The cells where the reefs are detected are shown in colors"
+
+plot_figure('reef-noadv')
 ```
