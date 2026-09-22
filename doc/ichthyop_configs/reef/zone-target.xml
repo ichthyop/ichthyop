@@ -26,7 +26,7 @@
         <lat>-10.79877769947052</lat>
       </point>
     </polygon>
-    <kappa>1.2</kappa>
+    <kappa>0.5</kappa>
     <color>[r=255,g=153,b=51]</color>
     <bathy_mask>
       <enabled>false</enabled>
@@ -77,7 +77,7 @@
       <lower_depth>0.0</lower_depth>
     </thickness>
     <color>[r=255,g=255,b=255]</color>
-    <kappa>1.2</kappa>
+    <kappa>20.0</kappa>
     <proportion_particles>0</proportion_particles>
   </zone>
 </zones>

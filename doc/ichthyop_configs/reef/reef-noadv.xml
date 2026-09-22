@@ -105,7 +105,7 @@
       <parameter>
         <key>output_path</key>
         <long_name>Output path</long_name>
-        <value>ichthyop_output/reef</value>
+        <value>ichthyop_output/reef-noadv</value>
         <format>path</format>
         <default>output</default>
         <description>Select the folder where the simulation NetCDF output file should be saved. For instance, relative paths 'output' or 'output/' or './output' or './output/' are supported and equivalent. They will be interpretated as /path_from_where_you_run_ichthyop/ouput/ If ouput folder does not exist, application will attempt to create it.</description>
@@ -475,7 +475,7 @@
     <key>action.advection</key>
     <description>Options that control the advection process.</description>
     <tree_path>Advanced/Transport/Advection</tree_path>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <parameters>
       <parameter>
         <key>scheme</key>
@@ -922,7 +922,7 @@
       <parameter>
         <key>txtfile</key>
         <long_name>Drifter file</long_name>
-        <value>ichthyop_configs/reef/initial_traj.txt</value>
+        <value>/home/BARRIER/Work/codes/ichthyop/ichthyop-private/doc/ichthyop_configs/reef/initial_traj.txt</value>
         <default>cfg/my_drifters.txt</default>
         <format>textfile</format>
         <template>drifter-indian.txt</template>
@@ -1432,7 +1432,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Orientation Zone File</long_name>
-        <value>ichthyop_configs/reef/zone-target.xml</value>
+        <value>/home/BARRIER/Work/codes/ichthyop/ichthyop-private/doc/ichthyop_configs/reef/zone-target.xml</value>
         <default>zone-target.xml</default>
         <format>zonefile</format>
         <template>target-zone-indian.xml</template>
