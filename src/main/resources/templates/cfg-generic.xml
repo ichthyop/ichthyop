@@ -74,7 +74,7 @@
       <parameter>
         <key>record_frequency</key>
         <long_name>Record frequency</long_name>
-        <value>24</value>
+        <value>144</value>
         <format>integer</format>
         <default>4</default>
         <description>Lagrangian model runs with its own computational time-step,
