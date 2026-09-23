@@ -3148,7 +3148,7 @@
         <value>cfg/my_drifters.txt</value>
         <default>cfg/my_drifters.txt</default>
         <format>textfile</format>
-        <template>drifter-iroise.txt</template>
+        <template>drifter-benguela.txt</template>
         <description>Select an existing drifter textfile (*.txt) or create a new
                     one.
                     Relative pathnames are supported (e.g 'cfg/my_drifters1.xml' or
