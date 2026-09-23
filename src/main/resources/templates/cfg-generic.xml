@@ -5144,6 +5144,18 @@
     <tree_path>Biology/Movements/Vertical migration</tree_path>
     <enabled>false</enabled>
     <parameters>
+        <parameter>
+            <key>method</key>
+            <long_name>Depth computation method</long_name>
+            <value>linear</value>
+            <default>linear</default>
+            <format>combo</format>
+            <accepted>linear</accepted>
+            <accepted>edge</accepted>
+            <description>Depth computing method. If linear, the
+                particle depth is linearly computed based on simulation time.
+            </description>
+        </parameter>
       <parameter>
         <key>daytime_depth</key>
         <long_name>Depth at daytime [meter]</long_name>
