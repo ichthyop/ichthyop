@@ -3836,38 +3836,6 @@
             length(t) + (growth_coeff1 + growth_coeff2 * max(temp, threshold_temp)) * dt</description>
     <parameters>
       <parameter>
-        <key>activation_variable</key>
-        <long_name>Variable used to activate/deactivate process</long_name>
-        <value>age</value>
-        <default>age</default>
-        <format>combo</format>
-        <accepted>age</accepted>
-        <accepted>length</accepted>
-        <description>Variable used to activate/deactivate a process. Can be age
-                    (in days) or
-                    length (in cm). Length can be used only if one growth module is activated</description>
-      </parameter>
-      <parameter>
-        <key>activation_minimum_class_value</key>
-        <long_name>Activation age (days) or length(cm)</long_name>
-        <value>0</value>
-        <default>0</default>
-        <format>float</format>
-        <description>Activation age (days) or length(cm). If the age or length
-                    of the
-                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
-      </parameter>
-      <parameter>
-        <key>activation_maximum_class_value</key>
-        <long_name>Dectivation age (days) or length(cm)</long_name>
-        <value>1e50</value>
-        <default>1e50</default>
-        <format>float</format>
-        <description>Dectivation age (days) or length(cm). If the age or length
-                    of the
-                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
-      </parameter>
-      <parameter>
         <key>coeff1</key>
         <long_name>Growth coefficient 1 (C1, cm/day)</long_name>
         <value>0.02</value>
@@ -4023,38 +3991,6 @@
             length(t) + (growth_coeff1 + growth_coeff2 * max(temp, threshold_temp)) * dt</description>
     <parameters>
       <parameter>
-        <key>activation_variable</key>
-        <long_name>Variable used to activate/deactivate process</long_name>
-        <value>age</value>
-        <default>age</default>
-        <format>combo</format>
-        <accepted>age</accepted>
-        <accepted>length</accepted>
-        <description>Variable used to activate/deactivate a process. Can be age
-                    (in days) or
-                    length (in cm). Length can be used only if one growth module is activated</description>
-      </parameter>
-      <parameter>
-        <key>activation_minimum_class_value</key>
-        <long_name>Activation age (days) or length(cm)</long_name>
-        <value>0</value>
-        <default>0</default>
-        <format>float</format>
-        <description>Activation age (days) or length(cm). If the age or length
-                    of the
-                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
-      </parameter>
-      <parameter>
-        <key>activation_maximum_class_value</key>
-        <long_name>Dectivation age (days) or length(cm)</long_name>
-        <value>1e50</value>
-        <default>1e50</default>
-        <format>float</format>
-        <description>Dectivation age (days) or length(cm). If the age or length
-                    of the
-                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
-      </parameter>
-      <parameter>
         <key>b</key>
         <long_name>b coefficient of the exponential growth module</long_name>
         <value>0.02</value>
@@ -4176,38 +4112,6 @@
             equations
             of Tanner et al. (2017)</description>
     <parameters>
-      <parameter>
-        <key>activation_variable</key>
-        <long_name>Variable used to activate/deactivate process</long_name>
-        <value>age</value>
-        <default>age</default>
-        <format>combo</format>
-        <accepted>age</accepted>
-        <accepted>length</accepted>
-        <description>Variable used to activate/deactivate a process. Can be age
-                    (in days) or
-                    length (in cm). Length can be used only if one growth module is activated</description>
-      </parameter>
-      <parameter>
-        <key>activation_minimum_class_value</key>
-        <long_name>Activation age (days) or length(cm)</long_name>
-        <value>0</value>
-        <default>0</default>
-        <format>float</format>
-        <description>Activation age (days) or length(cm). If the age or length
-                    of the
-                    particle is greater, then the process is activated. Length is available only if one growth module is available</description>
-      </parameter>
-      <parameter>
-        <key>activation_maximum_class_value</key>
-        <long_name>Dectivation age (days) or length(cm)</long_name>
-        <value>1e50</value>
-        <default>1e50</default>
-        <format>float</format>
-        <description>Dectivation age (days) or length(cm). If the age or length
-                    of the
-                    particle is greater, then the process is deactivated. Length can be used only if one module is activated</description>
-      </parameter>
       <parameter>
         <key>c1</key>
         <long_name>c1 coefficients of the sole growth module (cm/day)</long_name>
