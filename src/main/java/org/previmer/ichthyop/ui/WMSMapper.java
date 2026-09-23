@@ -356,12 +356,15 @@ public class WMSMapper extends JXMapKit {
             } else {
                 return new float[]{dataset[0], dataset[dataset.length - 1]};
             }
+        } else if (variable.equals("stage")) {
+             float lower = (float) getMin(dataset);
+             float upper = (float) getMax(dataset);
+             return new float[]{lower, upper};
         } else {
             double mean = getMean(dataset);
             double stdDeviation = getStandardDeviation(dataset, mean);
             float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
             float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
-            System.out.println("min: " + getMin(dataset) + " max: " + getMax(dataset));
             return new float[]{lower, upper};
         }
     }
