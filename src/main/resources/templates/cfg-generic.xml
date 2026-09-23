@@ -74,7 +74,7 @@
       <parameter>
         <key>record_frequency</key>
         <long_name>Record frequency</long_name>
-        <value>144</value>
+        <value>6</value>
         <format>integer</format>
         <default>4</default>
         <description>Lagrangian model runs with its own computational time-step,
@@ -135,7 +135,7 @@
       <parameter type="serial">
         <key>transport_duration</key>
         <long_name>Transport duration</long_name>
-        <value>0025 day(s) 00 hour(s) 00 minute(s)</value>
+        <value>0015 day(s) 00 hour(s) 00 minute(s)</value>
         <default>0000 day(s) 12 hour(s) 00 minute(s)</default>
         <format>duration</format>
         <description>Set the duration of particle transport. Format: #### day(s)
