@@ -42,6 +42,11 @@
 -   **`DatasetUtil.java`**: fixed date-parsing patterns (`yyyy-MM-dd` → `yyyy-M-d`) to correctly parse single-digit month/day values in NetCDF time units.
 -   **`RecruitmentStainAction.java`**: particle is now explicitly `lock()`ed upon recruitment in a stain.
 -   **`VonMisesRandom.java`**: added support for a fixed random seed (via `ParameterManager` / `app.seed` block) to make simulations reproducible.
+-   Release zone output was computed at record frequency, which led sometimes to -1 values. Now it is computed just after release event (Eliot bug)
+-   In the `MigrationAction.java`, positive depth values were not converted to negative ones, contrary to what is stated on the console
+-   Bug in bouncing when 2D datasets are used (bug introduced in 3.4)
+- **`ReefOrientation.java`**: Bug in the computation of reef orientation. Issue with a wrong angle computation.
+- Correction of map display when `stage` and `drifter` values are used.
 
 ## Refactors / Internal Changes
 
@@ -51,12 +56,6 @@
 -   `CheckGrowthParam.java`: now also recognizes `action.growth.exponential` as a valid growth module (alongside `action.growth` and `action.growthDeb`), enforcing that only one growth module is active at a time.
 -   `ParticleMortality.java`: added new `LARGE` mortality cause (for the exponential growth cap).
 -   Minor UI reorganizations in `IchthyopView.java` (WMS server list) and `NewConfigView.java` (generic template promoted to top of the config tree).
-
-## Bug fix
-
--   Release zone output was computed at record frequency, which led sometimes to -1 values. Now it is computed just after release event (Eliot bug)
--   In the `MigrationAction.java`, positive depth values were not converted to negative ones, contrary to what is stated on the console
--   Bug in bouncing when 2D datasets are used (bug introduced in 3.4)
 
 ## New features
 
