@@ -5068,7 +5068,7 @@
     <description>Block of options that control the random swimming process. Swimming
             velocities
             are provided in a CSV file as an age function of the particle.</description>
-    <tree_path>Transport/Movements/Swimming</tree_path>
+    <tree_path>Biology/Movements/Swimming</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter>
@@ -5141,7 +5141,7 @@
             operates after a “minimum age”. Setting the daytime depth equal to the
             night-time depth,
             the pattern forces the motion of particles at a constant depth.</description>
-    <tree_path>Transport/Movements/Vertical migration</tree_path>
+    <tree_path>Biology/Movements/Vertical migration</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter>
@@ -5242,7 +5242,7 @@
   </block>
   <block type="action">
     <key>action.gradient</key>
-    <tree_path>Transport/Movements/Gradient movement</tree_path>
+    <tree_path>Biology/Movements/Gradient movement</tree_path>
     <enabled>false</enabled>
     <description>Block of options for the gradient move process.</description>
     <parameters>
@@ -5340,7 +5340,7 @@
   </block>
   <block type="action">
     <key>action.orientation.reef</key>
-    <tree_path>Transport/Movements/Orientation/Reef</tree_path>
+    <tree_path>Biology/Movements/Orientation/Reef</tree_path>
     <enabled>false</enabled>
     <description>Block of options for defining reef orientation process.</description>
     <parameters>
@@ -5496,7 +5496,7 @@
   </block>
   <block type="action">
     <key>action.orientation.cardinal</key>
-    <tree_path>Transport/Movements/Orientation/Cardinal</tree_path>
+    <tree_path>Biology/Movements/Orientation/Cardinal</tree_path>
     <enabled>false</enabled>
     <description>Block of options for defining some recruitment criterions and
             recruitment
@@ -5631,7 +5631,7 @@
   </block>
   <block type="action">
     <key>action.orientation.rheotaxis</key>
-    <tree_path>Transport/Movements/Orientation/Rheotaxis</tree_path>
+    <tree_path>Biology/Movements/Orientation/Rheotaxis</tree_path>
     <enabled>false</enabled>
     <description>Block of options for defining Rheotaxis orientation process</description>
     <parameters>
