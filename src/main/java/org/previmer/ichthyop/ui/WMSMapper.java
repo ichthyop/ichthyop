@@ -945,8 +945,14 @@ public class WMSMapper extends JXMapKit {
             ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{index, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
-                if (pcolorVariable.getNameAndDimensions().startsWith("time") || pcolorVariable.getNameAndDimensions().startsWith("drifter")) {
+                if (pcolorVariable.getNameAndDimensions().startsWith("time")) {
+                    // If variable is time, then read only the time value at the given index.
+                    // hence this is an array of dimension 1 ([time])
                     arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
+                } else if (pcolorVariable.getNameAndDimensions().startsWith("drifter")) {
+                    // if drifter, then we read the variable for all the drifters, no time consideration here
+                    // (index is not used)
+                    arrColorVariable = pcolorVariable.read(new int[]{0}, new int[]{pcolorVariable.getShape(0)}).reduce();
                 } else {
                     arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
                 }
