@@ -350,7 +350,7 @@ public class WMSMapper extends JXMapKit {
         Array array = nc.findVariable(variable).read();
 
         float[] dataset = (float[]) array.get1DJavaArray(DataType.FLOAT);
-        if (variable.equals("time") || variable.equals("drifer")) {
+        if (variable.equals("time") || variable.equals("drifter")) {
             if (dataset[0] > dataset[dataset.length - 1]) {
                 return new float[]{dataset[dataset.length - 1], dataset[0]};
             } else {
