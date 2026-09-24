@@ -65,6 +65,16 @@ public class Particle extends GridPoint implements IParticle {
     private final List<ParticleLayer> layers = new ArrayList<>();
     private double oldLon;
     private double oldLat;
+    private int releaseZone;
+
+    @Override
+    public int getReleaseZone() {
+        return releaseZone;
+    }
+
+    public void setReleaseZone(int releaseZone) {
+        this.releaseZone = releaseZone;
+    }
 
     @Override
     public ParticleLayer getLayer(Class<?> layerClass) {

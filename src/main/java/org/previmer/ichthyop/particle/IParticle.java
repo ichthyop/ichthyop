@@ -105,6 +105,9 @@ public interface IParticle {
     public void setOldLat(double oldLat);
     public void setOldLon(double oldLon);
 
+    public int getReleaseZone();
+    public void setReleaseZone(int releaseZone);
+
     /**
      * Gets the depth
      *
