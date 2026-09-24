@@ -333,9 +333,16 @@ public class WMSMapper extends JXMapKit {
         list.add("time");
         list.add("drifter");
         for (Variable variable : nc.getVariables()) {
+
+            // If release zone in variables, add them as a display variable
+            if(variable.getFullName().equals("release_zone")) {
+                list.add("release_zone");
+            }
+
             List<Dimension> dimensions = variable.getDimensions();
             boolean excluded = (dimensions.size() != 2);
             if (!excluded) {
+                // Exclude all the variables that are not of dimensions (time, drifter)
                 excluded = !(dimensions.get(0).getShortName().equals("time") && dimensions.get(1).getShortName().equals("drifter"));
             }
             if (!excluded) {
@@ -356,7 +363,7 @@ public class WMSMapper extends JXMapKit {
             } else {
                 return new float[]{dataset[0], dataset[dataset.length - 1]};
             }
-        } else if (variable.equals("stage")) {
+        } else if (variable.equals("stage") || variable.equals("release_zone")) {
              float lower = (float) getMin(dataset);
              float upper = (float) getMax(dataset);
              return new float[]{lower, upper};
@@ -952,7 +959,7 @@ public class WMSMapper extends JXMapKit {
                     // If variable is time, then read only the time value at the given index.
                     // hence this is an array of dimension 1 ([time])
                     arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
-                } else if (pcolorVariable.getNameAndDimensions().startsWith("drifter")) {
+                } else if (pcolorVariable.getNameAndDimensions().startsWith("drifter") || pcolorVariable.getNameAndDimensions().startsWith("release_zone")  ) {
                     // if drifter, then we read the variable for all the drifters, no time consideration here
                     // (index is not used)
                     arrColorVariable = pcolorVariable.read(new int[]{0}, new int[]{pcolorVariable.getShape(0)}).reduce();

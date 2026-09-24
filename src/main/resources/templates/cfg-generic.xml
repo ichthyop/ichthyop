@@ -2980,7 +2980,7 @@
         <value>cfg/my_zones.xml</value>
         <default>cfg/my_zones.xml</default>
         <format>zonefile</format>
-        <template>zone-iroise.xml</template>
+        <template>zone-benguela.xml</template>
         <description>Select an existing zone file (*.xml) or create a new one.
                     Relative
                     pathnames are supported (e.g 'cfg/my_zones1.xml' or
