@@ -2952,6 +2952,19 @@
             but the file may not exist yet on your disk).</description>
     <enabled>false</enabled>
     <parameters>
+
+      <parameter>
+        <key>user_defined_nparticles</key>
+        <long_name>User-defined proportion of particles in each zone</long_name>
+        <value>false</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>If true, the user can specify the proportion of particles released
+            in each zone. If false, the number of particles in each zone is proportional to the
+            surface of each area.
+        </description>
+      </parameter>
+
       <parameter>
         <key>number_particles</key>
         <long_name>Number of particles</long_name>
