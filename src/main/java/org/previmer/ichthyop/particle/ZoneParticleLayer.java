@@ -76,7 +76,6 @@ public class ZoneParticleLayer extends ParticleLayer {
                 Zone znTmp = (Zone) iter.next();
                 if (znTmp.isParticleInZone(particle())) {
                     nZone = cpt;
-                    System.out.println("Einaudi " + znTmp.getType() + nZone);
                     foundZone = true;
                 }
             }
