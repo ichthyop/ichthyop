@@ -93,7 +93,7 @@ public class ZoneRelease extends AbstractRelease {
         int[] nParticlePerZone = new int[nbReleaseZones];
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
             Zone zone = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
-            int nParticulesZone = (int) zone.getProportionParticles() * nParticles;
+            int nParticulesZone = (int) Math.round(zone.getProportionParticles() * nParticles);
             nParticlePerZone[i_zone] = nParticulesZone;
             nParticleSum += nParticlePerZone[i_zone];
             totalPercentage += zone.getProportionParticles();
@@ -208,7 +208,11 @@ public class ZoneRelease extends AbstractRelease {
                         depth = -1.d * (upDepth + this.getRandomDraft() * (lowDepth - upDepth));
                     }
                     particle = ParticleFactory.createZoneParticle(index, x, y, depth);
+                    if (null != particle && !zone.isParticleInZone(particle)) {
+                        particle = null;
+                    }
                 }
+                particle.setReleaseZone(i_zone);
                 getSimulationManager().getSimulation().getPopulation().add(particle);
                 index++;
             }
