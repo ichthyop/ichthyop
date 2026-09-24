@@ -102,8 +102,7 @@ public class ReleaseZoneTracker extends AbstractInitialStateTracker {
         // Only write release zone when particle is released
         for (int i = nPopTm1; i < nNow; i++) {
             IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
-            ZoneParticleLayer zparticle = (ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class);
-            getArray().setInt(getIndex().set(particle.getIndex()), zparticle.getNumZone(TypeZone.RELEASE));
+            getArray().setInt(getIndex().set(particle.getIndex()), particle.getReleaseZone());
         }
         nPopTm1 = nNow;
 
