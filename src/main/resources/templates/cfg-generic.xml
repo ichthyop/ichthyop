@@ -4305,8 +4305,8 @@
       <parameter>
         <key>stop_moving</key>
         <long_name>Stop moving when recruited</long_name>
-        <value>false</value>
-        <default>false</default>
+        <value>true</value>
+        <default>true</default>
         <format>boolean</format>
         <description>Force a particle to remain where it is as soon as it is
                     recruited. If
