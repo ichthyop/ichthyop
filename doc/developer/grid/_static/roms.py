@@ -157,13 +157,13 @@ def plot_points(ix, jy, color):
 
     # i is the index of the u points to select
     # from U points of view, x is shifted by 0.5
-    # we therefore move ix to the U referential 
+    # we therefore move ix to the U referential
     # therefore, i is the index from the U point of vue.
     # i = 0 is the outer left U Point
-    i = np.floor(ix + 0.5)  
+    i = np.floor(ix + 0.5)
     cpt = 0
     for ii in range(2):
-        # For distance computation, we need to move the i index back to 
+        # For distance computation, we need to move the i index back to
         # the T grid reference in which ix is defined. Hence we shift by 0.5
         cox = 1 - abs((ix - (i - 0.5 + ii)))
         for jj in range(2):
@@ -206,7 +206,7 @@ def plot_points(ix, jy, color):
     for ii in range(2):
         cox = 1 - abs(ix - (i + ii))
         for jj in range(2):
-            # For distance computation, we need to move the j index back to 
+            # For distance computation, we need to move the j index back to
             # the T grid reference in which jy is defined. Hence we shift by 0.5
             print('-----')
             coy = 1 - abs(jy - (j - 0.5 + jj))
@@ -308,43 +308,52 @@ def plot_poly(i, j, color):
 
     iout = [i + 0.5 - 0.5, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5]
     jout = [j + 0.5 - 0.5, j + 0.5 - 0.5, j + 0.5 - 0.5 + 1, j + 0.5 - 0.5 + 1]
+    iout = [i - 0.5, i + 0.5, i + 0.5, i - 0.5, i - 0.5]
+    jout = [j - 0.5, j - 0.5, j + 0.5, j + 0.5, j - 0.5]
     points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
     p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
-    plt.plot(i + 0.5, j + 0.5, marker='o', color=color)
+    plt.plot(i, j, marker='o', color=color)
+    return None
 
 def plot_points(ix, jy, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
     plt.plot(ix, jy, marker='o', color=color, markersize=4)
-    j = np.round(jy - 0.5)
-    i = np.round(ix - 0.5)
+    j = np.round(jy)
+    i = np.round(ix)
+    print(j)
     points = []
 
-    if(j == np.floor(jy - 0.5)):
+    if(jy > j):
         jj = 1
     else:
         jj = -1
 
-    if(i == np.floor(ix - 0.5)):
+    if(ix > i):
         ii = 1
     else:
         ii = -1
+    print("---------")
+    print(f'y={jy}, x={ix}')
+    print(f"grid({j+jj}, {i + ii})")
     plot_poly(i + ii, j + jj, color)
+
+    print(f"grid({j+jj}, {i})")
     plot_poly(i, j + jj, color)
+
+    print(f"grid({j}, {i+ii})")
     plot_poly(i + ii, j, color)
 
 plt.figure()
 ax = plt.gca()
-plt.xlim(0, xmax)
-plt.ylim(0, ymax)
-ax.set_xticks(np.arange(0, xmax + 1))
-ax.set_yticks(np.arange(0, ymax + 1))
-[plt.plot([x + 0.5], [y + 0.5], marker='o', color='k') for x in range(xmax + 1) for y in range(ymax + 1)]
-plt.grid(True)
-l = ax.set_xticks(np.arange(xmax + 1))
-l = ax.set_yticks(np.arange(ymax + 1))
+plot_grid_layout()
+
+for i in range(xmax):
+    for j in range(ymax):
+        plt.plot(i, j, marker='o', markersize=3, color='k')
+
 plot_points(5.7, 3.1, 'r')
 plot_points(2.7, 1.7, 'b')
-plot_points(1.2, 4.1, 'g')
+plot_points(1.2, 3.1, 'g')
 plt.title('Close to Coast')
 #savefig('close_to_coast_roms')
 # -

@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.8
+#       jupytext_version: 1.15.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -35,30 +35,66 @@ print("++++++++++++++++++++++++++++++++++++++++++ ", outdir)
 #
 # <img src="https://www.nemo-ocean.eu/doc/img360.png">
 #
-# Tracer points (`T` points) are stored at the center of the cell. Zonal velocities (`U` points) are stored on the eastern face, while meridional velocities (`V` points) are stored on the northern face. **U, V and T points have the same number of elements!**
+# Tracer points (`T` points) are stored at the center of the cell. Zonal velocities (`U` points) are stored on the eastern face, while meridional velocities (`V` points) are stored on the northern face. **Contrary to ROMS, U, V and T points have the same number of elements on the NEMO grid!**
 
 # +
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Ellipse, Polygon
 import matplotlib.ticker as ticker
+bbox=dict(boxstyle="round,pad=0.5", fc="lightgray", ec="k", lw=2)
 
-xmax = 12
-ymax = 8
+xmax = 8 # number of rho points along x
+ymax = 5 # number of rho points along y
 
-fig = plt.figure()
+plt.figure(figsize=(12, 8))
+plt.title('Ichthyop layout of NEMO grid')
 ax = plt.gca()
+ax.set_aspect('equal', 'box')
 plt.xlim(0, xmax)
 plt.ylim(0, ymax)
-ax.set_xticks(np.arange(0, xmax + 1), minor=True)
-ax.set_yticks(np.arange(0, ymax + 1), minor=True)
-plt.grid(True, which='minor', linewidth=1)
-lt = [plt.plot([x + 0.5] , [y + 0.5], marker='o', color='r') for x in range(xmax) for y in range(ymax)]
-lu = [plt.plot([x + 1] , [y + 0.5], marker='o', color='b') for x in range(xmax) for y in range(ymax)]
-lv = [plt.plot([x + 0.5] , [y + 1], marker='o', color='g') for x in range(xmax) for y in range(ymax)]
+ax.set_xticks(np.arange(0, xmax + 1) - 0.5, minor=False)
+ax.set_yticks(np.arange(0, ymax + 1) - 0.5, minor=False)
+plt.grid(True, linewidth=2, linestyle='--', color='k')
+bbox['fc'] = 'orange'
+for x in range(0, xmax):
+    for y in range(0, ymax):
+        #lt = plt.plot(x + 0.5, y + 0.5, marker='.', color='g')
+        lt = plt.text(x, y, '%d,%d' %(x, y), bbox=bbox, ha='center', va='center', color='k', zorder=100)
+
+# Plotting U points
+bbox['fc'] = 'firebrick'
+bbox['alpha'] = 1
+for x in np.arange(xmax):
+    for y in range(ymax):
+        #lu = plt.plot(x - 0.5, y, marker='.', color='r')
+        lu = plt.text(x + 0.5, y, '%d,%d' %(x,y), bbox=bbox, ha='center', va='center', color='w', zorder=100)
+
+# Plotting V points
+bbox['fc'] = 'powderblue'
+for x in np.arange(0, xmax):
+    for y in range(ymax):
+        #lv = plt.plot(x, y - 0.5, marker='.', color='b')
+        lv = plt.text(x, y + 0.5, '%d,%d' %(x,y), bbox=bbox, ha='center', va='center', color='k')
+
+plt.plot([0.5, 7, 7, 0.5, 0.5], [0.5, 0.5, 4, 4, 0.5], lw=6)
+
+
+# +
+def plot_grid_layout():
+    ax = plt.gca()
+    plt.plot([0, 7, 7, 0, 0], [0, 0, 4, 4, 0], lw=3, color='gray')
+    ax.set_xticks(np.arange(xmax + 1) - 0.5, minor=False)
+    ax.set_yticks(np.arange(ymax + 1) - 0.5, minor=False)
+    plt.xlim(0 - 0.5, xmax - 0.5)
+    plt.ylim(0 - 0.5, ymax -0.5)
+    plt.grid(True, linewidth=1, color='gray', ls='--')
+    plt.plot([0.5, 7, 7, 0.5, 0.5], [0.5, 0.5, 4, 4, 0.5], lw=2, ls='--', color='red')
+
+
 # -
 
-# ### Scale factors
+# ## Scale factors
 #
 # In NEMO, the zonal and meridional length of the cells are stored in the `e1x` and `e2x` variables, with `x` equals to `t`, `u` or `v` depending on the point considered.
 #
@@ -72,32 +108,26 @@ import numpy as np
 from matplotlib.patches import Ellipse, Polygon
 import matplotlib.ticker as ticker
 
-xmax = 12
-ymax = 8
-
 fig = plt.figure()
 ax = plt.gca()
-plt.xlim(0, xmax)
-plt.ylim(0, ymax)
-ax.set_xticks(np.arange(0, xmax + 1), minor=True)
-ax.set_yticks(np.arange(0, ymax + 1), minor=True)
-plt.grid(True, which='minor', linewidth=1)
+plot_grid_layout()
 
 color = 'firebrick'
-x0 = 0
-p = ax.add_patch(Polygon([(x0, 0), (x0 + 1, 0), (x0 + 1, ymax), (x0, ymax)], closed=True,
-                                 hatch='\\\\', facecolor='none', edgecolor=color))
+x0 = -0.5
+alpha = 0.3
+p = ax.add_patch(Polygon([(x0, 0 - 0.5), (x0 + 1, 0  - 0.5), (x0 + 1, ymax), (x0, ymax)], closed=True,
+                                 hatch='\\\\', facecolor='none', edgecolor=color, alpha=alpha))
 x0 = xmax - 2
-p = ax.add_patch(Polygon([(x0, 0), (x0 + 1, 0), (x0 + 1, ymax), (x0, ymax)], closed=True,
-                                 hatch='\\\\', facecolor='none', edgecolor=color))
+p = ax.add_patch(Polygon([(x0, 0 - 0.5), (x0 + 1, 0  - 0.5), (x0 + 1, ymax), (x0, ymax)], closed=True,
+                                 hatch='\\\\', facecolor='none', edgecolor=color, alpha=alpha))
 
 color = 'steelblue'
-x0 = 1
-p = ax.add_patch(Polygon([(x0, 0), (x0 + 1, 0), (x0 + 1, ymax ), (x0, ymax)], closed=True,
-                                 hatch='\\\\', facecolor='none', edgecolor=color))
+x0 = 0.5
+p = ax.add_patch(Polygon([(x0, 0  - 0.5), (x0 + 1, 0  - 0.5), (x0 + 1, ymax ), (x0, ymax)], closed=True,
+                                 hatch='\\\\', facecolor='none', edgecolor=color, alpha=alpha))
 x0 = xmax - 1
-p = ax.add_patch(Polygon([(x0, 0), (x0 + 1, 0), (x0 + 1, ymax), (x0, ymax)], closed=True,
-                                 hatch='\\\\', facecolor='none', edgecolor=color))
+p = ax.add_patch(Polygon([(x0, 0  - 0.5), (x0 + 1, 0  - 0.5), (x0 + 1, ymax), (x0, ymax)], closed=True,
+                                 hatch='\\\\', facecolor='none', edgecolor=color, alpha=alpha))
 plt.title('Zonal cyclicity')
 plt.savefig(os.path.join(outdir, 'zonal_cyclicity_nemo.jpg'))
 # -
@@ -116,9 +146,6 @@ plt.savefig(os.path.join(outdir, 'zonal_cyclicity_nemo.jpg'))
 #
 
 # +
-xmax = 12
-ymax = 8
-
 plt.rcParams['lines.markersize'] = 2
 markers = ['^', '>', '<', 'v']
 
@@ -126,30 +153,28 @@ def plot_points(ix, jy, color):
     cpt = 0
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
     plt.plot(ix, jy, marker='x', color=color, markersize=4)
-    j = np.floor(jy - 0.5)
-    i = np.floor(ix - 0.5)
+    j = np.floor(jy)
+    i = np.floor(ix)
     for ii in range(2):
-        cox = 1 - abs(ix  - 0.5 - (i + ii))
+        cox = 1 - abs(ix  - (i + ii))
         for jj in range(2):
-            #print('x = ', i + ii + 0.5, 'y = ', j + jj + 0.5)
-            coy = 1 - abs(jy - 0.5 - (j + jj))
+            coy = 1 - abs(jy - (j + jj))
+            print('-----')
+            print(f'ix={ix}, i={i+ii}, cox={cox:.2f}')
+            print(f'jy={jy}, j={j+jj}, coy={coy:.2f}')
+            print(f'ti={i + ii}, tj={j + jj}')
             #print('dx = ', cox, 'dy = ', coy)
-            plt.plot(i + ii + 0.5, j + jj + 0.5, marker=markers[cpt], color=color, markersize=4, linestyle='none')
+            plt.plot(i + ii, j + jj, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
 
 fig = plt.figure()
 ax = plt.gca()
-plt.xlim(0, xmax)
-plt.ylim(0, ymax)
-l = [plt.plot([x + 0.5] , [y + 0.5], marker='o', color='k') for x in range(xmax) for y in range(ymax)]
-ax.set_xticks(np.arange(0, xmax + 1))
-ax.set_yticks(np.arange(0, ymax + 1))
-plt.grid(True)
-
+plot_grid_layout()
+[plt.plot([x], [y], marker='o', color='k', markersize=4) for x in range(xmax) for y in range(ymax)]
+plot_points(5.7, 3.1, 'r')
 plot_points(2.7, 2.7, 'b')
-plot_points(5.7, 6.1, 'r')
-plot_points(8.2, 6.1, 'g')
-plot_points(8.3, 2.7, 'orange')
+plot_points(0.6, 0.6, 'g')
+plot_points(6.3, 1.7, 'orange')
 #plot_points(11, 3, 'plum')
 plt.title('Interpolation of T variables')
 plt.savefig(os.path.join(outdir, 't_interpolation_nemo.jpg'))
@@ -164,39 +189,43 @@ plt.savefig(os.path.join(outdir, 't_interpolation_nemo.jpg'))
 # - The box used to average the variable is therefore defined by the `[i - 1, i]` and `[j, j + 1]` squares.
 
 # +
-xmax = 12
-ymax = 8
-
 plt.rcParams['lines.markersize'] = 2
 
 def plot_points(ix, jy, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
+
     plt.plot(ix, jy, marker='x', color=color, markersize=4)
-    j = np.floor(jy - 0.5)
-    i = np.floor(ix - 1)
+    j = np.floor(jy)
+
+    # ix is in the reference of T points.
+    # to extract the index, we need to move its value to the
+    # U reference by removing 0.5
+    i = np.floor(ix - 0.5)
     cpt = 0
     for ii in range(2):
         for jj in range(2):
-            print(i - ii + 1, j + jj + 0.5)
-            coy = 1 - abs(jy - 0.5 - (j + jj))
-            cox = 1 - abs(ix - 1 - (i - ii))
-            print(cox, coy)
-            plt.plot(i + ii + 1, j + jj + 0.5, marker=markers[cpt], color=color, markersize=4, linestyle='none')
+            coy = 1 - abs(jy - (j + jj))
+                
+            # here, i is the index of the U points on
+            # the U referentiel. We need to move it back
+            # to the T points by adding 0.5
+            cox = 1 - abs(ix - (i + 0.5 + ii))
+            print('-----')
+            print(f'ix={ix}, i={i+0.5+ii}, cox={cox:.2f}')
+            print(f'jy={jy}, j={j+jj}, coy={coy:.2f}')
+            print(f'ui={i + ii}, uj={j + jj}')
+            plt.plot(i + ii + 0.5, j + jj, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
 
 plt.figure()
 ax = plt.gca()
-plt.xlim(0, xmax)
-plt.ylim(0, ymax)
-[plt.plot([x + 1], [y + 0.5], marker='o', color='k') for x in range(xmax) for y in range(ymax)]
-plt.grid(True, which='minor')
-l = ax.set_xticks(np.arange(xmax + 1))
-l = ax.set_yticks(np.arange(ymax + 1))
+plot_grid_layout()
+[plt.plot([x + 0.5], [y], marker='o', color='k', markersize=3) for x in range(xmax) for y in range(ymax)]
 plt.grid(True)
-plot_points(5.7, 6.1, 'r')
+plot_points(5.7, 3.1, 'r')
 plot_points(2.7, 2.7, 'b')
-plot_points(8.2, 6.1, 'g')
-plot_points(8.3, 2.7, 'orange')
+plot_points(0.6, 0.6, 'g')
+plot_points(6.3, 1.7, 'orange')
 plt.title('Interpolation of U variables')
 plt.savefig(os.path.join(outdir, 'u_interpolation_nemo.jpg'))
 # -
@@ -204,174 +233,157 @@ plt.savefig(os.path.join(outdir, 'u_interpolation_nemo.jpg'))
 # #### Interpolation of V variables
 
 # +
-xmax = 12
-ymax = 8
-
 plt.rcParams['lines.markersize'] = 2
 
 def plot_points(ix, jy, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
     plt.plot(ix, jy, marker='x', color=color, markersize=4)
-    j = np.floor(jy - 1)
-    i = np.floor(ix - 0.5)
+    j = np.floor(jy - 0.5)
+    i = np.floor(ix)
     cpt = 0
     for ii in range(2):
-        cox = 1 - abs(ix - 0.5 - (i + ii))
+        cox = 1 - abs(ix - (i + ii))
         for jj in range(2):
-            print(i + ii + 0.5, j - jj + 1)
-            coy = 1 - abs(jy - 1 - (j - jj + 0.5))
-            print(cox, coy)
-            plt.plot(i + ii + 0.5, j + jj + 1, marker=markers[cpt], color=color, markersize=4, linestyle='none')
+            coy = 1 - abs(jy - (j + 0.5 + jj ))
+            print('-----')
+            print(f'ix={ix}, i={i+ii}, cox={cox:.2f}')
+            print(f'jy={jy}, j={j+0.5 + jj}, coy={coy:.2f}')
+            print(f'vi={i + ii}, vj={j + jj}')
+            plt.plot(i + ii, j + 0.5 + jj, marker=markers[cpt], color=color, markersize=4, linestyle='none')
             cpt += 1
 
 plt.figure()
 ax = plt.gca()
-ax.set_xlim(0, xmax)
-ax.set_ylim(0, ymax)
-ax.set_xticks(np.arange(xmax + 1))
-ax.set_yticks(np.arange(ymax + 1))
-[plt.plot([x + 0.5], [y + 1], marker='o', color='k') for x in range(xmax + 1) for y in range(ymax + 1)]
-plt.grid(True)
-plot_points(5.7, 6.1, 'r')
+plot_grid_layout()
+[plt.plot([x], [y + 0.5], marker='o', color='k') for x in range(xmax) for y in range(ymax)]
+plot_points(5.7, 3.1, 'r')
 plot_points(2.7, 2.7, 'b')
-plot_points(8.2, 6.1, 'g')
-plot_points(8.3, 2.7, 'orange')
+plot_points(0.6, 0.6, 'g')
+plot_points(6.3, 1.7, 'orange')
 plt.title('Interpolation of V variables')
 plt.savefig(os.path.join(outdir, 'v_interpolation_nemo.jpg'))
+
+
 # -
 
 # ### Land sea-mask
 
 # +
-xmax = 12
-ymax = 8
-
-plt.rcParams['lines.markersize'] = 2
 
 def plot_points(ix, jy, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
     plt.plot(ix, jy, marker='o', color=color, markersize=4)
-    j = np.round(jy - 0.5)
-    i = np.round(ix - 0.5)
+    j = np.round(jy)
+    i = np.round(ix)
     points = []
 
-    iout = [i + 0.5 - 0.5, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5]
-    jout = [j + 0.5 - 0.5, j + 0.5 - 0.5, j + 0.5 - 0.5 + 1, j + 0.5 - 0.5 + 1]
+    iout = [i - 0.5, i + 0.5, i + 0.5, i - 0.5, i - 0.5]
+    jout = [j - 0.5, j - 0.5, j + 0.5, j + 0.5, j - 0.5]
     points = [(ii, jj) for ii, jj in zip(iout, jout)]
     p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
-    plt.plot(i + 0.5, j + 0.5, marker='o', color=color)
+    plt.plot(i, j, marker='o', color=color)
 
 plt.figure()
 ax = plt.gca()
-plt.xlim(0, xmax)
-plt.ylim(0, ymax)
-ax.set_xticks(np.arange(0, xmax + 1))
-ax.set_yticks(np.arange(0, ymax + 1))
-[plt.plot([x + 0.5], [y + 0.5], marker='o', color='k') for x in range(xmax + 1) for y in range(ymax + 1)]
-plt.grid(True)
-l = ax.set_xticks(np.arange(xmax + 1))
-l = ax.set_yticks(np.arange(ymax + 1))
+plot_grid_layout()
+[plt.plot([x], [y], marker='o', color='k') for x in range(xmax) for y in range(ymax)]
 plot_points(5.7, 6.1, 'r')
 plot_points(2.7, 2.7, 'b')
-plot_points(8.2, 6.1, 'g')
-plot_points(8.3, 2.7, 'orange')
+plot_points(6.2, 2.1, 'g')
+plot_points(0.6, 2.7, 'orange')
 plt.title('Land-sea mask')
 plt.savefig(os.path.join(outdir, 'landsea_mask_nemo.jpg'))
+
+
 # -
 
 # ### Close to coast
 
 # +
-xmax = 12
-ymax = 8
-
-plt.rcParams['lines.markersize'] = 2
-
 def plot_poly(i, j, color):
 
     iout = [i + 0.5 - 0.5, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5 + 1, i + 0.5 - 0.5]
     jout = [j + 0.5 - 0.5, j + 0.5 - 0.5, j + 0.5 - 0.5 + 1, j + 0.5 - 0.5 + 1]
+    iout = [i - 0.5, i + 0.5, i + 0.5, i - 0.5, i - 0.5]
+    jout = [j - 0.5, j - 0.5, j + 0.5, j + 0.5, j - 0.5]
     points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
     p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
-    plt.plot(i + 0.5, j + 0.5, marker='o', color=color)
+    plt.plot(i, j, marker='o', color=color)
+    return None
 
 def plot_points(ix, jy, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
     plt.plot(ix, jy, marker='o', color=color, markersize=4)
-    j = np.round(jy - 0.5)
-    i = np.round(ix - 0.5)
+    j = np.round(jy)
+    i = np.round(ix)
+    print(j)
     points = []
 
-    if(j == np.floor(jy - 0.5)):
+    if(jy > j):
         jj = 1
     else:
         jj = -1
 
-    if(i == np.floor(ix - 0.5)):
+    if(ix > i):
         ii = 1
     else:
         ii = -1
+    print("---------")
+    print(f'y={jy}, x={ix}')
+    print(f"grid({j+jj}, {i + ii})")
     plot_poly(i + ii, j + jj, color)
+
+    print(f"grid({j+jj}, {i})")
     plot_poly(i, j + jj, color)
+
+    print(f"grid({j}, {i+ii})")
     plot_poly(i + ii, j, color)
 
 plt.figure()
 ax = plt.gca()
-plt.xlim(0, xmax)
-plt.ylim(0, ymax)
-ax.set_xticks(np.arange(0, xmax + 1))
-ax.set_yticks(np.arange(0, ymax + 1))
-[plt.plot([x + 0.5], [y + 0.5], marker='o', color='k') for x in range(xmax + 1) for y in range(ymax + 1)]
-plt.grid(True)
-l = ax.set_xticks(np.arange(xmax + 1))
-l = ax.set_yticks(np.arange(ymax + 1))
+plot_grid_layout()
+[plt.plot([x], [y], marker='o', color='k') for x in range(xmax) for y in range(ymax)]
 plot_points(5.7, 6.1, 'r')
-plot_points(2.7, 2.7, 'b')
-plot_points(8.2, 6.1, 'g')
-plot_points(8.3, 2.7, 'orange')
+plot_points(4.7, 2.7, 'b')
+plot_points(2.8, 1.1, 'g')
+plot_points(1.3, 3.2, 'orange')
 plt.title('Close to Coast')
 plt.savefig(os.path.join(outdir, 'close_to_coast_nemo.jpg'))
 # -
 
 # ### Is On Edge
 
-# +
-xmax = 12
-ymax = 8
+# On NEMO, the is on edge value is true when the particle is at a location when the zonal, meridional or temperature cannot be interpolated
 
-plt.rcParams['lines.markersize'] = 2
+# +
 
 plt.figure()
 ax = plt.gca()
-ax.set_xticks(np.arange(0, xmax))
-ax.set_yticks(np.arange(0, ymax))
-#[plt.plot([x], [y], marker='.', color='k') for x in range(xmax + 1) for y in range(ymax + 1)]
-plt.grid(True)
-l = ax.set_xticks(np.arange(xmax + 1))
-l = ax.set_yticks(np.arange(ymax + 1))
-plt.xlim(0, xmax)
-plt.ylim(0, ymax)
+plot_grid_layout()
 
-color = 'steelblue'
-#iout = [xmax - 0.5 + 1, xmax + 0.5 + 1, xmax + 0.5+ 1, xmax  - 0.5+ 1]
-iout = [xmax - 0.5, xmax + 1 - 0.5, xmax + 1 - 0.5, xmax - 0.5]
-jout = [0, 0, ymax, ymax]
-points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
+color = 'green'
+iout = [xmax, xmax + 0.5, xmax + 0.5, xmax, xmax]
+jout = [-0.5, -0.5, ymax + 0.5, ymax + 0.5, -0.5]
+print(iout)
+points = [(iii - 1, jjj) for iii, jjj in zip(iout, jout)]
 p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
+plt.plot(iout, jout, marker='o', markersize=5)
 
-iout = [0, 1, 1, 0]
-jout = [0, 0, ymax, ymax]
+color = 'blue'
+iout = [-0.5, 0.5, 0.5, -0.5]
+jout = [-0.5, -0.5, ymax, ymax]
 points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
 p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
 
 color = 'firebrick'
-iout = [0, xmax, xmax, 0]
-jout = [0, 0, 1, 1]
+iout = [0.5, 7,7, 0.5]
+jout = [-0.5, -0.5, 0.5, 0.5]
 points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
 p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
 
-iout = [0, xmax, xmax, 0]
-jout = [ymax - 0.5, ymax - 0.5, ymax - 0.5 +0.5, ymax - 0.5 + 0.5]
+color='orange'
+iout = [0.5, 7,7, 0.5]
+jout = [4, 4, 4.5, 4.5]
 points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
 p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.1))
 
@@ -608,4 +620,3 @@ plt.ylim(0, zmax)
 plot_point(-0.3, 2.7, 'red')
 plot_point(0.2, 5.3, 'blue')
 plt.savefig(os.path.join(outdir, 'vertical_landsea_mask_nemo.jpg'), bbox_inches='tight')
-# -
