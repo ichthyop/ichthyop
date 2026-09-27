@@ -119,7 +119,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private Dimension latlonDim;
     private boolean clearPredefinedTrackerList = false;
     private boolean clearCustomTrackerList = false;
-    private boolean clearInitialStateTrackerList = false;
+    private boolean clearInitialStateTrackerList = true;
     private boolean isDensityEnabled = false;
     private boolean isTrajectoryEnabled = true;
 
@@ -455,12 +455,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     public void addPredefinedInitialStateTracker(Class<?> trackerClass) {
-        if (null == initialStateTrackers) {
+        if (null == predefinedInitialStateTrackers) {
             predefinedInitialStateTrackers = new ArrayList<>();
         }
         if (clearInitialStateTrackerList) {
             predefinedInitialStateTrackers.clear();
-            clearInitialStateTrackerList = false;
+            // clearInitialStateTrackerList = false;
         }
         if (!predefinedInitialStateTrackers.contains(trackerClass)) {
             predefinedInitialStateTrackers.add(trackerClass);
