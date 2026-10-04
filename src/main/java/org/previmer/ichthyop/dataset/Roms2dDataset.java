@@ -1,47 +1,3 @@
-/*
- *
- * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
- * http://www.ichthyop.org
- *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
- * http://www.ird.fr
- *
- * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
- * Contributors (alphabetically sorted):
- * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothee BROCHIER,
- * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
- * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
- * Stephane POUS, Nathan PUTMAN.
- *
- * Ichthyop is a free Java tool designed to study the effects of physical and
- * biological factors on ichthyoplankton dynamics. It incorporates the most
- * important processes involved in fish early life: spawning, movement, growth,
- * mortality and recruitment. The tool uses as input time series of velocity,
- * temperature and salinity fields archived from oceanic models such as NEMO,
- * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
- * generates output files that can be post-processed easily using graphic and
- * statistical software.
- *
- * To cite Ichthyop, please refer to Lett et al. 2008
- * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
- * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
- * doi:10.1016/j.envsoft.2008.02.005
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full
- * description, see the LICENSE file.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- */
-
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
@@ -112,21 +68,41 @@ public class Roms2dDataset extends RomsCommon {
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
         double CO = 0.d;
         double co;
         double x;
 
+        // Recover the index of the T points which are used for
+        // interpolating the scale factors
+        // int it = (int) Math.floor(ix);
+        // int jt = (int) Math.floor(jy);
+
+        j = (int) Math.floor(jy + 0.5);  // (j, i) is the grid cell index of V point to select (low left)
+        i = (int) Math.floor(ix);
+
         for (int jj = 0; jj < 2; jj++) {
-            for (int ii = 0; ii < n; ii++) {
-                co = Math.abs((1.d - (double) ii - dx)
-                        * (.5d - (double) jj - dy));
+            double coy = 1 - Math.abs(jy - (j - 0.5 + jj));
+            for (int ii = 0; ii < 2; ii++) {
+                double cox = 1 - Math.abs(ix - (i + ii));
+                co = cox * coy;
                 CO += co;
-                x = (1.d - x_euler) * v_tp0[j + jj - 1][i + ii] + x_euler * v_tp1[j + jj - 1][i + ii];
+
+                // For getting the coordinate of the scale factor to
+                // interpolate, we switch the j index (in V space) back to T space
+                // if j = 0 for V, we are at -0.5 in T space
+                int jt = (int) Math.floor(j - 0.5) + 1;
+                int it = i + 1;
+
+                // interpolation of the T scale factor on V points
+                // jt is the index of the T point to select.
+                // however, scale factors are read on extended domain.
+                // it = 0 in ichthyop layout is it=1 in scale factors layout
+                double pnv = 0.5 * (pn[jt][it] + pn[jt + 1][it]);
+
+                x = (1.d - x_euler) * v_tp0[j + jj][i + ii] + x_euler * v_tp1[j + jj][i + ii];
                 if (!Double.isNaN(x)) {
                     if(normalize) {
-                        dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                        dv += .5d * x * co * pnv;
                     } else {
                         dv += x * co;
                     }
@@ -157,16 +133,34 @@ public class Roms2dDataset extends RomsCommon {
         double CO = 0.d;
         double co;
         double x;
-        for (int ii = 0; ii < 2; ii++) {
-            for (int jj = 0; jj < n; jj++) {
 
-                co = Math.abs((.5d - (double) ii - dx)
-                        * (1.d - (double) jj - dy));
+        i = (int) Math.floor(ix + 0.5);
+        j = (int) Math.floor(jy);
+
+        for (int ii = 0; ii < 2; ii++) {
+            double cox = 1 - Math.abs((ix - (i - 0.5 + ii)));
+            for (int jj = 0; jj < 2; jj++) {
+
+                double coy = 1 - Math.abs((jy - (j + jj)));
+                co = cox * coy;
+
+                // For getting the coordinate of the scale factor to
+                // interpolate, we switch the i index (in U space) back to U space
+                // if i = 0 for V, we are at -0.5 in T space
+                int it = (int) Math.floor(i - 0.5) + 1;
+                int jt = j + 1;
+
+                // interpolation of the T scale factor on V points
+                // jt is the index of the T point to select.
+                // however, scale factors are read on extended domain.
+                // it = 0 in ichthyop layout is it=1 in scale factors layout
+                double pnu = 0.5 * (pn[jt][it] + pn[jt][it + 1]);
+
                 CO += co;
-                x = (1.d - x_euler) * u_tp0[j + jj][i + ii - 1] + x_euler * u_tp1[j + jj][i + ii - 1];
+                x = (1.d - x_euler) * u_tp0[j + jj][i + ii] + x_euler * u_tp1[j + jj][i + ii];
                 if (!Double.isNaN(x)) {
                     if (normalize) {
-                        du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                        du += .5d * x * co * pnu;
                     } else {
                         du += x * co;
                     }
@@ -212,17 +206,24 @@ public class Roms2dDataset extends RomsCommon {
 
         getLogger().info("Reading NetCDF variables...");
 
-        int[] origin = new int[]{rank, jpo, ipo};
+        int[] origin ;
+        int[] count;
+
         double time_tp0 = time_tp1;
         Array arr;
         Index index;
 
         try {
-            arr = ncIn.findVariable(strU).read(origin, new int[]{1, ny, (nx - 1)}).reduce();
-            u_tp1 = new float[ny][nx - 1];
+            // For U, we read only on the inner domain
+            // but we have an extra U to read, which is one value less that T point.
+            // i.e. inner T domain starts at 1, inner U domain starts at 0
+            origin = new int[]{rank, jpo, ipo - 1};
+            count = new int[]{rank, ny, nx + 1};
+            arr = ncIn.findVariable(strU).read(origin, count).reduce();
+            u_tp1 = new float[count[1]][count[2]];
             index = arr.getIndex();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx - 1; i++) {
+            for (int j = 0; j < count[1]; j++) {
+                for (int i = 0; i < count[2]; i++) {
                     index.set(j, i);
                     u_tp1[j][i] = arr.getFloat(index);
                 }
@@ -233,11 +234,13 @@ public class Roms2dDataset extends RomsCommon {
             throw ioex;
         }
         try {
-            arr = ncIn.findVariable(strV).read(origin, new int[]{1, (ny - 1), nx}).reduce();
-            v_tp1 = new float[ny - 1][nx];
+            origin = new int[]{rank, jpo - 1, ipo};
+            count = new int[]{rank, ny + 1, nx};
+            arr = ncIn.findVariable(strV).read(origin,count).reduce();
+            v_tp1 = new float[count[1]][count[2]];
             index = arr.getIndex();
-            for (int j = 0; j < ny - 1; j++) {
-                for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < count[1]; j++) {
+                for (int i = 0; i < count[2]; i++) {
                     index.set(j, i);
                     v_tp1[j][i] = arr.getFloat(index);
                 }
