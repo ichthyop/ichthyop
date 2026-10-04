@@ -53,6 +53,75 @@ import numpy as np
 from matplotlib.patches import Ellipse, Polygon
 bbox=dict(boxstyle="round,pad=0.5", fc="lightgray", ec="k", lw=2)
 
+xmax = 8 + 2 # number of rho points along x
+ymax = 5 + 2 # number of rho points along y
+
+plt.figure(figsize=(12, 8))
+plt.title('Roms layout of ROMS grid')
+ax = plt.gca()
+ax.set_aspect('equal', 'box')
+plt.xlim(0, xmax - 0.5)
+plt.ylim(0, ymax - 0.5)
+ax.set_xticks(np.arange(0, xmax + 1) - 0.5, minor=False)
+ax.set_yticks(np.arange(0, ymax + 1) - 0.5, minor=False)
+plt.grid(True, linewidth=2, linestyle='--', color='k')
+
+bbox['fc'] = 'orange'
+for x in range(0, xmax):
+    for y in range(0, ymax):
+        #lt = plt.plot(x + 0.5, y + 0.5, marker='.', color='g')
+        lt = plt.text(x, y, '%d,%d' %(x, y), bbox=bbox, ha='center', va='center', color='k', zorder=100)
+
+# Plotting U points
+bbox['fc'] = 'firebrick'
+bbox['alpha'] = 1
+for x in np.arange(1, xmax):
+    for y in range(ymax):
+        #lu = plt.plot(x - 0.5, y, marker='.', color='r')
+        lu = plt.text(x - 0.5, y, '%d,%d' %(x -1 ,y), bbox=bbox, ha='center', va='center', color='w', zorder=100)
+
+# Plotting V points
+bbox['fc'] = 'powderblue'
+for x in np.arange(0, xmax):
+    for y in range(1, ymax):
+        #lv = plt.plot(x, y - 0.5, marker='.', color='b')
+        lv = plt.text(x, y - 0.5, '%d,%d' %(x,y - 1), bbox=bbox, ha='center', va='center', color='k')
+
+plt.plot([1, 8, 8, 1, 1], [1, 1, 5, 5, 1], lw=6)
+
+color = 'gray'
+jout = [-0.5, -0.5, 7, 7]
+iout = [-0.5, 1, 1, -0.5]
+points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
+p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.3))
+
+color = 'gray'
+jout = [-0.5, -0.5, 7, 7]
+iout = [8, 10, 10, 8]
+points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
+p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.3))
+
+color = 'gray'
+jout = [-0.5, -0.5, 1,1]
+iout = [1, 8, 8, 1]
+points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
+p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.3))
+
+color = 'gray'
+jout = [5,5, 6.5, 6.5]
+iout = [1, 8, 8, 1]
+points = [(iii, jjj) for iii, jjj in zip(iout, jout)]
+p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, alpha = 0.3))
+
+#l = plt.legend([lt, lu, lv], ['T', 'U', 'V'], ncol=1, loc='right', bbox_to_anchor=(1.2, 0.6))
+savefig('original_grid_roms')
+
+# +
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse, Polygon
+bbox=dict(boxstyle="round,pad=0.5", fc="lightgray", ec="k", lw=2)
+
 xmax = 8 # number of rho points along x
 ymax = 5 # number of rho points along y
 
@@ -117,8 +186,8 @@ plt.rcParams['lines.markersize'] = 2
 def plot_points(ix, jy, color):
     print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
     plt.plot(ix, jy, marker='o', color=color, markersize=6)
-    j = np.floor(jy)
-    i = np.floor(ix)
+    j = np.floor(jy) # takes the point on the left
+    i = np.floor(ix) # takes the point on the south
     cpt = 0
     for ii in range(2):
         cox = 1 - abs(ix - (i + ii))
@@ -139,6 +208,7 @@ plot_grid_layout()
 plot_points(5.7, 3.1, 'r')
 plot_points(2.7, 1.7, 'b')
 plot_points(1.2, 3.1, 'g')
+plot_points(0.2, 3.1, 'orange')
 # plt.axis('equal')
 ax.set_aspect('equal', adjustable='box')
 plt.title('Interpolation of T variables')
@@ -220,9 +290,10 @@ plt.figure()
 ax = plt.gca()
 plot_grid_layout()
 [plt.plot(x, [y - 0.5], marker='o', color='k', markersize=4) for x in range(xmax) for y in range(ymax + 1)]
-plot_points(5.7, 3.1, 'r')
-plot_points(2.7, 1.7, 'b')
-plot_points(1.2, 1.1, 'g')
+[plt.plot([x], [y], marker='o', color='red', markersize=4, alpha=0.2) for x in range(xmax) for y in range(ymax)]
+# plot_points(5.7, 3.1, 'r')
+# plot_points(2.7, 1.7, 'b')
+# plot_points(1.2, 1.1, 'g')
 plot_points(1.2, 0.1, 'c')
 plt.title('Interpolation of V variables')
 savefig('interpolation_v_roms')
@@ -264,7 +335,6 @@ p = ax.add_patch(Polygon(points, closed=True, facecolor=color, edgecolor=color, 
 
 plt.title('Is On Edge')
 savefig('is_on_edge_roms', bbox='tight')
-
 # -
 
 # ### Land-sea mask
@@ -274,7 +344,7 @@ plt.rcParams['lines.markersize'] = 2
 
 def plot_points(x, y, color):
 
-    print('+++++++++++++ ', x, y)
+    print('+++++++++++++ ', y, x)
     plt.plot(x, y, color=color, marker='o', markersize=6)
     i = np.round(x)
     j = np.round(y)
@@ -294,6 +364,7 @@ plot_grid_layout()
 plot_points(5.7, 3.1, 'r')
 plot_points(2.7, 1.7, 'b')
 plot_points(1.2, 3.1, 'g')
+plot_points(1.2, 3.6, 'purple')
 plot_points(0, 0, 'c')
 plt.title('Land-sea mask')
 savefig('land_sea_mask_roms', bbox='tight')
