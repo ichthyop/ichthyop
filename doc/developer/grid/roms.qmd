@@ -25,7 +25,7 @@ the `U` domain is $(N_y, N_x - 1)$ points while and `V` domain is $(N_y - 1, N_x
 Indeed, the first row for V and the first column for U are discarded. Therefore, the structure of the input ROMS grid is
 as follows:
 
-![ROMS grid as interpreted by Ichthyop](grid/_static/ichthyop_grid_roms.jpg)
+![ROMS grid as interpreted by Ichthyop](grid/_static/original_grid_roms.png)
 
 
 ##### Land-sea mask
