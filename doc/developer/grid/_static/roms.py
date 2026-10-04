@@ -290,13 +290,80 @@ plt.figure()
 ax = plt.gca()
 plot_grid_layout()
 [plt.plot(x, [y - 0.5], marker='o', color='k', markersize=4) for x in range(xmax) for y in range(ymax + 1)]
-[plt.plot([x], [y], marker='o', color='red', markersize=4, alpha=0.2) for x in range(xmax) for y in range(ymax)]
+# [plt.plot([x], [y], marker='o', color='red', markersize=4, alpha=0.2) for x in range(xmax) for y in range(ymax)]
 # plot_points(5.7, 3.1, 'r')
 # plot_points(2.7, 1.7, 'b')
 # plot_points(1.2, 1.1, 'g')
 plot_points(1.2, 0.1, 'c')
 plt.title('Interpolation of V variables')
 savefig('interpolation_v_roms')
+# -
+
+# ## Interpolation of V scale factors
+
+# +
+plt.rcParams['lines.markersize'] = 2
+
+def plot_points(ix, jy, color):
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
+    plt.plot(ix, jy, marker='o', color=color, markersize=4)
+
+    # from a V perspective, we need to move
+    # jy to the V grid layout by shifting by 0.5
+    j = np.floor(jy)  # (j, i) is the grid cell index of V point to select (low left)
+    i = np.floor(ix)
+    plt.plot(i, j, marker='>', markersize=10, color=color)
+    plt.plot(i, j + 1, marker='>', markersize=10, color=color)
+    print('-------------- vpoint ', ix, jy)
+    print(f'i={i},j={j}')
+    print(f'i={i},j={j+1}')
+    
+plt.figure()
+ax = plt.gca()
+plt.plot([0, 7, 7, 0, 0], [0, 0, 4, 4, 0], lw=3, color='gray')
+ax.set_xticks(np.arange(-1, xmax + 2) - 0.5, minor=False)
+ax.set_yticks(np.arange(-1, ymax + 2) - 0.5, minor=False)
+plt.xlim(-1 + 0 - 0.5, xmax - 0.5 + 1)
+plt.ylim(-1 + 0 - 0.5, ymax -0.5 + 1)
+plt.grid(True, linewidth=1, color='gray', ls='--')
+# [plt.plot(x, [y - 0.5], marker='o', color='k', markersize=4) for x in range(xmax) for y in range(ymax + 1)]
+# [plt.plot([x], [y], marker='o', color='red', markersize=4, alpha=0.2) for x in range(xmax) for y in range(ymax)]
+plot_points(0, 2.5, 'r')
+plot_points(2, -0.5, 'b')
+plt.title('Interpolation of V scale factors')
+savefig('interpolation_vscale_roms')
+
+# +
+plt.rcParams['lines.markersize'] = 2
+
+def plot_points(ix, jy, color):
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', ix,  jy)
+    plt.plot(ix, jy, marker='o', color=color, markersize=4)
+
+    # from a V perspective, we need to move
+    # jy to the V grid layout by shifting by 0.5
+    j = np.floor(jy)  # (j, i) is the grid cell index of V point to select (low left)
+    i = np.floor(ix)
+    plt.plot(i, j, marker='>', markersize=10, color=color)
+    plt.plot(i + 1, j, marker='>', markersize=10, color=color)
+    print('-------------- vpoint ', ix, jy)
+    print(f'i={i},j={j}')
+    print(f'i={i},j={j+1}')
+    
+plt.figure()
+ax = plt.gca()
+plt.plot([0, 7, 7, 0, 0], [0, 0, 4, 4, 0], lw=3, color='gray')
+ax.set_xticks(np.arange(-1, xmax + 2) - 0.5, minor=False)
+ax.set_yticks(np.arange(-1, ymax + 2) - 0.5, minor=False)
+plt.xlim(-1 + 0 - 0.5, xmax - 0.5 + 1)
+plt.ylim(-1 + 0 - 0.5, ymax -0.5 + 1)
+plt.grid(True, linewidth=1, color='gray', ls='--')
+# [plt.plot(x, [y - 0.5], marker='o', color='k', markersize=4) for x in range(xmax) for y in range(ymax + 1)]
+# [plt.plot([x], [y], marker='o', color='red', markersize=4, alpha=0.2) for x in range(xmax) for y in range(ymax)]
+plot_points(2.5, 0, 'r')
+plot_points(-0.5, 3, 'b')
+plt.title('Interpolation of U scale factors')
+savefig('interpolation_uscale_roms')
 # -
 
 # ### Is on edge
