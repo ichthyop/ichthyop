@@ -366,6 +366,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         Array arrZeta;
         Index index;
 
+        // WARNING: this one should not be here, and no consideration of rank!
         try {
             arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
         } catch (IOException | InvalidRangeException e) {
@@ -492,18 +493,29 @@ abstract public class Roms3dCommon extends RomsCommon {
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double dz = kz - (double) k;
+
+        j = (int) Math.floor(jy - 0.5);  // (j, i) is the grid cell index of V point to select (low left)
+        i = (int) Math.floor(ix);
+
         double CO = 0.d;
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    double co = Math.abs((1.d - (double) ii - dx)
-                            * (.5d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
+                for (int ii = 0; ii < 2; ii++) {
+
+                    double coy = 1 - Math.abs(jy - (j + 0.5 + jj));
+                    double cox = 1 - Math.abs(ix - (i + ii));
+                    double coz = Math.abs(1.d - (double) kk - dz);
+
+                    double co = cox * coy * coz;
                     CO += co;
-                    double x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+
+                    double pnv = this.interpolate_V_scalefactors(i, j);
+
+                    double x = (1.d - x_euler) * v_tp0[k + kk][j + jj][i + ii] + x_euler * v_tp1[k + kk][j + jj][i + ii];
+
                     if (!Double.isNaN(x)) {
                         if (normalize) {
-                            dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                            dv += x * co * pnv;
                         } else {
                             dv += x * co;
                         }
