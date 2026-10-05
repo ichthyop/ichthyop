@@ -753,4 +753,47 @@ abstract class RomsCommon extends AbstractDataset {
     public double yTore(double y) {
         return y;
     }
+
+    /** Interpolate V scale factors.
+     *
+     * It estimates the scale factor at the V cell based
+     * on the scalefactors at the two neighbouring T cells
+     *
+     * @param i Index of the i cell in the V space
+     * @param j Index of the j cell in the V space
+     * @return Interpolated scale factor
+     */
+    public double interpolate_V_scalefactors(int i, int j) {
+
+        // For getting the coordinate of the scale factor to
+        // interpolate, we switch the j index (in V space) back to T space
+        // if j = 0 for V, we are at 0.5 in T space
+        int jt = (int) Math.floor(j + 0.5);
+        int it = i;
+
+        // interpolation of the T scale factor on V points
+        // jt is the index of the T point to select.
+        // however, scale factors are read on extended domain.
+        // it = 0 in ichthyop layout is it=1 in scale factors layout
+        double pnv = 0.5 * (pn[jt][it] + pn[jt + 1][it]);
+        return pnv;
+
+    }
+
+    public double interpolate_U_scalefactors(int i, int j) {
+
+        // For getting the coordinate of the scale factor to
+        // interpolate, we switch the i index (in U space) back to U space
+        // if i = 0 for V, we are at -0.5 in T space
+        int it = (int) Math.floor(i + 0.5);
+        int jt = j;
+
+        // interpolation of the T scale factor on V points
+        // jt is the index of the T point to select.
+        // however, scale factors are read on extended domain.
+        // it = 0 in ichthyop layout is it=1 in scale factors layout
+        double pnu = 0.5 * (pn[jt][it] + pn[jt][it + 1]);
+        return pnu;
+    }
+
 }
