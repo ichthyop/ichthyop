@@ -15,70 +15,80 @@ In this section, the main features of the ROMS grid and the implications in Icht
 
 #### Horizontal
 
-The horizontal grid layout of the ROMS model is shown below:
+The horizontal grid layout, as described on the ROMS documentation, is shown in @fig-original-roms:
 
-![ROMS staggered grid structure](grid/_static/roms_grid_1.png)
+![ROMS staggered grid structure](grid/_static/roms_grid_1.png){#fig-original-roms}
 
-Contrary to NEMO and MARS, the `U` points are located on the *western* face, while velocities are
-located on the *southern* faces. However, However, as indicated on the [Wikiroms page](https://www.myroms.org/wiki/Numerical_Solution_Technique), while the `T` interior domain has $(N_y, N_x)$ dimensions,
-the `U` domain is $(N_y, N_x - 1)$ points while and `V` domain is $(N_y - 1, N_x)$ points.
-Indeed, the first row for V and the first column for U are discarded. Therefore, the structure of the input ROMS grid is
-as follows:
+<!--
+Contrary to NEMO and MARS, the `U` points are located on the *western* face, while velocities are located on the *southern* faces. However, However, as indicated on the [Wikiroms page](https://www.myroms.org/wiki/Numerical_Solution_Technique), while the `T` interior domain has $(N_y, N_x)$ dimensions, the `U` domain is $(N_y, N_x - 1)$ points while and `V` domain is $(N_y - 1, N_x)$ points. Indeed, the first row for V and the first column for U are discarded. Therefore, the structure of the input ROMS grid is as follows: -->
 
-![ROMS grid as interpreted by Ichthyop](grid/_static/original_grid_roms.png)
+In @fig-roms-layout, the structure of the grid, based on @fig-original-roms, is drawn with the indexes of the different points
+added.
 
+![ROMS grid layout. T points are shown in orange, U points are shown in red and V points are shown in blue. The Ichthyop computation area is shown in black](grid/_static/original_grid_roms.jpg){#fig-roms-layout}
+
+In ROMS, there are 1 extra column of T points compared to U points. There also is 1 extra line of T points compared to V points.
+
+##### Is on edge
+
+In Ichthyop, a particle is considered out of domain when U, V, or T points cannot be interpolated using a 4 point interpolation.
+Looking at the layout described in @fig-roms-layout, this occurs when:
+
+- $x \lt 0.5$ or $x \gt N_x -1 - 0.5$, when $U$ values cannot be interpolated.
+- $y \lt 0.5$ or $x \gt N_y -1 - 0.5$, when $V$ values cannot be interpolated.
+
+The excluded domain is represented in @fig-on-edge-roms:
+
+![Excluded domain in the Ichthyop ROMS simulations.](grid/_static/is_on_edge_roms.jpg){#fig-on-edge-roms}
 
 ##### Land-sea mask
 
-![Land-sea masking for ROMS grid](grid/_static/land_sea_mask_roms.jpg)
+The land-sea mask of a particle is obtained by rounding the $x$ and $y$ position of the particle, and
+getting the value of the mask at these rounded indexes. Some examples are shown in @fig-landsea-roms
 
+![Land-sea masking for ROMS grid](grid/_static/land_sea_mask_roms.jpg){#fig-landsea-roms}
 
 ##### Interpolation
+
+In this section, we describe how the zonal and meridional velocity fields are interpolated.
 
 ###### T interpolation
 
 Given a given position index of a particle with the `T` grid, the determination of the interpolation is done as follows:
 
-- First, the `i` index of the `T` grid column left of the particle is found. This is done by using `floor` on the `x - 0.5` value. The removing of 0.5 is to convert the `x` value from the computational grid to the `T` grid.
-- Then, the `j` index of the `T` grid line below the particle is found. This is done by using `floor` on the `y - 0.5` value. The removing of 0.5 is to convert the `y` value from the computational grid to the `T` grid.
-- The area to consider is defined by the `[i, i + 1]` and `[j, j + 1]` squares.
+-   First, the `i` index of the `T` grid column left of the particle is found. This is done by using `floor` on the `x` value.
+-   Then, the `j` index of the `T` grid line below the particle is found. This is done by using `floor` on the `y` value.
+-   The area to consider is defined by the `[i, i + 1]` and `[j, j + 1]` squares.
+- The weights are given by considering the coordinate distance between the particle location and the targeted T points.
 
-An illustration is given below
+An illustration is given @fig-t-interp-roms.
 
-![Interpolation of T points from ROMS grid](grid/_static/interpolation_t_roms.jpg)
-
+![Interpolation of T points from ROMS grid](grid/_static/interpolation_t_roms.jpg){#fig-t-interp-roms}
 
 ###### U interpolation
 
 Interpolation of `U` variables is done as follows:
 
-- First, the `i` index of the `U` point left of the particle is found by using `floor(x - 1)`. The `-1` is to move from the computation grid to the `U` grid system.
-- Then, the `j` index of the `U` grid line below the particle is found. This is done by using `floor` on the `y - 0.5` value. The `-0.5` is to move from the computation grid to the `U` grid system.
-- The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
+-   First, the `i` index of the `U` point left of the particle is found. This is done by using `floor(x - 0.5)`. The `-0.5` is to move from the computation T grid to the `U` grid system (if $x=0.5$ in T system, $x=0$ in U system).
+-   Then, the `j` index of the `U` grid line below the particle is found. This is done by using `floor` on the `y` value.
+-   The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
 
-![Interpolation of U points from ROMS grid](grid/_static/interpolation_u_roms.jpg)
+An illustration is given @fig-u-interp-roms.
 
+![Interpolation of U points from ROMS grid](grid/_static/interpolation_u_roms.jpg){#fig-u-interp-roms}
 
 ###### V interpolation
 
 Interpolation of `V` variables is done as follows:
 
-- First, the `i` index of the `V` point left of the particle is found by using `floor(x - 0.5)`. The `-0.5` is to move from the computation grid to the `U` grid system.
-- Then, the `j` index of the `V` grid line below the particle is found. This is done by using `floor` on the `y - 1` value. The `-1` is to move from the computation grid to the `U` grid system.
-- The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
-
-![Interpolation of V points from ROMS grid](grid/_static/interpolation_v_roms.jpg)
+-   First, the `i` index of the `V` point left of the particle is found by using `floor(x)`.
+-   Then, the `j` index of the `V` grid line below the particle is found. This is done by using `floor` on the `y - 0.5` value. The `-0.5` is to move from the computation T grid to the `V` grid system (if $y=0.5$ in T system, $y=0$ in V system).
+-   The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
 
 
-##### Is on edge
+An illustration is given @fig-v-interp-roms.
 
-A particle is considered to be out of domain when $x \leq 1$ (no possible interpolation of U on the western face), when $y \geq N_x - 1$
-(no possible interpolation of U on the eastern face), when $y \leq 1$ (no possible interpolation of V on the southern domain) or when $y \geq N_y - 1$ (no possible interpolation of V on the northern part of the domain).
-
-The excluded domain is represented below:
-
-![Excluded domain in the Ichthyop ROMS simulations.](grid/_static/is_on_edge_roms.jpg)
-
+![Interpolation of V points from ROMS grid](grid/_static/interpolation_v_roms.jpg){#fig-v-interp-roms}
 
 #### Vertical
 
