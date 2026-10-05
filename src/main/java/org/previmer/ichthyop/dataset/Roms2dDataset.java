@@ -137,13 +137,13 @@ public class Roms2dDataset extends RomsCommon {
                 double coy = 1 - Math.abs((jy - (j + jj)));
                 co = cox * coy;
 
-                double pnu = this.interpolate_U_scalefactors(i, j);
+                double pmu = this.interpolate_U_scalefactors(i, j);
 
                 CO += co;
                 x = (1.d - x_euler) * u_tp0[j + jj][i + ii] + x_euler * u_tp1[j + jj][i + ii];
                 if (!Double.isNaN(x)) {
                     if (normalize) {
-                        du += x * co * pnu;
+                        du += x * co * pmu;
                     } else {
                         du += x * co;
                     }

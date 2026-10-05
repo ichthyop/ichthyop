@@ -548,17 +548,29 @@ abstract public class Roms3dCommon extends RomsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
+
+        // Index of the closest point on the lower left in U space.
+        // Shift by -0.5 for moving from Tpoint to Uspace.
+        i = (int) Math.floor(ix - 0.5);
+        j = (int) Math.floor(jy);
+
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    double co = Math.abs((.5d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
+
+                    double cox = 1 - Math.abs((ix - (i + 0.5 + ii)));
+                    double coy = 1 - Math.abs((jy - (j + jj)));
+                    double coz = Math.abs(1.d - (double) kk - dz);
+
+                    double co = cox * coy * coz;
+
                     CO += co;
-                    double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                    double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii] + x_euler * u_tp1[k + kk][j + jj][i + ii];
+                    double pmu = this.interpolate_U_scalefactors(i, j);
+
                     if (!Double.isNaN(x)) {
                         if (normalize) {
-                            du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                            du += x * co * pmu;
                         } else {
                             du += x * co;
                         }

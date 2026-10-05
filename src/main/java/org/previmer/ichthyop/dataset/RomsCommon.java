@@ -785,15 +785,15 @@ abstract class RomsCommon extends AbstractDataset {
         // For getting the coordinate of the scale factor to
         // interpolate, we switch the i index (in U space) back to U space
         // if i = 0 for V, we are at -0.5 in T space
-        int it = (int) Math.floor(i + 0.5);
         int jt = j;
+        int it = (int) Math.floor(i + 0.5);
 
         // interpolation of the T scale factor on V points
         // jt is the index of the T point to select.
         // however, scale factors are read on extended domain.
         // it = 0 in ichthyop layout is it=1 in scale factors layout
-        double pnu = 0.5 * (pn[jt][it] + pn[jt][it + 1]);
-        return pnu;
+        double pmu = 0.5 * (pm[jt][it] + pm[jt][it + 1]);
+        return pmu;
     }
 
 }
