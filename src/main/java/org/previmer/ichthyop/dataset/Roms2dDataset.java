@@ -66,6 +66,7 @@ public class Roms2dDataset extends RomsCommon {
         jy = pGrid[1];
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
         double CO = 0.d;
@@ -77,11 +78,11 @@ public class Roms2dDataset extends RomsCommon {
         // int it = (int) Math.floor(ix);
         // int jt = (int) Math.floor(jy);
 
-        j = (int) Math.floor(jy + 0.5);  // (j, i) is the grid cell index of V point to select (low left)
+        j = (int) Math.floor(jy - 0.5);  // (j, i) is the grid cell index of V point to select (low left)
         i = (int) Math.floor(ix);
 
         for (int jj = 0; jj < 2; jj++) {
-            double coy = 1 - Math.abs(jy - (j - 0.5 + jj));
+            double coy = 1 - Math.abs(jy - (j + 0.5 + jj));
             for (int ii = 0; ii < 2; ii++) {
                 double cox = 1 - Math.abs(ix - (i + ii));
                 co = cox * coy;
@@ -89,9 +90,9 @@ public class Roms2dDataset extends RomsCommon {
 
                 // For getting the coordinate of the scale factor to
                 // interpolate, we switch the j index (in V space) back to T space
-                // if j = 0 for V, we are at -0.5 in T space
-                int jt = (int) Math.floor(j - 0.5) + 1;
-                int it = i + 1;
+                // if j = 0 for V, we are at 0.5 in T space
+                int jt = (int) Math.floor(j + 0.5);
+                int it = i;
 
                 // interpolation of the T scale factor on V points
                 // jt is the index of the T point to select.
@@ -134,11 +135,13 @@ public class Roms2dDataset extends RomsCommon {
         double co;
         double x;
 
-        i = (int) Math.floor(ix + 0.5);
+        // Index of the closest point on the lower left in U space.
+        // Shift by -0.5 for moving from Tpoint to Uspace.
+        i = (int) Math.floor(ix - 0.5);
         j = (int) Math.floor(jy);
 
         for (int ii = 0; ii < 2; ii++) {
-            double cox = 1 - Math.abs((ix - (i - 0.5 + ii)));
+            double cox = 1 - Math.abs((ix - (i + 0.5 + ii)));
             for (int jj = 0; jj < 2; jj++) {
 
                 double coy = 1 - Math.abs((jy - (j + jj)));
@@ -147,8 +150,8 @@ public class Roms2dDataset extends RomsCommon {
                 // For getting the coordinate of the scale factor to
                 // interpolate, we switch the i index (in U space) back to U space
                 // if i = 0 for V, we are at -0.5 in T space
-                int it = (int) Math.floor(i - 0.5) + 1;
-                int jt = j + 1;
+                int it = (int) Math.floor(i + 0.5);
+                int jt = j;
 
                 // interpolation of the T scale factor on V points
                 // jt is the index of the T point to select.
@@ -217,8 +220,8 @@ public class Roms2dDataset extends RomsCommon {
             // For U, we read only on the inner domain
             // but we have an extra U to read, which is one value less that T point.
             // i.e. inner T domain starts at 1, inner U domain starts at 0
-            origin = new int[]{rank, jpo, ipo - 1};
-            count = new int[]{rank, ny, nx + 1};
+            origin = new int[]{rank, jpo, ipo};
+            count = new int[]{rank, ny, nx - 1};
             arr = ncIn.findVariable(strU).read(origin, count).reduce();
             u_tp1 = new float[count[1]][count[2]];
             index = arr.getIndex();
@@ -234,8 +237,8 @@ public class Roms2dDataset extends RomsCommon {
             throw ioex;
         }
         try {
-            origin = new int[]{rank, jpo - 1, ipo};
-            count = new int[]{rank, ny + 1, nx};
+            origin = new int[]{rank, jpo, ipo};
+            count = new int[]{rank, ny - 1, nx};
             arr = ncIn.findVariable(strV).read(origin,count).reduce();
             v_tp1 = new float[count[1]][count[2]];
             index = arr.getIndex();

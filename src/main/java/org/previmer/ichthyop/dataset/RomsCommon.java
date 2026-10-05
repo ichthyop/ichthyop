@@ -198,8 +198,6 @@ abstract class RomsCommon extends AbstractDataset {
             // for pm and pn, we need to read on the extended T domain
             // i.e. include halo cells
             // since it is used in the interpolation of U and V.
-            origin =  new int[]{jpo - 1, ipo - 1};
-            size = new int[]{ny + 2, nx + 2};
             arrPm = ncGrid.findVariable(strPm).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset pm metrics. " + e.toString());
@@ -208,8 +206,6 @@ abstract class RomsCommon extends AbstractDataset {
         }
 
         try {
-            origin =  new int[]{jpo - 1, ipo - 1};
-            size = new int[]{ny + 2, nx + 2};
             arrPn = ncGrid.findVariable(strPn).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset pn metrics. " + e.toString());
@@ -237,11 +233,11 @@ abstract class RomsCommon extends AbstractDataset {
             }
         }
 
-        pm = new double[ny + 2][nx + 2];
-        pn = new double[ny + 2][nx + 2];
+        pm = new double[ny][nx];
+        pn = new double[ny][nx];
         index = arrPm.getIndex();
-        for (int j = 0; j < ny + 2; j++) {
-            for (int i = 0; i < nx + 2; i++) {
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
                 index.set(j, i);
                 pm[j][i] = arrPm.getDouble(index);
                 pn[j][i] = arrPn.getDouble(index);
@@ -268,7 +264,7 @@ abstract class RomsCommon extends AbstractDataset {
 
         try {
             // nx is the total number of T grid points in the inner domain
-            nx = ncGrid.findDimension(strXiDim).getLength() - 2;
+            nx = ncGrid.findDimension(strXiDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset grid dimensions XI. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -276,15 +272,13 @@ abstract class RomsCommon extends AbstractDataset {
         }
         try {
             // ny is the total number of T grid points in the inner domain
-            ny = ncGrid.findDimension(strEtaDim).getLength() - 2;
+            ny = ncGrid.findDimension(strEtaDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset grid dimensions ETA. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-
-        // We start at 1 to get only the inner domain
-        ipo = jpo = 1;
+        ipo = jpo = 0;
     }
 
     @Override
@@ -386,10 +380,10 @@ abstract class RomsCommon extends AbstractDataset {
 
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[0] > (nx - 1.0f))
-                || (pGrid[0] < 0.0f)
-                || (pGrid[1] > (ny - 1.0f))
-                || (pGrid[1] < 0.0f));
+        return ((pGrid[0] > (nx - 1.5f))
+                || (pGrid[0] < 0.5f)
+                || (pGrid[1] > (ny - 1.5f))
+                || (pGrid[1] < 0.5f));
     }
 
     @Override
@@ -615,13 +609,8 @@ abstract class RomsCommon extends AbstractDataset {
         jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
         jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
 
-        // ipo, ipn, jpo and jpn are the coordinates of the domain in the inner domain.
-        // for example, if the domaine starts at ipo = 1, it means that the netcdf file must be
-        // read at ipo = 2.
-        // so we offset by a factor of 1
-        ipo += 1;
-        jpo += 1;
 
+        // This is the total number of T points that will be read
         nx = Math.min(nx, ipn - ipo + 1);
         ny = Math.min(ny, jpn - jpo + 1);
         //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
