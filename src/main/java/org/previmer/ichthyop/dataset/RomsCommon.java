@@ -97,12 +97,17 @@ abstract class RomsCommon extends AbstractDataset {
 
     abstract void setOnFirstTime() throws Exception;
 
+    double e1u[][];
+    double e2u[][];
+    double e1v[][];
+    double e2v[][];
+
     @Override
     void loadParameters() {
 
         strXiDim = getParameter("field_dim_xi");
         strEtaDim = getParameter("field_dim_eta");
-        strTimeDim = getParameter("field_dim_time");
+        strTimeDim = getParameter("field_dim_t ime");
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
         strBathy = getParameter("field_var_bathy");
@@ -251,6 +256,9 @@ abstract class RomsCommon extends AbstractDataset {
                 hRho[j][i] = arrH.getDouble(index.set(j, i));
             }
         }
+
+        this.create_e2u_e1v();
+
     }
 
     /**
@@ -796,4 +804,40 @@ abstract class RomsCommon extends AbstractDataset {
         return pmu;
     }
 
+
+    /** Function to creates the equivalent of the e1v and
+     *  e2u scale NEMO scale factors
+     *
+     * We interpolate the 1/pn = delta y on the U cells.
+     * We interpolate the 1/pm = delta x on the V cells
+     *
+     * Note: pm = 1 / dx = e1t
+     * Note: pn = 1 / dy = e2t
+     *
+     */
+    void create_e2u_e1v() {
+
+        e1u = new double[ny][nx - 1];
+        e2u = new double[ny][nx - 1];
+
+        e1v = new double[ny - 1][nx];
+        e2v = new double[ny - 1][nx];
+
+        // Interpolates scale factor on U grid
+        // note: pm = 1 / dx
+        for(int j = 0; j < ny; j++) {
+            for(int i = 0; i < nx - 1; i++) {
+                e1u[j][i] = 0.5 * (1/pm[j][i])  + (1/pm[j][i+1]);
+                e2u[j][i] = 0.5 * (1/pn[j][i])  + (1/pn[j][i+1]);
+            }
+        }
+
+        // Interpolates e1v
+        for(int j = 0; j < ny - 1; j++) {
+            for(int i = 0; i < nx; i++) {
+                e1v[j][i] = 0.5 * (1/pm[j][i])  + (1/pm[j + 1][i]);
+                e2v[j][i] = 0.5 * (1/pn[j][i])  + (1/pn[j + 1][i]);
+            }
+        }
+    }
 }
