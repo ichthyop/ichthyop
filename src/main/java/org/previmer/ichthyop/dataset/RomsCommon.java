@@ -259,8 +259,6 @@ abstract class RomsCommon extends AbstractDataset {
             }
         }
 
-        this.create_e2u_e1v();
-
     }
 
     /**
@@ -792,27 +790,79 @@ abstract class RomsCommon extends AbstractDataset {
         return 0.5 * (pm[j][i] + pm[j][i + 1]);
     }
 
+    /**
+     * Interpolates the pn variable onto V points
+     *
+     * @param i i Index of the V point
+     * @param j j index of the V point
+     */
     public double get_pnv(int i, int j) {
         return 0.5 * (pn[j][i] + pn[j + 1][i]);
     }
 
+    /**
+     * Interpolates the pm variable onto V points
+     *
+     * @param i i Index of the V point
+     * @param j j index of the V point
+     */
     public double get_pmv(int i, int j) {
         return 0.5 * (pm[j][i] + pm[j + 1][i]);
     }
 
+    /**
+     * Returns the equivalent of the e1u function in Nemo
+     *
+     * It first interpolates the pm value onto U face, then
+     * returns the inverse
+     *
+     * @param i i index of the U cell
+     * @param j j index of the U cell
+     * @return
+     */
     public double get_e1u(int i, int j) {
         return 1 / get_pmu(i, j);
     }
 
+    /**
+     * Returns the equivalent of the e1v function in Nemo
+     *
+     * It first interpolates the pm value onto V face, then
+     * returns the inverse
+     *
+     * @param i i index of the V cell
+     * @param j j index of the V cell
+     * @return
+     */
     public double get_e1v(int i, int j) {
         return 1 / get_pmv(i, j);
     }
 
+    /**
+     * Returns the equivalent of the e2u function in Nemo
+     *
+     * It first interpolates the pn value onto U face, then
+     * returns the inverse
+     *
+     * @param i i index of the U cell
+     * @param j j index of the U cell
+     * @return
+     */
     public double get_e2u(int i, int j) {
         return 1 / get_pnu(i, j);
     }
 
-    public double get_e2V(int i, int j) {
+    /**
+     * Returns the equivalent of the e2v function in Nemo
+     *
+     * It first interpolates the pn value onto V face, then
+     * returns the inverse
+     *
+     * @param i i index of the V cell
+     * @param j j index of the V cell
+     * @return
+     */
+    public double get_e2v(int i, int j) {
         return 1 / get_pnv(i, j);
     }
 
