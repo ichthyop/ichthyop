@@ -164,7 +164,9 @@ abstract class RomsCommon extends AbstractDataset {
 
     void readConstantField(String gridFile) throws IOException {
 
-        // Read grid variables on the inner domain
+        // Read grid variables on the outer domain.
+        // T points are read from 0 to nx - 1. nx is the nunber
+        // of points including outer domain
         int[] origin = new int[]{jpo, ipo};
         int[] size = new int[]{ny, nx};
         Array arrLon, arrLat, arrMask, arrH, arrPm, arrPn;
@@ -271,7 +273,7 @@ abstract class RomsCommon extends AbstractDataset {
         NetcdfFile ncGrid = NetcdfDatasets.openDataset(gridFile);
 
         try {
-            // nx is the total number of T grid points in the inner domain
+            // nx is the total number of T grid points, including the outer domain
             nx = ncGrid.findDimension(strXiDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset grid dimensions XI. " + ex.toString());
@@ -279,7 +281,7 @@ abstract class RomsCommon extends AbstractDataset {
             throw ioex;
         }
         try {
-            // ny is the total number of T grid points in the inner domain
+            // ny is the total number of T grid points, including the outer domain
             ny = ncGrid.findDimension(strEtaDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset grid dimensions ETA. " + ex.toString());
@@ -387,6 +389,13 @@ abstract class RomsCommon extends AbstractDataset {
     }
 
     @Override
+    /** This function determines whether we are out of the domain.    (non-Javadoc)
+     *
+     * This is the case when U, V, W or T points cannot be interpolated. For Roms/Croco,
+     * this occurs when we are out of the U and V limits.
+     *
+     * @see org.previmer.ichthyop.dataset.IDataset#isOnEdge(double[])
+     */
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 1.5f))
                 || (pGrid[0] < 0.5f)
@@ -515,14 +524,19 @@ abstract class RomsCommon extends AbstractDataset {
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
+
+        // Find the T cell index in which the particle is located
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         double ix = pGrid[0];
         double jy = pGrid[1];
 
         if (jy > j) {
+            // if the particle is north of the center of T cell
+            // take cell above
             jj = 1;
         } else {
+            // else take cell below
             jj = -1;
         }
 
@@ -767,9 +781,9 @@ abstract class RomsCommon extends AbstractDataset {
      * It estimates the scale factor at the V cell based
      * on the scalefactors at the two neighbouring T cells
      *
-     * @param i Index of the i cell in the V space
-     * @param j Index of the j cell in the V space
-     * @return Interpolated scale factor
+     * @param i i index of the V cell
+     * @param j j index of the V cell
+     * @return Interpolated scale factor (1/e2v)
      */
     public double interpolate_V_scalefactors(int i, int j) {
 
@@ -784,10 +798,22 @@ abstract class RomsCommon extends AbstractDataset {
         // however, scale factors are read on extended domain.
         // it = 0 in ichthyop layout is it=1 in scale factors layout
         double pnv = 0.5 * (pn[jt][it] + pn[jt + 1][it]);
+
+        // this is 1/e2v
+
         return pnv;
 
     }
 
+     /** Interpolate U scale factors.
+     *
+     * It estimates the scale factor at the U cell based
+     * on the scalefactors at the two neighbouring T cells
+     *
+     * @param i i index of the U cell
+     * @param j j index of the U cell
+     * @return Interpolated scale factor (1/e2u)
+     */
     public double interpolate_U_scalefactors(int i, int j) {
 
         // For getting the coordinate of the scale factor to
@@ -808,8 +834,8 @@ abstract class RomsCommon extends AbstractDataset {
     /** Function to creates the equivalent of the e1v and
      *  e2u scale NEMO scale factors
      *
-     * We interpolate the 1/pn = delta y on the U cells.
-     * We interpolate the 1/pm = delta x on the V cells
+     * We interpolate the 1/pn = delta y on the U and V cells (this gives e2v and e2u)
+     * We interpolate the 1/pm = delta x on the V cells (this gives e1v and e1u)
      *
      * Note: pm = 1 / dx = e1t
      * Note: pn = 1 / dy = e2t
