@@ -458,23 +458,29 @@ abstract public class Roms3dCommon extends RomsCommon {
         int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f)); // force kz to be between 0 and nz - 1
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
-        int k = (int) Math.round(kz);
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double dz = kz - (double) k;
+        int i = (int) Math.floor(ix);
+        int j = (int) Math.floor(jy);
+        int k = (int) Math.floor(kz + 0.5);
+
         double CO = 0.d;
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
+        for (int ii = 0; ii < 2; ii++) {
+            for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
-                    CO += co;
+
+                    double coz = 1 - Math.abs(kz - (k - 0.5 + kk));
+                    double cox = 1 - Math.abs(ix - (i + ii));
+                    double coy = 1 - Math.abs(jy - (j + jj));
+                    double co = cox * coy * coz;
+
                     double x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                    if (!Double.isNaN(x)) {
+                    if (!Double.isNaN(x) & (isInWater(i + ii, j + jj))) {
+                        // If the point is in water and w is not Nan, then we interpolate dw.
+                        CO += co;
+                        // We need the layer thickness at the W point location (k). Since we don't have the
+                        // e3t equivalent in Croco, we compute based on the top and bottom W levels
                         dw += 2.d * x * co / (z_w_tp0[Math.min(k + kk + 1, nz)][j + jj][i + ii] - z_w_tp0[Math.max(k + kk - 1, 0)][j + jj][i + ii]);
                     }
                 }
@@ -498,13 +504,15 @@ abstract public class Roms3dCommon extends RomsCommon {
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
-        int k = (int) kz;
+        int k = (int) Math.floor(kz);
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double dz = kz - (double) k;
 
+        // if jy = 1 in T coordinate, it is 0.5 in the V coordinate
         j = (int) Math.floor(jy - 0.5);  // (j, i) is the grid cell index of V point to select (low left)
         i = (int) Math.floor(ix);
+        k = (int) Math.floor(kz);
 
         double CO = 0.d;
         for (int kk = 0; kk < 2; kk++) {
@@ -513,15 +521,14 @@ abstract public class Roms3dCommon extends RomsCommon {
 
                     double coy = 1 - Math.abs(jy - (j + 0.5 + jj));
                     double cox = 1 - Math.abs(ix - (i + ii));
-                    double coz = Math.abs(1.d - (double) kk - dz);
-
+                    double coz = 1 - Math.abs(kz - (k + kk));
                     double co = cox * coy * coz;
 
                     double pnv = this.interpolate_V_scalefactors(i, j);
 
                     double x = (1.d - x_euler) * v_tp0[k + kk][j + jj][i + ii] + x_euler * v_tp1[k + kk][j + jj][i + ii];
 
-                    if (!Double.isNaN(x)) {
+                    if (!Double.isNaN(x) & isInWater(i + ii, j + jj)) {
                         CO += co;
                         if (normalize) {
                             dv += x * co * pnv;
@@ -562,6 +569,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         // Shift by -0.5 for moving from Tpoint to Uspace.
         i = (int) Math.floor(ix - 0.5);
         j = (int) Math.floor(jy);
+        k = (int) Math.floor(kz);
 
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
@@ -569,14 +577,14 @@ abstract public class Roms3dCommon extends RomsCommon {
 
                     double cox = 1 - Math.abs((ix - (i + 0.5 + ii)));
                     double coy = 1 - Math.abs((jy - (j + jj)));
-                    double coz = Math.abs(1.d - (double) kk - dz);
+                    double coz = 1 - Math.abs(kz - (k + kk));
 
                     double co = cox * coy * coz;
 
                     double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii] + x_euler * u_tp1[k + kk][j + jj][i + ii];
                     double pmu = this.interpolate_U_scalefactors(i, j);
 
-                    if (!Double.isNaN(x)) {
+                    if (!Double.isNaN(x) & isInWater(i + ii, j + jj)) {
                         CO += co;
                         if (normalize) {
                             du += x * co * pmu;
@@ -596,22 +604,30 @@ abstract public class Roms3dCommon extends RomsCommon {
 
     private double getDepth(double xRho, double yRho, int k) {
 
-        final int i = (int) xRho;
-        final int j = (int) yRho;
+        // For getting depth, it is an interpolation of a W variable
+        final int i = (int) Math.floor(xRho);
+        final int j = (int) Math.floor(yRho);
         double hh = 0.d;
-        final double dx = (xRho - i);
-        final double dy = (yRho - j);
         double co;
+        double co_tot = 0;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 if (isInWater(i + ii, j + jj)) {
-                    co = Math.abs((1 - ii - dx) * (1 - jj - dy));
+                    double cox = 1 - Math.abs((xRho - (i + ii)));
+                    double coy = 1 - Math.abs((yRho - (j + jj)));
+                    co = cox * coy;
                     double z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
                             * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i + ii]);
                     hh += co * z_r;
+                    co_tot += co;
                 }
             }
         }
+
+        if(co_tot > 0) {
+            hh /= co_tot;
+        }
+
         return (hh);
     }
 
