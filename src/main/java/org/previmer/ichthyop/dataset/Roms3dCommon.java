@@ -282,7 +282,23 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         /* specific 3D calculations */
         getCstSigLevels();
+
+
+        // Initialize the zeta values with 0.
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                zeta_tp0[j][i] = 0;
+            }
+        }
+
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                zeta_tp1[j][i] = 0;
+            }
+        }
+
         z_w_tp0 = getSigLevels();
+
     }
 
     /**
