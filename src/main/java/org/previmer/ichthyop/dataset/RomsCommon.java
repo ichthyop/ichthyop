@@ -107,7 +107,7 @@ abstract class RomsCommon extends AbstractDataset {
 
         strXiDim = getParameter("field_dim_xi");
         strEtaDim = getParameter("field_dim_eta");
-        strTimeDim = getParameter("field_dim_t ime");
+        strTimeDim = getParameter("field_dim_time");
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
         strBathy = getParameter("field_var_bathy");
