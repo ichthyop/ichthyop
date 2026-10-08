@@ -265,6 +265,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         /* Vertical dimension */
         try {
+            // Number of T levels
             nz = ncIn.findDimension(strZDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset grid dimensions Z. " + ex.toString());
@@ -363,26 +364,9 @@ abstract public class Roms3dCommon extends RomsCommon {
     void readConstantField(String gridFile) throws IOException {
 
         super.readConstantField(gridFile);
-        Array arrZeta;
-        Index index;
+        // Array arrZeta;
+        // Index index;
 
-        // WARNING: this one should not be here, and no consideration of rank!
-        try {
-            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
-        } catch (IOException | InvalidRangeException e) {
-            IOException ioex = new IOException("Problem reading dataset ocean free surface elevation. " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        }
-
-        zeta_tp0 = new float[ny][nx];
-        index = arrZeta.getIndex();
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                zeta_tp0[j][i] = arrZeta.getFloat(index.set(j, i));
-            }
-        }
-        zeta_tp1 = zeta_tp0;
     }
 
     @Override
@@ -409,25 +393,24 @@ abstract public class Roms3dCommon extends RomsCommon {
     @Override
     public double z2depth(double x, double y, double z) {
 
+        // Force kz to be in the bounds of T points.
         final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
+
         final int i = (int) Math.floor(x);
         final int j = (int) Math.floor(y);
         // final int k = (int) Math.floor(kz);
         final int k = (int) Math.floor(kz + 0.5); // k is the lower index of the W variable to interpolate
 
         double depth = 0.d;
-        // final double dx = x - (double) i;
-        // final double dy = y - (double) j;
-        // final double dz = kz - (double) k;
 
-        // // patch for Luisa
-        // int nk = (z == 0) ? 1 : 2;
         double co;
         double CO_tot = 0;
         double z_r;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
+                    // For weight computation, we move back k (in W space) to T space.
+                    // if k = 0 in W, k = -0.5 in T space
                     double coz = 1 - Math.abs(kz - (k - 0.5 + kk));
                     double cox = 1 - Math.abs(x - (i + ii));
                     double coy = 1 - Math.abs(y - (j + jj));
@@ -455,7 +438,6 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         double dw = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f)); // force kz to be between 0 and nz - 1
@@ -476,7 +458,7 @@ abstract public class Roms3dCommon extends RomsCommon {
                     double co = cox * coy * coz;
 
                     double x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                    if (!Double.isNaN(x) & (isInWater(i + ii, j + jj))) {
+                    if (!Double.isNaN(x) & (x != 0)) {
                         // If the point is in water and w is not Nan, then we interpolate dw.
                         CO += co;
                         // We need the layer thickness at the W point location (k). Since we don't have the
@@ -502,17 +484,11 @@ abstract public class Roms3dCommon extends RomsCommon {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (int) Math.round(jy);
-        int k = (int) Math.floor(kz);
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double dz = kz - (double) k;
 
         // if jy = 1 in T coordinate, it is 0.5 in the V coordinate
-        j = (int) Math.floor(jy - 0.5);  // (j, i) is the grid cell index of V point to select (low left)
-        i = (int) Math.floor(ix);
-        k = (int) Math.floor(kz);
+        int j = (int) Math.floor(jy - 0.5);  // (j, i) is the grid cell index of V point to select (low left)
+        int i = (int) Math.floor(ix);
+        int k = (int) Math.floor(kz);
 
         double CO = 0.d;
         for (int kk = 0; kk < 2; kk++) {
@@ -524,11 +500,11 @@ abstract public class Roms3dCommon extends RomsCommon {
                     double coz = 1 - Math.abs(kz - (k + kk));
                     double co = cox * coy * coz;
 
-                    double pnv = this.interpolate_V_scalefactors(i, j);
+                    double pnv = this.get_pnv(i, j);
 
                     double x = (1.d - x_euler) * v_tp0[k + kk][j + jj][i + ii] + x_euler * v_tp1[k + kk][j + jj][i + ii];
 
-                    if (!Double.isNaN(x) & isInWater(i + ii, j + jj)) {
+                    if (!Double.isNaN(x) && (x != 0)) {
                         CO += co;
                         if (normalize) {
                             dv += x * co * pnv;
@@ -551,28 +527,22 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         double du = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) Math.round(ix);
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
-        int k = (int) kz;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double dz = kz - (double) k;
+
         double CO = 0.d;
 
         // Index of the closest point on the lower left in U space.
         // Shift by -0.5 for moving from Tpoint to Uspace.
-        i = (int) Math.floor(ix - 0.5);
-        j = (int) Math.floor(jy);
-        k = (int) Math.floor(kz);
+        int i = (int) Math.floor(ix - 0.5);
+        int j = (int) Math.floor(jy);
+        int k = (int) Math.floor(kz);
 
         for (int ii = 0; ii < 2; ii++) {
-            for (int jj = 0; jj < n; jj++) {
+            for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
 
                     double cox = 1 - Math.abs((ix - (i + 0.5 + ii)));
@@ -582,9 +552,9 @@ abstract public class Roms3dCommon extends RomsCommon {
                     double co = cox * coy * coz;
 
                     double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii] + x_euler * u_tp1[k + kk][j + jj][i + ii];
-                    double pmu = this.interpolate_U_scalefactors(i, j);
+                    double pmu = this.get_pmu(i, j);
 
-                    if (!Double.isNaN(x) & isInWater(i + ii, j + jj)) {
+                    if (!Double.isNaN(x) && (x != 0)) {
                         CO += co;
                         if (normalize) {
                             du += x * co * pmu;
@@ -604,7 +574,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
     private double getDepth(double xRho, double yRho, int k) {
 
-        // For getting depth, it is an interpolation of a W variable
+        // For getting depth, it is an interpolation of a W/T variable
         final int i = (int) Math.floor(xRho);
         final int j = (int) Math.floor(yRho);
         double hh = 0.d;
@@ -768,10 +738,6 @@ abstract public class Roms3dCommon extends RomsCommon {
         //System.out.println("Compute vertical velocity");
         double[][][] Huon = new double[nz][ny][nx];
         double[][][] Hvom = new double[nz][ny][nx];
-        double[][][] z_w_tmp = z_w_tp1;
-
-        double[][][] delta_ZU = new double[nz][ny][nx - 1];
-        double[][][] delta_ZV = new double[nz][ny - 1][nx];
         double[][][] delta_ZT = new double[nz][ny][nx];
 
         // Computes the layer thickness on the T points.
@@ -779,27 +745,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         for (int k = 0; k < nz - 1; k++) { // loop from nz - 1 to 0
             for (int i = 0; i < nx; i++) { // loop from 1 to nx - 1
                 for (int j = 0; j < ny; j++) {
-                    delta_ZT[k][j][i] = z_w_tmp[k + 1][j][i] - z_w_tmp[k][j][i];
-                }
-            }
-        }
-
-        // Computes the layer thickness on the U points.
-        // computed on the western face of the grid
-        for (int k = 0; k < nz; k++) { // loop from nz - 1 to 0
-            for (int i = 0; i < nx - 1; i++) { // loop from 0 to nx - 1
-                for (int j = 0; j < ny; j++) {
-                    delta_ZU[k][j][i] = 0.5 * (delta_ZT[k][j][i] + delta_ZT[k][j][i + 1]);
-                }
-            }
-        }
-
-        // Computes the layer thickness on the V points.
-        // computed on the southern face of the grid
-        for (int k = 0; k < nz; k++) { // loop from nz - 1 to 0
-            for (int i = 0; i < nx; i++) { // loop from 1 to nx - 1
-                for (int j = 0; j < ny - 1; j++) {
-                    delta_ZV[k][j][i] = 0.5 * (delta_ZT[k][j][i] + delta_ZT[k][j + 1][i]);
+                    delta_ZT[k][j][i] = z_w_tp1[k + 1][j][i] - z_w_tp1[k][j][i];
                 }
             }
         }
@@ -809,7 +755,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         for (int k = 0; k < nz; k++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx - 1; i++) {
-                    Huon[k][j][i] = u_tp1[k][j][i] * delta_ZU[k][j][i] * e2u[j][i];
+                    Huon[k][j][i] = u_tp1[k][j][i] * 0.5 *(delta_ZT[k][j][i] + delta_ZT[k][j][i + 1]) * get_e2u(i, j);
                     if(Double.isNaN(Huon[k][j][i])) {
                         Huon[k][j][i] = 0;
                     }
@@ -822,7 +768,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         for (int k = 0; k < nz; k++) {
             for (int j = 0; j < ny - 1; j++) {
                 for (int i = 0; i < nx; i++) {
-                    Hvom[k][j][i] = v_tp1[k][j][i] * delta_ZV[k][j][i] * e1v[j][i];
+                    Hvom[k][j][i] = v_tp1[k][j][i] * 0.5 * (delta_ZT[k][j][i] + delta_ZT[k][j + 1][i]) * get_e1v(i, j);
                     if(Double.isNaN(Hvom[k][j][i])) {
                         Hvom[k][j][i] = 0;
                     }
@@ -861,7 +807,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         // F[k] ← F[k] − [ (z_w[k] − z_w[0]) / (z_w[nz] − z_w[0]) ] · F[nz]
         for (int j = 1; j < ny - 1; j++) {
             for (int i = 1; i < nx - 1; i++) {
-                wrk[j][i] = w_double[nz][j][i] / (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
+                wrk[j][i] = w_double[nz][j][i] / (z_w_tp1[nz][j][i] - z_w_tp1[0][j][i]);
             }
         }
 
@@ -870,7 +816,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         for (int j = 1; j < ny - 1; j++) {
             for (int i = 1; i < nx - 1; i++) {
                 for (int k = 0; k < nz + 1; k++) {
-                    w_double[k][j][i] += -wrk[j][i] * (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
+                    w_double[k][j][i] += -wrk[j][i] * (z_w_tp1[k][j][i] - z_w_tp1[0][j][i]);
                 }
             }
         }
@@ -897,6 +843,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         // Boundary conditions for corners
         for (int k = 0; k < nz + 1; k++) {
+
             // Lower left corner
             w_double[k][0][0] = w_double[k][1][1];
 
@@ -908,7 +855,6 @@ abstract public class Roms3dCommon extends RomsCommon {
 
             // lower right
             w_double[k][0][nx - 1] = w_double[k][1][nx - 2];
-
         }
 
         //---------------------------------------------------
