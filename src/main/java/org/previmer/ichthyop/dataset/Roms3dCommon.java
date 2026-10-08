@@ -412,24 +412,28 @@ abstract public class Roms3dCommon extends RomsCommon {
         final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
         final int i = (int) Math.floor(x);
         final int j = (int) Math.floor(y);
-        final int k = (int) Math.floor(kz);
+        // final int k = (int) Math.floor(kz);
+        final int k = (int) Math.floor(kz + 0.5); // k is the lower index of the W variable to interpolate
+
         double depth = 0.d;
-        final double dx = x - (double) i;
-        final double dy = y - (double) j;
-        final double dz = kz - (double) k;
+        // final double dx = x - (double) i;
+        // final double dy = y - (double) j;
+        // final double dz = kz - (double) k;
 
-        // patch for Luisa
-        int nk = (z == 0) ? 1 : 2;
-
+        // // patch for Luisa
+        // int nk = (z == 0) ? 1 : 2;
         double co;
+        double CO_tot = 0;
         double z_r;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int kk = 0; kk < nk; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
+                for (int kk = 0; kk < 2; kk++) {
+                    double coz = 1 - Math.abs(kz - (k - 0.5 + kk));
+                    double cox = 1 - Math.abs(x - (i + ii));
+                    double coy = 1 - Math.abs(y - (j + jj));
+                    co = cox * coy * coz;
                     if (isInWater(i + ii, j + jj)) {
+                        CO_tot += co;
                         z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
                                 * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j
                                 + jj][i + ii]);
@@ -438,6 +442,11 @@ abstract public class Roms3dCommon extends RomsCommon {
                 }
             }
         }
+
+        if(CO_tot != 0) {
+            depth /= CO_tot;
+        }
+
         return depth;
     }
 
@@ -507,13 +516,13 @@ abstract public class Roms3dCommon extends RomsCommon {
                     double coz = Math.abs(1.d - (double) kk - dz);
 
                     double co = cox * coy * coz;
-                    CO += co;
 
                     double pnv = this.interpolate_V_scalefactors(i, j);
 
                     double x = (1.d - x_euler) * v_tp0[k + kk][j + jj][i + ii] + x_euler * v_tp1[k + kk][j + jj][i + ii];
 
                     if (!Double.isNaN(x)) {
+                        CO += co;
                         if (normalize) {
                             dv += x * co * pnv;
                         } else {
@@ -564,11 +573,11 @@ abstract public class Roms3dCommon extends RomsCommon {
 
                     double co = cox * coy * coz;
 
-                    CO += co;
                     double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii] + x_euler * u_tp1[k + kk][j + jj][i + ii];
                     double pmu = this.interpolate_U_scalefactors(i, j);
 
                     if (!Double.isNaN(x)) {
+                        CO += co;
                         if (normalize) {
                             du += x * co * pmu;
                         } else {
