@@ -85,7 +85,7 @@ public class Roms2dDataset extends RomsCommon {
                 co = cox * coy;
 
                 // interpolate V scale factors on the V cell
-                double pnv = this.interpolate_V_scalefactors(i + ii, j + jj);
+                double pnv = this.get_pnv(i + ii, j + jj);
 
                 x = (1.d - x_euler) * v_tp0[j + jj][i + ii] + x_euler * v_tp1[j + jj][i + ii];
                 if (!Double.isNaN(x)) {
@@ -132,7 +132,7 @@ public class Roms2dDataset extends RomsCommon {
                 double coy = 1 - Math.abs((jy - (j + jj)));
                 co = cox * coy;
 
-                double pmu = this.interpolate_U_scalefactors(i + ii, j + jj);
+                double pmu = this.get_pmu(i + ii, j + jj);
 
                 x = (1.d - x_euler) * u_tp0[j + jj][i + ii] + x_euler * u_tp1[j + jj][i + ii];
                 if (!Double.isNaN(x)) {
