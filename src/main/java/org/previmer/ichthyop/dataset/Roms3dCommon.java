@@ -283,7 +283,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         /* specific 3D calculations */
         getCstSigLevels();
 
-
+        zeta_tp0 = new float[ny][nx];
         // Initialize the zeta values with 0.
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
@@ -291,6 +291,7 @@ abstract public class Roms3dCommon extends RomsCommon {
             }
         }
 
+        zeta_tp1 = new float[ny][nx];
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
                 zeta_tp1[j][i] = 0;
