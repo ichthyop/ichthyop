@@ -415,8 +415,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         final int i = (int) Math.floor(x);
         final int j = (int) Math.floor(y);
-        // final int k = (int) Math.floor(kz);
-        final int k = (int) Math.floor(kz + 0.5); // k is the lower index of the W variable to interpolate
+        final int k = (int) Math.floor(kz); // k is the lower index of the Tvariable to interpolate
 
         double depth = 0.d;
 
@@ -426,17 +425,14 @@ abstract public class Roms3dCommon extends RomsCommon {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    // For weight computation, we move back k (in W space) to T space.
-                    // if k = 0 in W, k = -0.5 in T space
-                    double coz = 1 - Math.abs(kz - (k - 0.5 + kk));
+                    double coz = 1 - Math.abs(kz - (k + kk));
                     double cox = 1 - Math.abs(x - (i + ii));
                     double coy = 1 - Math.abs(y - (j + jj));
                     co = cox * coy * coz;
                     if (isInWater(i + ii, j + jj)) {
                         CO_tot += co;
                         z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
-                                * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j
-                                + jj][i + ii]);
+                                * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j + jj][i + ii]);
                         depth += co * z_r;
                     }
                 }
