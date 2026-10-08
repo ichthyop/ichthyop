@@ -108,7 +108,7 @@ public class Roms2dDataset extends RomsCommon {
 
         double du = 0.d;
         double ix, jy;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+
         ix = pGrid[0];
         jy = pGrid[1];
 
