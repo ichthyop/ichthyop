@@ -65,53 +65,53 @@ abstract public class Roms3dCommon extends RomsCommon {
     /**
      * Ocean free surface elevetation at current time
      */
-    float[][] zeta_tp0;
+    float zeta_tp0[][];
     /**
      * /**
      * Ocean free surface elevetation at time t + dt
      */
-    float[][] zeta_tp1;
+    float zeta_tp1[][];
     /**
      * Zonal component of the velocity field at current time
      */
-    float[][][] u_tp0;
+    float u_tp0[][][];
     /**
      * Zonal component of the velocity field at time t + dt
      */
-    float[][][] u_tp1;
+    float u_tp1[][][];
     /**
      * Meridional component of the velocity field at current time
      */
-    float[][][] v_tp0;
+    float v_tp0[][][];
     /**
      * Meridional component of the velocity field at time t + dt
      */
-    float[][][] v_tp1;
+    float v_tp1[][][];
     /**
      * Vertical component of the velocity field at current time
      */
-    float[][][] w_tp0;
+    float w_tp0[][][];
     /**
      * Vertical component of the velocity field at time t + dt
      */
-    float[][][] w_tp1;
+    float w_tp1[][][];
     /**
      * Depth at rho point
      */
-    private double[][][] z_rho_cst;
+    private double z_rho_cst[][][];
     /**
      * Depth at w point at current time. Takes account of free surface
      * elevation.
      */
-    double[][][] z_w_tp0;
+    double z_w_tp0[][][];
     /**
      * Depth at w point at time t + dt Takes account of free surface elevation.
      */
-    double[][][] z_w_tp1;
+    double z_w_tp1[][][];
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    private double[][][] z_w_cst;
+    private double z_w_cst[][][];
     /**
      * Name of the Dimension in NetCDF file
      */
@@ -126,8 +126,8 @@ abstract public class Roms3dCommon extends RomsCommon {
     private String strCs_r, strCs_w, strHC;
 
     private String strUStokes, strVStokes;
-    float[][][] v_stokes_tp1;
-    float[][][] u_stokes_tp1;
+    float v_stokes_tp1[][][];
+    float u_stokes_tp1[][][];
 
     /**
      * True if W should be read, false if should be computed.
@@ -391,7 +391,17 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
+        // First, get the z index of the particle below the particle;
+
         double z;
+
+        // if depth is above the first T layer (for example, depth = 0)
+        // return nz - 1
+        if(depth > getDepth(x, y, nz - 1)) {
+            z = (double) nz - 1;
+            return z;
+        }
+
         int lk = nz - 1;
         while ((lk > 0) && (getDepth(x, y, lk) > depth)) {
             lk--;
