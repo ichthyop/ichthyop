@@ -264,9 +264,9 @@ plot_grid_layout()
 [plt.plot([x + 0.5], [y], marker='o', color='k', markersize=4) for x in range(xmax - 1) for y in range(ymax)]
 plt.grid(True, which='minor')
 plot_points(5.7, 3.1, 'r')
-plot_points(2.7, 1.7, 'b')
-plot_points(1.2, 3.1, 'g')
-plot_points(6.6, 0.6, 'orange')
+# plot_points(2.7, 1.7, 'b')
+# plot_points(1.2, 3.1, 'g')
+# plot_points(6.6, 0.6, 'orange')
 
 plt.title('Interpolation of U variables')
 savefig('interpolation_u_roms')
@@ -546,3 +546,93 @@ plt.title('Close to Coast')
 # For the UCLa formulation:
 #
 # $H_0(x, y, \sigma) = h(x, y) S(x, y, \sigma) $
+
+# ## Vertical interpolation
+
+# In Ichthyop, we consider that the grid coordinates will be 0 at the center of the lower T cell bottom of the ocean
+# and will be nz -1 at the upper cell T, as shown below
+
+zmax = 6
+def plot_grid_layout():
+    ax = plt.gca()
+    plt.title('Croco T interpolation')
+    xticks = np.arange(-0.5, zmax + 0.5)
+    ax.set_yticks(xticks, minor=False)
+    plt.grid(True, color='k', linewidth=2)
+    for v in np.arange(0, zmax):
+        plt.plot(0, v, color='k', marker='o', markersize=4)
+    # plt.xlim(-0.5, 0.5)
+    plt.ylim(-0.5, zmax  - 1 + 0.5)
+    ax.get_xaxis().set_visible(False)  # removes xlabel
+    xticks
+
+
+# ### T variables
+
+# +
+markers = ['^', 'v']
+def plot_point(x, kz, color):
+    print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
+    k = np.floor(kz)
+    plt.plot(x, kz, marker='o', color=color, markersize=6)
+
+    for kk in range(2):
+        print(k + kk)
+        plt.plot(0, k + kk, marker=markers[kk], color=color, markersize=12)
+        coz = 1 - abs(kz - (k + kk))
+        print(coz)
+
+zmax = 6  # number of z levels (T points)
+plt.figure()
+ax = plt.subplot(121)
+plt.title('Croco T interpolation')
+plot_grid_layout()
+# ax.set_yticks(np.arange(0, zmax + 1), minor=False)
+# plt.grid(True, color='k', linewidth=2)
+# for v in np.arange(0, zmax):
+#     plt.plot(0, v + 0.5, color='k', marker='o', markersize=4)
+# ax.get_xaxis().set_visible(False)  # removes xlabel
+# plt.xlim(-0.5, 0.5)
+# plt.ylim(0, zmax)
+plot_point(-0.1, 2.7, 'red')
+plot_point(0.2, 4.5, 'blue')
+plot_point(0.2, 0.1, 'orange')
+plt.savefig(os.path.join(outdir, 'vertical_t_interpolation_roms.jpg'), bbox_inches='tight')
+# -
+
+# ### W variables
+
+# +
+markers = ['^', 'v']
+def plot_point(x, kz, color):
+    print('@@@@@@@@@@@@@@@@@@@@@@@@ ', kz)
+
+    # First, we convert the kz index from T to W.
+    # if kz = 0 in T, it is 0.5 in W
+    k = np.floor(kz + 0.5) # k is the lower index of the W variable to interpolate
+    plt.plot(x, kz, marker='o', color=color, markersize=6)
+
+    for kk in range(2):
+        plt.plot(0, k + kk - 0.5, marker=markers[kk], color=color, markersize=12)
+        coz = 1 - abs(kz - (k - 0.5 + kk))
+        print(f'kz={kz}, k={k}, coz={coz}')
+
+zmax = 6  # number of z levels (T points)
+plt.figure()
+ax = plt.subplot(121)
+plt.title('Croco T interpolation')
+plot_grid_layout()
+# ax.set_yticks(np.arange(0, zmax + 1), minor=False)
+# plt.grid(True, color='k', linewidth=2)
+# for v in np.arange(0, zmax):
+#     plt.plot(0, v + 0.5, color='k', marker='o', markersize=4)
+# ax.get_xaxis().set_visible(False)  # removes xlabel
+# plt.xlim(-0.5, 0.5)
+# plt.ylim(0, zmax)
+plot_point(-0.1, 2.7, 'red')
+plot_point(0.2, 4.5, 'blue')
+plot_point(0.2, 0.1, 'orange')
+plt.savefig(os.path.join(outdir, 'vertical_w_interpolation_roms.jpg'), bbox_inches='tight')
+# -
+
+
