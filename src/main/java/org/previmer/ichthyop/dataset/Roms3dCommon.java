@@ -733,6 +733,11 @@ abstract public class Roms3dCommon extends RomsCommon {
         }
     }
 
+    /**
+     * Computes the vertical W velocity.
+     * Based on the `omega.F` function from CROCO/ROMS.
+     * Note that this is the velocity through moving sigma levels
+     */
     protected float[][][] computeW() throws IOException, InvalidRangeException {
 
         //System.out.println("Compute vertical velocity");
@@ -740,125 +745,157 @@ abstract public class Roms3dCommon extends RomsCommon {
         double[][][] Hvom = new double[nz][ny][nx];
         double[][][] z_w_tmp = z_w_tp1;
 
-        //---------------------------------------------------
-        // Calculation Coeff Huon & Hvom
-        for (int k = nz; k-- > 0;) {
-            for (int i = 0; i++ < nx - 1;) {
-                for (int j = ny; j-- > 0;) {
-                    Huon[k][j][i] = (((z_w_tmp[k + 1][j][i]
-                            - z_w_tmp[k][j][i])
-                            + (z_w_tmp[k + 1][j][i - 1]
-                            - z_w_tmp[k][j][i - 1]))
-                            / (pn[j][i] + pn[j][i - 1]))
-                            * u_tp1[k][j][i - 1];
-                    if (Double.isNaN(Huon[k][j][i])) {
-                        Huon[k][j][i] = 0.d;
+        double[][][] delta_ZU = new double[nz][ny][nx - 1];
+        double[][][] delta_ZV = new double[nz][ny - 1][nx];
+        double[][][] delta_ZT = new double[nz][ny][nx];
 
-                    }
+        // Computes the layer thickness on the T points.
+        // note k = 0 is the sea bottom
+        for (int k = 0; k < nz - 1; k++) { // loop from nz - 1 to 0
+            for (int i = 0; i < nx; i++) { // loop from 1 to nx - 1
+                for (int j = 0; j < ny; j++) {
+                    delta_ZT[k][j][i] = z_w_tmp[k + 1][j][i] - z_w_tmp[k][j][i];
                 }
             }
-            for (int i = nx; i-- > 0;) {
-                for (int j = 0; j++ < ny - 1;) {
-                    Hvom[k][j][i] = (((z_w_tmp[k + 1][j][i]
-                            - z_w_tmp[k][j][i])
-                            + (z_w_tmp[k + 1][j - 1][i]
-                            - z_w_tmp[k][j - 1][i]))
-                            / (pm[j][i] + pm[j - 1][i]))
-                            * v_tp1[k][j - 1][i];
-                    if (Double.isNaN(Hvom[k][j][i])) {
-                        Hvom[k][j][i] = 0.d;
+        }
 
+        // Computes the layer thickness on the U points.
+        // computed on the western face of the grid
+        for (int k = 0; k < nz; k++) { // loop from nz - 1 to 0
+            for (int i = 0; i < nx - 1; i++) { // loop from 0 to nx - 1
+                for (int j = 0; j < ny; j++) {
+                    delta_ZU[k][j][i] = 0.5 * (delta_ZT[k][j][i] + delta_ZT[k][j][i + 1]);
+                }
+            }
+        }
+
+        // Computes the layer thickness on the V points.
+        // computed on the southern face of the grid
+        for (int k = 0; k < nz; k++) { // loop from nz - 1 to 0
+            for (int i = 0; i < nx; i++) { // loop from 1 to nx - 1
+                for (int j = 0; j < ny - 1; j++) {
+                    delta_ZV[k][j][i] = 0.5 * (delta_ZT[k][j][i] + delta_ZT[k][j + 1][i]);
+                }
+            }
+        }
+
+        // Computes the ocean transport on U faces.
+        // transport is computed on the western face.
+        for (int k = 0; k < nz; k++) {
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx - 1; i++) {
+                    Huon[k][j][i] = u_tp1[k][j][i] * delta_ZU[k][j][i] * e2u[j][i];
+                    if(Double.isNaN(Huon[k][j][i])) {
+                        Huon[k][j][i] = 0;
                     }
                 }
             }
         }
 
-        //---------------------------------------------------
+        // Computes the ocean transport on V faces
+        // transport is computed on the southern face.
+        for (int k = 0; k < nz; k++) {
+            for (int j = 0; j < ny - 1; j++) {
+                for (int i = 0; i < nx; i++) {
+                    Hvom[k][j][i] = v_tp1[k][j][i] * delta_ZV[k][j][i] * e1v[j][i];
+                    if(Double.isNaN(Hvom[k][j][i])) {
+                        Hvom[k][j][i] = 0;
+                    }
+                }
+            }
+        }
+
+        // Vertical integration of the contnuity equation
         // Calcultaion of w(i, j, k)
-        double[] wrk = new double[nx];
+        double[][] wrk = new double[ny][nx];
         double[][][] w_double = new double[nz + 1][ny][nx];
 
-        for (int j = ny - 1; j-- > 0;) {
-            for (int i = nx; i-- > 0;) {
+        // W is computed in the inner domain
+        for (int j = 1; j < ny - 1 ; j++) {
+            for (int i = 1; i < nx - 1; i++) {
+
+                // Initial w at depth
                 w_double[0][j][i] = 0.f;
-            }
-            for (int k = 0; k++ < nz;) {
-                for (int i = nx - 1; i-- > 0;) {
-                    w_double[k][j][i] = w_double[k - 1][j][i]
-                            + (float) (Huon[k - 1][j][i] - Huon[k - 1][j][i + 1]
+
+                // Computes the W by vertically integrating the conservation equation
+                // Here, k is the index on the W grid vertical layout.
+                for (int k = 1; k < nz + 1; k++) {
+                    w_double[k][j][i] = w_double[k - 1][j][i] + (Huon[k - 1][j][i] - Huon[k - 1][j][i + 1]
                             + Hvom[k - 1][j][i] - Hvom[k - 1][j + 1][i]);
                 }
             }
-            for (int i = nx; i-- > 0;) {
-                wrk[i] = w_double[nz][j][i]
-                        / (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
-            }
-            for (int k = nz; k-- >= 2;) {
-                for (int i = nx; i-- > 0;) {
-                    w_double[k][j][i] += -wrk[i]
-                            * (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
-                }
-            }
-            for (int i = nx; i-- > 0;) {
-                w_double[nz][j][i] = 0.f;
+        }
+
+        // At the surface (k = nz), the horizontal convergence should be 0.
+        // It is not since the time derivative of sea-surface height is not considered.
+        // Therefore, we ventilate this residual to insure that w_double[nz] = 0
+        // This is done by adding the resisual proportionally to the cell height above sea bed.
+
+        // For all the vertical layer, we compute the residual at the surface (zn).
+        // Correction is linear.
+        // F[k] ← F[k] − [ (z_w[k] − z_w[0]) / (z_w[nz] − z_w[0]) ] · F[nz]
+        for (int j = 1; j < ny - 1; j++) {
+            for (int i = 1; i < nx - 1; i++) {
+                wrk[j][i] = w_double[nz][j][i] / (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
             }
         }
 
-        //---------------------------------------------------
-        // Boundary Conditions
-        for (int k = nz + 1; k-- > 0;) {
-            for (int j = ny; j-- > 0;) {
+        // At depth (k=0) no residual is added.
+        // At the surface, all the values are reset to 0
+        for (int j = 1; j < ny - 1; j++) {
+            for (int i = 1; i < nx - 1; i++) {
+                for (int k = 0; k < nz + 1; k++) {
+                    w_double[k][j][i] += -wrk[j][i] * (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
+                }
+            }
+        }
+
+        // For W, we do not compute the values of the outer W rows and columns.
+        // We therefore copy the values of the neighbours
+        // Boundary Conditions for rows
+        for (int k = 0; k < nz + 1; k++) {
+            for (int j = 1; j < ny - 1; j++) {
                 w_double[k][j][0] = w_double[k][j][1];
                 w_double[k][j][nx - 1] = w_double[k][j][nx - 2];
             }
         }
-        for (int k = nz + 1; k-- > 0;) {
-            for (int i = nx; i-- > 0;) {
+
+
+        // Boundary conditions for columns
+        for (int k = 0; k < nz + 1; k++) {
+            for (int i = 1; i < nx - 1; i++) {
                 w_double[k][0][i] = w_double[k][1][i];
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
         }
 
+
+        // Boundary conditions for corners
+        for (int k = 0; k < nz + 1; k++) {
+            // Lower left corner
+            w_double[k][0][0] = w_double[k][1][1];
+
+            // upper left
+            w_double[k][ny - 1][0] = w_double[k][ny - 2][1];
+
+            // upper right
+            w_double[k][ny - 1][nx - 1] = w_double[k][ny - 2][nx - 2];
+
+            // lower right
+            w_double[k][0][nx - 1] = w_double[k][1][nx - 2];
+
+        }
+
         //---------------------------------------------------
         // w * pm * pn
         float[][][] w = new float[nz + 1][ny][nx];
-        for (int i = nx; i-- > 0;) {
-            for (int j = ny; j-- > 0;) {
-                for (int k = nz + 1; k-- > 0;) {
-                    w[k][j][i] = (float) (w_double[k][j][i] * pm[j][i]
-                            * pn[j][i]);
-                }
-            }
-        }
-        //---------------------------------------------------
-        // Return w
-
-        /*
-        Dimension timeD = new Dimension("depth", nz+1);
-	Dimension latD = new Dimension("lat", ny);
-	Dimension lonD = new Dimension("lon", nx);
-        Dimension[] rhPDims = {timeD, latD, lonD};
-
-        ArrayFloat.D3 array = new ArrayFloat.D3(nz + 1, ny, nx);
-        for (int k = 0; k < nz + 1; k++) {
+        for (int i = 0; i < nx; i++) {
             for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    array.set(k, j, i, w[k][j][i]);
+                for (int k =0; k < nz + 1; k++) {
+                    w[k][j][i] = (float) (w_double[k][j][i] * pm[j][i] * pn[j][i]);
                 }
             }
         }
-
-        NetcdfFileWriteable ncOut;
-        ncOut = NetcdfFileWriteable.createNew("wich.nc");
-        ncOut.addDimension(null, timeD);
-        ncOut.addDimension(null, latD);
-        ncOut.addDimension(null, lonD);
-        ncOut.addVariable("w", float.class, rhPDims);
-        ncOut.create();
-        ncOut.write("w", new int[] {0, 0, 0}, array);
-        ncOut.close();
-        System.exit(0);
-        */
 
         return w;
 
