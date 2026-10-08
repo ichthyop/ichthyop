@@ -776,94 +776,44 @@ abstract class RomsCommon extends AbstractDataset {
         return y;
     }
 
-    /** Interpolate V scale factors.
+    /** Interpolates the pn variable into U points
+     * i = index of the U cell
+     * j = index of the U cell
      *
-     * It estimates the scale factor at the V cell based
-     * on the scalefactors at the two neighbouring T cells
-     *
-     * @param i i index of the V cell
-     * @param j j index of the V cell
-     * @return Interpolated scale factor (1/e2v)
-     */
-    public double interpolate_V_scalefactors(int i, int j) {
-
-        // For getting the coordinate of the scale factor to
-        // interpolate, we switch the j index (in V space) back to T space
-        // if j = 0 for V, we are at 0.5 in T space
-        int jt = (int) Math.floor(j + 0.5);
-        int it = i;
-
-        // interpolation of the T scale factor on V points
-        // jt is the index of the T point to select.
-        // however, scale factors are read on extended domain.
-        // it = 0 in ichthyop layout is it=1 in scale factors layout
-        double pnv = 0.5 * (pn[jt][it] + pn[jt + 1][it]);
-
-        // this is 1/e2v
-
-        return pnv;
-
-    }
-
-     /** Interpolate U scale factors.
-     *
-     * It estimates the scale factor at the U cell based
-     * on the scalefactors at the two neighbouring T cells
-     *
-     * @param i i index of the U cell
-     * @param j j index of the U cell
-     * @return Interpolated scale factor (1/e2u)
-     */
-    public double interpolate_U_scalefactors(int i, int j) {
-
-        // For getting the coordinate of the scale factor to
-        // interpolate, we switch the i index (in U space) back to U space
-        // if i = 0 for V, we are at -0.5 in T space
-        int jt = j;
-        int it = (int) Math.floor(i + 0.5);
-
-        // interpolation of the T scale factor on V points
-        // jt is the index of the T point to select.
-        // however, scale factors are read on extended domain.
-        // it = 0 in ichthyop layout is it=1 in scale factors layout
-        double pmu = 0.5 * (pm[jt][it] + pm[jt][it + 1]);
-        return pmu;
-    }
-
-
-    /** Function to creates the equivalent of the e1v and
-     *  e2u scale NEMO scale factors
-     *
-     * We interpolate the 1/pn = delta y on the U and V cells (this gives e2v and e2u)
-     * We interpolate the 1/pm = delta x on the V cells (this gives e1v and e1u)
-     *
-     * Note: pm = 1 / dx = e1t
-     * Note: pn = 1 / dy = e2t
+     * the T cell of index i is on the left of the U cell
      *
      */
-    void create_e2u_e1v() {
-
-        e1u = new double[ny][nx - 1];
-        e2u = new double[ny][nx - 1];
-
-        e1v = new double[ny - 1][nx];
-        e2v = new double[ny - 1][nx];
-
-        // Interpolates scale factor on U grid
-        // note: pm = 1 / dx
-        for(int j = 0; j < ny; j++) {
-            for(int i = 0; i < nx - 1; i++) {
-                e1u[j][i] = 0.5 * (1/pm[j][i])  + (1/pm[j][i+1]);
-                e2u[j][i] = 0.5 * (1/pn[j][i])  + (1/pn[j][i+1]);
-            }
-        }
-
-        // Interpolates e1v
-        for(int j = 0; j < ny - 1; j++) {
-            for(int i = 0; i < nx; i++) {
-                e1v[j][i] = 0.5 * (1/pm[j][i])  + (1/pm[j + 1][i]);
-                e2v[j][i] = 0.5 * (1/pn[j][i])  + (1/pn[j + 1][i]);
-            }
-        }
+    public double get_pnu(int i, int j) {
+        return 0.5 * (pn[j][i] + pn[j][i + 1]);
     }
+
+    /** Interpolates the pm variable on U points */
+    public double get_pmu(int i, int j) {
+        return 0.5 * (pm[j][i] + pm[j][i + 1]);
+    }
+
+    public double get_pnv(int i, int j) {
+        return 0.5 * (pn[j][i] + pn[j + 1][i]);
+    }
+
+    public double get_pmv(int i, int j) {
+        return 0.5 * (pm[j][i] + pm[j + 1][i]);
+    }
+
+    public double get_e1u(int i, int j) {
+        return 1 / get_pmu(i, j);
+    }
+
+    public double get_e1v(int i, int j) {
+        return 1 / get_pmv(i, j);
+    }
+
+    public double get_e2u(int i, int j) {
+        return 1 / get_pnu(i, j);
+    }
+
+    public double get_e2V(int i, int j) {
+        return 1 / get_pnv(i, j);
+    }
+
 }
