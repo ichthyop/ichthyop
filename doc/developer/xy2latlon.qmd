@@ -1,4 +1,4 @@
-## Interpolation of coordinates
+# Interpolation of coordinates
 
 There are two coordinate systems in Ichthyop:
 
@@ -7,7 +7,7 @@ There are two coordinate systems in Ichthyop:
 
 In Ichthyop, there are fonctions that allows to switch from one system to another, considering that the grid may be irregular (for example NEMO or CROCO grid).
 
-### Grid to geographical coordinates
+## Grid to geographical coordinates
 
 Conversion from grid to geographical coordinates is done by using the `xy2latlon` methods associated with `Dataset` objects.
 
@@ -74,7 +74,7 @@ $$
 
 Note that by construction, the sum of the weight equals to 1, so no need to divide by the total weight.
 
-### Geographical to grid coordinates
+## Geographical to grid coordinates
 
 The switch from geographical to grid coordinates is a bit more tricky, considering that the grid may be irregular. Let's consider the example in @fig-latlon2xy
 

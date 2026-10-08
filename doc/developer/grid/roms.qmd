@@ -1,4 +1,4 @@
-### ROMS grid
+## ROMS grid
 
 ```{python}
 #| echo: false
@@ -13,7 +13,7 @@ subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.
 
 In this section, the main features of the ROMS grid and the implications in Ichthyop are summarized.
 
-#### Horizontal
+### Horizontal
 
 The horizontal grid layout, as described on the ROMS documentation, is shown in @fig-original-roms:
 
@@ -29,7 +29,7 @@ added.
 
 In ROMS, there are 1 extra column of T points compared to U points. There also is 1 extra line of T points compared to V points.
 
-##### Is on edge
+#### Is on edge
 
 In Ichthyop, a particle is considered out of domain when U, V, or T points cannot be interpolated using a 4 point interpolation.
 Looking at the layout described in @fig-roms-layout, this occurs when:
@@ -41,18 +41,18 @@ The excluded domain is represented in @fig-on-edge-roms:
 
 ![Excluded domain in the Ichthyop ROMS simulations.](grid/_static/is_on_edge_roms.jpg){#fig-on-edge-roms}
 
-##### Land-sea mask
+#### Land-sea mask
 
 The land-sea mask of a particle is obtained by rounding the $x$ and $y$ position of the particle, and
 getting the value of the mask at these rounded indexes. Some examples are shown in @fig-landsea-roms
 
 ![Land-sea masking for ROMS grid](grid/_static/land_sea_mask_roms.jpg){#fig-landsea-roms}
 
-##### Interpolation
+#### Interpolation
 
 In this section, we describe how the zonal and meridional velocity fields are interpolated.
 
-###### T interpolation
+##### T interpolation
 
 Given a given position index of a particle with the `T` grid, the determination of the interpolation is done as follows:
 
@@ -65,7 +65,7 @@ An illustration is given @fig-t-interp-roms.
 
 ![Interpolation of T points from ROMS grid](grid/_static/interpolation_t_roms.jpg){#fig-t-interp-roms}
 
-###### U interpolation
+##### U interpolation
 
 Interpolation of `U` variables is done as follows:
 
@@ -77,7 +77,7 @@ An illustration is given @fig-u-interp-roms.
 
 ![Interpolation of U points from ROMS grid](grid/_static/interpolation_u_roms.jpg){#fig-u-interp-roms}
 
-###### V interpolation
+##### V interpolation
 
 Interpolation of `V` variables is done as follows:
 
@@ -90,9 +90,9 @@ An illustration is given @fig-v-interp-roms.
 
 ![Interpolation of V points from ROMS grid](grid/_static/interpolation_v_roms.jpg){#fig-v-interp-roms}
 
-#### Vertical
+### Vertical
 
-##### Sigma coordinate
+#### Sigma coordinate
 
 The vertical coordinate system of ROMS is discussed on [WikiRoms](https://www.myroms.org/wiki/Vertical_S-coordinate) and shown below.
 
@@ -159,3 +159,102 @@ For the UCLA formulation:
 $$
 H_0(x, y, \sigma) = h(x, y) S(x, y, \sigma)
 $$
+
+#### Interpolation
+
+In Ichthyop, the vertical index ranges from 0 (center of the bottom T cell) to $N_z - 1$ (center of the surface T cell).
+
+Interpolation of T variables on the vertical is done as follows:
+
+- First, the index of the T cell just below is obtained by using the `floor` function on the Z index.
+- Then, the value is interpolated between the cell below and above.
+
+An example is shown in @fig-roms-zt-interp
+
+![Vertical interpolation of T points on ROMS grid](grid/_static/vertical_t_interpolation_roms.jpg){#fig-roms-zt-interp}
+
+### Vertical velocity reconstruction
+
+Vertical velocity, if not provided by the user, can be reconstructed from zonal and meridional velocities.
+
+The continuity equation in terrain following coordinated gives (cf [Roms doc](https://croco-ocean.gitlabpages.inria.fr/croco_doc/model/model.equations.hydro.html)):
+
+$$
+\dfrac{\partial}{\partial s} \left(\frac{H_z\ \Omega}{mn}\right) =
+-\dfrac{\partial}{\partial t} \left(\frac{H_z}{mn}\right)
+-
+\dfrac{\partial}{\partial \xi} \left(\frac{H_z\ u}{n}\right)
+-
+\dfrac{\partial}{\partial \eta} \left(\frac{H_z\ v}{m}\right)
+$${#eq-roms-cont-eq}
+
+with $H_z = \dfrac{\partial z}{\partial \sigma}$ and $m$ and $n$ the ROMS/CROCO scale factors. Let's define the vertical flux (in $m^3.s^{-1}$) as:
+
+$$
+F_z =\frac{H_z\ \Omega}{mn}
+$$
+
+
+The vertical integration of @eq-roms-cont-eq gives:
+
+$$
+{F_z}\left(s=k\right) =  F_z\left(s=0\right)
+- \int_{s=0}^{s=k} \left[\dfrac{\partial}{\partial t}
++
+\dfrac{\partial}{\partial \xi} \left(\frac{H_z\ u}{n}\right)
++
+\dfrac{\partial}{\partial \eta} \left(\frac{H_z\ v}{m}\right)
+\right]
+$${#eq-roms-vint-cont-eq}
+
+assuming that $F_z(s=0) = 0$ (i.e. no flux of water at the surface).
+
+<!-- The total convergence, i.e. $\frac{H_z\ \Omega}{mn}\left(s=N_z - 1\right)$, gives the vertical velocity at the free surface, which in ROMS/CROCO gives the trend term for the sea-surface height. -->
+
+In Ichthyop, the term including the partial derivative is ignored, since it cannot be computed considering that free-surface is not saved at a sufficient temporal resolution. Therefore, @eq-roms-vint-cont-eq simplifies as follows:
+
+$$
+F_z(s=k) =  F_z(s=0)
+- \int_{s=0}^{s=k} \left[
+    \dfrac{\partial}{\partial \xi} \left(\frac{H_z\ u}{n}\right)
++
+\dfrac{\partial}{\partial \eta} \left(\frac{H_z\ v}{m}\right)
+\right]
+$${#eq-roms-vint-cont-eq2}
+
+Due to the different approximations, the vertical flux at the sea-surface $F_(N_Z)$ is not 0 at it should be. This is what is called in the ROMS/CROCO community the "grid breathing". Since the sigma levels vary as a function of sea-surface height, we need to substract this "breathing" component from out vertical flux calculation.
+
+This residual flux is therefore removed at each depth index, linearly as a function of depth.
+
+$$
+C(s=k) = ({Z_w(k) - Z_w(0)})\dfrac {F_z(s=N_Z)} {Z_w(N_Z) - Z_w(0)}
+$$
+
+with $\dfrac {F_z(s=N_Z)} {Z_w(N_Z) - Z_w(0)}$ the residual volume flux per unit depth.
+
+and
+
+$$
+F_{z_{cor}} = F_z - C(s=k)
+$$
+
+
+Therefore, at $k=0$, the correction is 0 and $F_{z_{cor}}(s=0) = F_z(s=0)$.
+
+While at $k = Nz$, the correction is:
+
+$$
+C(s=Nz) = F_z(s=N_Z)
+$$
+
+hence leading to a $F_{{z_{cor}}}(s=N_z) = 0$, i.e 0 vertical flux.
+
+Finally, vertical velocity $Omega$ is computed as follows:
+
+$$
+\Omega(s=k) = F_{{z_{cor}}}(s=k) \times m \times n
+$$
+
+The physical interpretation of this correction is that when integrating the
+horizontal divergence equation, contributions due to the "grid breathing" will
+accumulate. Which is why the correction is proportional to the distance from the bottom

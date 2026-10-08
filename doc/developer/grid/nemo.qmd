@@ -1,4 +1,4 @@
-### NEMO grid
+## NEMO grid
 
 ```{python}
 #| echo: false
@@ -14,14 +14,14 @@ subprocess.call(["python", fpath])
 
 In this section, the main features of the NEMO grid and the implications in Ichthyop are summarized.
 
-#### Horizontal
+### Horizontal
 
-###### Computation domain
+##### Computation domain
 
 In the NEMO grid, the computation domain extends from the western edge of the western T cell (`i=0`) to the eastern edge of the eastern T cells (`i=nx`), and from the
 southern edge of the southern T cells (`j=0`) to the northern edge of the nothern T cells (`j=ny`).
 
-###### Indexing
+##### Indexing
 
 The horizontal layout of the NEMO grid is as follows:
 
@@ -29,11 +29,11 @@ The horizontal layout of the NEMO grid is as follows:
 
 Tracer points (`T` points) are stored at the center of the cell. Zonal velocities (`U` points) are stored on the eastern face, while meridional velocities (`V` points) are stored on the northern face. **U, V and T points have the same number of elements!**
 
-###### Scale factors
+##### Scale factors
 
 In NEMO, the zonal and meridional length of the cells are stored in the `e1x` and `e2x` variables, with `x` equals to `t`, `u` or `v` depending on the point considered.
 
-###### Land-sea mask
+##### Land-sea mask
 
 For a particle at a given location, we determine whether it is on land as follows:
 
@@ -43,14 +43,14 @@ For a particle at a given location, we determine whether it is on land as follow
 
 ![ ](grid/_static/landsea_mask_nemo.jpg)
 
-###### Close to coast
+##### Close to coast
 
 To determine whether a particle is close to coast, we extract the three neighbouring T cells. If one of them is land, then it assumed to be close to coast.
 
 ![ ](grid/_static/close_to_coast_nemo.jpg)
 
 
-###### Is On Edge
+##### Is On Edge
 
 The particle is considered to be out of the domain if the `y` value is greater than `ny - 0.5` (no possible interpolation of `T` points) or less than `1` (no possible interpolation of `V` points).
 
@@ -58,7 +58,7 @@ If there is no zonal cyclicity, the particle is also considered to be out of the
 
 ![](grid/_static/is_on_edge_nemo.jpg)
 
-###### Zonal cyclicity
+##### Zonal cyclicity
 
 For regional simulations, there is no zonal cyclicty. On the other hand, for global NEMO simulations, which runs
 on the ORCA grid, the zonal cyclicity is as follows (indexes are provided for T points):
@@ -70,9 +70,9 @@ Therefore:
 - if $x \leq 1$, the particle is moved at $N_x - 2 + x$
 - if $x \geq nx - 1$, the particle is moved at $x - N_x + 2)$
 
-###### Interpolation
+##### Interpolation
 
-######### Interpolation of T variables
+######## Interpolation of T variables
 
 Given a given position index of a particle with the `T` grid, the determination of the interpolation is done as follows:
 
@@ -84,7 +84,7 @@ An illustration is given below
 
 ![](grid/_static/t_interpolation_nemo.jpg)
 
-######### Interpolation of U variables
+######## Interpolation of U variables
 
 Interpolation of `U` variables is done as follows:
 
@@ -94,7 +94,7 @@ Interpolation of `U` variables is done as follows:
 
 ![](grid/_static/u_interpolation_nemo.jpg)
 
-######### Interpolation of V variables
+######## Interpolation of V variables
 
 Interpolation of `V` variables is done as follows:
 
@@ -105,9 +105,9 @@ Interpolation of `V` variables is done as follows:
 ![](grid/_static/v_interpolation_nemo.jpg)
 
 
-#### Vertical
+### Vertical
 
-###### Indexing
+##### Indexing
 
 The original NEMO vertical indexing system is shown below:
 
@@ -132,23 +132,23 @@ Furthermore, since in Ichthyop the first index corresponds to the seabed, the ar
 
 Corrected vertical indexing, with `k=0` associated with the bottom depth.
 
-###### Land-sea mask
+##### Land-sea mask
 
 ![](grid/_static/vertical_landsea_mask_nemo.jpg)
 
 
 Vertical land-sea mask
 
-###### Interpolation
+##### Interpolation
 
-######### T variables
+######## T variables
 
 ![](grid/_static/vertical_t_interpolation_nemo.jpg)
 
 
 Vertical interpolation of T variables.
 
-######### W variables
+######## W variables
 
 ![](grid/_static/vertical_w_interpolation_nemo.jpg)
 :align: center

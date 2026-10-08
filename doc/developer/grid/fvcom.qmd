@@ -1,4 +1,4 @@
-### FVCOM grid
+## FVCOM grid
 
 In the Ichthyop repository (https://github.com/ichthyop/ichthyop), there is a feature branch, called `feature/fvcom-grid`,
 which allows to use the unstructured mesh grid from the FVCOM model.
@@ -10,13 +10,13 @@ In order to use Ichthyop with FVCOM grid, you will need to download this specifi
 In the present section, we describe some features of how tracer and velocity fields are computed. The authors acknowledge
 Laki Premathilake for his very important contribution and his very kind help.
 
-#### Scale factors description
+### Scale factors description
 
 The FVCOM grid is associated with shape functions that are used to interpolate vector (i.e. velocities) and scalar properties (i.e. temperature) at given locations. These scale factors are
 
 $a1u(N, 4)$, $a2u(N, 4)$, $aw0(N_e, 3)$, $awx(N_e, 3)$ and $awy(N_e, 3)$ with $N$ the number of elements (i.e. triangles) defined in the grid and $N_{e}$ the number of nodes.
 
-#### Velocity computations
+### Velocity computations
 
 ```{python}
 #| label: fig-fvcom-vel
@@ -155,7 +155,7 @@ The first neighbouring element E1 corresponds to the neighbour relative to the f
 
 :::
 
-#### Tracer computation
+### Tracer computation
 
 Interpolation of tracer fields can be done by using $aw0$, $awx$ and $awy$. In the model, tracer fields are computed at the **nodes** of the triangles.
 

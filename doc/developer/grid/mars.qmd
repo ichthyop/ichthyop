@@ -1,4 +1,4 @@
-### MARS grid
+## MARS grid
 
 ```{python}
 #| echo: false
@@ -14,13 +14,13 @@ subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.
 
 In this section, the main features of the MARS grid and the implications in Ichthyop are summarized.
 
-#### Horizontal
+### Horizontal
 
 In MARS, the 3D structure of the grid is the same as the one in NEMO:
 
 ![MARS staggered grid structure](grid/_static/mars_schema_discretisation.jpg)
 
-#### Vertical
+### Vertical
 
 The vertical coordinate of the Mars model is called $\sigma$, which varies from -1 at seabed to 0 at the surface. In MARS, if the number of `T` points on the vertical is `kmax`, the number of `W` points is `kmax + 1`. For a given `T` cell located at the `k` index, the corresponding `W` point is located below. `k=0` corresponds to the bottom, while `k=kmax` corresponds to the surface.
 
