@@ -75,9 +75,6 @@ public class Roms2dDataset extends RomsCommon {
 
         // Recover the index of the T points which are used for
         // interpolating the scale factors
-        // int it = (int) Math.floor(ix);
-        // int jt = (int) Math.floor(jy);
-
         j = (int) Math.floor(jy - 0.5);  // (j, i) is the grid cell index of V point to select (low left)
         i = (int) Math.floor(ix);
 
@@ -86,12 +83,13 @@ public class Roms2dDataset extends RomsCommon {
             for (int ii = 0; ii < 2; ii++) {
                 double cox = 1 - Math.abs(ix - (i + ii));
                 co = cox * coy;
-                CO += co;
 
-                double pnv = this.interpolate_V_scalefactors(i, j);
+                // interpolate V scale factors on the V cell
+                double pnv = this.interpolate_V_scalefactors(i + ii, j + jj);
 
                 x = (1.d - x_euler) * v_tp0[j + jj][i + ii] + x_euler * v_tp1[j + jj][i + ii];
                 if (!Double.isNaN(x)) {
+                    CO += co;
                     if(normalize) {
                         dv += x * co * pnv;
                     } else {
@@ -117,18 +115,15 @@ public class Roms2dDataset extends RomsCommon {
         jy = pGrid[1];
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) Math.round(ix);
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
+
         double CO = 0.d;
         double co;
         double x;
 
         // Index of the closest point on the lower left in U space.
         // Shift by -0.5 for moving from Tpoint to Uspace.
-        i = (int) Math.floor(ix - 0.5);
-        j = (int) Math.floor(jy);
+        int i = (int) Math.floor(ix - 0.5);
+        int j = (int) Math.floor(jy);
 
         for (int ii = 0; ii < 2; ii++) {
             double cox = 1 - Math.abs((ix - (i + 0.5 + ii)));
@@ -137,11 +132,11 @@ public class Roms2dDataset extends RomsCommon {
                 double coy = 1 - Math.abs((jy - (j + jj)));
                 co = cox * coy;
 
-                double pmu = this.interpolate_U_scalefactors(i, j);
+                double pmu = this.interpolate_U_scalefactors(i + ii, j + jj);
 
-                CO += co;
                 x = (1.d - x_euler) * u_tp0[j + jj][i + ii] + x_euler * u_tp1[j + jj][i + ii];
                 if (!Double.isNaN(x)) {
+                    CO += co;
                     if (normalize) {
                         du += x * co * pmu;
                     } else {
@@ -249,6 +244,7 @@ public class Roms2dDataset extends RomsCommon {
     }
 
     @Override
+    // WARNING: Check that for reading of T and U/V points
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
         Variable variable = nc.findVariable(name);
         int[] origin = null, shape = null;
