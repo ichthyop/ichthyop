@@ -199,7 +199,7 @@ The vertical integration of @eq-roms-cont-eq gives:
 
 $$
 {F_z}\left(s=k\right) =  F_z\left(s=0\right)
-- \int_{s=0}^{s=k} \left[\dfrac{\partial}{\partial t}
+- \int_{s=0}^{s=k} \left[\dfrac{\partial F_z}{\partial t}
 +
 \dfrac{\partial}{\partial \xi} \left(\frac{H_z\ u}{n}\right)
 +
