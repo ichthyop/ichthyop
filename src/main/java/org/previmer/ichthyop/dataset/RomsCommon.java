@@ -97,11 +97,6 @@ abstract class RomsCommon extends AbstractDataset {
 
     abstract void setOnFirstTime() throws Exception;
 
-    double e1u[][];
-    double e2u[][];
-    double e1v[][];
-    double e2v[][];
-
     @Override
     void loadParameters() {
 
