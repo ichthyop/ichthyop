@@ -61,22 +61,20 @@ public class Roms2dDataset extends RomsCommon {
     public double get_dVy(double[] pGrid, double time, boolean normalize) {
         double dv = 0.d;
         double ix, jy;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+
         ix = pGrid[0];
         jy = pGrid[1];
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
 
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (int) Math.round(jy);
         double CO = 0.d;
         double co;
         double x;
 
         // Recover the index of the T points which are used for
         // interpolating the scale factors
-        j = (int) Math.floor(jy - 0.5);  // (j, i) is the grid cell index of V point to select (low left)
-        i = (int) Math.floor(ix);
+        int j = (int) Math.floor(jy - 0.5);  // (j, i) is the grid cell index of V point to select (low left)
+        int i = (int) Math.floor(ix);
 
         for (int jj = 0; jj < 2; jj++) {
             double coy = 1 - Math.abs(jy - (j + 0.5 + jj));
@@ -84,11 +82,11 @@ public class Roms2dDataset extends RomsCommon {
                 double cox = 1 - Math.abs(ix - (i + ii));
                 co = cox * coy;
 
-                // interpolate V scale factors on the V cell
+                // get the dY value on the V point
                 double pnv = this.get_pnv(i + ii, j + jj);
 
                 x = (1.d - x_euler) * v_tp0[j + jj][i + ii] + x_euler * v_tp1[j + jj][i + ii];
-                if (!Double.isNaN(x)) {
+                if (!Double.isNaN(x) && (x != 0)) {
                     CO += co;
                     if(normalize) {
                         dv += x * co * pnv;
@@ -132,10 +130,11 @@ public class Roms2dDataset extends RomsCommon {
                 double coy = 1 - Math.abs((jy - (j + jj)));
                 co = cox * coy;
 
+                // Get the dX value on the U point
                 double pmu = this.get_pmu(i + ii, j + jj);
 
                 x = (1.d - x_euler) * u_tp0[j + jj][i + ii] + x_euler * u_tp1[j + jj][i + ii];
-                if (!Double.isNaN(x)) {
+                if (!Double.isNaN(x) && (x != 0)) {
                     CO += co;
                     if (normalize) {
                         du += x * co * pmu;
