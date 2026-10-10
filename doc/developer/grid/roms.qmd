@@ -180,7 +180,7 @@ Vertical velocity, if not provided by the user, can be reconstructed from zonal 
 The continuity equation in terrain following coordinated gives (cf [Roms doc](https://croco-ocean.gitlabpages.inria.fr/croco_doc/model/model.equations.hydro.html)):
 
 $$
-\dfrac{\partial}{\partial s} \left(\frac{H_z\ \Omega}{mn}\right) =
+\dfrac{\partial}{\partial \sigma} \left(\frac{H_z\ \Omega}{mn}\right) =
 -\dfrac{\partial}{\partial t} \left(\frac{H_z}{mn}\right)
 -
 \dfrac{\partial}{\partial \xi} \left(\frac{H_z\ u}{n}\right)
@@ -188,7 +188,7 @@ $$
 \dfrac{\partial}{\partial \eta} \left(\frac{H_z\ v}{m}\right)
 $${#eq-roms-cont-eq}
 
-with $H_z = \dfrac{\partial z}{\partial \sigma}$ and $m$ and $n$ the ROMS/CROCO scale factors. Let's define the vertical flux (in $m^3.s^{-1}$) as:
+with $\Omega$ the vertical velocity in sigma coordinate, $H_z = \dfrac{\partial z}{\partial \sigma}$ and $m$ and $n$ the ROMS/CROCO scale factors. Let's define the vertical flux (in $m^3.s^{-1}$) as:
 
 $$
 F_z =\frac{H_z\ \Omega}{mn}
@@ -199,7 +199,7 @@ The vertical integration of @eq-roms-cont-eq gives:
 
 $$
 {F_z}\left(s=k\right) =  F_z\left(s=0\right)
-- \int_{s=0}^{s=k} \left[\dfrac{\partial F_z}{\partial t}
+- \int_{s=-1}^{s=k} \left[\dfrac{\partial F_z}{\partial t}
 +
 \dfrac{\partial}{\partial \xi} \left(\frac{H_z\ u}{n}\right)
 +
@@ -207,15 +207,15 @@ $$
 \right]
 $${#eq-roms-vint-cont-eq}
 
-assuming that $F_z(s=0) = 0$ (i.e. no flux of water at the surface).
+assuming that $F_z(s=-1) = 0$ (i.e. no flux of water at the surface).
 
 <!-- The total convergence, i.e. $\frac{H_z\ \Omega}{mn}\left(s=N_z - 1\right)$, gives the vertical velocity at the free surface, which in ROMS/CROCO gives the trend term for the sea-surface height. -->
 
-In Ichthyop, the term including the partial derivative is ignored, since it cannot be computed considering that free-surface is not saved at a sufficient temporal resolution. Therefore, @eq-roms-vint-cont-eq simplifies as follows:
+In Ichthyop, the $\dfrac{\partial F_z}{\partial t}$ term is not considered, since it cannot be computed considering that free-surface is not saved at a sufficient temporal resolution. Therefore, @eq-roms-vint-cont-eq simplifies as follows:
 
 $$
 F_z(s=k) =  F_z(s=0)
-- \int_{s=0}^{s=k} \left[
+- \int_{s=-1}^{s=k} \left[
     \dfrac{\partial}{\partial \xi} \left(\frac{H_z\ u}{n}\right)
 +
 \dfrac{\partial}{\partial \eta} \left(\frac{H_z\ v}{m}\right)
@@ -224,37 +224,50 @@ $${#eq-roms-vint-cont-eq2}
 
 Due to the different approximations, the vertical flux at the sea-surface $F_(N_Z)$ is not 0 at it should be. This is what is called in the ROMS/CROCO community the "grid breathing". Since the sigma levels vary as a function of sea-surface height, we need to substract this "breathing" component from out vertical flux calculation.
 
-This residual flux is therefore removed at each depth index, linearly as a function of depth.
+This residual flux is therefore removed at each depth index, linearly as a function of depth. The correction applied is given by:
 
 $$
 C(s=k) = ({Z_w(k) - Z_w(0)})\dfrac {F_z(s=N_Z)} {Z_w(N_Z) - Z_w(0)}
 $$
 
-with $\dfrac {F_z(s=N_Z)} {Z_w(N_Z) - Z_w(0)}$ the residual volume flux per unit depth.
+with
 
-and
+$$
+\dfrac {F_z(s=N_Z)} {Z_w(N_Z) - Z_w(0)}
+$$
+
+the residual volume flux per unit depth. Therefore, the corrected vertical flux is:
 
 $$
 F_{z_{cor}} = F_z - C(s=k)
 $$
 
 
-Therefore, at $k=0$, the correction is 0 and $F_{z_{cor}}(s=0) = F_z(s=0)$.
-
-While at $k = Nz$, the correction is:
-
-$$
-C(s=Nz) = F_z(s=N_Z)
-$$
-
-hence leading to a $F_{{z_{cor}}}(s=N_z) = 0$, i.e 0 vertical flux.
-
-Finally, vertical velocity $Omega$ is computed as follows:
-
-$$
-\Omega(s=k) = F_{{z_{cor}}}(s=k) \times m \times n
-$$
-
+With this correction, we insure that the vertical flux is 0 at the surface.
 The physical interpretation of this correction is that when integrating the
 horizontal divergence equation, contributions due to the "grid breathing" will
-accumulate. Which is why the correction is proportional to the distance from the bottom
+accumulate. Which is why the correction is proportional to the distance from the bottom.
+
+The vertical velocity in $\sigma$ coordinates $Omega$ is computed as follows:
+
+$$
+\Omega(s=k) = \dfrac{F_{{z_{cor}}}(s=k) \times m \times n}{H_z}
+$$
+
+The vertical velocity in $z$ is given by:
+
+$$
+w = \dfrac{\partial z}{\partial t} + u \dfrac{\partial z}{\partial x} + v \dfrac{\partial z}{\partial y} + H_z \Omega
+$$
+
+We neglect the isopycnal slope corrections and free surface tendency, and approximate:
+
+$$
+w = H_z \Omega
+$$
+
+Finally, the vertical velocity is therefore given by:
+
+$$
+w(k) = F_{{z_{cor}}}(s=k) \times m \times n
+$$
