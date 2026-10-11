@@ -43,7 +43,7 @@ for conf in confnames:
             print(command)
             result = subprocess.run(command, capture_output=False, text=False)
 ```
-
+<!--
 
 ```{python}
 #|label: fig-ref-control
@@ -722,4 +722,4 @@ plot_figure('reef')
 #|fig-cap: "Trajectory with reef orientation only. The cells where the reefs are detected are shown in colors"
 
 plot_figure('reef-noadv')
-```
+``` -->
