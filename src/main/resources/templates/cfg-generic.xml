@@ -2069,6 +2069,7 @@
         <default>e2t</default>
         <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
       </parameter>
+
       <parameter>
         <key>field_var_e1v</key>
         <long_name>Zonal scale factor at V points</long_name>
@@ -2076,6 +2077,23 @@
         <default>e1v</default>
         <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
       </parameter>
+
+      <parameter>
+        <key>field_var_e2v</key>
+        <long_name>Meridional scale factor at V points</long_name>
+        <value>e2v</value>
+        <default>e2v</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+      </parameter>
+
+      <parameter>
+        <key>field_var_e1u</key>
+        <long_name>Zonal scale factor at U points</long_name>
+        <value>e1u</value>
+        <default>e1u</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+      </parameter>
+
       <parameter>
         <key>field_var_e2u</key>
         <long_name>Meridional scale factor at U points</long_name>
@@ -2083,6 +2101,7 @@
         <default>e2u</default>
         <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
       </parameter>
+
       <parameter>
         <key>zgr_pattern</key>
         <long_name>ZGR file pattern</long_name>
@@ -2096,27 +2115,38 @@
                     points, depth
                     at W points and vertical scale factor at T points.</description>
       </parameter>
+
       <parameter>
         <key>field_var_e3t</key>
         <long_name>Vertical scale factor at T points</long_name>
-        <value>e3t_ps</value>
-        <default>e3t_ps</default>
+        <value>e3t_0</value>
+        <default>e3t_0</default>
         <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
       </parameter>
+
+      <parameter>
+        <key>field_var_e3w</key>
+        <long_name>Vertical scale factor at W points</long_name>
+        <value>e3w_0</value>
+        <default>e3w_0</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+      </parameter>
+
       <parameter>
         <key>field_var_e3u</key>
         <long_name>Vertical scale factor at U points</long_name>
-        <value>e3u_ps</value>
-        <default>e3u_ps</default>
+        <value>e3u_0</value>
+        <default>e3u_0</default>
         <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
       </parameter>
       <parameter>
         <key>field_var_e3v</key>
         <long_name>Vertical scale factor at V points</long_name>
-        <value>e3v_ps</value>
-        <default>e3v_ps</default>
+        <value>e3v_0</value>
+        <default>e3v_0</default>
         <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
       </parameter>
+
       <parameter>
         <key>field_var_gdept</key>
         <long_name>Depth at T points</long_name>
