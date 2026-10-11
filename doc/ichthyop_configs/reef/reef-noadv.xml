@@ -1450,7 +1450,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Orientation Zone File</long_name>
-        <value>/home/BARRIER/Work/codes/ichthyop/ichthyop-private/doc/ichthyop_configs/reef/zone-target.xml</value>
+        <value>ichthyop_configs/reef/zone-target.xml</value>
         <default>zone-target.xml</default>
         <format>zonefile</format>
         <template>target-zone-indian.xml</template>
