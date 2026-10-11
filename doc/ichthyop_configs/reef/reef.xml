@@ -941,7 +941,7 @@
       <parameter>
         <key>txtfile</key>
         <long_name>Drifter file</long_name>
-        <value>ichthyop_configs/reef/initial_traj.txt</value>
+        <value>ichthyop_configs/reef/initial-traj.txt</value>
         <default>cfg/my_drifters.txt</default>
         <format>textfile</format>
         <template>drifter-indian.txt</template>
