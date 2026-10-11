@@ -5094,7 +5094,7 @@
         <parameter>
             <key>method</key>
             <long_name>Depth computation method</long_name>
-            <value>linear</value>
+            <value>edge</value>
             <default>linear</default>
             <format>combo</format>
             <accepted>linear</accepted>
