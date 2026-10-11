@@ -32,7 +32,7 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         env:
-            GH_TOKEN: ${{ secrets.GH_GITHUB_COM_TOKEN }}
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,6 +74,8 @@ jobs:
 
       - name: Tinytex install
         run: quarto install tinytex
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Render doc
         run: quarto render doc --output-dir=public --to html
