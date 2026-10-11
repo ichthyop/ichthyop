@@ -3960,8 +3960,8 @@
       <parameter>
         <key>stage_thresholds</key>
         <long_name>Length at which the particle change stage [cm]</long_name>
-        <value>"0.28" "0.45"</value>
-        <default>"0.28" "0.45"</default>
+        <value>"2" "5"</value>
+        <default>"2" "5"</default>
         <format>list</format>
         <description>Initial length for each physiological stage of the larva
                     life history,
@@ -4088,8 +4088,8 @@
       <parameter>
         <key>stage_thresholds</key>
         <long_name>Length in [cm] at which the stages change</long_name>
-        <value>"0.28" "0.45"</value>
-        <default>"0.28" "0.45"</default>
+        <value>"2" "5"</value>
+        <default>"2" "5"</default>
         <format>list</format>
         <description>Initial length for each physiological stage of the larva
                     life history,
@@ -4206,8 +4206,8 @@
       <parameter>
         <key>stage_thresholds</key>
         <long_name>Length in [cm] at which the stages change</long_name>
-        <value>"0.28" "0.45"</value>
-        <default>"0.28" "0.45"</default>
+        <value>"2" "5"</value>
+        <default>"2" "5"</default>
         <format>list</format>
         <description>Initial length for each physiological stage of the larva
                     life history,
