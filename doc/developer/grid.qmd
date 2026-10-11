@@ -1,5 +1,6 @@
 # Grid management
 
+{{< include grid/regular.qmd >}}
 {{< include grid/nemo.qmd >}}
 {{< include grid/roms.qmd >}}
 {{< include grid/mars.qmd >}}
