@@ -280,7 +280,9 @@ abstract public class Roms3dCommon extends RomsCommon {
         /* common setup*/
         super.setUp();
 
-        /* specific 3D calculations */
+        // Computes the H0 value, which
+        // is the depth component that is independent from
+        // sea-surface height
         getCstSigLevels();
 
         zeta_tp0 = new float[ny][nx];
@@ -298,6 +300,7 @@ abstract public class Roms3dCommon extends RomsCommon {
             }
         }
 
+        // Initialize depth using only H0
         z_w_tp0 = getSigLevels();
 
     }
@@ -322,6 +325,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         //-----------------------------------------------------------
         // Calculation of sc_r and sc_w, the sigma levels
+        // QUESTION Why don't we read it?
         for (int k = nz; k-- > 0;) {
             sc_r[k] = ((double) (k - nz) + .5d) / (double) nz;
             sc_w[k + 1] = (double) (k + 1 - nz) / (double) nz;
@@ -597,6 +601,10 @@ abstract public class Roms3dCommon extends RomsCommon {
 
     private double getDepth(double xRho, double yRho, int k) {
 
+        double time = getSimulationManager().getTimeManager().getTime();
+
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
         // For getting depth, it is an interpolation of a W/T variable
         final int i = (int) Math.floor(xRho);
         final int j = (int) Math.floor(yRho);
@@ -609,8 +617,11 @@ abstract public class Roms3dCommon extends RomsCommon {
                     double cox = 1 - Math.abs((xRho - (i + ii)));
                     double coy = 1 - Math.abs((yRho - (j + jj)));
                     co = cox * coy;
-                    double z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
-                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i + ii]);
+
+                    // Get the zeta at the right time by interpolating zeta
+                    // instead of using zeta_tp0
+                    double zeta =  (1.d - x_euler) * zeta_tp0[j + jj][i + ii] + x_euler * zeta_tp1[j + jj][i + ii];
+                    double z_r = z_rho_cst[k][j + jj][i + ii] +  zeta * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i + ii]);
                     hh += co * z_r;
                     co_tot += co;
                 }
