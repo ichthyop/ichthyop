@@ -175,8 +175,10 @@ public class NemoDataset extends AbstractDataset {
      *
      */
     private double e3t[][][], e3u[][][], e3v[][][];
-    private double e1t[][], e2t[][], e1v[][], e2u[][];
-    private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
+    private double e1t[][], e2t[][];
+    private double e1v[][], e2v[][];
+    private double e1u[][], e2u[][];
+    private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v, stre2v, stre1u;
     private String str_gdepT, str_gdepW;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
@@ -267,17 +269,15 @@ public class NemoDataset extends AbstractDataset {
         // fichier *mesh*h*
         e1t = read_e1_e2_field(nc, stre1t);
         e2t = read_e1_e2_field(nc, stre2t);
-        if (stre1v.equals(stre1t) || (null == nc.findVariable(stre1v))) {
-            e1v = e1t;
-        } else {
-            e1v = read_e1_e2_field(nc, stre1v);
-        }
-        if (stre2u.equals(stre2t) || (null == nc.findVariable(stre2u))) {
-            e2u = e2t;
-        } else {
-            e2u = read_e1_e2_field(nc, stre2u);
-        }
+
+        e1v = read_e1_e2_field(nc, stre1v);
+        e2u = read_e1_e2_field(nc, stre2u);
+
+        e1u = read_e1_e2_field(nc, stre1u);
+        e2v = read_e1_e2_field(nc, stre2v);
+
         nc.close();
+
     }
 
     private void compute_e3t() throws IOException {
@@ -624,7 +624,7 @@ public class NemoDataset extends AbstractDataset {
                         x = (1.d - x_euler) * u_tp0.getDouble(index)
                                 + x_euler * u_tp1.getDouble(index);
                         if (normalize) {
-                            du += x * co / e2u[j + jj][i + ii - 1];
+                            du += x * co / e1u[j + jj][i + ii - 1];
                         } else {
                             du += x * co;
                         }
@@ -672,6 +672,7 @@ public class NemoDataset extends AbstractDataset {
                         x = (1.d - x_euler) * w_tp0.getDouble(index)
                                 + x_euler * w_tp1.getDouble(index);
 
+                        // TODO: use e3w
                         dw += 2.d * x * co
                                 / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
                                 - gdepW[Math.min(k + kk + 1, nz)][j + jj][i + ii]);
@@ -719,7 +720,7 @@ public class NemoDataset extends AbstractDataset {
                         x = (1.d - x_euler) * v_tp0.getDouble(index)
                                 + x_euler * v_tp1.getDouble(index);
                         if(normalize) {
-                            dv += x * co / e1v[j + jj - 1][i + ii];
+                            dv += x * co / e2v[j + jj - 1][i + ii];
                         } else {
                             dv += x * co;
                         }
@@ -998,10 +999,16 @@ public class NemoDataset extends AbstractDataset {
         stre3v = getParameter("field_var_e3v");
         str_gdepT = getParameter("field_var_gdept"); // z_rho
         str_gdepW = getParameter("field_var_gdepw"); // z_w
+
         stre1t = getParameter("field_var_e1t");
         stre2t = getParameter("field_var_e2t");
+
         stre1v = getParameter("field_var_e1v");
+        stre2v = getParameter("field_var_e2v");
+
+        stre1u = getParameter("field_var_e1u");
         stre2u = getParameter("field_var_e2u");
+
         if (!findParameter("enhanced_mode")) {
             getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
         }
