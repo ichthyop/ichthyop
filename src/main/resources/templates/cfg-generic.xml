@@ -4311,8 +4311,8 @@
       <parameter>
         <key>limit_length</key>
         <long_name>Recruitment limit length [millimeter]</long_name>
-        <value>6.0</value>
-        <default>6.0</default>
+        <value>5</value>
+        <default>5</default>
         <format>float</format>
         <description>A particle must be "bigger" than the specified length
                     [millimeter] to
