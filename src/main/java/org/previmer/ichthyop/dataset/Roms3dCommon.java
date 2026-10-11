@@ -326,6 +326,12 @@ abstract public class Roms3dCommon extends RomsCommon {
         //-----------------------------------------------------------
         // Calculation of sc_r and sc_w, the sigma levels
         // QUESTION Why don't we read it?
+
+        // loops from nz - 1 to 0. It starts with k = nz
+        // check if k > 0 then decrements
+        // so k = nz never considered.
+        // when k = 1: check if k > 0, then move to k = 0
+        // when k = 0: breaks
         for (int k = nz; k-- > 0;) {
             sc_r[k] = ((double) (k - nz) + .5d) / (double) nz;
             sc_w[k + 1] = (double) (k + 1 - nz) / (double) nz;
@@ -776,7 +782,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         // Computes the layer thickness on the T points.
         // note k = 0 is the sea bottom
-        for (int k = 0; k < nz - 1; k++) { // loop from nz - 1 to 0
+        for (int k = 0; k < nz; k++) { // loop from 0 to nz - 1
             for (int i = 0; i < nx; i++) { // loop from 1 to nx - 1
                 for (int j = 0; j < ny; j++) {
                     delta_ZT[k][j][i] = z_w_tp1[k + 1][j][i] - z_w_tp1[k][j][i];
