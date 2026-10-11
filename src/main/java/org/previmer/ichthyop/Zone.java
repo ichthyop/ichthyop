@@ -348,10 +348,20 @@ public class Zone extends SimulationManagerAccessor {
         return isIn && isXYInPolygon(x, y);
     }
 
+    /**
+     * Determines whether a particle is on the right bathymetric layer.
+     *
+     * Note that the bathymetry is given at T file locations and that
+     * the grid reference is T file as well. So we need to use round.
+     *
+     * @param x X location in the T grid (x=0: center of the lefternmost T cell, x=nx-1: center of easternmost T cell)
+     * @param y Y location in the T grid (y=0: center of the lowernmost T cell, x=nx-1: center of uppermost T cell)
+     * @return
+     */
     private boolean isXYBetweenBathyLines(double x, double y) {
-        return (getSimulationManager().getDataset().getBathy((int) Math.floor(x), (int) Math.floor(y))
+        return (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
                 > inshoreLine
-                & getSimulationManager().getDataset().getBathy((int) Math.floor(x), (int) Math.floor(y))
+                & getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
                 < offshoreLine);
     }
 
