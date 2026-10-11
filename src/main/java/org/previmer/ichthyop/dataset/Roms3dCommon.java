@@ -846,7 +846,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         // For W, we do not compute the values of the outer W rows and columns.
         // We therefore copy the values of the neighbours
-        // Boundary Conditions for rows
+        // Boundary Conditions for columns
         for (int k = 0; k < nz + 1; k++) {
             for (int j = 1; j < ny - 1; j++) {
                 w_double[k][j][0] = w_double[k][j][1];
@@ -855,7 +855,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         }
 
 
-        // Boundary conditions for columns
+        // Boundary conditions for rows
         for (int k = 0; k < nz + 1; k++) {
             for (int i = 1; i < nx - 1; i++) {
                 w_double[k][0][i] = w_double[k][1][i];
