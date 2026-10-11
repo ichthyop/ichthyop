@@ -173,8 +173,8 @@ public class Mercator_3D extends AbstractDataset {
     /**
      *
      */
-    private double e3t[][][], e3u[][][], e3v[][][];
-    private double e1t[][], e2t[][], e1v[][], e2u[][];
+    private double e3t[][][];
+    private double e1t[][], e2t[][];
     private String stre1t, stre2t, stre3t;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
@@ -218,6 +218,7 @@ public class Mercator_3D extends AbstractDataset {
             nc.close();
             nc = NetcdfDatasets.openDataset(file_mask, enhanced(), null);
         }
+
         maskRho = new int[nz][ny][nx];
         Array arrMask = nc.findVariable(strMask).read().reduce().flip(0);
         Index indexMask = arrMask.getIndex();
@@ -237,8 +238,6 @@ public class Mercator_3D extends AbstractDataset {
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
         e3t = read_e3_field(nc, stre3t);
-        e3u = compute_e3u(e3t);
-        e3v = compute_e3v(e3t);
 
         if (!isGridInfoInOneFile) {
             nc.close();
@@ -249,55 +248,12 @@ public class Mercator_3D extends AbstractDataset {
         e1t = read_e1_e2_field(nc, stre1t);
         e2t = read_e1_e2_field(nc, stre2t);
 
-        e1v = e1t;
-        e2u = e2t;
-
         nc.close();
 
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
         get_gdep_fields(nc);
 
-    }
-
-    private double[][][] compute_e3u(double[][][] e3t) {
-
-        double[][][] e3u_calc = new double[nz][ny][nx];
-
-        for (int k = 0; k < nz; k++) {
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx - 1; i++) {
-                    /*
-                     * In NEMO domzgr.F90
-                     * e3u (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji+1,jj,jk))
-                     */
-                    //e3u_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j][i + 1]);
-                    e3u_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
-                }
-                e3u_calc[k][j][nx - 1] = e3t[k][j][nx - 1];
-            }
-        }
-        return e3u_calc;
-    }
-
-    private double[][][] compute_e3v(double[][][] e3t) {
-
-        double[][][] e3v_calc = new double[nz][ny][nx];
-
-        for (int k = 0; k < nz; k++) {
-            for (int i = 0; i < nx; i++) {
-                for (int j = 0; j < ny - 1; j++) {
-                    /*
-                     * In Nemo domzgr.F90
-                     * e3v (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji,jj+1,jk))
-                     */
-                    //e3v_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j + 1][i]);
-                    e3v_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
-                }
-                e3v_calc[k][ny - 1][i] = e3t[k][ny - 1][i];
-            }
-        }
-        return e3v_calc;
     }
 
     private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
@@ -344,49 +300,19 @@ public class Mercator_3D extends AbstractDataset {
 
                 gdepW[nz][j][i] = 0.d;   // init.
 
-                for (int k = nz; k-- > 0;) {
-
+                // Loop from k = nz - 1 to 0
+                for (int k = nz - 1; k>=0; k--) {
+                    // depth of W cell is assumed to be depth of above cell + thickness
+                    // of the cell T below.
+                    // if k = nz - 1, gdepW[nz] = 0, gdepW[nz-2] = e3t[nz-1]
                     gdepW[k][j][i] = gdepW[k + 1][j][i] + e3t[k][j][i];
-                    gdepT[k][j][i] = 0.5 * (gdepW[k][j][i] + gdepW[k + 1][j][i]);
 
+                    // Computes the depth of the T cell as the mean of the W cell
+                    gdepT[k][j][i] = 0.5 * (gdepW[k][j][i] + gdepW[k + 1][j][i]);
                 }
             }
         }
 
-        /*
-        array = nc.findVariable(str_gdepT).read().reduce().flip(0);
-        index = array.getIndex();
-        gdepT = new double[nz];
-        for (int k = 0; k < nz; k++) {
-            index.set(k + 1);
-            gdepT[k] = array.getDouble(index);
-        }
-
-        gdepW = new double[nz + 1];
-        if (null != nc.findVariable(str_gdepW)) {
-            getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
-            // Read gdepw
-            array = nc.findVariable(str_gdepW).read().reduce().flip(0);
-            index = array.getIndex();
-            for (int k = 0; k < nz + 1; k++) {
-                index.set(k); // barrier.n
-                gdepW[k] = array.getDouble(index);
-            }
-        } else {
-            // Compute gdepw (approximation)
-            // Reads the T depth from NetCDF file
-            getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
-            array = nc.findVariable(str_gdepT).read().reduce().flip(0);
-            for (int k = 0; k < nz; k++) {
-                index.set(k);
-                gdepW[k] = array.getDouble(index);
-                index.set(k + 1);
-                gdepW[k] += array.getDouble(index);
-                gdepW[k] *= 0.5;
-            }
-            gdepW[nz] = 0.;
-        }
-        */
     }
 
     private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
@@ -468,34 +394,35 @@ public class Mercator_3D extends AbstractDataset {
 
         double du = 0.d;
         double kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+
+        double ix = pGrid[0];
+        double jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
-        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
-        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
-        int k = (int) kz;
+        int i = (int) Math.floor(ix);
+        int j = (int) Math.floor(jy);
+        int k = (int) Math.floor(kz);
 
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
         double CO = 0.d;
         double co, x;
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
 
         Index index = u_tp0.getIndex();
         for (int ii = 0; ii < 2; ii++) {
-            for (int jj = 0; jj < n; jj++) {
+            for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
+                    double cox = 1 - Math.abs(ix - (i + ii));
+                    double coy = 1 - Math.abs(jy - (j + jj));
+                    double coz = 1 - Math.abs(ix - (k + kk));
+                    co = cox * coy * coz;
                     index.set(k + kk, j + jj, i + ii);
-                    if (!(Double.isNaN(u_tp0.getDouble(index)))) {
+                    if (!(Double.isNaN(u_tp0.getDouble(index))) && (u_tp0.getDouble(index) != 0)) {
+                        CO += co;
                         x = (1.d - x_euler) * u_tp0.getDouble(index)
                                 + x_euler * u_tp1.getDouble(index);
                         if (normalize) {
-                            du += x * co / e2u[j + jj][i + ii];
+                            // Normalize by the scale factor to have the displacement
+                            du += x * co / e1t[j + jj][i + ii];
                         } else {
                             du += x * co;
                         }
@@ -514,30 +441,35 @@ public class Mercator_3D extends AbstractDataset {
 
         double dw = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
-        int k = (int) Math.round(kz);
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double dz = kz - (double) k;
+
+        // Get the index for the W point velocity
+        int k = (int) Math.floor(kz + 0.5);
+        int j = (int) Math.floor(jy);
+        int i = (int) Math.floor(ix);
+
         double CO = 0.d;
         double co, x;
         Index index = w_tp0.getIndex();
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
+        for (int ii = 0; ii < 2; ii++) {
+            for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
                     index.set(k + kk, j + jj, i + ii);
+
+                    double cox = 1 - Math.abs(ix - (i + ii));
+                    double coy = 1 - Math.abs(jy - (j + jj));
+                    double coz = 1 - Math.abs(kz - (k - 0.5 + kk));
+
                     // Patch for Eliot (issues 122)
                     // Check whether the value is NaN for the vertical velocity.
                     // If so, we don't read it.
-                    if (!Double.isNaN(w_tp0.getDouble(index))) {
-                        co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                    if (!Double.isNaN(w_tp0.getDouble(index)) && (w_tp0.getDouble(index) != 0)) {
+                        co = cox * coy * coz;
                         CO += co;
                         x = (1.d - x_euler) * w_tp0.getDouble(index) + x_euler * w_tp1.getDouble(index);
                         dw += 2.d * x * co / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
@@ -560,36 +492,36 @@ public class Mercator_3D extends AbstractDataset {
     public double get_dVy(double[] pGrid, double time, boolean normalize) {
 
         double dv = 0.d;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
-        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
+
         double CO = 0.d;
         double x;
         double co;
 
         double kz;
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+        double ix = pGrid[0];
+        double jy = pGrid[1];
 
-        int k = (int) kz;
+        int i = (int) Math.floor(ix);
+        int j = (int) Math.floor(jy);
+        int k = (int) Math.floor(kz);
 
-        double dz = kz - (double) k;
         Index index = v_tp0.getIndex();
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
+                for (int ii = 0; ii < 2; ii++) {
+                    double cox =  1 - Math.abs(ix - (i + ii));
+                    double coy = 1 - Math.abs(jy - (j + jj));
+                    double coz = 1 - Math.abs(kz - (k + kk));
+                    co = cox * coy * coz;
                     index.set(k + kk, j + jj, i + ii);
-                    if (!Double.isNaN(v_tp0.getDouble(index))) {
+                    if (!Double.isNaN(v_tp0.getDouble(index)) && (v_tp0.getDouble(index) != 0)) {
+                        CO += co;
                         x = (1.d - x_euler) * v_tp0.getDouble(index)
                                 + x_euler * v_tp1.getDouble(index);
                         if (normalize) {
-                            dv += x * co / e1v[j + jj][i + ii];
+                            dv += x * co / e1t[j + jj][i + ii];
                         } else {
                             dv += x * co;
                         }
@@ -640,31 +572,40 @@ public class Mercator_3D extends AbstractDataset {
      *
      * So the water vertical velocity at sigma levels is
      * Ws(i, j, k) = W(i, j, k) - Wgrid(i, j, k)
+     *
+     * See https://help.marine.copernicus.eu/en/articles/5588616-vertical-velocity-data-and-derivation-methods
+     *
      * </pre>
      */
     private Array computeW() {
 
         Index index, indexbis;
 
+        // Ocean transport on the eastern and northern face
         double[][][] Huon = new double[nz][ny][nx];
         double[][][] Hvom = new double[nz][ny][nx];
 
-        // Array containing the interpolated speed on the eastern/western faces.
+        // Array containing the interpolated speed on the eastern/northern faces.
         double[][][] u_east = new double[nz][ny][nx];
         double[][][] v_north = new double[nz][ny][nx];
 
         index = u_tp1.getIndex();
         indexbis = u_tp1.getIndex();
 
+        // Interpolates the velocity on eastern face.
         for (int k = 0; k < nz; k++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx - 1; i++) {
                     index.set(k, j, i);
                     indexbis.set(k, j, i + 1);
-                    // If umask = 0, interpolated speed = 0.
-                    // else, ueast = mean over T points
-                    u_east[k][j][i] = (Double.isNaN(u_tp1.getDouble(index)) || Double.isNaN(u_tp1.getDouble(indexbis)))
-                            ? 0.d : 0.5 * (u_tp1.getDouble(index) + u_tp1.getDouble(indexbis));
+                    if (isInWater(i, j, k) && isInWater(i + 1, j, k)) {
+                        // If umask = 0, interpolated speed = 0.
+                        // else, ueast = mean over T points
+                        u_east[k][j][i] = 0.5 * (u_tp1.getDouble(index) + u_tp1.getDouble(indexbis));
+                    } else {
+                        u_east[k][j][i] = 0;
+                    }
+
                 }
             }
         }
@@ -677,10 +618,14 @@ public class Mercator_3D extends AbstractDataset {
                 for (int i = 0; i < nx; i++) {
                     index.set(k, j, i);
                     indexbis.set(k, j + 1, i);
-                    // If umask = 0, interpolated speed = 0.
-                    // else, ueast = mean over T points
-                    v_north[k][j][i] = (Double.isNaN(v_tp1.getDouble(index)) || Double.isNaN(v_tp1.getDouble(indexbis)))
-                            ? 0.d : 0.5 * (v_tp1.getDouble(index) + v_tp1.getDouble(indexbis));
+
+                    if (isInWater(i, j, k) && isInWater(i, j + 1, k)) {
+                        // If umask = 0, interpolated speed = 0.
+                        // else, ueast = mean over T points
+                        v_north[k][j][i] = 0.5 * (v_tp1.getDouble(index) + v_tp1.getDouble(indexbis));
+                    } else {
+                        v_north[k][j][i] = 0;
+                    }
 
                 }
             }
@@ -688,18 +633,20 @@ public class Mercator_3D extends AbstractDataset {
 
         //---------------------------------------------------
         // Calculation Coeff Huon & Hvom
-        for (int k = nz; k-- > 0;) {
+        // here, indexes are supposed to be the U index (eastern face)
+        for (int k = 0; k < nz; k++) {
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny; j++) {
-                    Huon[k][j][i] = u_east[k][j][i] * e2u[j][i] * e3u[k][j][i];
+                    Huon[k][j][i] = u_east[k][j][i] * this.get_e2u(i, j) * this.get_e3u(i, j, k);
                 }
             }
         }
 
-        for (int k = nz; k-- > 0;) {
+        // here, indexes are supposed to be the U index (western face)
+        for (int k = 0; k < nz; k++) {
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny - 1; j++) {
-                    Hvom[k][j][i] = v_north[k][j][i] * e1v[j][i] * e3v[k][j][i];
+                    Hvom[k][j][i] = v_north[k][j][i] * this.get_e1v(i, j) * this.get_e3v(i, j, k);
                 }
             }
         }
@@ -708,55 +655,91 @@ public class Mercator_3D extends AbstractDataset {
         // Calcultaion of w(i, j, k)
         double[][][] w_double = new double[nz + 1][ny][nx];
 
-        for (int j = 1; j < ny; j++) {
-            for (int i = 1; i < nx; i++) {
+        // Here, j and i are the indexes for the W points.
+        // i.e. j, i = center of the cells
+        // because fluxes are missing in the outermost cells, we compute
+        // w only in the inner domain.
+        for (int j = 1; j < ny - 1; j++) {
+            for (int i = 1; i < nx - 1; i++) {
                 /*
                  * pverley 15/02/2011
                  * I must start integrating the vertical velocity at the bottom
                  * of the water column wich is not necessarily k = 0;
                  * So first I look for k0 such as (k0 - 1) is bottom, k0 is first
-                 * cell of the column in water.
+                 * cell of the column in water (k0 = index of T point)
                  */
                 int k0 = 0;
+                for (int k = 0; k < nz; k++) {
+                    if (isInWater(k, j, i)) {
+                        k0 = k;
+                        break;
+                    }
+                }
 
-                /*
-                 * pverley 15/02/2011
-                 * Ensured that w(0:k0, :, :) = 0;
-                 */
+                // pverley 15/02/2011
+                // Ensured that w(0:k0, :, :) = 0;
+                // note that here we loop over k0+1
+                // because transport is set at W cell
                 for (int k = 0; k < k0 + 1; k++) {
                     w_double[k][j][i] = 0.d;
                     //System.out.println("k: " + k + " k0: " + k0 + " wr: " + wr_tp1[k][j][i] + " " + isInWater(k, j, i));
                 }
+
                 for (int k = k0 + 1; k < nz; k++) {
                     w_double[k][j][i] = w_double[k - 1][j][i]
                             - (Huon[k - 1][j][i] - Huon[k - 1][j][i - 1] + Hvom[k - 1][j][i] - Hvom[k - 1][j - 1][i]);
                 }
+
+                // We artificially force W at the surface to be 0
                 w_double[nz][j][i] = 0.d;
             }
         }
-        //---------------------------------------------------
-        // Boundary Conditions
-        for (int k = nz + 1; k-- > 0;) {
-            for (int j = ny; j-- > 0;) {
+
+        // For W, we do not compute the values of the outer W rows and columns.
+        // We therefore copy the values of the neighbours
+        // Boundary Conditions for columns
+        for (int k = 0; k < nz + 1; k++) {
+            for (int j = 1; j < ny - 1; j++) {
                 w_double[k][j][0] = w_double[k][j][1];
                 w_double[k][j][nx - 1] = w_double[k][j][nx - 2];
             }
         }
-        for (int k = nz + 1; k-- > 0;) {
-            for (int i = nx; i-- > 0;) {
+
+
+        // Boundary conditions for rows
+        for (int k = 0; k < nz + 1; k++) {
+            for (int i = 1; i < nx - 1; i++) {
                 w_double[k][0][i] = w_double[k][1][i];
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
         }
+
+
+        // Boundary conditions for corners
+        for (int k = 0; k < nz + 1; k++) {
+
+            // Lower left corner
+            w_double[k][0][0] = w_double[k][1][1];
+
+            // upper left
+            w_double[k][ny - 1][0] = w_double[k][ny - 2][1];
+
+            // upper right
+            w_double[k][ny - 1][nx - 1] = w_double[k][ny - 2][nx - 2];
+
+            // lower right
+            w_double[k][0][nx - 1] = w_double[k][1][nx - 2];
+        }
+
 
         //---------------------------------------------------
         // w * dxu * dyv
         //float[][][] w = new float[nz + 1][ny][nx];
         Array w = new ArrayDouble.D3(nz + 1, ny, nx);
         index = w.getIndex();
-        for (int i = nx; i-- > 0;) {
-            for (int j = ny; j-- > 0;) {
-                for (int k = nz + 1; k-- > 0;) {
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
+                for (int k = 0; k < nz + 1; k++) {
                     w.setDouble(index.set(k, j, i), (w_double[k][j][i] / (e1t[j][i] * e2t[j][i])));
                 }
             }
@@ -765,16 +748,6 @@ public class Mercator_3D extends AbstractDataset {
         //---------------------------------------------------
         // Return w
         return w;
-    }
-
-    /*
-     * Adimensionalizes the given magnitude at the specified grid location.
-     */
-    public double adimensionalize(double number, double xRho, double yRho) {
-
-        int i = (int) Math.round(xRho);
-        int j = (int) Math.round(yRho);
-        return 2.d * number / (e1t[j][i] + e2t[j][i]);
     }
 
     /**
@@ -792,15 +765,34 @@ public class Mercator_3D extends AbstractDataset {
             latitude = new float[ny];
             Array arrLon = nc.findVariable(strLon).read().reduce();
             Array arrLat = nc.findVariable(strLat).read().reduce();
-            Index indexLon = arrLon.getIndex();
-            Index indexLat = arrLat.getIndex();
 
-            for (int i = 0; i < nx; i++) {
-                longitude[i] = arrLon.getFloat(indexLon.set(ipo + i));
-            }
+            if (arrLon.getRank() == 2) {
 
-            for (int j = 0; j < ny; j++) {
-                latitude[j] = arrLat.getFloat(indexLat.set(jpo + j));
+                Index indexLon = arrLon.getIndex();
+                Index indexLat = arrLat.getIndex();
+
+                for (int i = 0; i < nx; i++) {
+                    // If the grid is regular but provides 2D coordinates,
+                    // extract only one row
+                    longitude[i] = arrLon.getFloat(indexLon.set(0, ipo + i));
+                }
+
+                for (int j = 0; j < ny; j++) {
+                    latitude[j] = arrLat.getFloat(indexLat.set(jpo + j, 0));
+                }
+
+            } else {
+
+                Index indexLon = arrLon.getIndex();
+                Index indexLat = arrLat.getIndex();
+
+                for (int i = 0; i < nx; i++) {
+                    longitude[i] = arrLon.getFloat(indexLon.set(ipo + i));
+                }
+
+                for (int j = 0; j < ny; j++) {
+                    latitude[j] = arrLat.getFloat(indexLat.set(jpo + j));
+                }
             }
 
         }
@@ -928,7 +920,7 @@ public class Mercator_3D extends AbstractDataset {
             throw ioex;
         }
         try {
-            nz = nc.findDimension(strZDim).getLength() - 1;
+            nz = nc.findDimension(strZDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset Z dimension. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -983,59 +975,14 @@ public class Mercator_3D extends AbstractDataset {
      */
     private void getDimGeogArea() {
 
-        /* NEMO way.
-        //--------------------------------------
+        // --------------------------------------
         // Calculate the Physical Space extrema
         lonMin = Double.MAX_VALUE;
         lonMax = -lonMin;
         latMin = Double.MAX_VALUE;
         latMax = -latMin;
+
         depthMax = 0.d;
-        int i = nx;
-
-        while (i-- > 0) {
-            int j = ny;
-            while (j-- > 0) {
-                if (lonRho[j][i] >= lonMax) {
-                    lonMax = lonRho[j][i];
-                }
-                if (lonRho[j][i] <= lonMin) {
-                    lonMin = lonRho[j][i];
-                }
-                if (latRho[j][i] >= latMax) {
-                    latMax = latRho[j][i];
-                }
-                if (latRho[j][i] <= latMin) {
-                    latMin = latRho[j][i];
-                }
-                double depth = getBathy(i, j);
-                if (depth > depthMax) {
-                    depthMax = depth;
-                }
-            }
-        }
-
-        double double_tmp;
-        if (lonMin > lonMax) {
-            double_tmp = lonMin;
-            lonMin = lonMax;
-            lonMax = double_tmp;
-        }
-
-        if (latMin > latMax) {
-            double_tmp = latMin;
-            latMin = latMax;
-            latMax = double_tmp;
-        }
-         */
-        //--------------------------------------
-        // Calculate the Physical Space extrema
-        lonMin = Double.MAX_VALUE;
-        lonMax = -lonMin;
-        latMin = Double.MAX_VALUE;
-        latMax = -latMin;
-
-                depthMax = 0.d;
 
         int i = nx;
         while (i-- > 0) {
@@ -1056,7 +1003,8 @@ public class Mercator_3D extends AbstractDataset {
             }
         }
 
-        //System.out.println("lonmin " + lonMin + " lonmax " + lonMax + " latmin " + latMin + " latmax " + latMax);
+        // System.out.println("lonmin " + lonMin + " lonmax " + lonMax + " latmin " +
+        // latMin + " latmax " + latMax);
         double double_tmp;
         if (lonMin > lonMax) {
             double_tmp = lonMin;
@@ -1207,12 +1155,27 @@ public class Mercator_3D extends AbstractDataset {
     @Override
     public boolean isCloseToCost(double[] pGrid) {
 
-        int i, j, k, ii, jj;
-        i = (int) (Math.round(pGrid[0]));
-        j = (int) (Math.round(pGrid[1]));
-        k = (int) (Math.round(pGrid[2]));
-        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
+        double ix = pGrid[0];
+        double jy = pGrid[1];
+        double kz = pGrid[2];
+
+        int j = (int) Math.round(jy);
+        int i = (int) Math.round(ix);
+        int k = (int) Math.round(kz);
+        int ii, jj;
+
+        if (jy > j) {
+            jj = 1;
+        } else {
+            jj = -1;
+        }
+
+        if (ix > i) {
+            ii = 1;
+        } else {
+            ii = -1;
+        }
+
         return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k) && isInWater(i, j + jj, k));
 
     }
@@ -1414,66 +1377,6 @@ public class Mercator_3D extends AbstractDataset {
     @Override
     public double[] latlon2xy(double lat, double lon) {
 
-        /* NEMO way
-        //--------------------------------------------------------------------
-        // Physical space (lat, lon) => Computational space (x, y)
-        boolean found;
-        int imin, imax, jmin, jmax, i0, j0;
-        double dx1, dy1, dx2, dy2, c1, c2, deltax, deltay, xgrid, ygrid;
-
-        xgrid = -1.;
-        ygrid = -1.;
-        found = isInsidePolygone(0, nx - 1, 0, ny - 1, lon, lat);
-
-        //-------------------------------------------
-        // Research surrounding grid-points
-        if (found) {
-            imin = 0;
-            imax = nx - 1;
-            jmin = 0;
-            jmax = ny - 1;
-            while (((imax - imin) > 1) | ((jmax - jmin) > 1)) {
-                if ((imax - imin) > 1) {
-                    i0 = (imin + imax) / 2;
-                    found = isInsidePolygone(imin, i0, jmin, jmax, lon, lat);
-                    if (found) {
-                        imax = i0;
-                    } else {
-                        imin = i0;
-                    }
-                }
-                if ((jmax - jmin) > 1) {
-                    j0 = (jmax + jmin) / 2;
-                    found = isInsidePolygone(imin, imax, jmin, j0, lon, lat);
-                    if (found) {
-                        jmax = j0;
-                    } else {
-                        jmin = j0;
-                    }
-                }
-            }
-
-            //--------------------------------------------
-            // Trilinear interpolation
-            dy1 = latRho[jmin + 1][imin] - latRho[jmin][imin];
-            dx1 = lonRho[jmin + 1][imin] - lonRho[jmin][imin];
-            dy2 = latRho[jmin][imin + 1] - latRho[jmin][imin];
-            dx2 = lonRho[jmin][imin + 1] - lonRho[jmin][imin];
-
-            c1 = lon * dy1 - lat * dx1;
-            c2 = lonRho[jmin][imin] * dy2 - latRho[jmin][imin] * dx2;
-            deltax = (c1 * dx2 - c2 * dx1) / (dx2 * dy1 - dy2 * dx1);
-            deltax = (deltax - lonRho[jmin][imin]) / dx2;
-            xgrid = (double) imin + Math.min(Math.max(0.d, deltax), 1.d);
-
-            c1 = lonRho[jmin][imin] * dy1 - latRho[jmin][imin] * dx1;
-            c2 = lon * dy2 - lat * dx2;
-            deltay = (c1 * dy2 - c2 * dy1) / (dx2 * dy1 - dy2 * dx1);
-            deltay = (deltay - latRho[jmin][imin]) / dy1;
-            ygrid = (double) jmin + Math.min(Math.max(0.d, deltay), 1.d);
-        }
-        return (new double[]{xgrid, ygrid});
-         */
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
         boolean found1 = false;
@@ -1515,7 +1418,7 @@ public class Mercator_3D extends AbstractDataset {
                     found2 = true;
                 } else {
                     di = (int) Math.max(1, di / 2);
-                    dj = (int) Math.max(1, di / 2);
+                    dj = (int) Math.max(1, dj / 2);
                     found1 = false;
                 }
             }
@@ -1526,21 +1429,25 @@ public class Mercator_3D extends AbstractDataset {
         int cim1 = ci - 1 < 0 ? nx - 1 : ci - 1;
         int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
         int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
+
         // xgrid
         double xgrid;
         if (lon >= longitude[ci]) {
+            // If particle is on the right, we interpolate longitude with the cell on the right
             double dx = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
-                    ? 360.d + (longitude[cip1] - longitude[ci])
-                    : longitude[cip1] - longitude[ci];
+            ? 360.d + (longitude[cip1] - longitude[ci])
+            : longitude[cip1] - longitude[ci];
             double deltax = (lon - longitude[ci]) / dx;
             xgrid = xTore(ci + deltax);
         } else {
+            // If particle is on the left of ci, then we interpolate with the cell on the left
             double dx = (Math.abs(longitude[ci] - longitude[cim1]) > 180.d)
                     ? 360.d + (longitude[ci] - longitude[cim1])
                     : longitude[ci] - longitude[cim1];
             double deltax = (lon - longitude[cim1]) / dx;
             xgrid = xTore(cim1 + deltax);
         }
+
         // ygrid
         double ygrid;
         if (lat >= latitude[cj]) {
@@ -1668,16 +1575,7 @@ public class Mercator_3D extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-
-        /* NEMO way
-        return ((pGrid[0] > (nx - 3.0f))
-                || (pGrid[0] < 2.0f)
-                || (pGrid[1] > (ny - 3.0f))
-                || (pGrid[1] < 2.0f));
-         */
-        // barrier.n, 2017-08-02> adding the last two lines for zonal checking */
-        return ((pGrid[0] > (nx - 2.d)) || ((pGrid[0] < 1.d))
-                || (pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
+        return (pGrid[0] < 0) && (pGrid[0] > nx - 1) && (pGrid[1] < 0) && (pGrid[1] > ny - 1);
 
     }
 
@@ -1885,4 +1783,92 @@ public class Mercator_3D extends AbstractDataset {
         double bathy = getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
         return bathy;
     }
+
+    /**
+     * Interpolates e1t on U faces.
+     *
+     * U faces are assumed to be at the eastern face of the cells
+     *
+     * @param i index of the U cell
+     * @param j index of the U cell
+     *
+     * @return
+     */
+    public double get_e1u(int i, int j) {
+        return 0.5 * (e1t[j][i + 1] + e1t[j][i]);
+    }
+
+    /**
+     * Interpolates e2t on U facts - 1.
+     *1t   * U faces are assumed to be at the eastern face of the cells
+     *
+     * @param i index of the U cell
+     * @param j index of the U cell
+     *
+     * @return
+     */
+    public double get_e2u(int i, int j) {
+        return 0.5 * (e2t[j][i + 1] + e2t[j][i]);
+    }
+
+
+    /**
+     * Interpolates e1t on V faces.
+     *
+     * V faces are assumed to be at the northern face of the cells
+     *
+     * @param i index of the V cell
+     * @param j index of the V cell
+     *
+     * @return
+     */
+    public double get_e1v(int i, int j) {
+        return 0.5 * (e1t[j + 1][i] + e1t[j][i]);
+    }
+
+
+    /**
+     * Interpolates e1t on V faces.
+     *
+     * V faces are assumed to be at the northern face of the cells
+     *
+     * @param i index of the V cell
+     * @param j index of the V cell
+     *
+     * @return
+     */
+    public double get_e2v(int i, int j) {
+        return 0.5 * (e2t[j + 1][i] + e2t[j][i]);
+    }
+
+
+    /**
+     * Interpolates e3t on U faces.
+     *
+     * U faces are assumed to be at the northern face of the cells
+     *
+     * @param i index of the U cell
+     * @param j index of the U cell
+     *
+     * @return
+     */
+    public double get_e3u(int i, int j, int k) {
+        return 0.5 * (e3t[k][j][i + 1] + e3t[k][j][i]);
+    }
+
+    /**
+     * Interpolates e3t on V faces.
+     *
+     * V faces are assumed to be at the northern face of the cells
+     *
+     * @param i index of the V cell
+     * @param j index of the V cell
+     *
+     * @return
+     */
+    public double get_e3v(int i, int j, int k) {
+        return 0.5 * (e3t[k][j + 1][i] + e3t[k][j][i]);
+    }
+
+
 }
