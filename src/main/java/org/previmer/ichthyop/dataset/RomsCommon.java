@@ -557,8 +557,8 @@ abstract class RomsCommon extends AbstractDataset {
      */
     void readLonLat(String gridFile) throws IOException {
 
-        int[] start = new int[] { rank, jpo, ipo };
-        int[] count = new int[] { rank, ny, nx };
+        int[] start = new int[] {jpo, ipo };
+        int[] count = new int[] {ny, nx };
         Array arrLon, arrLat;
         NetcdfFile ncGrid = NetcdfDatasets.openDataset(gridFile);
         try {
