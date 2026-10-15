@@ -12,6 +12,8 @@ pages:
   script:
   - apt update -y
   - apt install -y python3 openjdk-11-jdk python3 pip python-is-python3 maven libgeos-dev wget unzip
+  # shared libraries required by chrome-headless-shell (used by quarto to render mermaid diagrams for PDF)
+  - apt install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libasound2 libdbus-1-3
   - pip install cartopy matplotlib numpy nbformat jupyter-cache netcdf4 jupytext ipykernel xarray pandas dask scipy
   - wget https://zenodo.org/records/10890690/files/input.zip && unzip -o input.zip
   - python -m ipykernel install --user --name python3 --display-name "Python 3"
@@ -20,7 +22,7 @@ pages:
   - quarto --version
   - quarto install tinytex
   - quarto install chrome-headless-shell
-  - quarto render doc --output-dir=public --to html
+  - quarto render doc --output-dir=public
   - rm -rf public && mv doc/public public
   artifacts:
     paths:
