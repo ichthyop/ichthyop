@@ -34,8 +34,8 @@ In ROMS, there are 1 extra column of T points compared to U points. There also i
 In Ichthyop, a particle is considered out of domain when U, V, or T points cannot be interpolated using a 4 point interpolation.
 Looking at the layout described in @fig-roms-layout, this occurs when:
 
-- $x \lt 0.5$ or $x \gt N_x -1 - 0.5$, when $U$ values cannot be interpolated.
-- $y \lt 0.5$ or $x \gt N_y -1 - 0.5$, when $V$ values cannot be interpolated.
+- $x < 0.5$ or $x > N_x -1 - 0.5$, when $U$ values cannot be interpolated.
+- $y < 0.5$ or $y > N_y -1 - 0.5$, when $V$ values cannot be interpolated.
 
 The excluded domain is represented in @fig-on-edge-roms:
 

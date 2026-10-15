@@ -22,7 +22,7 @@ build-pages:
   - quarto --version
   - quarto install tinytex
   - quarto install chrome-headless-shell
-  - quarto render doc --output-dir=public --cache-refresh --to html
+  - quarto render doc --output-dir=public
   artifacts:
     paths:
     - doc/public
