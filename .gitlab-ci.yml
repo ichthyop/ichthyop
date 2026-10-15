@@ -22,7 +22,7 @@ pages:
   - quarto --version
   - quarto install tinytex
   - quarto install chrome-headless-shell
-  - quarto render doc --output-dir=public
+  - quarto render doc --output-dir=public --to html
   - rm -rf public && mv doc/public public
   artifacts:
     paths:
