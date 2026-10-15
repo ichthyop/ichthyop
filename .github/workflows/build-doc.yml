@@ -72,6 +72,9 @@ jobs:
       - name: Install Packages
         run:  pip install cartopy matplotlib numpy nbformat jupyter-cache netcdf4 jupytext ipykernel xarray pandas dask scipy
 
+      - name: Allow headless Chrome sandbox (Ubuntu 24.04)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
       - name: Tinytex install
         run: quarto install tinytex
         env:
