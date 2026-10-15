@@ -78,7 +78,7 @@ jobs:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Render doc
-        run: quarto render doc --output-dir=public
+        run: quarto render doc --output-dir=public --to html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
