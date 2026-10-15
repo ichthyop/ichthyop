@@ -50,6 +50,7 @@
 
 ## Refactors / Internal Changes
 
+- Correction of the interpolation method in `Roms*` dataset (as described in the documentation)
 -   `BuoyancyAction.java`: density computation refactored into pluggable functional interfaces (`getDensity`), with a new `density.method` (`constant`/`file`) and `density.class` (`age`/`length`) parameter pair replacing the old implicit CSV-file detection.
 -   `LinearGrowthAction.java`: growth computation split into `growWithFood`/`growWithoutFood` strategies, gated by a new `growth.food.enabled` flag, and now takes an explicit `initial_length` parameter instead of using the first stage threshold.
 -   `SoleGrowthAction.java`: also switched to an explicit `initial_length` parameter and made length/stage trackers independently toggleable.
