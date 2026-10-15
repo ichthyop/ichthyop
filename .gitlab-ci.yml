@@ -1,14 +1,12 @@
 image: ubuntu:jammy
 
-build-pages:
+pages:
   cache:
     paths:
       - .cache/pip
       - doc/ichthyop_output
-  only:
-    - release/.*
-  pages:
-    publish: doc/public
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release\//
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   script:
@@ -23,6 +21,7 @@ build-pages:
   - quarto install tinytex
   - quarto install chrome-headless-shell
   - quarto render doc --output-dir=public
+  - rm -rf public && mv doc/public public
   artifacts:
     paths:
-    - doc/public
+    - public
