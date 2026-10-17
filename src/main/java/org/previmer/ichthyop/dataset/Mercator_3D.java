@@ -635,7 +635,7 @@ public class Mercator_3D extends AbstractDataset {
         // Calculation Coeff Huon & Hvom
         // here, indexes are supposed to be the U index (eastern face)
         for (int k = 0; k < nz; k++) {
-            for (int i = 0; i < nx; i++) {
+            for (int i = 0; i < nx - 1; i++) {
                 for (int j = 0; j < ny; j++) {
                     Huon[k][j][i] = u_east[k][j][i] * this.get_e2u(i, j) * this.get_e3u(i, j, k);
                 }
