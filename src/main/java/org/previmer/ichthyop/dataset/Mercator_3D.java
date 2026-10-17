@@ -267,7 +267,7 @@ public class Mercator_3D extends AbstractDataset {
         if (shape.length == 1) {
 
             for (int k = 0; k < nz; k++) {
-                index.set(k + 1);
+                index.set(k);
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
                         field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
