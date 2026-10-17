@@ -66,3 +66,53 @@ Common values are `time`, `scrum_time`, `time_counter`, `ocean_time`.
 
 The units value must also be chosen consistently with the dataset
 :::
+
+
+Note that it is possible to assess the time values of a NetCDF time as follows:
+
+```{python}
+import xarray as xr
+data = xr.open_dataset('input/roms-benguela.nc')
+data['scrum_time'].values
+```
+
+The above works if the NetCDF file follows the CF convention, i.e. if it contains a `unit` and a `calendar` attribute.
+
+If it does not, you will have numerical values. You need to convert it manually by providing the unit in CF form as follows.
+
+```{python}
+import cftime
+units = 'seconds since 1900-01-01 00:00'
+calendar = 'gregorian'
+data = xr.open_dataset('input/roms-benguela.nc', decode_times=False)
+cftime.num2date(data['scrum_time'].values, units, calendar)
+```
+
+In R, you should be able to see the dates as follows, providing the units as a combination
+of arguments to the `as.POSIXct` and `as.difftime` functions.
+
+
+```r
+library(ncdf4)
+
+# Open the NetCDF file
+nc <- nc_open("input/roms-benguela.nc")
+
+# Read the time variable
+scrum_time <- ncvar_get(nc, "scrum_time")
+
+nc_close(nc)
+
+# Define the origin (equivalent to 'seconds since 1900-01-01 00:00')
+origin <- as.POSIXct("1900-01-01 00:00:00", tz = "UTC")
+
+# Convert numeric seconds to datetime (equivalent to cftime.num2date)
+dates <- origin + as.difftime(scrum_time, units = "secs")
+```
+
+::: {.callout-note}
+
+To check whether the file has these attributes, you can see the file metadata using `ncdump -h` on Linux/Mac or visualize the
+file using the [Panoply](https://www.giss.nasa.gov/tools/panoply/download/) software
+
+:::
