@@ -4644,8 +4644,8 @@
       <parameter>
         <key>scheme</key>
         <long_name>Numerical scheme</long_name>
-        <value>Forward Euler</value>
-        <default>Forward Euler</default>
+        <value>Runge Kutta 4</value>
+        <default>Runge Kutta 4</default>
         <format>combo</format>
         <accepted>Forward Euler</accepted>
         <accepted>Runge Kutta 4</accepted>
