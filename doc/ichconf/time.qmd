@@ -57,7 +57,7 @@ for f in filelist:
     data[time].attrs['units'] = units
     data[time]
 
-    data.to_netcdf(f)
+    data.to_netcdf(f, unlimited_dims='time')
 ```
 
 :::{.callout-note}
