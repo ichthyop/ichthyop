@@ -4609,7 +4609,7 @@
     <tree_path>Transport/Advection</tree_path>
     <enabled>true</enabled>
     <parameters>
-      <parameter>
+      <parameter hidden="true">
         <key>activation_variable</key>
         <long_name>Variable used to activate/deactivate process</long_name>
         <value>age</value>
@@ -4621,7 +4621,7 @@
                     (in days) or
                     length (in cm). Length can be used only if one growth module is activated</description>
       </parameter>
-      <parameter>
+      <parameter hidden="true">
         <key>activation_minimum_class_value</key>
         <long_name>Activation age (days) or length(cm)</long_name>
         <value>0</value>
@@ -4631,7 +4631,7 @@
                     of the
                     particle is greater, then the process is activated. Length is available only if one growth module is available</description>
       </parameter>
-      <parameter>
+      <parameter hidden="true">
         <key>activation_maximum_class_value</key>
         <long_name>Dectivation age (days) or length(cm)</long_name>
         <value>1e50</value>
