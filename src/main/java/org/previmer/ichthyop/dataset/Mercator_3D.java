@@ -225,7 +225,7 @@ public class Mercator_3D extends AbstractDataset {
         for (int k = 0; k < nz; k++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    maskRho[k][j][i] = arrMask.getInt(indexMask.set(k + 1, j + jpo, i + ipo));
+                    maskRho[k][j][i] = arrMask.getInt(indexMask.set(k, j + jpo, i + ipo));
                 }
             }
         }
@@ -280,7 +280,7 @@ public class Mercator_3D extends AbstractDataset {
             for (int k = 0; k < nz; k++) {
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
-                        index.set(k + 1, j + jpo, i + ipo);
+                        index.set(k, j + jpo, i + ipo);
                         field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
                     }
                 }
