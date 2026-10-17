@@ -415,7 +415,14 @@ public class Mercator_3D extends AbstractDataset {
                     double coy = 1 - Math.abs(jy - (j + jj));
                     double coz = 1 - Math.abs(ix - (k + kk));
                     co = cox * coy * coz;
-                    index.set(k + kk, j + jj, i + ii);
+                    try {
+                        index.set(k + kk, j + jj, i + ii);
+                    } catch (Exception e) {
+                        System.out.printf("error with k=%d, j=%d, i=%d\n", k, j, i);
+                        System.out.printf("error with kk=%d, jj=%d, ii=%d\n", kk, jj, ii);
+                        System.out.printf("error with kz=%f, jy=%f, ix=%f\n", kz, jy, ix);
+                    }
+
                     if (!(Double.isNaN(u_tp0.getDouble(index))) && (u_tp0.getDouble(index) != 0)) {
                         CO += co;
                         x = (1.d - x_euler) * u_tp0.getDouble(index)
@@ -1575,7 +1582,7 @@ public class Mercator_3D extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return (pGrid[0] < 0) && (pGrid[0] > nx - 1) && (pGrid[1] < 0) && (pGrid[1] > ny - 1);
+        return (pGrid[0] < 0) || (pGrid[0] > nx - 1) || (pGrid[1] < 0) || (pGrid[1] > ny - 1);
 
     }
 
