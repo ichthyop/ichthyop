@@ -3946,6 +3946,15 @@
         <description>The name of the food variable (case sensitive) in the
                     hydrodynamic dataset.</description>
       </parameter>
+
+      <parameter>
+            <key>half_saturation</key>
+            <long_name>Half saturation constant</long_name>
+            <value>0.5</value>
+            <default>0.5</default>
+            <description>Half-saturation constant for the computation of the functional response</description>
+      </parameter>
+
       <parameter>
         <key>stage_tags</key>
         <long_name>Tags of the stages</long_name>
