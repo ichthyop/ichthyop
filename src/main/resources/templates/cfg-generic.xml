@@ -5901,4 +5901,127 @@
       </parameter>
     </parameters>
   </block>
+
+  <block type="action">
+    <key>action.growth.vb</key>
+    <tree_path>Biology/Growth/Von Bertalanffy Growth</tree_path>
+    <enabled>false</enabled>
+    <description>Block of options for setting up the growth model using a Von Bertalanffy growth function</description>
+    <parameters>
+
+      <parameter>
+        <key>vb_l_inf</key>
+        <long_name>Infinite length (cm)</long_name>
+        <value>0.02</value>
+        <default>0.02</default>
+        <format>float</format>
+        <description>Value of the Linf parameter</description>
+      </parameter>
+
+      <parameter>
+        <key>vb_growth_coeff</key>
+        <long_name>Growth coefficient (K)</long_name>
+        <value>0.02</value>
+        <default>0.02</default>
+        <format>float</format>
+        <description>Value of the Linf parameter</description>
+      </parameter>
+
+      <parameter>
+        <key>vb_t0</key>
+        <long_name>T0 parameter</long_name>
+        <value>0.02</value>
+        <default>0.02</default>
+        <format>float</format>
+        <description>Theoretical age for a particle of length 0</description>
+      </parameter>
+
+      <parameter>
+        <key>vb_age_init</key>
+        <long_name>Initial age of the particle</long_name>
+        <value>0</value>
+        <default>0</default>
+        <format>float</format>
+        <description>Initial age of the particle. Used to start with adults instead of larva</description>
+      </parameter>
+
+      <parameter>
+        <key>stage_tags</key>
+        <long_name>Tags of the stages</long_name>
+        <value>"egg" "yolk-sac larva" "feeding larva"</value>
+        <default>"egg" "yolk-sac larva" "feeding larva"</default>
+        <format>list</format>
+        <description>Names of each physiological stage of the larva life
+                    history. No matter
+                    what you set, Ichthyop assumes that the first stage corresponds to
+                    egg stage.</description>
+      </parameter>
+
+      <parameter>
+        <key>stage_thresholds</key>
+        <long_name>Length at which the particle change stage [cm]</long_name>
+        <value>"2" "5"</value>
+        <default>"2" "5"</default>
+        <format>list</format>
+        <description>Initial length for each physiological stage of the larva
+                    life history,
+                    in millimeter. Ichthyop assumes that the first length provided
+                    corresponds to
+                    the egg length.</description>
+      </parameter>
+
+      <parameter hidden="true">
+        <key>length_tracker</key>
+        <long_name>Track particle length</long_name>
+        <value>true</value>
+        <default>true</default>
+        <format>boolean</format>
+        <description>If true the application adds a "length" variable in the
+                    NetCDF output
+                    file.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>stage_tracker</key>
+        <long_name>Track particle biological stage</long_name>
+        <value>true</value>
+        <default>true</default>
+        <format>boolean</format>
+        <description>If true the application adds a "stage" variable in the
+                    NetCDF output
+                    file.</description>
+      </parameter>
+
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.VBGrowthAction</value>
+        <default>org.previmer.ichthyop.action.VBGrowthAction</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this
+                    dataset.</description>
+      </parameter>
+
+      <parameter hidden="true">
+        <long_name>priority</long_name>
+        <key>priority</key>
+        <description>Level of priority of the action (comparatively to other
+                    actions). Each
+                    time step, a high priority action will be called by the application
+                    before than
+                    a low priority action. Actions with same level of priority will be
+                    called
+                    without any specific order.</description>
+        <value>high</value>
+        <default>high</default>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+    </parameters>
+
+
+
 </icstructure>
