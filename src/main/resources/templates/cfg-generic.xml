@@ -5912,8 +5912,8 @@
       <parameter>
         <key>vb_l_inf</key>
         <long_name>Infinite length (cm)</long_name>
-        <value>0.02</value>
-        <default>0.02</default>
+        <value>3.66</value>
+        <default>3.66</default>
         <format>float</format>
         <description>Value of the Linf parameter</description>
       </parameter>
@@ -5921,8 +5921,8 @@
       <parameter>
         <key>vb_growth_coeff</key>
         <long_name>Growth coefficient (K)</long_name>
-        <value>0.02</value>
-        <default>0.02</default>
+        <value>0.31</value>
+        <default>0.31</default>
         <format>float</format>
         <description>Value of the Linf parameter</description>
       </parameter>
@@ -5930,17 +5930,26 @@
       <parameter>
         <key>vb_t0</key>
         <long_name>T0 parameter</long_name>
-        <value>0.02</value>
-        <default>0.02</default>
+        <value>-1.71</value>
+        <default>-1.71</default>
         <format>float</format>
         <description>Theoretical age for a particle of length 0</description>
       </parameter>
 
       <parameter>
-        <key>vb_age_init</key>
-        <long_name>Initial age of the particle</long_name>
+        <key>vb_age_mean</key>
+        <long_name>Mean initial of the particle</long_name>
         <value>0</value>
         <default>0</default>
+        <format>float</format>
+        <description>Initial age of the particle. Used to start with adults instead of larva</description>
+      </parameter>
+
+      <parameter>
+        <key>vb_age_std</key>
+        <long_name>Standard deviation in the age of the particles</long_name>
+        <value>0.5</value>
+        <default>0.5</default>
         <format>float</format>
         <description>Initial age of the particle. Used to start with adults instead of larva</description>
       </parameter>
@@ -6021,7 +6030,7 @@
         <accepted>highest</accepted>
       </parameter>
     </parameters>
-
+    </block>
 
 
 </icstructure>

@@ -1,6 +1,9 @@
 package org.previmer.ichthyop.action;
 
+import java.util.Random;
+
 import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.manager.ParameterManager;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.StageParticleLayer;
@@ -13,19 +16,31 @@ public class VBGrowthAction extends AbstractAction {
     private float l_inf;
     private float growth_coefficient;
     private float t0;
-    private float age_init;
+    private float age_mean;
+    private float age_std;
     private LengthStage lengthStage;
+    private Random randomGenerator;
 
     @Override
     public void loadParameters() throws Exception {
 
+        boolean isFixedSeed = ParameterManager.getInstance().getConfigurationFile().isFixedSeed();
+
         l_inf = Float.valueOf(getParameter("vb_l_inf"));
         growth_coefficient = Float.valueOf(getParameter("vb_growth_coeff"));
         t0 = Float.valueOf(getParameter("vb_t0"));
-        age_init = Float.valueOf(getParameter("age_t0"));
+        age_mean = Float.valueOf(getParameter("vb_age_mean"));
+        age_std = Float.valueOf(getParameter("vb_age_std"));
 
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
+
+        // Fix the seed if needed
+        if (isFixedSeed) {
+            randomGenerator = new Random(getSimulationManager().getIndexSimulation());
+        } else {
+            randomGenerator = new Random();
+        }
 
     }
 
@@ -36,7 +51,11 @@ public class VBGrowthAction extends AbstractAction {
         // For the particle, initialize the age value
         // the argument here is the age in days
         // which is converted in seconds in the setAge function
-        particle.setAge(age_init);
+
+        double age = age_mean + age_std * randomGenerator.nextGaussian();
+        age = Math.max(0, age);
+
+        particle.setAge(age);
 
         // returns the length based on initial age of particle
         double initial_length = this.getLength(particle.getAge());
@@ -57,6 +76,7 @@ public class VBGrowthAction extends AbstractAction {
 
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
+
     }
 
     /** Computes the lenght based on the VB
