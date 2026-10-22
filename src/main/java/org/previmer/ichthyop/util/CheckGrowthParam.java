@@ -56,35 +56,43 @@ public class CheckGrowthParam extends SimulationManagerAccessor {
     public static boolean checkParams() {
 
         // TODO: optimize that to make it more robust, even for new growth modules added
-        boolean isGrowth;
+        boolean isGrowth = false;
         try {
             isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         } catch (NullPointerException e) {
             isGrowth = false;
         }
 
-        boolean isDebGrowth;
+        boolean isDebGrowth = false;
         try {
             isDebGrowth = getSimulationManager().getActionManager().isEnabled("action.growthdeb");
         } catch (NullPointerException e) {
             isDebGrowth = false;
         }
 
-        boolean isExponentialGrowth;
+        boolean isExponentialGrowth = false;
         try {
             isExponentialGrowth = getSimulationManager().getActionManager().isEnabled("action.growth.exponential");
         } catch (NullPointerException e) {
             isExponentialGrowth = false;
         }
 
-        if (isGrowth || isDebGrowth || isExponentialGrowth) { // if one or two growth action are on
-            boolean paramOk = (isGrowth ^ isDebGrowth ^ isExponentialGrowth);  // check that only one of the two is true using xor operator
+        boolean isVBGrowth = false;
+        try {
+            isExponentialGrowth = getSimulationManager().getActionManager().isEnabled("action.growth.vb");
+        } catch (NullPointerException e) {
+            isExponentialGrowth = false;
+        }
+
+
+        if (isGrowth || isDebGrowth || isExponentialGrowth || isVBGrowth) { // if one or two growth action are on
+            boolean paramOk = (isGrowth ^ isDebGrowth ^ isExponentialGrowth ^ isVBGrowth);  // check that only one of the two is true using xor operator
             if (!paramOk) {
                 throw new IllegalArgumentException("Only one among action.growth and action.growthDeb should be ");
             }
         }
         // Redefines isGrowth, taking into account the possibility to set it using deb.
-        isGrowth = (isGrowth || isDebGrowth || isExponentialGrowth);
+        isGrowth = (isGrowth || isDebGrowth || isExponentialGrowth || isVBGrowth);
         return (isGrowth);
     }
 
