@@ -83,6 +83,10 @@ public class VBGrowthAction extends AbstractAction {
 
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         lengthLayer.setLength(initial_length);
+
+        StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
+        stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
+
     }
 
     @Override
