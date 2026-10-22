@@ -3,6 +3,8 @@ package org.previmer.ichthyop.action;
 import java.util.Random;
 
 import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.io.LengthTracker;
+import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.manager.ParameterManager;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
@@ -40,6 +42,25 @@ public class VBGrowthAction extends AbstractAction {
             randomGenerator = new Random(getSimulationManager().getIndexSimulation());
         } else {
             randomGenerator = new Random();
+        }
+
+        boolean addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("length_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("stage_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
         }
 
     }
