@@ -50,6 +50,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.*;
+import org.previmer.ichthyop.util.Constant;
+
 
 /**
  *
@@ -131,6 +133,15 @@ public class Particle extends GridPoint implements IParticle {
 
     public void incrementAge() {
         age += Math.abs(getSimulationManager().getTimeManager().get_dt());
+    }
+
+    /** Set the particle age to a given value (in days)
+     * Age in days is converted in seconds and set as integer
+    */
+   @Override
+    public void setAge(double age_days) {
+        int age_seconds = (int) (age_days * Constant.ONE_DAY);
+        this.age = age_seconds;
     }
 
     @Override

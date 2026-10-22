@@ -168,4 +168,6 @@ public interface IParticle {
 
 	public void step();
 
+    public void setAge(double age_days);
+
 }
