@@ -57,6 +57,7 @@ import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDatasets;
@@ -261,32 +262,22 @@ public class Mercator_3D extends AbstractDataset {
     }
 
     /**
-     * Sets the mask to 0 where U or V is missing (NaN) at the first time step
-     * of the first U and V files, although the static mask flags it as water.
-     * The missing values are assumed constant over time.
+     * Sets the mask to 0 where U or V is missing (fill value) at the first
+     * time step of the first U and V files, although the static mask flags it
+     * as water. The missing values are assumed constant over time.
      */
     private void maskVelocityGaps() throws InvalidRangeException, IOException {
 
-        int[] origin = new int[]{0, 0, jpo, ipo};
-        int[] shape = new int[]{1, nz, ny, nx};
-        Array arrU, arrV;
-        // Always open in enhanced mode so that fill values are converted to NaN
-        try (NetcdfFile ncu = NetcdfDatasets.openDataset(listUFiles.get(0), true, null)) {
-            arrU = ncu.findVariable(strU).read(origin, shape).flip(1).reduce();
-        }
-        try (NetcdfFile ncv = NetcdfDatasets.openDataset(listVFiles.get(0), true, null)) {
-            arrV = ncv.findVariable(strV).read(origin, shape).flip(1).reduce();
-        }
+        // Files are opened in raw mode and compared to _FillValue. In enhanced
+        // mode, values outside [valid_min, valid_max] would also be NaN.
+        boolean[][][] missingU = readMissing(listUFiles.get(0), strU);
+        boolean[][][] missingV = readMissing(listVFiles.get(0), strV);
 
-        Index indexU = arrU.getIndex();
-        Index indexV = arrV.getIndex();
         int nMasked = 0;
         for (int k = 0; k < nz; k++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    if (maskRho[k][j][i] > 0
-                            && (Double.isNaN(arrU.getDouble(indexU.set(k, j, i)))
-                            || Double.isNaN(arrV.getDouble(indexV.set(k, j, i))))) {
+                    if (maskRho[k][j][i] > 0 && (missingU[k][j][i] || missingV[k][j][i])) {
                         maskRho[k][j][i] = 0;
                         nMasked++;
                     }
@@ -294,6 +285,30 @@ public class Mercator_3D extends AbstractDataset {
             }
         }
         getLogger().log(Level.INFO, "{0} wet cells with missing velocity have been masked", nMasked);
+    }
+
+    private boolean[][][] readMissing(String filename, String varname) throws InvalidRangeException, IOException {
+
+        boolean[][][] missing = new boolean[nz][ny][nx];
+        try (NetcdfFile nc = NetcdfFile.open(filename)) {
+            Variable variable = nc.findVariable(varname);
+            Attribute fill = variable.findAttribute("_FillValue");
+            if (fill == null) {
+                fill = variable.findAttribute("missing_value");
+            }
+            Array array = variable.read(new int[]{0, 0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce();
+            Index index = array.getIndex();
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        double value = array.getDouble(index.set(k, j, i));
+                        missing[k][j][i] = Double.isNaN(value)
+                                || (fill != null && value == fill.getNumericValue().doubleValue());
+                    }
+                }
+            }
+        }
+        return missing;
     }
 
     private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
