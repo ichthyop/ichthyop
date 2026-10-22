@@ -677,7 +677,7 @@ public class Mercator_3D extends AbstractDataset {
                  */
                 int k0 = 0;
                 for (int k = 0; k < nz; k++) {
-                    if (isInWater(k, j, i)) {
+                    if (isInWater(i, j, k)) {
                         k0 = k;
                         break;
                     }
@@ -748,6 +748,9 @@ public class Mercator_3D extends AbstractDataset {
             for (int j = 0; j < ny; j++) {
                 for (int k = 0; k < nz + 1; k++) {
                     w.setDouble(index.set(k, j, i), (w_double[k][j][i] / (e1t[j][i] * e2t[j][i])));
+                    if(w_double[k][j][i] != 0) {
+                        System.out.printf("k=%d, j=%d, i=%d, w=%f\n", k, j, i, w_double[k][j][i] / (e1t[j][i] * e2t[j][i]));
+                    }
                 }
             }
         }
@@ -1059,7 +1062,7 @@ public class Mercator_3D extends AbstractDataset {
      * @param rank an int, the rank of the time dimension in the NetCDF dataset.
      * @throws an IOException if an error occurs while reading the variables.
      *
-     * pverley pour chourdin: la aussi je fais du provisoire en attendant de
+    * pverley pour chourdin: la aussi je fais du provisoire en attendant de
      * voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
