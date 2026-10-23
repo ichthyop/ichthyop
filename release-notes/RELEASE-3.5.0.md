@@ -47,6 +47,8 @@
 -   Bug in bouncing when 2D datasets are used (bug introduced in 3.4)
 - **`ReefOrientation.java`**: Bug in the computation of reef orientation. Issue with a wrong angle computation.
 - Correction of map display when `stage` and `drifter` values are used.
+- Before releasing a particle using the stain, check that the particle is on the bounding box of the hydro file
+- Proper reinitialization of the output files. This was causing some troubles when running multiple simulations from the GUI
 
 ## Refactors / Internal Changes
 

@@ -208,10 +208,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             Path fileBase = new File(strFileBase).toPath();
             Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
-            ncOut = null;
-            bNcOut = null;
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
+        } finally {
+            ncOut = null;
+            bNcOut = null;
         }
     }
 
@@ -226,10 +227,39 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             Path fileBase = new File(strFileBase).toPath();
             Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
-            densNcOut = null;
-            bDensNcOut = null;
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
+        } finally {
+            densNcOut = null;
+            bDensNcOut = null;
+        }
+    }
+
+    /**
+     * Discards output files left over by a previous setup that did not reach
+     * the last step (GUI preview, failed initialization, etc.). Open writers
+     * are closed, so that the file is no longer locked, and the incomplete
+     * .part files are deleted.
+     */
+    private void discardPreviousOutputs() {
+        if (null != ncOut) {
+            discardFile(ncOut, trajectoryFileName);
+        }
+        ncOut = null;
+        bNcOut = null;
+        if (null != densNcOut) {
+            discardFile(densNcOut, densityFileName);
+        }
+        densNcOut = null;
+        bDensNcOut = null;
+    }
+
+    private void discardFile(NetcdfFormatWriter writer, String fileName) {
+        try {
+            writer.close();
+            Files.deleteIfExists(new File(fileName).toPath());
+        } catch (Exception ex) {
+            getLogger().log(Level.WARNING, "Problem discarding the NetCDF output file " + fileName + " ==> {0}", ex.toString());
         }
     }
 
@@ -553,6 +583,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (e.isInterrupted()) {
             return;
         }
+        createOutputFiles();
         TimeManager timeManager = e.getSource();
 
         if (((long) (timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
@@ -623,14 +654,22 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     @Override
     public void lastStepOccurred(LastStepEvent e) {
 
-        if (this.isTrajectoryEnabled) {
+        if (!e.isInterrupted()) {
+            try {
+                createOutputFiles();
+            } catch (Exception ex) {
+                getLogger().log(Level.SEVERE, "Failed to create NetCDF output files", ex);
+            }
+        }
+
+        if (this.isTrajectoryEnabled && null != ncOut) {
             if (!e.isInterrupted()) {
                 writeToNetCDF(i_record);
             }
             this.closeTraj();
         }
 
-        if (this.isDensityEnabled) {
+        if (this.isDensityEnabled && null != densNcOut) {
             if (!e.isInterrupted()) {
                 writeDensToNetCDF(i_record);
             }
@@ -647,12 +686,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     /** Setup trajectory outputs */
     private void setupTrajectoryOutput() throws Exception {
-
-        if(bNcOut != null) {
-            // if ncOut is not null, i.e. if file is defined,
-            // and if not in defined mode, nothing is done here
-            return;
-        }
 
         this.trajectoryFileName = makeFileLocation();
         bNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, this.trajectoryFileName, this.chunker);
@@ -725,11 +758,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     /** Setup density outputs */
     private void setupDensityOutput() throws IOException {
 
-        // If the file is defined and not in define mode, nothing is done.
-        if ((bDensNcOut != null)) {
-            return;
-        }
-
         // Initialize the density tracker
         this.densTracker = new DensityTracker();
         this.densTracker.init();
@@ -769,6 +797,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
+
+        // Output files are always rebuilt from the current settings
+        discardPreviousOutputs();
+        isTrajectoryEnabled = true;
+        isDensityEnabled = false;
+        chunker = null;
 
         String key = "netcdf_output_format";
         if (this.isNull(key)) {
@@ -942,8 +976,23 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     }
 
-    public void write_intial_step() {
+    public void write_intial_step() throws Exception {
+        createOutputFiles();
         this.writeInitialStateToNetCDF();
+    }
+
+    /**
+     * Creates the NetCDF files on disk, if not already done. It is not done at
+     * initialization so that the GUI preview (setup + init, no time step) does
+     * not create any file.
+     */
+    private void createOutputFiles() throws Exception {
+        if (this.isTrajectoryEnabled) {
+            this.initializeTrajectoryOutputs();
+        }
+        if (this.isDensityEnabled) {
+            this.initializeDensityOutputs();
+        }
     }
 
     @Override
@@ -954,13 +1003,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         /* reset counter */
         i_record = 0;
 
-        if(this.isTrajectoryEnabled) {
-            this.initializeTrajectoryOutputs();
-        }
-
-        if(this.isDensityEnabled) {
-            this.initializeDensityOutputs();
-        }
+        /* NetCDF files are created at the first write, see createOutputFiles() */
 
         /* add listeners */
         getSimulationManager().getTimeManager().addNextStepListener(this);
