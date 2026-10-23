@@ -245,7 +245,11 @@ public class ReefOrientationAction extends OrientationVelocity {
             VonMisesRandom vonMises = new VonMisesRandom(0, Kappa_reef, getSimulationManager().getTimeManager().index(), particle.getIndex());
             double ti = vonMises.nextDouble();
 
-            double turningAngle = d * (thetaPref - thetaCurrent) + ti;
+            // wraps the angle difference in [-pi, pi] to turn the shortest way
+            double deltaTheta = thetaPref - thetaCurrent;
+            deltaTheta = Math.atan2(Math.sin(deltaTheta), Math.cos(deltaTheta));
+
+            double turningAngle = d * deltaTheta + ti;
 
             double theta = thetaCurrent + turningAngle;
 
