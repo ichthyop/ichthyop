@@ -29,6 +29,13 @@ public class ReefOrientationAction extends OrientationVelocity {
 
     private double kappaBarycenter[];
 
+    // Coast avoidance: if the swimming step ends on land, the heading is
+    // rotated (by steps of coastAngleStep, up to +/- coastMaxAngle) and the wet
+    // heading that brings the particle the closest to the target is kept.
+    private boolean coastAvoidance;
+    private double coastAngleStep;
+    private double coastMaxAngle;
+
     ArrayList<Zone> zones;
     private boolean isInitialized = false;
 
@@ -79,6 +86,12 @@ public class ReefOrientationAction extends OrientationVelocity {
         }
 
         dt = getSimulationManager().getTimeManager().get_dt();
+
+        coastAvoidance = !isNull("coast.avoidance.enabled") && Boolean.valueOf(getParameter("coast.avoidance.enabled"));
+        coastAngleStep = isNull("coast.avoidance.angle.step") ? 10.d : Double.valueOf(getParameter("coast.avoidance.angle.step"));
+        coastMaxAngle = isNull("coast.avoidance.angle.max") ? 90.d : Double.valueOf(getParameter("coast.avoidance.angle.max"));
+        coastAngleStep = Math.toRadians(coastAngleStep);
+        coastMaxAngle = Math.toRadians(coastMaxAngle);
 
     }
 
@@ -252,25 +265,100 @@ public class ReefOrientationAction extends OrientationVelocity {
             double turningAngle = d * deltaTheta + ti;
 
             double theta = thetaCurrent + turningAngle;
-
             double swimmingSpeed = getVelocity(particle);
 
-            // Compute u and v orientation velocity;
+            if (coastAvoidance) {
+                theta = avoidCoast(particle, theta, swimmingSpeed, closestReefIndex);
+            }
+
             uorient = swimmingSpeed * Math.cos(theta);
             vorient = swimmingSpeed * Math.sin(theta);
 
         }
 
-        double dx = uorient * dt;
-        double dy = vorient * dt;
+        return computeDlonDlat(particle.getLat(), uorient, vorient);
 
-        double[] latlon = getSimulationManager().getDataset().xy2latlon(particle.getX(), particle.getY());
-        double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
+    }
+
+    /** Converts a velocity (m/s) into a lon/lat displacement over one time step. */
+    private double[] computeDlonDlat(double lat, double u, double v) {
+
+        double dx = u * dt;
+        double dy = v * dt;
+
+        double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * lat / 180.d);
         double dLon = dx / one_deg_lon_meter;
         double dLat = dy / ONE_DEG_LATITUDE_IN_METER;
 
         return new double[] { dLon, dLat };
 
+    }
+
+    /**
+     * Returns the heading to use so that the particle does not swim on land. If
+     * the step along theta ends in water, theta is returned. Else, headings
+     * theta +/- k * coastAngleStep (up to coastMaxAngle) are tested and, among
+     * the ones that end in water, the one that brings the particle the closest to
+     * the target reef is returned. Returns NaN if no wet heading is found.
+     */
+    private double avoidCoast(IParticle particle, double theta, double swimmingSpeed, int reefIndex) {
+
+        if (isWetDestination(particle, theta, swimmingSpeed)) {
+            return theta;
+        }
+
+        double bestTheta = Double.NaN;
+        double bestDistance = Double.MAX_VALUE;
+        int nSteps = (int) Math.floor(coastMaxAngle / coastAngleStep);
+        for (int k = 1; k <= nSteps; k++) {
+            for (int sign = -1; sign <= 1; sign += 2) {
+                double thetaTest = theta + sign * k * coastAngleStep;
+                if (!isWetDestination(particle, thetaTest, swimmingSpeed)) {
+                    continue;
+                }
+                double[] latlon = getDestination(particle, thetaTest, swimmingSpeed);
+                double distance = computeReefDistance(latlon[0], latlon[1], reefIndex);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestTheta = thetaTest;
+                }
+            }
+        }
+
+        // If no best theta is found, then return original value and particle
+        // will be onland
+        if (Double.isNaN(bestTheta)) {
+            return theta;
+        } else {
+            return bestTheta;
+        }
+
+    }
+
+    /** Returns the lat/lon of the particle after one swimming step along theta. */
+    private double[] getDestination(IParticle particle, double theta, double swimmingSpeed) {
+        double[] mvt = computeDlonDlat(particle.getLat(), swimmingSpeed * Math.cos(theta),
+                swimmingSpeed * Math.sin(theta));
+        return new double[] { particle.getLat() + mvt[1], particle.getLon() + mvt[0] };
+    }
+
+    /** Checks whether one swimming step along theta ends in water (surface mask). */
+    private boolean isWetDestination(IParticle particle, double theta, double swimmingSpeed) {
+        double[] latlon = getDestination(particle, theta, swimmingSpeed);
+        if (!getSimulationManager().getDataset().isInDomain(latlon[1], latlon[0])) {
+            return false;
+        }
+        double[] xy = getSimulationManager().getDataset().latlon2xy(latlon[0], latlon[1]);
+        return getSimulationManager().getDataset().isInWater(new double[] { xy[0], xy[1] });
+    }
+
+    /** Distance between a lat/lon position and the target point (edge or barycenter) of a reef. */
+    private double computeReefDistance(double lat, double lon, int reefIndex) {
+        double[] xy = getSimulationManager().getDataset().latlon2xy(lat, lon);
+        double[] closestPoint = this.getClosestPoint.getClosestPoint(xy, reefIndex);
+        double[] closestLatLon = getSimulationManager().getDataset().xy2latlon(closestPoint[0], closestPoint[1]);
+        return getSimulationManager().getDataset().getDistGetter().getDistance(lat, lon, closestLatLon[0],
+                closestLatLon[1]);
     }
 
     @Override

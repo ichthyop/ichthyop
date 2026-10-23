@@ -5418,6 +5418,35 @@
                     barycenters</description>
       </parameter>
       <parameter>
+        <key>coast.avoidance.enabled</key>
+        <long_name>Coast avoidance</long_name>
+        <value>false</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>If true, when the swimming step would end on land, the heading
+                    is rotated and the wet heading that brings the particle the
+                    closest to the target is used (particles follow the coast).</description>
+      </parameter>
+      <parameter>
+        <key>coast.avoidance.angle.step</key>
+        <long_name>Coast avoidance angle step [degree]</long_name>
+        <value>10.0</value>
+        <default>10.0</default>
+        <format>float</format>
+        <description>Angle increment used to test alternative headings when the
+                    swimming step would end on land.</description>
+      </parameter>
+      <parameter>
+        <key>coast.avoidance.angle.max</key>
+        <long_name>Coast avoidance maximum angle [degree]</long_name>
+        <value>90.0</value>
+        <default>90.0</default>
+        <format>float</format>
+        <description>Maximum deviation from the preferred heading tested when the
+                    swimming step would end on land. If no wet heading is found,
+                    the particle does not swim.</description>
+      </parameter>
+      <parameter>
         <key>zone_file</key>
         <long_name>Orientation Zone File</long_name>
         <value>ichthyop_configs/reef/zone-target.xml</value>
