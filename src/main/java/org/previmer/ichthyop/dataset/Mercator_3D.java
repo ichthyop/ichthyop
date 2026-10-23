@@ -803,9 +803,9 @@ public class Mercator_3D extends AbstractDataset {
             for (int j = 0; j < ny; j++) {
                 for (int k = 0; k < nz + 1; k++) {
                     w.setDouble(index.set(k, j, i), (w_double[k][j][i] / (e1t[j][i] * e2t[j][i])));
-                    if(w_double[k][j][i] != 0) {
-                        System.out.printf("k=%d, j=%d, i=%d, w=%f\n", k, j, i, w_double[k][j][i] / (e1t[j][i] * e2t[j][i]));
-                    }
+                    // if(w_double[k][j][i] != 0) {
+                    //     System.out.printf("k=%d, j=%d, i=%d, w=%f\n", k, j, i, w_double[k][j][i] / (e1t[j][i] * e2t[j][i]));
+                    // }
                 }
             }
         }
