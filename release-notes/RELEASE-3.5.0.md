@@ -45,7 +45,7 @@
 -   Release zone output was computed at record frequency, which led sometimes to -1 values. Now it is computed just after release event (Eliot bug)
 -   In the `MigrationAction.java`, positive depth values were not converted to negative ones, contrary to what is stated on the console
 -   Bug in bouncing when 2D datasets are used (bug introduced in 3.4)
-- **`ReefOrientation.java`**: Bug in the computation of reef orientation. Issue with a wrong angle computation.
+- **`ReefOrientation.java`**: Bug in the computation of reef orientation. Several issues with angle computations, especially due to the ponderation by discance. Documentation updated accordingly.
 - Correction of map display when `stage` and `drifter` values are used.
 - Before releasing a particle using the stain, check that the particle is on the bounding box of the hydro file
 - Proper reinitialization of the output files. This was causing some troubles when running multiple simulations from the GUI
