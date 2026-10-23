@@ -129,4 +129,7 @@ public interface IDataset extends NextStepListener {
     public double yTore(double y);
 
     public boolean isProjected();
+
+    public boolean isInDomain(double lon, double lat);
+
 }

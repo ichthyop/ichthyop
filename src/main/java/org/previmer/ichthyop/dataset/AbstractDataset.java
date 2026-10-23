@@ -196,4 +196,14 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return false;
     }
 
+
+    @Override
+    /**
+    Function that returns true if a longitude/latitude coordinates is within the bounding box
+    of the release area
+    **/
+    public boolean isInDomain(double lon, double lat) {
+        return (lon >= this.getLonMin()) && (lon <= this.getLonMax()) && (lat >= this.getLatMin()) && (lat <= this.getLatMax());
+    }
+
 }

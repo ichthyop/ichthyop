@@ -58,6 +58,13 @@ public class ParticleFactory extends SimulationManagerAccessor {
         particle.setIndex(index);
         boolean living = mortality.equals(ParticleMortality.ALIVE);
 
+        // patch: if particle is not in the bounding box of the domain.
+        // returns null. used if the release stain gives particles outside
+        // of the release area
+        if (!getSimulationManager().getDataset().isInDomain(lon, lat)) {
+            return null;
+        }
+
         particle.setLon(lon);
         particle.setLat(lat);
         particle.setDepth(depth);
