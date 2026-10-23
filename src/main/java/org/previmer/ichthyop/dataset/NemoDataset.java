@@ -597,34 +597,40 @@ public class NemoDataset extends AbstractDataset {
 
         double du = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+        double co;
+        double x;
+
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) Math.round(ix);
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
-        int k = (int) kz;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double dz = kz - (double) k;
-        double CO = 0.d;
-        double co, x;
+
+        // If ix = 10 in T grid, then ix = 9.5 in U grid (x=10 is on the right)
+        int i = (int) Math.floor(ix - 0.5);
+        int j = (int) Math.floor(jy);
+        int k = (int) Math.floor(kz);
+
+        double CO = 0;
         Index index = u_tp0.getIndex();
         for (int ii = 0; ii < 2; ii++) {
-            for (int jj = 0; jj < n; jj++) {
+            for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((.5d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
-                    index.set(k + kk, j + jj, i + ii - 1);
+
+                    // Now i is in U grid layout, so need to offset to T.
+                    // if i = 9 in U, then i = 9.5 in T
+                    double cox = 1 - Math.abs(ix - (i + 0.5 + ii));
+                    double coy = 1 - Math.abs(jy - (j + jj));
+                    double coz = 1 - Math.abs(kz - (k + kk));
+                    co = cox * coy * coz;
+
+                    index.set(k + kk, j + jj, i + ii );
                     if (!(Double.isNaN(u_tp0.getDouble(index)))) {
+                        CO += co;
                         x = (1.d - x_euler) * u_tp0.getDouble(index)
                                 + x_euler * u_tp1.getDouble(index);
                         if (normalize) {
-                            du += x * co / e1u[j + jj][i + ii - 1];
+                            du += x * co / e1u[j + jj][i + ii];
                         } else {
                             du += x * co;
                         }
@@ -649,26 +655,32 @@ public class NemoDataset extends AbstractDataset {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
-        int k = (int) Math.round(kz);
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double dz = kz - (double) k;
+
+        int i = (int) Math.floor(ix);
+        int j = (int) Math.floor(jy);
+
+        // W points
+        int k = (int) Math.floor(kz + 0.5);
+
         double CO = 0.d;
         double co, x;
         Index index = w_tp0.getIndex();
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
+        for (int ii = 0; ii < 2; ii++) {
+            for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (.5d - (double) kk - dz));
-                    CO += co;
+
+                    // Now i is in U grid layout, so need to offset to T.
+                    // if i = 9 in U, then i = 9.5 in T
+                    double cox = 1 - Math.abs(ix - (i + ii));
+                    double coy = 1 - Math.abs(jy - (j + jj));
+                    double coz = 1 - Math.abs(kz - (k - 0.5 + kk));
+                    co = cox * coy * coz;
+
                     index.set(k + kk, j + jj, i + ii);
 
                     if (!(Double.isNaN(w_tp0.getDouble(index)))) {
 
+                        CO += co;
                         x = (1.d - x_euler) * w_tp0.getDouble(index)
                                 + x_euler * w_tp1.getDouble(index);
 
@@ -699,28 +711,32 @@ public class NemoDataset extends AbstractDataset {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (int) Math.round(jy);
-        int k = (int) kz;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double dz = kz - (double) k;
+
+        int i = (int) Math.floor(ix);
+        int j = (int) Math.floor(jy - 0.5);
+        int k = (int) Math.floor(kz);
+
         double CO = 0.d;
         double co, x;
         Index index = v_tp0.getIndex();
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (.5d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
-                    index.set(k + kk, j + jj - 1, i + ii);
+                for (int ii = 0; ii < 2; ii++) {
+
+                    // Now i is in V grid layout, so need to offset to T.
+                    // if j = 9 in V, then j  = 9.5 in T
+                    double cox = 1 - Math.abs(ix - (i + ii));
+                    double coy = 1 - Math.abs(jy - (j + 0.5 + ii));
+                    double coz = 1 - Math.abs(kz - (k + kk));
+                    co = cox * coy * coz;
+
+                    index.set(k + kk, j + jj, i + ii);
                     if (!Double.isNaN(v_tp0.getDouble(index))) {
+                        CO += co;
                         x = (1.d - x_euler) * v_tp0.getDouble(index)
                                 + x_euler * v_tp1.getDouble(index);
                         if(normalize) {
-                            dv += x * co / e2v[j + jj - 1][i + ii];
+                            dv += x * co / e2v[j + jj][i + ii];
                         } else {
                             dv += x * co;
                         }
@@ -785,7 +801,7 @@ public class NemoDataset extends AbstractDataset {
             index = u_tp1.getIndex();
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny; j++) {
-//                    Huon[k][j][i] = u_tp1[k][j][i] * e2u[j][i] * Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
+                    // Huon[k][j][i] = u_tp1[k][j][i] * e2u[j][i] * Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
                     index.set(k, j, i);
                     Huon[k][j][i] = Double.isNaN(u_tp1.getDouble(index))
                             ? 0.f
@@ -795,7 +811,7 @@ public class NemoDataset extends AbstractDataset {
             index = v_tp1.getIndex();
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny; j++) {
-//                    Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i] * Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
+                    // Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i] * Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
                     index.set(k, j, i);
                     Hvom[k][j][i] = Double.isNaN(v_tp1.getDouble(index))
                             ? 0.f
@@ -1759,10 +1775,7 @@ public class NemoDataset extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[0] > (nx - 3.0f))
-                || (pGrid[0] < 2.0f)
-                || (pGrid[1] > (ny - 3.0f))
-                || (pGrid[1] < 2.0f));
+        return ((pGrid[0] < 0.5) || (pGrid[0] > nx - 1) || (pGrid[1] < 0.5) || (pGrid[1]  > ny - 1));
     }
 
 //////////
