@@ -5938,7 +5938,7 @@
 
       <parameter>
         <key>vb_age_mean</key>
-        <long_name>Mean initial of the particle</long_name>
+        <long_name>Mean age of the particle</long_name>
         <value>0</value>
         <default>0</default>
         <format>float</format>
