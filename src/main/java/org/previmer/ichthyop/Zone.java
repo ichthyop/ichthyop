@@ -378,9 +378,14 @@ public class Zone extends SimulationManagerAccessor {
                 dx2 = polygon.get(k + 1).getX() - x;
                 dxy = dx2 * (y - polygon.get(k).getY()) - dx1 * (polygon.get(k + 1).getY() - y);
                 inc = 0;
-                if ((polygon.get(k).getX() == x) & (polygon.get(k).getY() == y)) {
-                    crossings = 1;
-                } else if (((dx1 == 0.) & (y >= polygon.get(k).getY()))
+
+                // // if the x, y matches one of the polygon points, then force
+                // // it inside.
+                // if ((polygon.get(k).getX() == x) & (polygon.get(k).getY() == y)) {
+                //     crossings = 1;
+                // } else
+                // NB: remove the particle
+                if (((dx1 == 0.) & (y >= polygon.get(k).getY()))
                         | ((dx2 == 0.) & (y >= polygon.get(k + 1).getY()))) {
                     inc = 1;
                 } else if ((dx1 * dx2 > 0.)
