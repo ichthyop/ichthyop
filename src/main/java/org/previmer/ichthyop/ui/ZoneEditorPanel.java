@@ -413,7 +413,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
-        System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
+        // System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
         String prop = evt.getPropertyName();
         if (prop.equals("enabled")
                 || prop.equals("value")
@@ -434,7 +434,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }
 
     public void actionPerformed(ActionEvent e) {
-        System.out.println("ActionPerformed" + e.getSource());
+        // System.out.println("ActionPerformed" + e.getSource());
         hasZoneChanged = true;
         btnSave.setEnabled(true);
         this.updateElements(ckBoxEnabled.isSelected());
