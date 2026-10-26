@@ -62,8 +62,7 @@ public class CardinalOrientationAction extends OrientationVelocity {
         double dx = uorient * dt;
         double dy = vorient * dt;
 
-        double[] latlon = getSimulationManager().getDataset().xy2latlon(particle.getX(), particle.getY());
-        double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
+        double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
         double dLon = dx / one_deg_lon_meter;
         double dLat = dy / ONE_DEG_LATITUDE_IN_METER;
 

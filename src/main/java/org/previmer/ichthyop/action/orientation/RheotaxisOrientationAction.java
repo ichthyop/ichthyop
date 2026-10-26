@@ -1,5 +1,6 @@
 package org.previmer.ichthyop.action.orientation;
 
+import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.VonMisesRandom;
 
@@ -22,38 +23,46 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
             canSwimAgainstCurrent = Boolean.valueOf(getParameter("can.swim.against.current"));
         }
 
+
+        vonMises = new VonMisesRandom(0, vonMisesKappa);
+        dt = getSimulationManager().getTimeManager().get_dt();
+
     }
 
     @Override
     public void execute(IParticle particle) {
 
-        if(!this.isActive(particle)) {
+        if (!this.isActive(particle)) {
             return;
         }
 
-        double[] mvt = getDlonDlat(particle);
-        double newLon = particle.getLon() + mvt[0];
-        double newLat = particle.getLat() + mvt[1];
-        double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
-        double[] posIncr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
+        double[] posIncr = getDXDY(particle);
         particle.increment(posIncr);
+
     }
 
     /** Computes the longitude/latitude increment */
-    private double[] getDlonDlat(IParticle particle) {
+    private double[] getDXDY(IParticle particle) {
 
-        double swimmingSpeed = getVelocity(particle);
+        IDataset dataset = getSimulationManager().getDataset();
+        double time = getSimulationManager().getTimeManager().getTime();
 
         double[] pGrid;
-        if(getSimulationManager().getDataset().is3D()) {
-            pGrid = new double[] {particle.getX(), particle.getY(), particle.getZ()};
+        if (dataset.is3D()) {
+            pGrid = new double[] { particle.getX(), particle.getY(), particle.getZ() };
         } else {
             pGrid = new double[] { particle.getX(), particle.getY() };
         }
 
-        double uf = getSimulationManager().getDataset().get_dUx(pGrid, getSimulationManager().getTimeManager().getTime(), false);
-        double vf = getSimulationManager().getDataset().get_dVy(pGrid, getSimulationManager().getTimeManager().getTime(), false);
+        double uf = dataset.get_dUx(pGrid, time, false);
+        double vf = dataset.get_dVy(pGrid, time, false);
         double uv = Math.sqrt(uf * uf + vf * vf);
+
+        if (uv < 1e-6) {
+            // if current is less than a given value, particles don't
+            // move. if not, they will be moving west
+            return new double[] { 0, 0 };
+        }
 
         double ti = vonMises.nextDouble();
         // ti = 0;
@@ -63,31 +72,28 @@ public class RheotaxisOrientationAction extends OrientationVelocity {
         double thetaRheo = Math.atan2(vf, uf) + Math.PI;
         double theta = thetaRheo + ti;
 
-        // Larvae cannot swim against the current. Therefore,
-        // if the swimming speed is greater that the current, we
-        // set the swimming speed as equal to the current
+        double swimmingSpeed = getVelocity(particle);
+
+        // If particle can't move against the current, set the velocity maximum to uv.
         swimmingSpeed = canSwimAgainstCurrent ? swimmingSpeed : Math.min(swimmingSpeed, uv);
 
         double uorient = swimmingSpeed * Math.cos(theta);
         double vorient = swimmingSpeed * Math.sin(theta);
 
-        double dx = uorient * dt;
-        double dy = vorient * dt;
+        // Convert from m/s to grid displacement
+        int i = (int) Math.round(particle.getX());
+        int j = (int) Math.round(particle.getY());
+        double dx = uorient / dataset.getdxi(j, i) * dt;
+        double dy = vorient / dataset.getdeta(j, i) * dt;
 
-        double[] latlon = getSimulationManager().getDataset().xy2latlon(particle.getX(), particle.getY());
-        double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
-        double dLon = dx / one_deg_lon_meter;
-        double dLat = dy / ONE_DEG_LATITUDE_IN_METER;
-
-        return new double[] {dLon, dLat};
+        return new double[] { dx, dy };
 
     }
 
     @Override
     public void init(IParticle particle) {
 
-        vonMises = new VonMisesRandom(0, vonMisesKappa);
-        dt = getSimulationManager().getTimeManager().get_dt();
+        super.init(particle);
 
     }
 
