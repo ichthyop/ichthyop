@@ -470,13 +470,8 @@ public class Mercator_3D extends AbstractDataset {
                     double coy = 1 - Math.abs(jy - (j + jj));
                     double coz = 1 - Math.abs(kz - (k + kk));
                     co = cox * coy * coz;
-                    try {
+
                         index.set(k + kk, j + jj, i + ii);
-                    } catch (Exception e) {
-                        System.out.printf("error with k=%d, j=%d, i=%d\n", k, j, i);
-                        System.out.printf("error with kk=%d, jj=%d, ii=%d\n", kk, jj, ii);
-                        System.out.printf("error with kz=%f, jy=%f, ix=%f\n", kz, jy, ix);
-                    }
 
                     if (!(Double.isNaN(u_tp0.getDouble(index))) && (u_tp0.getDouble(index) != 0)) {
                         CO += co;
