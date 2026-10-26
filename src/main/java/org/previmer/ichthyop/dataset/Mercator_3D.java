@@ -468,7 +468,7 @@ public class Mercator_3D extends AbstractDataset {
                 for (int kk = 0; kk < 2; kk++) {
                     double cox = 1 - Math.abs(ix - (i + ii));
                     double coy = 1 - Math.abs(jy - (j + jj));
-                    double coz = 1 - Math.abs(ix - (k + kk));
+                    double coz = 1 - Math.abs(kz - (k + kk));
                     co = cox * coy * coz;
                     try {
                         index.set(k + kk, j + jj, i + ii);
@@ -583,7 +583,7 @@ public class Mercator_3D extends AbstractDataset {
                         x = (1.d - x_euler) * v_tp0.getDouble(index)
                                 + x_euler * v_tp1.getDouble(index);
                         if (normalize) {
-                            dv += x * co / e1t[j + jj][i + ii];
+                            dv += x * co / e2t[j + jj][i + ii];
                         } else {
                             dv += x * co;
                         }
