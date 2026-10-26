@@ -60,6 +60,7 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
@@ -471,7 +472,7 @@ public class Mercator_3D extends AbstractDataset {
                     double coz = 1 - Math.abs(kz - (k + kk));
                     co = cox * coy * coz;
 
-                        index.set(k + kk, j + jj, i + ii);
+                    index.set(k + kk, j + jj, i + ii);
 
                     if (!(Double.isNaN(u_tp0.getDouble(index))) && (u_tp0.getDouble(index) != 0)) {
                         CO += co;
