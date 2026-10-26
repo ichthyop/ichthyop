@@ -889,6 +889,9 @@ public class Mercator_3D extends AbstractDataset {
     @Override
     public void setUp() throws Exception {
 
+        // nbarrier: patch to prevent masking data outside of the min/max range
+        NetcdfDataset.setInvalidDataIsMissing(false);
+
         loadParameters();
         clearRequiredVariables();
         sortInputFiles();
