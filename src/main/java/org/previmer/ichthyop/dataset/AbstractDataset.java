@@ -109,6 +109,16 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return true;
     }
 
+    public boolean isNull(String key) {
+        String value;
+        try {
+            value = getParameter(key).trim();
+        } catch (Exception ex) {
+            return true;
+        }
+        return (null == value) || value.isEmpty() ||  value.equalsIgnoreCase("null");
+    }
+
     @Override
     public Number get(String variableName, double[] pGrid, double time) {
         if (null != requiredVariables.get(variableName)) {
