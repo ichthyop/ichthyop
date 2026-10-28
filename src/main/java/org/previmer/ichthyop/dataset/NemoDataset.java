@@ -268,9 +268,9 @@ public class NemoDataset extends AbstractDataset {
         // nbarrier: adding possibility to
         // use e3w
         if (null == nc.findVariable(stre3w)) {
-            e3w = read_e3_field(nc, stre3w, true);
-        } else {
             e3w = reconstruct_e3w(nc);
+        } else {
+            e3w = read_e3_field(nc, stre3w, true);
         }
 
         if (!isGridInfoInOneFile) {
@@ -319,17 +319,27 @@ public class NemoDataset extends AbstractDataset {
         Index ind_mbathy = mbathy.getIndex();
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
+
                 // First we initialize e3t with e3t_0
                 for (int k = 0; k < nz; k++) {
                     e3t[k][j][i] = e3t0.getDouble(ind_e3t0.set(k + 1));
                 }
+
                 // From NEMO to Ichthyop grid, we remove the deepest z level
                 // as it is always ocean bottom in NEMO and we flip z-axis
                 // So the index of mbathy must be converted into Ichthyop grid
-                int km = nz - mbathy.getInt(ind_mbathy.set(j + jpo, i + ipo)) - 1;
-                // Next we correct the depth of the layer adjacent to the ocean
-                // bottom with e3t_ps
-                if (km > 0) {
+                // In the NEMO grid, tmask(mbathy, 0, 0) = 0, tmask(mbathy - 1, 0, 0)
+                // to flip mbath to the Ichthyop layout, we need to to (nz + 1) - mbathy
+                // since Ichthyop removed on T point in the file.
+                // If mbathy = 5 on NEMO, then the point to update is k=4 on Nemo grid.
+                // if nz=6 (7 levels in NEMO file), then on the flipped
+                // NEMO grid, the point to update is k = 2= (nz + 1 - mbathy)
+                // Since Ichthyop removes the first bottom cell, if k=2 on the NEMO grid,
+                // we need to remove -1 to switch back Ich grid.
+                // so km = (nz +1 -mbathy) - 1 = nz - mb
+                int mb = mbathy.getInt(ind_mbathy.set(j + jpo, i + ipo));
+                if (mb > 0) {
+                    int km = nz - mb;
                     e3t[km][j][i] = e3tps.getDouble(ind_e3tps.set(j + jpo, i + ipo));
                 }
             }
@@ -534,9 +544,9 @@ public class NemoDataset extends AbstractDataset {
                 for (int k = 0; k < nz; k++) {
                     for (int j = 0; j < ny; j++) {
                         for (int i = 0; i < nx; i++) {
-                            index.set(k, j, i);
+                            index.set(k, j + jpo, i + ipo);
                             gdepW[k][j][i] = array.getDouble(index);
-                            index.set(k + 1, j, i);
+                            index.set(k + 1, j + jpo, i + ipo);
                             gdepW[k][j][i] += array.getDouble(index);
                             gdepW[k][j][i] *= 0.5;
                         }   // end of i
@@ -713,13 +723,15 @@ public class NemoDataset extends AbstractDataset {
 
                     index.set(k + kk, j + jj, i + ii);
 
-                    if (!(Double.isNaN(w_tp0.getDouble(index)))) {
+                    // Adding a condition to prevent from division
+                    // by 0
+                    if (!(Double.isNaN(w_tp0.getDouble(index))) && (e3w[k][j + jj][i+ii] > 0)) {
 
                         x = (1.d - x_euler) * w_tp0.getDouble(index)
                                 + x_euler * w_tp1.getDouble(index);
 
                         // Use e3w for the adimensionalisation
-                        dw += x * co / e3w[k][j][i] ;
+                        dw += x * co / e3w[k][j + jj][i + ii] ;
                     }
 
                 }
@@ -1374,9 +1386,10 @@ public boolean isCloseToCost(double[] pGrid) {
             //System.out.println("depth: " + depth + " ==> z: " + (nz - 1) + " gdepT[nz - 1]: " + gdepT[nz - 1]);
             return (nz - 1);
         }
-        for (int k = nz - 1; k > 0; k--) {
+        for (int k = nz - 1; k >= 0; k--) {
             //System.out.println("t1 " + z_w[k] + " " + (float)depth + " " + z_rho[k]);
-            if (depth <= gdepW[k][j][i] && depth > gdepT[k][j][i]) {
+            if ((k > 0) && (depth <= gdepW[k][j][i]) && (depth > gdepT[k][j][i])) {
+                // 0.5 is the grid spacing, in grid coordinates, between T and W points
                 zRho = k + 0.d - 0.5d * Math.abs((gdepT[k][j][i] - depth) / (gdepT[k][j][i] - gdepW[k][j][i]));
                 //System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + " gdepW[k]: " + gdepW[k] + " gdepT[k]: " + gdepT[k]);
                 return zRho;
@@ -1737,13 +1750,13 @@ public boolean isCloseToCost(double[] pGrid) {
         if (listUFiles.isEmpty()) {
             throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridu_pattern"));
         }
-        listVFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridv_pattern"));
+        listVFiles = DatasetUtil.list(path, getParameter("gridv_pattern"));
         if (listVFiles.isEmpty()) {
             throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridv_pattern"));
         }
-        listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
+        listTFiles = DatasetUtil.list(path, getParameter("gridt_pattern"));
         if (readW) {
-            listWFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridw_pattern"));
+            listWFiles = DatasetUtil.list(path, getParameter("gridw_pattern"));
             if (listWFiles.isEmpty()) {
                 throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridw_pattern"));
             }
