@@ -175,10 +175,11 @@ public class NemoDataset extends AbstractDataset {
      *
      */
     private double e3t[][][], e3u[][][], e3v[][][];
+    private double e3w[][][];
     private double e1t[][], e2t[][];
     private double e1v[][], e2v[][];
     private double e1u[][], e2u[][];
-    private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v, stre2v, stre1u;
+    private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v, stre2v, stre1u, stre3w;
     private String str_gdepT, str_gdepW;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
@@ -245,20 +246,31 @@ public class NemoDataset extends AbstractDataset {
 
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
-        if (findParameter("field_var_e3t0") && findParameter("field_var_e3tps") && findParameter("field_var_mbathy")) {
+
+        if (null == nc.findVariable(stre3t)) {
             compute_e3t();
         } else {
-            e3t = read_e3_field(nc, stre3t);
+            e3t = read_e3_field(nc, stre3t, false);
         }
-        if (stre3u.equals(stre3t) || (null == nc.findVariable(stre3u))) {
+
+        if (null == nc.findVariable(stre3u)) {
             e3u = compute_e3u(e3t);
         } else {
-            e3u = read_e3_field(nc, stre3u);
+            e3u = read_e3_field(nc, stre3u, false);
         }
-        if (stre3v.equals(stre3t) || (null == nc.findVariable(stre3v))) {
+
+        if (null == nc.findVariable(stre3v)) {
             e3v = compute_e3v(e3t);
         } else {
-            e3v = read_e3_field(nc, stre3v);
+            e3v = read_e3_field(nc, stre3v, false);
+        }
+
+        // nbarrier: adding possibility to
+        // use e3w
+        if (null == nc.findVariable(stre3w)) {
+            e3w = read_e3_field(nc, stre3w, true);
+        } else {
+            e3w = reconstruct_e3w(nc);
         }
 
         if (!isGridInfoInOneFile) {
@@ -364,20 +376,41 @@ public class NemoDataset extends AbstractDataset {
         return e3v_calc;
     }
 
-    private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
+    private double[][][] read_e3_field(NetcdfFile nc, String varname, boolean isOnWpoints) throws InvalidRangeException, IOException {
 
+        // Array is the field read from file, i.e from all the grid
         Array array = nc.findVariable(varname).read().reduce().flip(0);
+
         Index index = array.getIndex();
-        double[][][] field = new double[nz][ny][nx];
-        for (int k = 0; k < nz; k++) {
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    index.set(k + 1, j + jpo, i + ipo);
-                    field[k][j][i] = Double.isNaN(array.getDouble(index))
-                            ? 0.d
-                            : array.getDouble(index);
+        double[][][] field;
+
+        if (isOnWpoints) {
+
+            // If reading e3w, then we read an extra value for e3w compared to e3t
+            // nz = total number of t points minus the bottom cell. Here we also read
+            // the bottom cell
+            field = new double[nz + 1][ny][nx];
+            for (int k = 0; k < nz + 1; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        index.set(k, j + jpo, i + ipo); // offset index to read by 1 on z since last level removed
+                        field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
+                    }
                 }
             }
+
+        } else {
+
+            field = new double[nz][ny][nx];
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        index.set(k + 1, j + jpo, i + ipo); // offset index to read by 1 on z since last level removed
+                        field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
+                    }
+                }
+            }
+
         }
         return field;
     }
@@ -388,6 +421,7 @@ public class NemoDataset extends AbstractDataset {
         Array array;
         boolean depth3d;
 
+        // Here, array is the entire gdept for T grid, including the last (dry) cell (k = 0 in flipped mode)
         array = nc.findVariable(str_gdepT).read().reduce().flip(0);
 
         // If depthT array is 3D, then use 3d depth array
@@ -407,8 +441,9 @@ public class NemoDataset extends AbstractDataset {
             getLogger().log(Level.INFO, "Depth array are 1D arrays (z dimension)");
 
             // Extraction of depth at T points
+            // loop over the points in Ichthtop, i.e. without the last bottom cell
             for (int k = 0; k < nz; k++) {
-                index.set(k + 1);
+                index.set(k + 1); // k = 0 in ich = k = 1 (first we point) in NEMO
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
                         gdepT[k][j][i] = array.getDouble(index);
@@ -469,7 +504,7 @@ public class NemoDataset extends AbstractDataset {
             for (int k = 0; k < nz; k++) {
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
-                        index.set(k + 1, j + jpo, i + ipo);
+                        index.set(k + 1, j + jpo, i + ipo); // k = 0 in Ich => k = 1 in flipped Nemo (bottom cell discarded in Ichthyop)
                         gdepT[k][j][i] = array.getDouble(index);
                     }
                 }
@@ -613,9 +648,9 @@ public class NemoDataset extends AbstractDataset {
 
         double CO = 0;
         Index index = u_tp0.getIndex();
-        for (int ii = 0; ii < 2; ii++) {
+        for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
+                for (int ii = 0; ii < 2; ii++) {
 
                     // Now i is in U grid layout, so need to offset to T.
                     // if i = 9 in U, then i = 9.5 in T
@@ -623,10 +658,10 @@ public class NemoDataset extends AbstractDataset {
                     double coy = 1 - Math.abs(jy - (j + jj));
                     double coz = 1 - Math.abs(kz - (k + kk));
                     co = cox * coy * coz;
+                    CO += co;
 
                     index.set(k + kk, j + jj, i + ii );
                     if (!(Double.isNaN(u_tp0.getDouble(index)))) {
-                        CO += co;
                         x = (1.d - x_euler) * u_tp0.getDouble(index)
                                 + x_euler * u_tp1.getDouble(index);
                         if (normalize) {
@@ -649,7 +684,6 @@ public class NemoDataset extends AbstractDataset {
 
         double dw = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
@@ -665,9 +699,9 @@ public class NemoDataset extends AbstractDataset {
         double CO = 0.d;
         double co, x;
         Index index = w_tp0.getIndex();
-        for (int ii = 0; ii < 2; ii++) {
+        for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
+                for (int ii = 0; ii < 2; ii++) {
 
                     // Now i is in U grid layout, so need to offset to T.
                     // if i = 9 in U, then i = 9.5 in T
@@ -675,19 +709,17 @@ public class NemoDataset extends AbstractDataset {
                     double coy = 1 - Math.abs(jy - (j + jj));
                     double coz = 1 - Math.abs(kz - (k - 0.5 + kk));
                     co = cox * coy * coz;
+                    CO += co;
 
                     index.set(k + kk, j + jj, i + ii);
 
                     if (!(Double.isNaN(w_tp0.getDouble(index)))) {
 
-                        CO += co;
                         x = (1.d - x_euler) * w_tp0.getDouble(index)
                                 + x_euler * w_tp1.getDouble(index);
 
-                        // TODO: use e3w
-                        dw += 2.d * x * co
-                                / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
-                                - gdepW[Math.min(k + kk + 1, nz)][j + jj][i + ii]);
+                        // Use e3w for the adimensionalisation
+                        dw += x * co / e3w[k][j][i] ;
                     }
 
                 }
@@ -705,7 +737,7 @@ public class NemoDataset extends AbstractDataset {
     public double get_dVy(double[] pGrid, double time, boolean normalize) {
         double dv = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
+
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
@@ -726,13 +758,13 @@ public class NemoDataset extends AbstractDataset {
                     // Now i is in V grid layout, so need to offset to T.
                     // if j = 9 in V, then j  = 9.5 in T
                     double cox = 1 - Math.abs(ix - (i + ii));
-                    double coy = 1 - Math.abs(jy - (j + 0.5 + ii));
+                    double coy = 1 - Math.abs(jy - (j + 0.5 + jj));
                     double coz = 1 - Math.abs(kz - (k + kk));
                     co = cox * coy * coz;
+                    CO += co;
 
                     index.set(k + kk, j + jj, i + ii);
                     if (!Double.isNaN(v_tp0.getDouble(index))) {
-                        CO += co;
                         x = (1.d - x_euler) * v_tp0.getDouble(index)
                                 + x_euler * v_tp1.getDouble(index);
                         if(normalize) {
@@ -1283,15 +1315,32 @@ public class NemoDataset extends AbstractDataset {
      * <code>false</code> otherwise.
      */
     @Override
-    public boolean isCloseToCost(double[] pGrid) {
+public boolean isCloseToCost(double[] pGrid) {
 
-        int i, j, k, ii, jj;
+        int i, j, ii, jj;
+
+        // Find the T cell index in which the particle is located
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
-        k = (int) (Math.round(pGrid[2]));
-        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k) && isInWater(i, j + jj, k));
+        double ix = pGrid[0];
+        double jy = pGrid[1];
+
+        if (jy > j) {
+            // if the particle is north of the center of T cell
+            // take cell above
+            jj = 1;
+        } else {
+            // else take cell below
+            jj = -1;
+        }
+
+        if (ix > i) {
+            ii = 1;
+        } else {
+            ii = -1;
+        }
+
+        return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
     /*
@@ -1985,4 +2034,62 @@ public class NemoDataset extends AbstractDataset {
         }
         return bathy;
     }
+
+    /**
+     * Reconstruct e3w if not read in files.
+     *
+     * We reconstruct e3w by considering the depth of the T points. To have the e3w
+     * value at depth, we re-read the T depth array over the entire column (including
+     * bottom cell). In this layout, the W point is above the T point.
+     *
+     */
+    double[][][] reconstruct_e3w(NetcdfFile nc) {
+
+        Index index, indexbis;
+        Array array = null;
+        boolean depth3d;
+
+        // Here, array is the entire gdept for T grid, including the last (dry) cell (k = 0 in flipped mode)
+        try {
+            array = nc.findVariable(str_gdepT).read().reduce().flip(0);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        depth3d = (array.getRank() == 3);
+
+        double[][][] e3w = new double[nz + 1][ny][nx];
+
+        index = array.getIndex();
+        indexbis = array.getIndex();
+
+        for(int k = 0; k < nz; k++) {
+            for(int j = 0; j < ny; j++) {
+                for(int i = 0; i < nx; i++) {
+                    if(depth3d) {
+                        index.set(k, j + jpo, i + ipo);
+                        indexbis.set(k + 1, j + jpo, i + ipo);
+                    } else {
+                        index.set(k);
+                        indexbis.set(k + 1);
+                    }
+                    e3w[k][j][i] = Math.abs(array.getDouble(indexbis) - array.getDouble(index));
+                }
+            }
+        }
+
+        // Surface W cell: no T point above, so NEMO's convention is used
+        // (gdepw = 0 at the surface, T point at mid-cell) => e3w = 2 * gdept
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                e3w[nz][j][i] = e3t[nz - 1][j][i];
+            }
+        }
+
+        return e3w;
+
+    }
+
+
 }
