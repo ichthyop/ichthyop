@@ -27,7 +27,7 @@ The horizontal layout of the NEMO grid is as follows:
 
 ![Grid layout for the NEMO grid (NEMO Book)](grid/_static/nemo_hor_index.png){#fig-hor-grid-nemo-book}
 
-Tracer points (`T` points) are stored at the center of the cell. Zonal velocities (`U` points) are stored on the eastern face, while meridional velocities (`V` points) are stored on the northern face. **U, V and T points have the same number of elements!**, as shown in @fig-grid-nemo-ich
+Tracer points (`T` points) are stored at the center of the cell. Zonal velocities (`U` points) are stored on the eastern face, while meridional velocities (`V` points) are stored on the northern face. **U, V and T points have the same number of elements!**, as shown in @fig-hor-grid-nemo
 
 ![Grid layout for the NEMO grid with the T, U and V points displayed for an entire grid](grid/_static/full_domain_nemo_ich.jpg){#fig-hor-grid-nemo}
 
@@ -71,7 +71,7 @@ on the ORCA grid, the zonal cyclicity is as follows (indexes are provided for T 
 Therefore:
 
 - if $x \leq 1$, the particle is moved at $N_x - 2 + x$
-- if $x \geq nx - 1$, the particle is moved at $x - N_x + 2)$
+- if $x \geq nx - 1$, the particle is moved at $x - N_x + 2$
 
 ##### Interpolation
 
@@ -96,7 +96,7 @@ Interpolation of `U` variables is done as follows:
 - The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
 - Averaging will be performed considering the distance, in grid coordinates, between the particle and the U point.
 
-![](grid/_static/u_interpolation_nemo.jpg)
+![Interpolation of U variables on NEMO grid](grid/_static/u_interpolation_nemo.jpg)
 
 ######## Interpolation of V variables
 
@@ -107,7 +107,7 @@ Interpolation of `V` variables is done as follows:
 - The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
 - Averaging will be performed considering the distance, in grid coordinates, between the particle and the V point.
 
-![](grid/_static/v_interpolation_nemo.jpg)
+![Interpolation of V variables on NEMO grid](grid/_static/v_interpolation_nemo.jpg)
 
 
 ### Vertical
