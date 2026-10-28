@@ -77,19 +77,23 @@ for x in np.arange(0, xmax):
         #lv = plt.plot(x, y - 0.5, marker='.', color='b')
         lv = plt.text(x, y + 0.5, '%d,%d' %(x,y), bbox=bbox, ha='center', va='center', color='k')
 
-plt.plot([0.5, 7, 7, 0.5, 0.5], [0.5, 0.5, 4, 4, 0.5], lw=6)
+plt.plot([0, 7, 7, 0, 0], [0, 0, 4, 4, 0], lw=6, color='k')
+# plt.plot([0.5, 7, 7, 0.5, 0.5], [0.5, 0.5, 4, 4, 0.5], lw=6)
+plt.savefig(os.path.join(outdir, 'full_domain_nemo_ich.jpg'), bbox_inches='tight')
 
 
 # +
 def plot_grid_layout():
     ax = plt.gca()
-    plt.plot([0, 7, 7, 0, 0], [0, 0, 4, 4, 0], lw=3, color='gray')
+    plt.plot([0, 7, 7, 0, 0], [0, 0, 4, 4, 0], lw=6, color='gold')
+    plt.plot([0.5, 7, 7, 0.5, 0.5], [0.5, 0.5, 4, 4, 0.5], lw=6, color='gray')
+    
     ax.set_xticks(np.arange(xmax + 1) - 0.5, minor=False)
     ax.set_yticks(np.arange(ymax + 1) - 0.5, minor=False)
     plt.xlim(0 - 0.5, xmax - 0.5)
     plt.ylim(0 - 0.5, ymax -0.5)
     plt.grid(True, linewidth=1, color='gray', ls='--')
-    plt.plot([0.5, 7, 7, 0.5, 0.5], [0.5, 0.5, 4, 4, 0.5], lw=2, ls='--', color='red')
+    # plt.plot([0.5, 7, 7, 0.5, 0.5], [0.5, 0.5, 4, 4, 0.5], lw=2, ls='--', color='red')
 
 
 # -

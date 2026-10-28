@@ -91,10 +91,10 @@ for x in np.arange(0, xmax):
         #lv = plt.plot(x, y - 0.5, marker='.', color='b')
         lv = plt.text(x, y - 0.5, '%d,%d' %(x,y - 1), bbox=bbox, ha='center', va='center', color='k')
 
-x0 = 0.5
-x1 = 6.5 + 1
-y0 = 0.5
-y1 = 3.5 + 1
+x0 = 0.0
+x1 = 6. + 2
+y0 = 0.0
+y1 = 3. + 2
 plt.plot([x0, x1, x1, x0, x0], [y0, y0, y1, y1, y0], lw=6, color='k')
 
 # color = 'gray'
@@ -177,6 +177,13 @@ def plot_grid_layout():
     y0 = 0.5
     y1 = 3.5 + 1
     plt.plot([x0, x1, x1, x0, x0], [y0, y0, y1, y1, y0], lw=5, color='darkgray')
+
+    x0 = 0.0
+    x1 = 6. + 2
+    y0 = 0.0
+    y1 = 3. + 2
+    plt.plot([x0, x1, x1, x0, x0], [y0, y0, y1, y1, y0], lw=6, color='gold')
+    
     ax.set_xticks(np.arange(xmax + 1) - 0.5, minor=False)
     ax.set_yticks(np.arange(ymax + 1) - 0.5, minor=False)
     plt.xlim(0 - 0.5, xmax - 0.5)

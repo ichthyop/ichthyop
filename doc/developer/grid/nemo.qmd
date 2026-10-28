@@ -25,9 +25,20 @@ southern edge of the southern T cells (`j=0`) to the northern edge of the nother
 
 The horizontal layout of the NEMO grid is as follows:
 
-![ ](grid/_static/nemo_hor_index.png)
+![Grid layout for the NEMO grid (NEMO Book)](grid/_static/nemo_hor_index.png){#fig-hor-grid-nemo-book}
 
-Tracer points (`T` points) are stored at the center of the cell. Zonal velocities (`U` points) are stored on the eastern face, while meridional velocities (`V` points) are stored on the northern face. **U, V and T points have the same number of elements!**
+Tracer points (`T` points) are stored at the center of the cell. Zonal velocities (`U` points) are stored on the eastern face, while meridional velocities (`V` points) are stored on the northern face. **U, V and T points have the same number of elements!**, as shown in @fig-grid-nemo-ich
+
+![Grid layout for the NEMO grid with the T, U and V points displayed for an entire grid](grid/_static/full_domain_nemo_ich.jpg){#fig-hor-grid-nemo}
+
+##### Is On Edge
+
+The particle is considered to be out of the domain if the `y` value is greater than `ny - 1` (no possible interpolation of `T` points) or less than `0.5` (no possible interpolation of `V` points).
+
+If there is no zonal cyclicity, the particle is also considered to be out of the domain if the `x` value is greater than `nx - 1` (no possible interpolation of `T` points) or less than `0.5` (no possible interpolation of `U` points).
+
+![Is on edge for the Nemo grid. Particle is on edge when either T, U or V points can't be interpolated](grid/_static/is_on_edge_nemo.jpg)
+
 
 ##### Scale factors
 
@@ -37,33 +48,25 @@ In NEMO, the zonal and meridional length of the cells are stored in the `e1x` an
 
 For a particle at a given location, we determine whether it is on land as follows:
 
-- We extract the `i` index of the `T` land-sea mask to use by computing `round(x - 0.5)`.
-- We extract the `j` index of the `T` land-sea mask to use by computing `round(y - 0.5)`.
+- We extract the `i` index of the `T` land-sea mask to use by computing `round(x)`.
+- We extract the `j` index of the `T` land-sea mask to use by computing `round(y)`.
 - We extract the mask value at the `(i, j)` location.
 
-![ ](grid/_static/landsea_mask_nemo.jpg)
+![Land-sea mask on the NEMO grid](grid/_static/landsea_mask_nemo.jpg)
 
 ##### Close to coast
 
 To determine whether a particle is close to coast, we extract the three neighbouring T cells. If one of them is land, then it assumed to be close to coast.
 
-![ ](grid/_static/close_to_coast_nemo.jpg)
+![Is close to coast on the NEMO grid](grid/_static/close_to_coast_nemo.jpg)
 
-
-##### Is On Edge
-
-The particle is considered to be out of the domain if the `y` value is greater than `ny - 0.5` (no possible interpolation of `T` points) or less than `1` (no possible interpolation of `V` points).
-
-If there is no zonal cyclicity, the particle is also considered to be out of the domain if the `x` value is greater than `nx - 0.5` (no possible interpolation of `T` points) or less than `1` (no possible interpolation of `U` points).
-
-![](grid/_static/is_on_edge_nemo.jpg)
 
 ##### Zonal cyclicity
 
 For regional simulations, there is no zonal cyclicty. On the other hand, for global NEMO simulations, which runs
 on the ORCA grid, the zonal cyclicity is as follows (indexes are provided for T points):
 
-![](grid/_static/zonal_cyclicity_nemo.jpg)
+![Zonal cyclicity on the NEMO grid](grid/_static/zonal_cyclicity_nemo.jpg)
 
 Therefore:
 
@@ -76,21 +79,22 @@ Therefore:
 
 Given a given position index of a particle with the `T` grid, the determination of the interpolation is done as follows:
 
-- First, the `i` index of the `T` grid column left of the particle is found. This is done by using `floor` on the `x - 0.5` value. The removing of 0.5 is to convert the `x` value from the computational grid to the `T` grid.
-- Then, the `j` index of the `T` grid line below the particle is found. This is done by using `floor` on the `y - 0.5` value. The removing of 0.5 is to convert the `y` value from the computational grid to the `T` grid.
+- First, the `i` index of the `T` grid column left of the particle is found. This is done by using `floor` on the `x` value.
+- Then, the `j` index of the `T` grid line below the particle is found. This is done by using `floor` on the `y` value.
 - The area to consider is defined by the `[i, i + 1]` and `[j, j + 1]` squares.
 
 An illustration is given below
 
-![](grid/_static/t_interpolation_nemo.jpg)
+![T interpolation for the NEMO grid](grid/_static/t_interpolation_nemo.jpg)
 
 ######## Interpolation of U variables
 
 Interpolation of `U` variables is done as follows:
 
-- First, the `i` index of the `U` point left of the particle is found by using `floor(x - 1)`. The `-1` is to move from the computation grid to the `U` grid system.
-- Then, the `j` index of the `U` grid line below the particle is found. This is done by using `floor` on the `y - 0.5` value. The `-0.5` is to move from the computation grid to the `U` grid system.
+- First, the `i` index of the `U` point left of the particle is found by using `floor(x - 0.5)`. The `-0.5` is to move from the computation grid (T grid) to the `U` grid system. For example, in @fig-hor-grid-nemo, a particle with $x=3.7$ on the T grid will be at the position $x=3.2$ on the U grid system.
+- Then, the `j` index of the `U` grid line below the particle is found. This is done by using `floor` on the `y` value.
 - The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
+- Averaging will be performed considering the distance, in grid coordinates, between the particle and the U point.
 
 ![](grid/_static/u_interpolation_nemo.jpg)
 
@@ -98,9 +102,10 @@ Interpolation of `U` variables is done as follows:
 
 Interpolation of `V` variables is done as follows:
 
-- First, the `i` index of the `V` point left of the particle is found by using `floor(x - 0.5)`. The `-0.5` is to move from the computation grid to the `U` grid system.
-- Then, the `j` index of the `V` grid line below the particle is found. This is done by using `floor` on the `y - 1` value. The `-1` is to move from the computation grid to the `U` grid system.
+- First, the `i` index of the `V` point left of the particle is found by using `floor(x)`.
+- Then, the `j` index of the `V` grid line below the particle is found. This is done by using `floor` on the `y - 0.5` value. The `-0.5` is to move from the computation grid (T grid) to the `V` grid system. A particle at position $y=2.3$ in the T grid system will be at $y=1.8$ on the V grid system.
 - The box used to average the variable is therefore defined by the `[i, i + 1]` and `[j, j + 1]` squares.
+- Averaging will be performed considering the distance, in grid coordinates, between the particle and the V point.
 
 ![](grid/_static/v_interpolation_nemo.jpg)
 
