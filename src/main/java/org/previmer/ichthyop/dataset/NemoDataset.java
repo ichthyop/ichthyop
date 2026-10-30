@@ -1573,13 +1573,17 @@ public class NemoDataset extends AbstractDataset {
 
         xgrid = -1.;
         ygrid = -1.;
-        found = isInsidePolygone(0, nx - 1, 0, ny - 1, lon, lat);
+        // Without halo columns, the cell between i = nx - 1 and i = 0 is
+        // also part of the domain, so the search is extended to i = nx
+        // (wrapped to i = 0 by xIndex)
+        int iEast = (zonalCyclityEnabled && zonalPeriod == nx) ? nx : nx - 1;
+        found = isInsidePolygone(0, iEast, 0, ny - 1, lon, lat);
 
         //-------------------------------------------
         // Research surrounding grid-points
         if (found) {
             imin = 0;
-            imax = nx - 1;
+            imax = iEast;
             jmin = 0;
             jmax = ny - 1;
             while (((imax - imin) > 1) | ((jmax - jmin) > 1)) {
@@ -1605,21 +1609,25 @@ public class NemoDataset extends AbstractDataset {
 
             //--------------------------------------------
             // Trilinear interpolation
-            dy1 = latRho[jmin + 1][imin] - latRho[jmin][imin];
-            dx1 = lonRho[jmin + 1][imin] - lonRho[jmin][imin];
-            dy2 = latRho[jmin][imin + 1] - latRho[jmin][imin];
-            dx2 = lonRho[jmin][imin + 1] - lonRho[jmin][imin];
+            // Longitudes are taken relative to lon (which is then 0), to
+            // avoid the 180/-180 (or 0/360) jump inside the cell
+            double lon0 = lonDiff(lonAt(jmin, imin), lon);
+            double lat0 = latAt(jmin, imin);
+            dy1 = latAt(jmin + 1, imin) - lat0;
+            dx1 = lonDiff(lonAt(jmin + 1, imin), lon) - lon0;
+            dy2 = latAt(jmin, imin + 1) - lat0;
+            dx2 = lonDiff(lonAt(jmin, imin + 1), lon) - lon0;
 
-            c1 = lon * dy1 - lat * dx1;
-            c2 = lonRho[jmin][imin] * dy2 - latRho[jmin][imin] * dx2;
+            c1 = -lat * dx1;
+            c2 = lon0 * dy2 - lat0 * dx2;
             deltax = (c1 * dx2 - c2 * dx1) / (dx2 * dy1 - dy2 * dx1);
-            deltax = (deltax - lonRho[jmin][imin]) / dx2;
+            deltax = (deltax - lon0) / dx2;
             xgrid = (double) imin + Math.min(Math.max(0.d, deltax), 1.d);
 
-            c1 = lonRho[jmin][imin] * dy1 - latRho[jmin][imin] * dx1;
-            c2 = lon * dy2 - lat * dx2;
+            c1 = lon0 * dy1 - lat0 * dx1;
+            c2 = -lat * dx2;
             deltay = (c1 * dy2 - c2 * dy1) / (dx2 * dy1 - dy2 * dx1);
-            deltay = (deltay - latRho[jmin][imin]) / dy1;
+            deltay = (deltay - lat0) / dy1;
             ygrid = (double) jmin + Math.min(Math.max(0.d, deltay), 1.d);
         }
         return (new double[]{xgrid, ygrid});
@@ -1779,31 +1787,31 @@ public class NemoDataset extends AbstractDataset {
         // and the western boundary into a [0, 360] range
         // if diff = -10, then diff = 350
         for (double lonP = lonBoundaryMin + ((lon - lonBoundaryMin) % 360 + 360) % 360; lonP <= lonBoudaryMax; lonP += 360) {
-        crossings = 0;
-        for (int k = 0; k < nb; k++) {
+            crossings = 0;
+            for (int k = 0; k < nb; k++) {
                 if (lonBoundary[k] != lonBoundary[k + 1]) {
                     dx1 = lonP - lonBoundary[k];
                     dx2 = lonBoundary[k + 1] - lonP;
                     dxy = dx2 * (lat - latBoundary[k]) - dx1 * (latBoundary[k + 1] - lat);
-                inc = 0;
+                    inc = 0;
                     if ((lonBoundary[k] == lonP) & (latBoundary[k] == lat)) {
-                    crossings = 1;
+                        crossings = 1;
                     } else if (((dx1 == 0.) & (lat >= latBoundary[k]))
                             | ((dx2 == 0.) & (lat >= latBoundary[k + 1]))) {
-                    inc = 1;
+                        inc = 1;
                     } else if ((dx1 * dx2 > 0.) & ((lonBoundary[k + 1] - lonBoundary[k]) * dxy >= 0.)) {
-                    inc = 2;
-                }
+                        inc = 2;
+                    }
                     if (lonBoundary[k + 1] > lonBoundary[k]) {
-                    crossings += inc;
-                } else {
-                    crossings -= inc;
+                        crossings += inc;
+                    } else {
+                        crossings -= inc;
+                    }
                 }
             }
-        }
             if (crossings != 0) {
                 return true;
-        }
+            }
         }
         return false;
     }
@@ -2177,7 +2185,30 @@ public class NemoDataset extends AbstractDataset {
         }
     }
 
-    /** Longitude difference a - b, in [-180, 180). */
+    /** Longitude at T point (j, i), with i wrapped by {@link #xIndex(int)}. */
+    private double lonAt(int j, int i) {
+        return lonRho[j][xIndex(i)];
+    }
+
+    /** Latitude at T point (j, i), with i wrapped by {@link #xIndex(int)}. */
+    private double latAt(int j, int i) {
+        return latRho[j][xIndex(i)];
+    }
+
+    /** Longitude difference a - b, in [-180, 180) (shortest angle)
+     *
+     * (a - b) is the difference between angle. It is an angle. Can be on [-360, 360]
+     *
+     * (a - b) % 360 move diff from [-360, 360] to [0, 360]. In Java,
+     * this diff = -358, diff % 360 = -358 (compared to Python). So we add +360 to the angle
+     * so new angle is (a-b)%360 + 360
+     *
+     * Then we move this new angle to [-180, 180] by
+     * final = (new_angle + 180) % 360 - 180
+     *       = ( (a-b)%360 + 360 + 180) % 360 - 180
+     *       = ((a - b) % 360 + 540) % 360 - 180
+     *
+    */
     private static double lonDiff(double a, double b) {
         return ((a - b) % 360 + 540) % 360 - 180;
     }
