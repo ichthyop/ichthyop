@@ -2295,12 +2295,15 @@ public class NemoDataset extends AbstractDataset {
             for (int i = 0; i < nx; i++) {
                 if (isInWater(i, j, nz - 1)) {
                     for (int k = 0; k < nz; k++) {
-                        bathy[i][i] += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i]) ? 0.d
+                        bathy[j][i] += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i]) ? 0.d
                                 : maskRho[k][j][i] * e3t[k][j][i];
                         // System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + e3t[k][j][i] +
                         // " " + bathy);
                     } // end of k loop
-                } // end of isInwater test
+                } else {
+                    bathy[j][i] = Double.NaN;
+                }
+
             } // end if i loop
 
         } // end of j loop
