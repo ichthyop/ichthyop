@@ -1722,66 +1722,90 @@ public class NemoDataset extends AbstractDataset {
         //-----------------------------------------
         // Build the polygone
         int nb, shft;
-        double[] xb, yb;
-        boolean isInPolygone = true;
+        double[] lonBoundary, latBoundary;
 
         nb = 2 * (jmax - jmin + imax - imin);
-        xb = new double[nb + 1];
-        yb = new double[nb + 1];
+        lonBoundary = new double[nb + 1];
+        latBoundary = new double[nb + 1];
         shft = 0 - imin;
         for (int i = imin; i <= (imax - 1); i++) {
-            xb[i + shft] = lonRho[jmin][i];
-            yb[i + shft] = latRho[jmin][i];
+            lonBoundary[i + shft] = lonAt(jmin, i);
+            latBoundary[i + shft] = latAt(jmin, i);
         }
         shft = 0 - jmin + imax - imin;
         for (int j = jmin; j <= (jmax - 1); j++) {
-            xb[j + shft] = lonRho[j][imax];
-            yb[j + shft] = latRho[j][imax];
+            lonBoundary[j + shft] = lonAt(j, imax);
+            latBoundary[j + shft] = latAt(j, imax);
         }
         shft = jmax - jmin + 2 * imax - imin;
         for (int i = imax; i >= (imin + 1); i--) {
-            xb[shft - i] = lonRho[jmax][i];
-            yb[shft - i] = latRho[jmax][i];
+            lonBoundary[shft - i] = lonAt(jmax, i);
+            latBoundary[shft - i] = latAt(jmax, i);
         }
         shft = 2 * jmax - jmin + 2 * (imax - imin);
         for (int j = jmax; j >= (jmin + 1); j--) {
-            xb[shft - j] = lonRho[j][imin];
-            yb[shft - j] = latRho[j][imin];
+            lonBoundary[shft - j] = lonAt(j, imin);
+            latBoundary[shft - j] = latAt(j, imin);
         }
-        xb[nb] = xb[0];
-        yb[nb] = yb[0];
+
+        // Unwraps the longitudes along the polygon, so that consecutive
+        // vertices never differ by more than 180 degrees. A polygon that goes
+        // around the globe (zonal cyclicity) then becomes a band of about
+        // 360 degrees width, instead of crossing the 180/-180 jump.
+        // The first point of the boundary is the anchor and is left unchanged
+        // Initialization of the minimum and maximum longitude (boundary extent)
+        double lonBoundaryMin = lonBoundary[0];
+        double lonBoudaryMax = lonBoundary[0];
+        for (int k = 1; k < nb; k++) {
+            lonBoundary[k] = lonBoundary[k - 1] + lonDiff(lonBoundary[k], lonBoundary[k - 1]);
+            lonBoundaryMin = Math.min(lonBoundaryMin, lonBoundary[k]);
+            lonBoudaryMax = Math.max(lonBoudaryMax, lonBoundary[k]);
+        }
+        lonBoundary[nb] = lonBoundary[0];
+        latBoundary[nb] = latBoundary[0];
 
         //---------------------------------------------
         //Check if {lon, lat} is inside polygone
+        // The point longitude is tested at all its 360 degrees shifts within
+        // [xbMin, xbMax]: a band polygon is about 360 degrees wide (more with
+        // halo columns) and its western and eastern edges are not straight,
+        // so a single shift is not enough.
         int inc, crossings;
         double dx1, dx2, dxy;
+        // here, lon is in any framework [-180, 180] for example.
+        // so we test inclusion by taking the longitude shifted into the polygon frame
+        // we also test lonp + 360, lonp + 720 until the boundaries of the polygon have been
+        // ((lon - lonBoundaryMin) % 360 + 360) % 360 converts the angular difference between lon
+        // and the western boundary into a [0, 360] range
+        // if diff = -10, then diff = 350
+        for (double lonP = lonBoundaryMin + ((lon - lonBoundaryMin) % 360 + 360) % 360; lonP <= lonBoudaryMax; lonP += 360) {
         crossings = 0;
-
         for (int k = 0; k < nb; k++) {
-            if (xb[k] != xb[k + 1]) {
-                dx1 = lon - xb[k];
-                dx2 = xb[k + 1] - lon;
-                dxy = dx2 * (lat - yb[k]) - dx1 * (yb[k + 1] - lat);
+                if (lonBoundary[k] != lonBoundary[k + 1]) {
+                    dx1 = lonP - lonBoundary[k];
+                    dx2 = lonBoundary[k + 1] - lonP;
+                    dxy = dx2 * (lat - latBoundary[k]) - dx1 * (latBoundary[k + 1] - lat);
                 inc = 0;
-                if ((xb[k] == lon) & (yb[k] == lat)) {
+                    if ((lonBoundary[k] == lonP) & (latBoundary[k] == lat)) {
                     crossings = 1;
-                } else if (((dx1 == 0.) & (lat >= yb[k]))
-                        | ((dx2 == 0.) & (lat >= yb[k + 1]))) {
+                    } else if (((dx1 == 0.) & (lat >= latBoundary[k]))
+                            | ((dx2 == 0.) & (lat >= latBoundary[k + 1]))) {
                     inc = 1;
-                } else if ((dx1 * dx2 > 0.) & ((xb[k + 1] - xb[k]) * dxy >= 0.)) {
+                    } else if ((dx1 * dx2 > 0.) & ((lonBoundary[k + 1] - lonBoundary[k]) * dxy >= 0.)) {
                     inc = 2;
                 }
-                if (xb[k + 1] > xb[k]) {
+                    if (lonBoundary[k + 1] > lonBoundary[k]) {
                     crossings += inc;
                 } else {
                     crossings -= inc;
                 }
             }
         }
-        if (crossings == 0) {
-            isInPolygone = false;
+            if (crossings != 0) {
+                return true;
         }
-        return (isInPolygone);
+        }
+        return false;
     }
 
     /**
