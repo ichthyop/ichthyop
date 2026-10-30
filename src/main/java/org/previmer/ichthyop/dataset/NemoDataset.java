@@ -187,6 +187,13 @@ public class NemoDataset extends AbstractDataset {
     private boolean isGridInfoInOneFile;
     // Whether vertical velocity should be read from NetCDF or calculated from U & V
     private boolean readW;
+    private boolean zonalCyclityEnabled = false;
+    // Zonal period, in grid cells: nx - 2 if the grid has the 2 NEMO halo
+    // columns (i=0 copy of i=nx-2, i=nx-1 copy of i=1), nx otherwise.
+    private int zonalPeriod;
+    // Western bound of the x-range particles are kept in by xTore:
+    // [xWest, xWest + zonalPeriod). 0.5 with halo, -0.5 without.
+    private double xWest;
 
 ////////////////////////////
 // Definition of the methods
@@ -219,6 +226,10 @@ public class NemoDataset extends AbstractDataset {
                         ? indexLat.set(jpo + j, ipo + i)
                         : indexLat.set(jpo + j));
             }
+        }
+
+        if (zonalCyclityEnabled) {
+            setZonalPeriod();
         }
 
         if (!isGridInfoInOneFile) {
@@ -363,7 +374,9 @@ public class NemoDataset extends AbstractDataset {
                     //e3u_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j][i + 1]);
                     e3u_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
                 }
-                e3u_calc[k][j][nx - 1] = e3t[k][j][nx - 1];
+                e3u_calc[k][j][nx - 1] = zonalCyclityEnabled
+                        ? Math.min(e3t[k][j][nx - 1], e3t[k][j][xIndex(nx)])
+                        : e3t[k][j][nx - 1];
             }
         }
         return e3u_calc;
@@ -648,7 +661,7 @@ public class NemoDataset extends AbstractDataset {
         double co;
         double x;
 
-        ix = pGrid[0];
+        ix = xTore(pGrid[0]);
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
@@ -673,12 +686,13 @@ public class NemoDataset extends AbstractDataset {
                     co = cox * coy * coz;
                     CO += co;
 
-                    index.set(k + kk, j + jj, i + ii );
+                    int ic = xIndex(i + ii);
+                    index.set(k + kk, j + jj, ic);
                     if (!(Double.isNaN(u_tp0.getDouble(index)))) {
                         x = (1.d - x_euler) * u_tp0.getDouble(index)
                                 + x_euler * u_tp1.getDouble(index);
                         if (normalize) {
-                            du += x * co / e1u[j + jj][i + ii];
+                            du += x * co / e1u[j + jj][ic];
                         } else {
                             du += x * co;
                         }
@@ -697,7 +711,7 @@ public class NemoDataset extends AbstractDataset {
 
         double dw = 0.d;
         double ix, jy, kz;
-        ix = pGrid[0];
+        ix = xTore(pGrid[0]);
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
@@ -724,17 +738,18 @@ public class NemoDataset extends AbstractDataset {
                     co = cox * coy * coz;
                     CO += co;
 
-                    index.set(k + kk, j + jj, i + ii);
+                    int ic = xIndex(i + ii);
+                    index.set(k + kk, j + jj, ic);
 
                     // Adding a condition to prevent from division
                     // by 0
-                    if (!(Double.isNaN(w_tp0.getDouble(index))) && (e3w[k][j + jj][i+ii] > 0)) {
+                    if (!(Double.isNaN(w_tp0.getDouble(index))) && (e3w[k][j + jj][ic] > 0)) {
 
                         x = (1.d - x_euler) * w_tp0.getDouble(index)
                                 + x_euler * w_tp1.getDouble(index);
 
                         // Use e3w for the adimensionalisation
-                        dw += x * co / e3w[k][j + jj][i + ii] ;
+                        dw += x * co / e3w[k + kk][j + jj][ic] ;
                     }
 
                 }
@@ -753,7 +768,7 @@ public class NemoDataset extends AbstractDataset {
         double dv = 0.d;
         double ix, jy, kz;
 
-        ix = pGrid[0];
+        ix = xTore(pGrid[0]);
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
@@ -778,12 +793,13 @@ public class NemoDataset extends AbstractDataset {
                     co = cox * coy * coz;
                     CO += co;
 
-                    index.set(k + kk, j + jj, i + ii);
+                    int ic = xIndex(i + ii);
+                    index.set(k + kk, j + jj, ic);
                     if (!Double.isNaN(v_tp0.getDouble(index))) {
                         x = (1.d - x_euler) * v_tp0.getDouble(index)
                                 + x_euler * v_tp1.getDouble(index);
                         if(normalize) {
-                            dv += x * co / e2v[j + jj][i + ii];
+                            dv += x * co / e2v[j + jj][ic];
                         } else {
                             dv += x * co;
                         }
@@ -871,8 +887,12 @@ public class NemoDataset extends AbstractDataset {
         // Calcultaion of w(i, j, k)
         double[][][] w_double = new double[nz + 1][ny][nx];
 
+        // With zonal cyclicity, w can be computed on the full x-range
+        // since the western neighbour of i=0 is known
+        int iStart = zonalCyclityEnabled ? 0 : 1;
+        int iEnd = zonalCyclityEnabled ? nx : nx - 1;
         for (int j = 1; j < ny - 1; j++) {
-            for (int i = 1; i < nx - 1; i++) {
+            for (int i = iStart; i < iEnd; i++) {
                 /*
                  * pverley 15/02/2011
                  * I must start integrating the vertical velocity at the bottom
@@ -892,7 +912,7 @@ public class NemoDataset extends AbstractDataset {
                 }
                 for (int k = k0 + 1; k < nz; k++) {
                     w_double[k][j][i] = w_double[k - 1][j][i]
-                            - (Huon[k - 1][j][i] - Huon[k - 1][j][i - 1] + Hvom[k - 1][j][i] - Hvom[k - 1][j - 1][i]);
+                            - (Huon[k - 1][j][i] - Huon[k - 1][j][xIndex(i - 1)] + Hvom[k - 1][j][i] - Hvom[k - 1][j - 1][i]);
                 }
 
                 w_double[nz][j][i] = 0.d;  // Because particle at the surface can not "fly" (must remember my GFD classes).
@@ -901,10 +921,12 @@ public class NemoDataset extends AbstractDataset {
         //---------------------------------------------------
         // Boundary Conditions
 
-        for (int k = nz + 1; k-- > 0;) {
-            for (int j = ny; j-- > 0;) {
-                w_double[k][j][0] = w_double[k][j][1];
-                w_double[k][j][nx - 1] = w_double[k][j][nx - 2];
+        if (!zonalCyclityEnabled) {
+            for (int k = nz + 1; k-- > 0;) {
+                for (int j = ny; j-- > 0;) {
+                    w_double[k][j][0] = w_double[k][j][1];
+                    w_double[k][j][nx - 1] = w_double[k][j][nx - 2];
+                }
             }
         }
         for (int k = nz + 1; k-- > 0;) {
@@ -937,7 +959,7 @@ public class NemoDataset extends AbstractDataset {
      */
     public double adimensionalize(double number, double xRho, double yRho) {
 
-        int i = (int) Math.round(xRho);
+        int i = (int) Math.round(xTore(xRho));
         int j = (int) Math.round(yRho);
         return 2.d * number / (e1t[j][i] + e2t[j][i]);
     }
@@ -1016,6 +1038,9 @@ public class NemoDataset extends AbstractDataset {
 
         if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
             try {
+
+                // Forces the zonal cyclicity to false when shrinked domain
+                this.zonalCyclityEnabled = false;
                 float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
@@ -1037,6 +1062,10 @@ public class NemoDataset extends AbstractDataset {
      */
     @Override
     public void loadParameters() {
+
+        if(!isNull("zonal_cyclicity_enabled")) {
+            this.zonalCyclityEnabled = Boolean.valueOf(getParameter("zonal_cyclicity_enabled"));
+        }
 
         strXDim = getParameter("field_dim_x");
         strYDim = getParameter("field_dim_y");
@@ -1313,9 +1342,9 @@ public class NemoDataset extends AbstractDataset {
     @Override
     public boolean isInWater(double[] pGrid) {
         if (pGrid.length > 2) {
-            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
+            return isInWater((int) Math.round(xTore(pGrid[0])), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
         } else {
-            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+            return isInWater((int) Math.round(xTore(pGrid[0])), (int) Math.round(pGrid[1]));
         }
     }
 
@@ -1330,15 +1359,15 @@ public class NemoDataset extends AbstractDataset {
      * <code>false</code> otherwise.
      */
     @Override
-public boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
 
         // Find the T cell index in which the particle is located
-        i = (int) (Math.round(pGrid[0]));
-        j = (int) (Math.round(pGrid[1]));
-        double ix = pGrid[0];
+        double ix = xTore(pGrid[0]);
         double jy = pGrid[1];
+        i = (int) (Math.round(ix));
+        j = (int) (Math.round(jy));
 
         if (jy > j) {
             // if the particle is north of the center of T cell
@@ -1355,7 +1384,7 @@ public boolean isCloseToCost(double[] pGrid) {
             ii = -1;
         }
 
-        return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
+        return !(isInWater(xIndex(i + ii), j) && isInWater(xIndex(i + ii), j + jj) && isInWater(i, j + jj));
     }
 
     /*
@@ -1372,7 +1401,7 @@ public boolean isCloseToCost(double[] pGrid) {
     public double depth2z(double x, double y, double depth) {
 
         int j = (int) Math.round(y);
-        int i = (int) Math.round(x);
+        int i = (int) Math.round(xTore(x));
 
         if (depth > 0) {
             depth = 0.d;
@@ -1431,7 +1460,7 @@ public boolean isCloseToCost(double[] pGrid) {
         double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
         int k = (int) Math.round(kz);
         int j = (int) Math.round(y);
-        int i = (int) Math.round(x);
+        int i = (int) Math.round(xTore(x));
         dz = kz - k;
 
         if (dz < 0) { // >= ?
@@ -1465,10 +1494,14 @@ public boolean isCloseToCost(double[] pGrid) {
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
+        xRho = xTore(xRho);
+
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
-        final double ix = Math.max(0.00001f,
-                Math.min(xRho, (double) nx - 1.00001f));
+        // With zonal cyclicity, xRho is already in range and i + 1 is wrapped
+        final double ix = zonalCyclityEnabled
+                ? xRho
+                : Math.max(0.00001f, Math.min(xRho, (double) nx - 1.00001f));
         final double jy = Math.max(0.00001f,
                 Math.min(yRho, (double) ny - 1.00001f));
 
@@ -1479,11 +1512,21 @@ public boolean isCloseToCost(double[] pGrid) {
         final double dx = ix - (double) i;
         final double dy = jy - (double) j;
         double co;
+        // Longitudes of the 4 corners are unwrapped relative to the first one,
+        // to avoid interpolating across the 180/-180 (or 0/360) jump
+        final double lonRef = lonRho[j][xIndex(i)];
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
+                int ic = xIndex(i + ii);
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                latitude += co * latRho[j + jj][i + ii];
-                longitude += co * lonRho[j + jj][i + ii];
+                latitude += co * latRho[j + jj][ic];
+                double lon = lonRho[j + jj][ic];
+                if (lon - lonRef > 180) {
+                    lon -= 360;
+                } else if (lon - lonRef < -180) {
+                    lon += 360;
+                }
+                longitude += co * lon;
             }
         }
         return (new double[]{latitude, longitude});
@@ -1850,7 +1893,8 @@ public boolean isCloseToCost(double[] pGrid) {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[0] < 0.5) || (pGrid[0] > nx - 1) || (pGrid[1] < 0.5) || (pGrid[1]  > ny - 1));
+        boolean xEdge = !zonalCyclityEnabled && ((pGrid[0] < 0.5) || (pGrid[0] > nx - 1));
+        return xEdge || (pGrid[1] < 0.5) || (pGrid[1] > ny - 1);
     }
 
 //////////
@@ -2044,7 +2088,78 @@ public boolean isCloseToCost(double[] pGrid) {
 
     @Override
     public double xTore(double x) {
+
+        if(zonalCyclityEnabled) {
+            // Keeps x in [xWest, xWest + zonalPeriod)
+            // With halo (period nx - 2): [0.5, nx - 1.5), i.e. outside the halo cells
+            // if nx = 7, xp = 0.3 -> xp = 5.3 and xp = 5.6 -> xp = 0.6
+            // Without halo (period nx): [-0.5, nx - 0.5), i.e. round(x) in [0, nx - 1]
+            if(x < xWest) {
+                x += zonalPeriod;
+            } else if(x >= xWest + zonalPeriod) {
+                x -= zonalPeriod;
+            }
+        }
+
         return x;
+
+    }
+
+    /**
+     * Wraps a T-cell index in the zonal direction, so that index i - 1 at the
+     * western edge and index i + 1 at the eastern edge can be used in the
+     * interpolation stencils. Does nothing if zonal cyclicity is disabled.
+     */
+    private int xIndex(int i) {
+        if (zonalCyclityEnabled) {
+            if (i < 0) {
+                return i + zonalPeriod;
+            }
+            if (i >= nx) {
+                return i - zonalPeriod;
+            }
+        }
+        return i;
+    }
+
+    /**
+     * Determines the zonal period of the grid. If the columns i=0 and i=nx-1
+     * are copies of the columns i=nx-2 and i=1 (NEMO halo), the period is
+     * nx - 2. Otherwise, the grid is assumed to have no halo and the period
+     * is nx.
+     */
+    private void setZonalPeriod() {
+
+        int j = ny / 2;
+        boolean hasHalo = isSameLon(lonRho[j][0], lonRho[j][nx - 2])
+                && isSameLon(lonRho[j][nx - 1], lonRho[j][1])
+                && (latRho[j][0] == latRho[j][nx - 2])
+                && (latRho[j][nx - 1] == latRho[j][1]);
+
+        if (hasHalo) {
+            zonalPeriod = nx - 2;
+            xWest = 0.5;
+            getLogger().log(Level.INFO, "Zonal cyclicity: halo columns detected, period = nx - 2 = {0}", zonalPeriod);
+        } else {
+            zonalPeriod = nx;
+            xWest = -0.5;
+            getLogger().log(Level.INFO, "Zonal cyclicity: no halo columns detected, period = nx = {0}", zonalPeriod);
+            // Checks that the gap between the last and first columns looks like a grid cell
+            double dxIn = Math.abs(lonDiff(lonRho[j][1], lonRho[j][0]));
+            double dxGap = Math.abs(lonDiff(lonRho[j][0], lonRho[j][nx - 1]));
+            if (dxGap > 2 * dxIn || dxGap < 0.5 * dxIn) {
+                getLogger().log(Level.WARNING, "Zonal cyclicity: the longitude gap between the last and first columns ({0}) does not match the grid spacing ({1}). Is the grid really periodic?", new Object[]{dxGap, dxIn});
+            }
+        }
+    }
+
+    /** Longitude difference a - b, in [-180, 180). */
+    private static double lonDiff(double a, double b) {
+        return ((a - b) % 360 + 540) % 360 - 180;
+    }
+
+    private static boolean isSameLon(double a, double b) {
+        return Math.abs(lonDiff(a, b)) < 1e-4;
     }
 
     @Override
@@ -2054,7 +2169,7 @@ public boolean isCloseToCost(double[] pGrid) {
 
     @Override
     public double getBottomDepth(double[] pGrid) {
-        double bathy = getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        double bathy = getBathy((int) Math.round(xTore(pGrid[0])), (int) Math.round(pGrid[1]));
         if(Double.isNaN(bathy)) {
             bathy = 0;
         }
