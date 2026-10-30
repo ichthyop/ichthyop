@@ -1935,8 +1935,8 @@ public class NemoDataset extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        boolean xEdge = !zonalCyclityEnabled && ((pGrid[0] < 0.5) || (pGrid[0] > nx - 1));
-        return xEdge || (pGrid[1] < 0.5) || (pGrid[1] > ny - 1);
+        boolean xEdge = !zonalCyclityEnabled && ((pGrid[0] < 0.5) || (pGrid[0] >= nx - 1));
+        return xEdge || (pGrid[1] < 0.5) || (pGrid[1] >= ny - 1);
     }
 
 //////////
