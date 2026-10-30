@@ -171,6 +171,9 @@ public class NemoDataset extends AbstractDataset {
      * Name of the Variable in NetCDF file
      */
     private String strLon, strLat, strMask;
+
+    private double bathy[][];
+
     /**
      *
      */
@@ -300,6 +303,8 @@ public class NemoDataset extends AbstractDataset {
         e2v = read_e1_e2_field(nc, stre2v);
 
         nc.close();
+
+        this.computeBathy();
 
     }
 
@@ -1091,7 +1096,8 @@ public class NemoDataset extends AbstractDataset {
         stre3t = getParameter("field_var_e3t");
         stre3u = getParameter("field_var_e3u");
         stre3v = getParameter("field_var_e3v");
-        stre3w = getParameter("field_var_e3w");
+        // e3w is optional (reconstructed from gdept if missing), older configurations may not have the key
+        stre3w = findParameter("field_var_e3w") ? getParameter("field_var_e3w") : null;
 
         str_gdepT = getParameter("field_var_gdept"); // z_rho
         str_gdepW = getParameter("field_var_gdepw"); // z_w
@@ -2018,18 +2024,8 @@ public class NemoDataset extends AbstractDataset {
      */
     @Override
     public double getBathy(int i, int j) {
+        return bathy[j][i];
 
-        double bathy = 0.d;
-        if (isInWater(i, j, nz - 1)) {
-            for (int k = 0; k < nz; k++) {
-                bathy += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i])
-                        ? 0.d
-                        : maskRho[k][j][i] * e3t[k][j][i];
-                //System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + e3t[k][j][i] + " " + bathy);
-            }
-            return bathy;
-        }
-        return Double.NaN;
     }
 
     @Override
@@ -2236,6 +2232,23 @@ public class NemoDataset extends AbstractDataset {
 
         return e3w;
 
+    }
+
+    void computeBathy() {
+        bathy = new double[ny][nx];
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                if (isInWater(i, j, nz - 1)) {
+                    for (int k = 0; k < nz; k++) {
+                        bathy[i][i] += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i]) ? 0.d
+                                : maskRho[k][j][i] * e3t[k][j][i];
+                        // System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + e3t[k][j][i] +
+                        // " " + bathy);
+                    } // end of k loop
+                } // end of isInwater test
+            } // end if i loop
+
+        } // end of j loop
     }
 
 
