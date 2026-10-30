@@ -128,6 +128,12 @@ public interface IDataset extends NextStepListener {
 
     public double yTore(double y);
 
+    /**
+     * Wraps a T-cell index in the zonal direction, for grids with zonal
+     * cyclicity. Returns i unchanged otherwise.
+     */
+    public int xIndex(int i);
+
     public boolean isProjected();
 
     public boolean isInDomain(double lon, double lat);

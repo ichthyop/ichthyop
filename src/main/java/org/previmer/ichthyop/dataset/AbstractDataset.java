@@ -206,6 +206,11 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return false;
     }
 
+    @Override
+    public int xIndex(int i) {
+        return i;
+    }
+
 
     @Override
     /**
