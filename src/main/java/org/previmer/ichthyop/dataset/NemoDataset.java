@@ -214,6 +214,7 @@ public class NemoDataset extends AbstractDataset {
         NetcdfFile nc;
         nc = NetcdfDatasets.openDataset(file_hgr, enhanced(), null);
         getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
+
         lonRho = new float[ny][nx];
         latRho = new float[ny][nx];
         Array arrLon = nc.findVariable(strLon).read().reduce();
@@ -449,21 +450,22 @@ public class NemoDataset extends AbstractDataset {
     private void get_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
 
         Index index, indexbis;
-        Array array;
+        Array arrayT;
+        Array arrayW;
         boolean depth3d;
 
         // Here, array is the entire gdept for T grid, including the last (dry) cell (k = 0 in flipped mode)
-        array = nc.findVariable(str_gdepT).read().reduce().flip(0);
+        arrayT = nc.findVariable(str_gdepT).read().reduce().flip(0);
 
         // If depthT array is 3D, then use 3d depth array
         // if depthT is 1D, use 1D array to reconstruct 3D one
-        if (array.getShape().length == 3) {
+        if (arrayT.getShape().length == 3) {
             depth3d = true;
         } else {
             depth3d = false;
         }
 
-        index = array.getIndex();
+        index = arrayT.getIndex();
         gdepT = new double[nz][ny][nx];
         gdepW = new double[nz + 1][ny][nx];
 
@@ -477,7 +479,7 @@ public class NemoDataset extends AbstractDataset {
                 index.set(k + 1); // k = 0 in ich = k = 1 (first we point) in NEMO
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
-                        gdepT[k][j][i] = array.getDouble(index);
+                        gdepT[k][j][i] = arrayT.getDouble(index);
                     }
                 }
             }
@@ -488,13 +490,13 @@ public class NemoDataset extends AbstractDataset {
             if (null != nc.findVariable(str_gdepW)) {
                 getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
                 // Read gdepw
-                array = nc.findVariable(str_gdepW).read().reduce().flip(0);
-                index = array.getIndex();
+                arrayW = nc.findVariable(str_gdepW).read().reduce().flip(0);
+                index = arrayW.getIndex();
                 for (int k = 0; k < nz + 1; k++) {
                     index.set(k); // barrier.n
                     for (int j = 0; j < ny; j++) {
                         for (int i = 0; i < nx; i++) {
-                            gdepW[k][j][i] = array.getDouble(index);
+                            gdepW[k][j][i] = arrayW.getDouble(index);
                         }
                     }
                 }
@@ -503,16 +505,15 @@ public class NemoDataset extends AbstractDataset {
                 // Reads the T depth from NetCDF file
                 getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
 
-                array = nc.findVariable(str_gdepT).read().reduce().flip(0);
-                indexbis = array.getIndex();
+                indexbis = arrayT.getIndex();
 
                 for (int k = 0; k < nz; k++) {
                     index.set(k);
                     indexbis.set(k + 1);
                     for (int j = 0; j < ny; j++) {
                         for (int i = 0; i < nx; i++) {
-                            gdepW[k][j][i] = array.getDouble(index);
-                            gdepW[k][j][i] += array.getDouble(indexbis);
+                            gdepW[k][j][i] = arrayT.getDouble(index);
+                            gdepW[k][j][i] += arrayT.getDouble(indexbis);
                             gdepW[k][j][i] *= 0.5;
                         }   // end of i
                     }  // end of j
@@ -536,7 +537,7 @@ public class NemoDataset extends AbstractDataset {
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
                         index.set(k + 1, j + jpo, i + ipo); // k = 0 in Ich => k = 1 in flipped Nemo (bottom cell discarded in Ichthyop)
-                        gdepT[k][j][i] = array.getDouble(index);
+                        gdepT[k][j][i] = arrayT.getDouble(index);
                     }
                 }
             }
@@ -547,13 +548,13 @@ public class NemoDataset extends AbstractDataset {
             if (null != nc.findVariable(str_gdepW)) {
                 getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
                 // Read gdepw
-                array = nc.findVariable(str_gdepW).read().reduce().flip(0);
-                index = array.getIndex();
+                arrayW = nc.findVariable(str_gdepW).read().reduce().flip(0);
+                index = arrayW.getIndex();
                 for (int k = 0; k < nz + 1; k++) {
                     for (int j = 0; j < ny; j++) {
                         for (int i = 0; i < nx; i++) {
                             index.set(k, j + jpo, i + ipo); // barrier.n
-                            gdepW[k][j][i] = array.getDouble(index);
+                            gdepW[k][j][i] = arrayW.getDouble(index);
                         }
                     }
                 }
@@ -561,14 +562,13 @@ public class NemoDataset extends AbstractDataset {
                 // Compute gdepw (approximation)
                 // Reads the T depth from NetCDF file
                 getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
-                array = nc.findVariable(str_gdepT).read().reduce().flip(0);
                 for (int k = 0; k < nz; k++) {
                     for (int j = 0; j < ny; j++) {
                         for (int i = 0; i < nx; i++) {
                             index.set(k, j + jpo, i + ipo);
-                            gdepW[k][j][i] = array.getDouble(index);
+                            gdepW[k][j][i] = arrayT.getDouble(index);
                             index.set(k + 1, j + jpo, i + ipo);
-                            gdepW[k][j][i] += array.getDouble(index);
+                            gdepW[k][j][i] += arrayT.getDouble(index);
                             gdepW[k][j][i] *= 0.5;
                         }   // end of i
                     }  // end of j
