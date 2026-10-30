@@ -743,7 +743,7 @@ public class NemoDataset extends AbstractDataset {
 
                     // Adding a condition to prevent from division
                     // by 0
-                    if (!(Double.isNaN(w_tp0.getDouble(index))) && (e3w[k][j + jj][ic] > 0)) {
+                    if (!(Double.isNaN(w_tp0.getDouble(index))) && (e3w[k + kk][j + jj][ic] > 0)) {
 
                         x = (1.d - x_euler) * w_tp0.getDouble(index)
                                 + x_euler * w_tp1.getDouble(index);
@@ -1063,6 +1063,8 @@ public class NemoDataset extends AbstractDataset {
     @Override
     public void loadParameters() {
 
+        this.zonalCyclityEnabled = false;
+
         if(!isNull("zonal_cyclicity_enabled")) {
             this.zonalCyclityEnabled = Boolean.valueOf(getParameter("zonal_cyclicity_enabled"));
         }
@@ -1089,6 +1091,8 @@ public class NemoDataset extends AbstractDataset {
         stre3t = getParameter("field_var_e3t");
         stre3u = getParameter("field_var_e3u");
         stre3v = getParameter("field_var_e3v");
+        stre3w = getParameter("field_var_e3w");
+
         str_gdepT = getParameter("field_var_gdept"); // z_rho
         str_gdepW = getParameter("field_var_gdepw"); // z_w
 
