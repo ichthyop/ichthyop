@@ -344,6 +344,9 @@ public class NemoDataset extends AbstractDataset {
                 }
             }
         }
+
+        nc.close();
+
     }
 
     private double[][][] compute_e3u(double[][][] e3t) {
@@ -1409,7 +1412,7 @@ public boolean isCloseToCost(double[] pGrid) {
     }
 
     /*
-     * Transdorms the specified z-location into depth
+     * Transforms the specified z-location into depth
      *
      * pverley pour chourdin: j'ai testé z2depth et depth2z, ça à l'air de
      * marcher mais il faudra faire une validation plus sérieuse.
@@ -1429,9 +1432,11 @@ public boolean isCloseToCost(double[] pGrid) {
         int k = (int) Math.round(kz);
         int j = (int) Math.round(y);
         int i = (int) Math.round(x);
-        dz = z - k;
+        dz = kz - k;
 
         if (dz < 0) { // >= ?
+            // Here, the multiplication by 2 is due to the fact that W and T cell have a dz of 0.5
+            // division by 0.5 = multiplication by 2
             depth = gdepT[k][j][i]
                     + 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k][j][i]));
             //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k][j][i] + " gdepW[k]: " + gdepW[k][j][i]) ;
@@ -1798,6 +1803,7 @@ public boolean isCloseToCost(double[] pGrid) {
             ncU.close();
         }
         ncU = DatasetUtil.openFile(listUFiles.get(index), enhanced());
+
         if (ncV != null) {
             ncV.close();
         }
@@ -1806,7 +1812,14 @@ public boolean isCloseToCost(double[] pGrid) {
         } else {
             ncV = DatasetUtil.openFile(listVFiles.get(index), enhanced());
         }
+
+
         if (readW) {
+
+            if (ncW != null) {
+                ncW.close();
+            }
+
             if (listUFiles.get(index).equals(listWFiles.get(index))) {
                 ncW = ncU;
             } else {
@@ -2054,9 +2067,10 @@ public boolean isCloseToCost(double[] pGrid) {
      * We reconstruct e3w by considering the depth of the T points. To have the e3w
      * value at depth, we re-read the T depth array over the entire column (including
      * bottom cell). In this layout, the W point is above the T point.
+     * @throws IOException
      *
      */
-    double[][][] reconstruct_e3w(NetcdfFile nc) {
+    double[][][] reconstruct_e3w(NetcdfFile nc) throws IOException {
 
         Index index, indexbis;
         Array array = null;
@@ -2068,6 +2082,7 @@ public boolean isCloseToCost(double[] pGrid) {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            throw(e);
         }
 
         depth3d = (array.getRank() == 3);
@@ -2093,7 +2108,7 @@ public boolean isCloseToCost(double[] pGrid) {
         }
 
         // Surface W cell: no T point above, so NEMO's convention is used
-        // (gdepw = 0 at the surface, T point at mid-cell) => e3w = 2 * gdept
+        // (gdepw = 0 at the surface, T point at mid-cell) => e3w = e3t
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
                 e3w[nz][j][i] = e3t[nz - 1][j][i];
