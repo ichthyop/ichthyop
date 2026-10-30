@@ -159,25 +159,29 @@ public class VDispAction extends AbstractAction {
         double[] kvSpline;
         double depth;
 
-        x = pGrid[0];
+        x = dataset.xTore(pGrid[0]);
         y = pGrid[1];
         z = Math.max(0.d, Math.min(pGrid[2], dataset.get_nz() - 1.00001f));
         depth = dataset.z2depth(x, y, z);
 
-        i = (int) x;
-        j = (int) y;
+        // Close to coast (n = 1): nearest T point. Otherwise (n = 2): the
+        // stencil is [i, i + 1], so i must be floor(x) to keep dx in [0, 1)
+        // (floor, not truncation, since x can be < 0 with zonal cyclicity)
+        i = (n == 1) ? (int) Math.round(x) : (int) Math.floor(x);
+        j = (n == 1) ? (int) Math.round(y) : (int) Math.floor(y);
         k = (int) Math.round(z);
-        dx = x - Math.floor(x);
-        dy = y - Math.floor(y);
+        dx = x - i;
+        dy = y - j;
 
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
-                kvSpline = getKv(i + ii, j + jj, depth, time, dt);
+                int ic = dataset.xIndex(i + ii);
+                kvSpline = getKv(ic, j + jj, depth, time, dt);
                 diffKv += kvSpline[0] * co;
                 Kv += kvSpline[1] * co;
-                Hz += co * (dataset.z2depth(i + ii, j + jj, k + 1.5) - dataset.z2depth(i + ii, j + jj, Math.max(k - 1.5, 0)));
+                Hz += co * (dataset.z2depth(ic, j + jj, k + 1.5) - dataset.z2depth(ic, j + jj, Math.max(k - 1.5, 0)));
             }
         }
         if (CO != 0) {
@@ -204,7 +208,7 @@ public class VDispAction extends AbstractAction {
         z = Math.min(dataset.depth2z(i, j, depth), dataset.get_nz() - 1.00001f);
         k = (int) z;
         //dz = z - Math.floor(z);
-        ddepth = depth - dataset.z2depth(k, j, i);
+        ddepth = depth - dataset.z2depth(i, j, k);
         /** Compute the polynomial coefficients of the piecewise of the spline
          * contained between [k; k + 1]. Let's take M = Kv''
          * a = (M(k + 1) - M(k)) / 6
@@ -231,7 +235,7 @@ public class VDispAction extends AbstractAction {
                     - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
             d = Kv[k];
         }
-        ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(k, j, i);
+        ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(i, j, k);
         /** Compute Kv(z)
          * Kv(z) = a * dz3 + b * dz2 + c * dz + d;*/
         Kvzz = d + ddepth * (c + ddepth * (b + ddepth * a));
