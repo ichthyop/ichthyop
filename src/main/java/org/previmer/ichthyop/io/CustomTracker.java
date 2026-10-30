@@ -44,6 +44,7 @@
 
 package org.previmer.ichthyop.io;
 
+import org.previmer.ichthyop.dataset.GridPoint;
 import org.previmer.ichthyop.particle.IParticle;
 
 /**
@@ -54,8 +55,13 @@ public class CustomTracker extends FloatTracker {
 
     private final String variableName;
 
+    /**
+     * @param variableName the name of the dataset variable, possibly followed
+     * by its grid point, as in "vozocrtx@U". The output variable is named
+     * without the grid point.
+     */
     public CustomTracker(String variableName) {
-        this.variableName = variableName;
+        this.variableName = GridPoint.parseName(variableName);
         getSimulationManager().getDataset().requireVariable(variableName, getClass());
     }
 

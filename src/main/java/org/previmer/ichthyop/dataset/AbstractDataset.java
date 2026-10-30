@@ -45,6 +45,7 @@
 package org.previmer.ichthyop.dataset;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Level;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.manager.TimeManager;
@@ -119,20 +120,45 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return (null == value) || value.isEmpty() ||  value.equalsIgnoreCase("null");
     }
 
+    /**
+     * Gets the value of a required variable at the particle location.
+     *
+     * @param variableName the name of the variable, possibly followed by its
+     * grid point, as in "vozocrtx@U"
+     */
     @Override
     public Number get(String variableName, double[] pGrid, double time) {
-        if (null != requiredVariables.get(variableName)) {
-            return requiredVariables.get(variableName).get(pGrid, time);
+        RequiredVariable variable = requiredVariables.get(GridPoint.parseName(variableName));
+        if (null != variable) {
+            return variable.get(pGrid, time);
         }
         return Float.NaN;
     }
 
+    /**
+     * Requires a variable to be read in the dataset.
+     *
+     * @param name the name of the variable, possibly followed by its grid
+     * point, as in "vozocrtx@U". If no grid point is given, the dataset
+     * detects it, when it supports staggered variables.
+     */
     @Override
     public void requireVariable(String name, Class<?> requiredBy) {
-        if (!requiredVariables.containsKey(name)) {
-            requiredVariables.put(name, new RequiredVariable(name, requiredBy));
-        } else {
-            requiredVariables.get(name).addRequiredBy(requiredBy);
+        String varName = GridPoint.parseName(name);
+        GridPoint gridPoint = GridPoint.parseGridPoint(name);
+        RequiredVariable variable = requiredVariables.get(varName);
+        if (null == variable) {
+            requiredVariables.put(varName, new RequiredVariable(varName, gridPoint, requiredBy));
+            return;
+        }
+        variable.addRequiredBy(requiredBy);
+        if (null != gridPoint) {
+            if (null == variable.getGridPoint()) {
+                variable.setGridPoint(gridPoint);
+            } else if (variable.getGridPoint() != gridPoint) {
+                getLogger().log(Level.WARNING, "Variable {0} is required on {1} points by {2}, but is already required on {3} points. Keeps {3} points.",
+                        new Object[]{varName, gridPoint, requiredBy, variable.getGridPoint()});
+            }
         }
     }
 
@@ -146,40 +172,47 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
 
     @Override
     public void removeRequiredVariable(String name, Class<?> requiredBy) {
-        RequiredVariable var = requiredVariables.get(name);
+        String varName = GridPoint.parseName(name);
+        RequiredVariable var = requiredVariables.get(varName);
         if (null != var) {
             if (var.getRequiredBy().size() > 1) {
                 /* just remove the reference but dont remove the
                  variable because other classes might need it */
                 var.getRequiredBy().remove(requiredBy);
             } else if (var.getRequiredBy().get(0).equals(requiredBy)) {
-                requiredVariables.remove(name);
+                requiredVariables.remove(varName);
             }
         }
     }
 
     public void checkRequiredVariable(NetcdfFile nc) {
-        for (RequiredVariable variable : requiredVariables.values()) {
+        Iterator<RequiredVariable> iterator = requiredVariables.values().iterator();
+        while (iterator.hasNext()) {
+            RequiredVariable variable = iterator.next();
             try {
                 variable.checked(nc);
             } catch (NullPointerException | NumberFormatException ex) {
-                requiredVariables.remove(variable.getName());
-                StringBuilder msg = new StringBuilder();
-                msg.append("Failed to read dataset variable ");
-                msg.append(variable.getName());
-                msg.append(" ==> ");
-                msg.append(ex.toString());
-                msg.append("\n");
-                msg.append("Required by classes ");
-                for (Class<?> aClass : variable.getRequiredBy()) {
-                    msg.append(aClass.getCanonicalName());
-                    msg.append(", ");
-                }
-                msg.append("\n");
-                msg.append("Watch out, these classes might not work correctly.");
-                getLogger().log(Level.WARNING, msg.toString(), ex);
+                iterator.remove();
+                warnUnreadableVariable(variable, ex);
             }
         }
+    }
+
+    void warnUnreadableVariable(RequiredVariable variable, Exception ex) {
+        StringBuilder msg = new StringBuilder();
+        msg.append("Failed to read dataset variable ");
+        msg.append(variable.getName());
+        msg.append(" ==> ");
+        msg.append(ex.toString());
+        msg.append("\n");
+        msg.append("Required by classes ");
+        for (Class<?> aClass : variable.getRequiredBy()) {
+            msg.append(null == aClass ? "null" : aClass.getCanonicalName());
+            msg.append(", ");
+        }
+        msg.append("\n");
+        msg.append("Watch out, these classes might not work correctly.");
+        getLogger().log(Level.WARNING, msg.toString(), ex);
     }
 
     boolean skipSorting() {

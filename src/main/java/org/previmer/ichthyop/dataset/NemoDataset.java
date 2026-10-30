@@ -46,7 +46,10 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
@@ -57,6 +60,7 @@ import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDatasets;
@@ -65,7 +69,7 @@ import ucar.nc2.dataset.NetcdfDatasets;
  *
  * @author pverley
  */
-public class NemoDataset extends AbstractDataset {
+public class NemoDataset extends AbstractDataset implements StaggeredGrid {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -95,29 +99,29 @@ public class NemoDataset extends AbstractDataset {
      */
     private int maskRho[][][];//, masku, maskv;
     /**
-     * Zonal component of the velocity field at current time
+     * Zonal component of the velocity field, at time t and t + dt
      */
-    private Array u_tp0;
+    private final StaggeredField uField = new StaggeredField(GridPoint.U, this, false);
     /**
-     * Zonal component of the velocity field at time t + dt
+     * Meridional component of the velocity field, at time t and t + dt
      */
-    private Array u_tp1;
+    private final StaggeredField vField = new StaggeredField(GridPoint.V, this, false);
     /**
-     * Meridional component of the velocity field at current time
+     * Vertical component of the velocity field, at time t and t + dt
      */
-    private Array v_tp0;
+    private final StaggeredField wField = new StaggeredField(GridPoint.W, this, false);
     /**
-     * Meridional component of the velocity field at time t + dt
+     * Conversion of the velocities from meter per second to grid unit per
+     * second
      */
-    private Array v_tp1;
+    private final StaggeredField.CornerScale invE1u = (i, j, k) -> 1.d / this.e1u[j][i];
+    private final StaggeredField.CornerScale invE2v = (i, j, k) -> 1.d / this.e2v[j][i];
+    private final StaggeredField.CornerScale invE3w = (i, j, k) -> this.e3w[k][j][i] > 0 ? 1.d / this.e3w[k][j][i] : Double.NaN;
     /**
-     * Vertical component of the velocity field at current time
+     * Group of files (gridT, gridU, gridV or gridW) in which each required
+     * variable is read
      */
-    private Array w_tp0;
-    /**
-     * Vertical component of the velocity field at time t + dt
-     */
-    private Array w_tp1;
+    private final Map<String, GridPoint> requiredVariableFiles = new HashMap<>();
     /**
      * Depth at rho point
      */
@@ -660,162 +664,26 @@ public class NemoDataset extends AbstractDataset {
      */
     @Override
     public double get_dUx(double[] pGrid, double time, boolean normalize) {
-
-        double du = 0.d;
-        double ix, jy, kz;
-        double co;
-        double x;
-
-        ix = xTore(pGrid[0]);
-        jy = pGrid[1];
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        // If ix = 10 in T grid, then ix = 9.5 in U grid (x=10 is on the right)
-        int i = (int) Math.floor(ix - 0.5);
-        int j = (int) Math.floor(jy);
-        int k = (int) Math.floor(kz);
-
-        double CO = 0;
-        Index index = u_tp0.getIndex();
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < 2; jj++) {
-                for (int ii = 0; ii < 2; ii++) {
-
-                    // Now i is in U grid layout, so need to offset to T.
-                    // if i = 9 in U, then i = 9.5 in T
-                    double cox = 1 - Math.abs(ix - (i + 0.5 + ii));
-                    double coy = 1 - Math.abs(jy - (j + jj));
-                    double coz = 1 - Math.abs(kz - (k + kk));
-                    co = cox * coy * coz;
-                    CO += co;
-
-                    int ic = xIndex(i + ii);
-                    index.set(k + kk, j + jj, ic);
-                    if (!(Double.isNaN(u_tp0.getDouble(index)))) {
-                        x = (1.d - x_euler) * u_tp0.getDouble(index)
-                                + x_euler * u_tp1.getDouble(index);
-                        if (normalize) {
-                            du += x * co / e1u[j + jj][ic];
-                        } else {
-                            du += x * co;
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            du /= CO;
-        }
-        return du;
+        return uField.interpolate(pGrid, timeFraction(time), normalize ? invE1u : null);
     }
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-
-        double dw = 0.d;
-        double ix, jy, kz;
-        ix = xTore(pGrid[0]);
-        jy = pGrid[1];
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        int i = (int) Math.floor(ix);
-        int j = (int) Math.floor(jy);
-
-        // W points
-        int k = (int) Math.floor(kz + 0.5);
-
-        double CO = 0.d;
-        double co, x;
-        Index index = w_tp0.getIndex();
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < 2; jj++) {
-                for (int ii = 0; ii < 2; ii++) {
-
-                    // Now i is in U grid layout, so need to offset to T.
-                    // if i = 9 in U, then i = 9.5 in T
-                    double cox = 1 - Math.abs(ix - (i + ii));
-                    double coy = 1 - Math.abs(jy - (j + jj));
-                    double coz = 1 - Math.abs(kz - (k - 0.5 + kk));
-                    co = cox * coy * coz;
-                    CO += co;
-
-                    int ic = xIndex(i + ii);
-                    index.set(k + kk, j + jj, ic);
-
-                    // Adding a condition to prevent from division
-                    // by 0
-                    if (!(Double.isNaN(w_tp0.getDouble(index))) && (e3w[k + kk][j + jj][ic] > 0)) {
-
-                        x = (1.d - x_euler) * w_tp0.getDouble(index)
-                                + x_euler * w_tp1.getDouble(index);
-
-                        // Use e3w for the adimensionalisation
-                        dw += x * co / e3w[k + kk][j + jj][ic] ;
-                    }
-
-                }
-            }
-        }
-
-        if (CO != 0) {
-            dw /= CO;
-        }
-
-        return dw;
+        // Use e3w for the adimensionalisation
+        return wField.interpolate(pGrid, timeFraction(time), invE3w);
     }
 
     @Override
     public double get_dVy(double[] pGrid, double time, boolean normalize) {
-        double dv = 0.d;
-        double ix, jy, kz;
+        return vField.interpolate(pGrid, timeFraction(time), normalize ? invE2v : null);
+    }
 
-        ix = xTore(pGrid[0]);
-        jy = pGrid[1];
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        int i = (int) Math.floor(ix);
-        int j = (int) Math.floor(jy - 0.5);
-        int k = (int) Math.floor(kz);
-
-        double CO = 0.d;
-        double co, x;
-        Index index = v_tp0.getIndex();
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < 2; jj++) {
-                for (int ii = 0; ii < 2; ii++) {
-
-                    // Now i is in V grid layout, so need to offset to T.
-                    // if j = 9 in V, then j  = 9.5 in T
-                    double cox = 1 - Math.abs(ix - (i + ii));
-                    double coy = 1 - Math.abs(jy - (j + 0.5 + jj));
-                    double coz = 1 - Math.abs(kz - (k + kk));
-                    co = cox * coy * coz;
-                    CO += co;
-
-                    int ic = xIndex(i + ii);
-                    index.set(k + kk, j + jj, ic);
-                    if (!Double.isNaN(v_tp0.getDouble(index))) {
-                        x = (1.d - x_euler) * v_tp0.getDouble(index)
-                                + x_euler * v_tp1.getDouble(index);
-                        if(normalize) {
-                            dv += x * co / e2v[j + jj][ic];
-                        } else {
-                            dv += x * co;
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            dv /= CO;
-        }
-        return dv;
+    /**
+     * Fraction of time between the previous (0) and the next (1) time
+     * records of the dataset.
+     */
+    private double timeFraction(double time) {
+        return (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
     }
 
     /**
@@ -857,7 +725,7 @@ public class NemoDataset extends AbstractDataset {
      * Ws(i, j, k) = W(i, j, k) - Wgrid(i, j, k)
      * </pre>
      */
-    private Array computeW() {
+    private Array computeW(Array u_tp1, Array v_tp1) {
 
         double[][][] Huon = new double[nz][ny][nx];
         double[][][] Hvom = new double[nz][ny][nx];
@@ -1257,7 +1125,7 @@ public class NemoDataset extends AbstractDataset {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
         open(indexFile = DatasetUtil.index(listUFiles, t0, time_arrow, strTime));
-        checkRequiredVariable(ncT);
+        setUpRequiredVariables();
         setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncU, strTime, time_arrow));
         time_tp1 = t0;
     }
@@ -1278,6 +1146,7 @@ public class NemoDataset extends AbstractDataset {
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
+        Array u_tp1, v_tp1;
         try {
             u_tp1 = ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx}).flip(1).reduce();
         } catch (IOException | InvalidRangeException ex) {
@@ -1304,18 +1173,21 @@ public class NemoDataset extends AbstractDataset {
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
+            NetcdfFile nc = getFile(requiredVariableFiles.get(variable.getName()));
+            variable.nextStep(readVariable(nc, variable.getName(), rank, variable.getGridPoint()), time_tp1, dt_HyMo);
         }
+        uField.push(u_tp1);
+        vField.push(v_tp1);
         if (readW) {
             try {
-                w_tp1 = ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).flip(1).reduce();
+                wField.push(ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).flip(1).reduce());
             } catch (IOException | InvalidRangeException ex) {
                 IOException ioex = new IOException("Error reading W variable. " + ex.toString());
                 ioex.setStackTrace(ex.getStackTrace());
                 throw ioex;
             }
         } else {
-            w_tp1 = computeW();
+            wField.push(computeW(u_tp1, v_tp1));
         }
     }
 
@@ -1356,6 +1228,133 @@ public class NemoDataset extends AbstractDataset {
         } else {
             return isInWater((int) Math.round(xTore(pGrid[0])), (int) Math.round(pGrid[1]));
         }
+    }
+
+    /**
+     * Determines whether the grid point (i, j, k) of the given type is in
+     * water. A U (resp. V) point is in water if the T points on both sides
+     * are in water, a F point if the four surrounding T points are in water,
+     * and a W point if the T point below is in water.
+     */
+    @Override
+    public boolean isInWater(GridPoint gridPoint, int i, int j, int k) {
+        switch (gridPoint) {
+            case U:
+                return isInWater(i, j, k) && isInWater(xIndex(i + 1), j, k);
+            case V:
+                return isInWater(i, j, k) && isInWater(i, j + 1, k);
+            case F:
+                return isInWater(GridPoint.U, i, j, k) && isInWater(GridPoint.U, i, j + 1, k);
+            case W:
+                return isInWater(i, j, k - 1);
+            default:
+                return isInWater(i, j, k);
+        }
+    }
+
+    @Override
+    public boolean isInWater(GridPoint gridPoint, int i, int j) {
+        // Surface W point is on top of the surface T cell
+        return (gridPoint == GridPoint.W)
+                ? isInWater(GridPoint.W, i, j, nz)
+                : isInWater(gridPoint, i, j, nz - 1);
+    }
+
+    /**
+     * Finds the files and the grid points of the required variables.
+     *
+     * The variable is looked for in the file of its grid point if specified
+     * by the user, then in the gridT, gridU, gridV and gridW files. If not
+     * specified by the user, the grid point is given by the vertical dimension
+     * (deptht, depthu, depthv or depthw) or else by the file in which the
+     * variable has been found.
+     */
+    private void setUpRequiredVariables() {
+
+        requiredVariableFiles.clear();
+        GridPoint[] fileGroups = new GridPoint[]{GridPoint.T, GridPoint.U, GridPoint.V, GridPoint.W};
+        Iterator<RequiredVariable> iterator = requiredVariables.values().iterator();
+        while (iterator.hasNext()) {
+            RequiredVariable variable = iterator.next();
+            GridPoint fileGroup = null;
+            if ((null != variable.getGridPoint()) && hasVariable(getFile(variable.getGridPoint()), variable.getName())) {
+                fileGroup = variable.getGridPoint();
+            } else {
+                for (GridPoint group : fileGroups) {
+                    if (hasVariable(getFile(group), variable.getName())) {
+                        fileGroup = group;
+                        break;
+                    }
+                }
+            }
+            try {
+                if (null == fileGroup) {
+                    throw new NullPointerException("Variable " + variable.getName() + " not found in gridT, gridU, gridV or gridW files.");
+                }
+                NetcdfFile nc = getFile(fileGroup);
+                variable.checked(nc);
+                GridPoint gridPoint = variable.getGridPoint();
+                if (null == gridPoint) {
+                    gridPoint = getGridPointFromDimensions(nc.findVariable(variable.getName()));
+                }
+                if (null == gridPoint) {
+                    gridPoint = fileGroup;
+                }
+                variable.setField(new StaggeredField(gridPoint, this, true));
+                requiredVariableFiles.put(variable.getName(), fileGroup);
+                getLogger().log(Level.INFO, "Variable {0} read in grid{1} files, interpolated on {2} points.",
+                        new Object[]{variable.getName(), fileGroup, gridPoint});
+            } catch (NullPointerException | NumberFormatException ex) {
+                iterator.remove();
+                warnUnreadableVariable(variable, ex);
+            }
+        }
+    }
+
+    /**
+     * Returns the NetCDF file of the given group (gridT, gridU, gridV or
+     * gridW), null if not opened.
+     */
+    private NetcdfFile getFile(GridPoint fileGroup) {
+        switch (fileGroup) {
+            case T:
+                return ncT;
+            case U:
+                return ncU;
+            case V:
+                return ncV;
+            case W:
+                return ncW;
+            default:
+                return null;
+        }
+    }
+
+    private static boolean hasVariable(NetcdfFile nc, String name) {
+        return (null != nc) && (null != nc.findVariable(name));
+    }
+
+    /**
+     * Grid point given by the NEMO vertical dimension of the variable
+     * (deptht, depthu, depthv or depthw), null if none.
+     */
+    private static GridPoint getGridPointFromDimensions(Variable variable) {
+        for (Dimension dim : variable.getDimensions()) {
+            String dimName = dim.getShortName().toLowerCase();
+            if (dimName.length() == 6 && dimName.startsWith("depth")) {
+                switch (dimName.charAt(5)) {
+                    case 't':
+                        return GridPoint.T;
+                    case 'u':
+                        return GridPoint.U;
+                    case 'v':
+                        return GridPoint.V;
+                    case 'w':
+                        return GridPoint.W;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -2069,10 +2068,6 @@ public class NemoDataset extends AbstractDataset {
             return;
         }
 
-        u_tp0 = u_tp1;
-        v_tp0 = v_tp1;
-        w_tp0 = w_tp1;
-        //wr_tp0 = wr_tp1;
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
@@ -2086,13 +2081,22 @@ public class NemoDataset extends AbstractDataset {
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+        return readVariable(nc, name, rank, GridPoint.T);
+    }
+
+    /**
+     * Reads a variable at the given time record. Variables on W points have
+     * one more level than the others.
+     */
+    private Array readVariable(NetcdfFile nc, String name, int rank, GridPoint gridPoint) throws Exception {
         Variable variable = nc.findVariable(name);
         int[] origin = null, shape = null;
         boolean hasVerticalDim = false;
+        int nk = (gridPoint == GridPoint.W) ? nz + 1 : nz;
         switch (variable.getShape().length) {
             case 4:
                 origin = new int[]{rank, 0, jpo, ipo};
-                shape = new int[]{1, nz, ny, nx};
+                shape = new int[]{1, nk, ny, nx};
                 hasVerticalDim = true;
                 break;
             case 2:
@@ -2102,7 +2106,7 @@ public class NemoDataset extends AbstractDataset {
             case 3:
                 if (!variable.isUnlimited()) {
                     origin = new int[]{0, jpo, ipo};
-                    shape = new int[]{nz, ny, nx};
+                    shape = new int[]{nk, ny, nx};
                     hasVerticalDim = true;
                 } else {
                     origin = new int[]{rank, jpo, ipo};

@@ -66,12 +66,27 @@ public class RequiredVariable {
     private double time_tp1, dt_dataset;
     private boolean isUnlimited;
     private List<Class<?>> requiredByList;
+    /**
+     * Grid point of the variable, null if not specified by the user and not
+     * yet detected by the dataset.
+     */
+    private GridPoint gridPoint;
+    /**
+     * Interpolator for datasets on staggered grids. If null, the variable is
+     * interpolated as a T variable by {@link #get(double[], double)}.
+     */
+    private StaggeredField field;
 
-    public RequiredVariable(String name, Class<?> requiredBy) {
+    public RequiredVariable(String name, GridPoint gridPoint, Class<?> requiredBy) {
         this.name = name;
+        this.gridPoint = gridPoint;
         this.dataset = SimulationManager.getInstance().getDataset();
         requiredByList = new ArrayList<>();
         requiredByList.add(requiredBy);
+    }
+
+    public RequiredVariable(String name, Class<?> requiredBy) {
+        this(name, null, requiredBy);
     }
 
     public RequiredVariable(String name) {
@@ -80,6 +95,23 @@ public class RequiredVariable {
 
     public String getName() {
         return name;
+    }
+
+    public GridPoint getGridPoint() {
+        return gridPoint;
+    }
+
+    public void setGridPoint(GridPoint gridPoint) {
+        this.gridPoint = gridPoint;
+    }
+
+    /**
+     * Interpolates the variable with a staggered field located at the grid
+     * point of the variable, instead of the default T interpolation.
+     */
+    public void setField(StaggeredField field) {
+        this.field = field;
+        this.gridPoint = field.getGridPoint();
     }
 
     public void setUnlimited(boolean unlim) {
@@ -128,11 +160,20 @@ public class RequiredVariable {
 
         this.time_tp1 = time_tp1;
         this.dt_dataset = dt_dataset;
+        if (null != field) {
+            field.push(array_tp1);
+            return;
+        }
         array_tp0 = this.array_tp1;
         this.array_tp1 = array_tp1;
     }
 
     public Number get(double[] pGrid, double time) {
+
+        if (null != field) {
+            double frac = isUnlimited ? (dt_dataset - Math.abs(time_tp1 - time)) / dt_dataset : 1.d;
+            return field.interpolate(pGrid, frac);
+        }
 
         int[] origin;
         int[] shape;
