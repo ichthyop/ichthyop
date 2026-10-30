@@ -2142,7 +2142,8 @@ public class NemoDataset extends AbstractDataset {
      * western edge and index i + 1 at the eastern edge can be used in the
      * interpolation stencils. Does nothing if zonal cyclicity is disabled.
      */
-    private int xIndex(int i) {
+    @Override
+    public int xIndex(int i) {
         if (zonalCyclityEnabled) {
             if (i < 0) {
                 return i + zonalPeriod;
